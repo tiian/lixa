@@ -1,4 +1,4 @@
-Create a specific case test for timeout using XTA branching
+Change XID serialization for PostgreSQL to adopt the JDBC driver one!
 
 Improving the state file synchronization elapsed time is now a priority to
 avoid annoying connection timeout errors!!!

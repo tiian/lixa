@@ -214,6 +214,8 @@ AT_CHECK([rm fifo_reply], [0], [ignore], [ignore])
 AT_CLEANUP
 
 AT_SETUP([XTA/6.0/1.0 SUP Crash after xa_end])
+# This test case tests even the behaviour of the client connection timeout
+# configuration option (environment variable)
 AT_CHECK([if test "$LIXA_XTA" = "no"; then exit 77; fi])
 AT_CHECK([if test "$LIXA_CRASH" = "no"; then exit 77; fi])
 # create FIFO objects for communication between superior and subordinate
@@ -224,7 +226,7 @@ AT_CHECK([mkfifo fifo_reply], [0], [ignore], [ignore])
 # "sleeping"
 AT_DATA([insert],
 [[export LIXA_CRASH_POINT=12 ; timeout 3 lixa_test_exec.sh noreset none case0106 0 1 1 1 fifo_request fifo_reply monkey1s.conf
-timeout 5 lixa_test_exec.sh noreset none case0106 1 1 2 1 fifo_request fifo_reply monkey2s.conf
+export LIXA_CLIENT_CONNECTION_TIMEOUT=2000; lixa_test_exec.sh noreset none case0106 1 1 2 1 fifo_request fifo_reply monkey2s.conf
 ]])
 AT_DATA([monkey1s.conf],
 [[# monkey R.M. config
@@ -244,7 +246,7 @@ xa_prepare/0
 xa_commit/0
 xa_close/0
 ]])
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027 ; lixa_test_group.sh insert], [ignore], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027 ; lixa_test_group.sh insert], [147], [ignore], [ignore])
 AT_CHECK([rm fifo_request], [0], [ignore], [ignore])
 AT_CHECK([rm fifo_reply], [0], [ignore], [ignore])
 AT_CLEANUP

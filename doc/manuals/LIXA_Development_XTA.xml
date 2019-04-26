@@ -296,7 +296,7 @@
 	</table>
       </para>
     </section>
-    <section>
+    <section xml:id="The_XTA_Programming_Model">
       <title>The XTA Programming Model</title>
       <para>
 	XTA support 4 different patterns:

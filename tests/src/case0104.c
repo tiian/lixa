@@ -62,8 +62,11 @@
  *  0:   OK
  *  1:   generic error
  *  2:   superior branch / xta_transaction_commit() -> LIXA_RC_TX_ROLLBACK
- *  2:   intermediate branch / xta_transaction_commit() -> LIXA_RC_TX_ROLLBACK
+ *  3:   intermediate branch / xta_transaction_commit() -> LIXA_RC_TX_ROLLBACK
  *  4:   subordinate branch / xta_transaction_commit() -> LIXA_RC_TX_ROLLBACK
+ *  5:   superior branch / xta_transaction_commit() -> LIXA_RC_MESSAGE_TIMEOUT_EXPIRED
+ *  6:   intermediate branch / xta_transaction_commit() -> LIXA_RC_MESSAGE_TIMEOUT_EXPIRED
+ *  7:   subordinate branch / xta_transaction_commit() -> LIXA_RC_MESSAGE_TIMEOUT_EXPIRED
  */
 
 
@@ -295,8 +298,10 @@ void superior(void)
         if (rc != test_rc) {
             fprintf(stderr, "%s/%u| xta_transaction_commit: returned "
                     "%d (%s)\n", pgm, pid, rc, lixa_strerror(rc));
-            if (rc == LIXA_RC_TX_ROLLBACK)
+            if (LIXA_RC_TX_ROLLBACK == rc)
                 exit(2);
+            else if (LIXA_RC_MESSAGE_TIMEOUT_EXPIRED == rc)
+                exit(5);
             else
                 exit(1);
         }
@@ -364,8 +369,10 @@ void intermediate(void)
         if (rc != test_rc) {
             fprintf(stderr, "%s/%u| xta_transaction_commit: returned "
                     "%d (%s)\n", pgm, pid, rc, lixa_strerror(rc));
-            if (rc == LIXA_RC_TX_ROLLBACK)
+            if (LIXA_RC_TX_ROLLBACK == rc)
                 exit(3);
+            else if (LIXA_RC_MESSAGE_TIMEOUT_EXPIRED == rc)
+                exit(6);
             else
                 exit(1);
         }
@@ -425,8 +432,10 @@ void subordinate(void)
         if (rc != test_rc) {
             fprintf(stderr, "%s/%u| xta_transaction_commit: returned "
                     "%d (%s)\n", pgm, pid, rc, lixa_strerror(rc));
-            if (rc == LIXA_RC_TX_ROLLBACK)
+            if (LIXA_RC_TX_ROLLBACK == rc)
                 exit(4);
+            else if (LIXA_RC_MESSAGE_TIMEOUT_EXPIRED == rc)
+                exit(7);
             else
                 exit(1);
         }

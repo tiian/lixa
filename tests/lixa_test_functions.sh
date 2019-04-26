@@ -19,8 +19,8 @@
 
 
 # trace everything but CLIENT_CONFIG (too verbose)
-#export LIXA_TRACE_MASK=0xffff7fff
-export LIXA_TRACE_MASK=0xffffffff
+export LIXA_TRACE_MASK=0xffff7fff
+#export LIXA_TRACE_MASK=0xffffffff
 
 
 # This file contains utility functions for test purposes

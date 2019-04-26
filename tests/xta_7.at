@@ -136,10 +136,10 @@ AT_CHECK([mkfifo tmp_fifo1], [0], [ignore], [ignore])
 AT_CHECK([mkfifo tmp_fifo2], [0], [ignore], [ignore])
 AT_DATA([insert],
 [[export LIXA_CRASH_POINT=12 ; timeout 3 lixa_test_exec.sh noreset none case0104 0 1 1 1 0 tmp_fifo1 foo
-timeout 3 lixa_test_exec.sh noreset none case0104 1 1 2 1 0 tmp_fifo2 tmp_fifo1
-timeout 3 lixa_test_exec.sh noreset none case0104 2 1 3 1 0 foo tmp_fifo2
+export LIXA_CLIENT_CONNECTION_TIMEOUT=2000; lixa_test_exec.sh noreset none case0104 1 1 2 1 0 tmp_fifo2 tmp_fifo1
+export LIXA_CLIENT_CONNECTION_TIMEOUT=2000; lixa_test_exec.sh noreset none case0104 2 1 3 1 0 foo tmp_fifo2
 ]])
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027 ; lixa_test_group.sh insert], [ignore], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027 ; lixa_test_group.sh insert], [141], [ignore], [ignore])
 # wait 1 second to avoid the query for recovery pending is activated too early
 AT_CHECK([sleep 1], [0], [ignore], [ignore])
 # execute the program again to activate automatic recovery
@@ -153,6 +153,8 @@ AT_CHECK([rm tmp_fifo2], [0], [ignore], [ignore])
 AT_CLEANUP
 
 AT_SETUP([XTA/7.0/1.4 INT crash after xa_end])
+# This test case tests even the behaviour of the client connection timeout
+# configuration option (environment variable)
 AT_CHECK([if test "$LIXA_XTA" = "no"; then exit 77; fi])
 AT_CHECK([if test "$LIXA_CRASH" = "no"; then exit 77; fi])
 # create FIFO objects for communication between superior and subordinate
@@ -160,11 +162,11 @@ AT_CHECK([if test "$LIXA_CRASH" = "no"; then exit 77; fi])
 AT_CHECK([mkfifo tmp_fifo1], [0], [ignore], [ignore])
 AT_CHECK([mkfifo tmp_fifo2], [0], [ignore], [ignore])
 AT_DATA([insert],
-[[timeout 3 lixa_test_exec.sh noreset none case0104 0 1 1 1 0 tmp_fifo1 foo
+[[export LIXA_CLIENT_CONNECTION_TIMEOUT=2000; lixa_test_exec.sh noreset none case0104 0 1 1 1 0 tmp_fifo1 foo
 export LIXA_CRASH_POINT=12 ; timeout 3 lixa_test_exec.sh noreset none case0104 1 1 2 1 0 tmp_fifo2 tmp_fifo1
-timeout 3 lixa_test_exec.sh noreset none case0104 2 1 3 1 0 foo tmp_fifo2
+export LIXA_CLIENT_CONNECTION_TIMEOUT=2000; lixa_test_exec.sh noreset none case0104 2 1 3 1 0 foo tmp_fifo2
 ]])
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027 ; lixa_test_group.sh insert], [ignore], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027 ; lixa_test_group.sh insert], [146], [ignore], [ignore])
 # wait 1 second to avoid the query for recovery pending is activated too early
 AT_CHECK([sleep 1], [0], [ignore], [ignore])
 # execute the program again to activate automatic recovery
@@ -178,6 +180,8 @@ AT_CHECK([rm tmp_fifo2], [0], [ignore], [ignore])
 AT_CLEANUP
 
 AT_SETUP([XTA/7.0/1.6 SUB crash after xa_end])
+# This test case tests even the behaviour of the client connection timeout
+# configuration option (environment variable)
 AT_CHECK([if test "$LIXA_XTA" = "no"; then exit 77; fi])
 AT_CHECK([if test "$LIXA_CRASH" = "no"; then exit 77; fi])
 # create FIFO objects for communication between superior and subordinate
@@ -185,11 +189,11 @@ AT_CHECK([if test "$LIXA_CRASH" = "no"; then exit 77; fi])
 AT_CHECK([mkfifo tmp_fifo1], [0], [ignore], [ignore])
 AT_CHECK([mkfifo tmp_fifo2], [0], [ignore], [ignore])
 AT_DATA([insert],
-[[timeout 3 lixa_test_exec.sh noreset none case0104 0 1 1 1 0 tmp_fifo1 foo
-timeout 3 lixa_test_exec.sh noreset none case0104 1 1 2 1 0 tmp_fifo2 tmp_fifo1
+[[export LIXA_CLIENT_CONNECTION_TIMEOUT=2000; lixa_test_exec.sh noreset none case0104 0 1 1 1 0 tmp_fifo1 foo
+export LIXA_CLIENT_CONNECTION_TIMEOUT=2000; lixa_test_exec.sh noreset none case0104 1 1 2 1 0 tmp_fifo2 tmp_fifo1
 export LIXA_CRASH_POINT=12 ; timeout 3 lixa_test_exec.sh noreset none case0104 2 1 3 1 0 foo tmp_fifo2
 ]])
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027 ; lixa_test_group.sh insert], [ignore], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027 ; lixa_test_group.sh insert], [145], [ignore], [ignore])
 # wait 1 second to avoid the query for recovery pending is activated too early
 AT_CHECK([sleep 1], [0], [ignore], [ignore])
 # execute the program again to activate automatic recovery
@@ -424,7 +428,7 @@ AT_DATA([insert],
 timeout 3 lixa_test_exec.sh noreset none case0104 1 1 2 1 0 tmp_fifo2 tmp_fifo1
 timeout 3 lixa_test_exec.sh noreset none case0104 2 1 3 1 0 foo tmp_fifo2
 ]])
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027 ; lixa_test_group.sh insert], [ignore], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027 ; lixa_test_group.sh insert], [134], [ignore], [ignore])
 # wait 1 second to avoid the query for recovery pending is activated too early
 AT_CHECK([sleep 1], [0], [ignore], [ignore])
 # execute the program again to activate automatic recovery
@@ -466,7 +470,7 @@ AT_DATA([insert],
 export LIXA_CRASH_POINT=15 ; timeout 3 lixa_test_exec.sh noreset none case0104 1 1 2 1 0 tmp_fifo2 tmp_fifo1
 timeout 3 lixa_test_exec.sh noreset none case0104 2 1 3 1 0 foo tmp_fifo2
 ]])
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027 ; lixa_test_group.sh insert], [ignore], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027 ; lixa_test_group.sh insert], [134], [ignore], [ignore])
 # wait 1 second to avoid the query for recovery pending is activated too early
 AT_CHECK([sleep 1], [0], [ignore], [ignore])
 # execute the program again to activate automatic recovery
@@ -508,7 +512,7 @@ AT_DATA([insert],
 timeout 3 lixa_test_exec.sh noreset none case0104 1 1 2 1 0 tmp_fifo2 tmp_fifo1
 export LIXA_CRASH_POINT=15 ; timeout 3 lixa_test_exec.sh noreset none case0104 2 1 3 1 0 foo tmp_fifo2
 ]])
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027 ; lixa_test_group.sh insert], [ignore], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027 ; lixa_test_group.sh insert], [134], [ignore], [ignore])
 # wait 1 second to avoid the query for recovery pending is activated too early
 AT_CHECK([sleep 1], [0], [ignore], [ignore])
 # execute the program again to activate automatic recovery

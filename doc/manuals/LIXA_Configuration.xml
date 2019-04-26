@@ -788,6 +788,18 @@ Feb  8 21:38:51 ubuntu lixat[2532]: LXC001E transaction '1279875137.46d1df80428d
 	expressed in milliseconds, -1 is a special value with "no timeout"
 	meaning and 0 is not an acceptable value.
       </para>
+      <note>
+	<para>
+	  The environment variable and the correlated configuration parameter
+	  in the XTA interface has been introduced to prevent process
+	  starvation in some specific situations that may happen implementing
+	  the
+	  <quote>Multiple Applications, Concurrent Branches</quote> patterns
+	  (see <xref linkend="The_XTA_Programming_Model"/>). There should be
+	  no useful usage of this variable outside the two XTA specific
+	  patterns.
+	</para>
+      </note>
     </section>
     <section>
       <title>LIXA_CONFIG_FILE</title>
