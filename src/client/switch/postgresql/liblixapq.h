@@ -58,6 +58,54 @@ struct xa_switch_t xapqls;
 
 
 /**
+ * Character separator used when serializing/deserializing a xid
+ */
+#define LIXA_PQ_XID_SEPARATOR '_'
+
+
+
+/**
+ * Length of a string that can contain a serialized XID for PostgreSQL:
+ * formatID + '_' + base64(gtrid) + '_' + base64(bqual)
+ */
+#define LIXA_PQ_XID_SERIALIZE_LENGTH (LIXA_SERIALIZED_LONG_INT+1+XIDDATASIZE*2/3+4+1+XIDDATASIZE*2/3+4+1)
+
+
+
+/**
+ * A string used to serialize a XID for PostgreSQL.
+ * NOTE: this is not XA standard compliant, but it the same used by the
+ * PostgreSQL JDBC driver.
+ */
+typedef char lixa_pq_ser_xid_t[LIXA_PQ_XID_SERIALIZE_LENGTH];
+
+
+
+/**
+ * Serialize XID to a string with the same schema used by
+ * https://jdbc.postgresql.org/
+ * See method xidToString in https://github.com/pgjdbc/pgjdbc/blob/master/pgjdbc/src/main/java/org/postgresql/xa/RecoveredXid.java
+ * @param[in] xid the XID to be serialized
+ * @param[out] lpsx the serialized XID
+ * @return TRUE if serialization was completed, FALSE if there was an error
+ */
+int lixa_pq_xid_serialize(const XID *xid, lixa_pq_ser_xid_t lpsx);
+
+
+    
+/**
+ * Deserialize a string compatible with PostgreSQL JDBC driver to a XID
+ * See method stringToXid in https://github.com/pgjdbc/pgjdbc/blob/master/pgjdbc/src/main/java/org/postgresql/xa/RecoveredXid.java
+ * @param[out] xid the deserialized XID
+ * @param[in] lpsx the string must be deserialized
+ * @return TRUE if deserialization was completed, <br>
+ *         FALSE if there was an error
+ */
+int lixa_pq_xid_deserialize(XID *xid, const lixa_pq_ser_xid_t lpsx);
+
+
+
+/**
  * Implementation of "xa_open" for PostgreSQL;
  * refer to "Distributed Transaction Processing: The XA Specification" for
  * a complete description

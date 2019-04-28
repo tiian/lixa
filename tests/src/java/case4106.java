@@ -347,14 +347,14 @@ public class case4106 {
                 // enlist MySQL resource to Transaction
                 tx.enlistResource(
                     xar1, "MySQL",
-                    "jdbc:mysql://localhost/lixa?user=lixa/password=");
+                    "jdbc:mysql://localhost/lixa?user=lixa");
                 // enlist Oracle resource to transaction
-                tx.enlistResource(xar2, "Oracle DB", "orcl.brenta.org/hr/hr");
+                tx.enlistResource(xar2, "Oracle DB", "orcl.brenta.org/hr");
             }
             if (branchType == 1) { // SUBORDINATE
                 // enlist PostgreSQL resource to transaction
                 tx.enlistResource(xar3, "PostgreSQL",
-                                  "localhost/testdb/tiian/passw0rd");
+                                  "localhost/testdb/tiian");
             }
         } catch  (XtaException e) {
             System.err.println("XtaException: LIXA ReturnCode=" +

@@ -309,8 +309,7 @@ int lixa_xid_serialize(const XID *xid, lixa_ser_xid_t lsx)
 
 int lixa_xid_deserialize(XID *xid, const lixa_ser_xid_t lsx)
 {
-    enum Exception
-    {
+    enum Exception {
         REGCOMP_ERROR,
         REGEXEC_ERROR,
         SEPARATOR1,

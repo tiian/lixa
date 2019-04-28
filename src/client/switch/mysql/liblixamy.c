@@ -366,7 +366,7 @@ int lixa_my_xid_serialize(const XID *xid, lixa_my_ser_xid_t lmsx)
         3 /* ',' */ +
         xid->bqual_length*2 /* bqual */ +
         2 /* ', */ +
-        LIXA_MY_XID_SERIALIZE_FORMATID_DIGITS /* formatID */ +
+        LIXA_SERIALIZED_LONG_INT /* formatID */ +
         1 /* '\0' terminator */ ;
     /* check the XID can be serialized for MySQL by this routine */
     if (len > sizeof(lixa_my_ser_xid_t)) {
@@ -902,7 +902,6 @@ int lixa_my_end(const XID *xid, int rmid, long flags)
                 xa_rc = XAER_PROTO;
                 break;
             case NONE:
-                xa_rc = XA_OK;
                 break;
             default:
                 xa_rc = XAER_RMFAIL;
@@ -1099,7 +1098,6 @@ int lixa_my_rollback(const XID *xid, int rmid, long flags)
                 xa_rc = XAER_PROTO;
                 break;
             case NONE:
-                xa_rc = XA_OK;
                 break;
             default:
                 xa_rc = XAER_RMFAIL;
@@ -1305,7 +1303,6 @@ int lixa_my_prepare(const XID *xid, int rmid, long flags)
                 xa_rc = XAER_PROTO;
                 break;
             case NONE:
-                xa_rc = XA_OK;
                 break;
             default:
                 xa_rc = XAER_RMFAIL;
@@ -1454,7 +1451,6 @@ int lixa_my_commit(const XID *xid, int rmid, long flags)
                 xa_rc = XAER_PROTO;
                 break;
             case NONE:
-                xa_rc = XA_OK;
                 break;
             default:
                 xa_rc = XAER_RMFAIL;

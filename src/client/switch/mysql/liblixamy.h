@@ -58,18 +58,10 @@ struct xa_switch_t xamyls;
 
 
 /**
- * Number of digits used to for formatID (20 should be sufficient, but some
- * spare space is not dangerous)
- */
-#define LIXA_MY_XID_SERIALIZE_FORMATID_DIGITS 25
-
-
-
-/**
  * Length of a string that can contain a serialized XID for MySQL:
  * ' + gtrid + ',' + bqual + ', + formatID
  */
-#define LIXA_MY_XID_SERIALIZE_LENGTH (2*XIDDATASIZE+5+LIXA_MY_XID_SERIALIZE_FORMATID_DIGITS+1)
+#define LIXA_MY_XID_SERIALIZE_LENGTH (2*XIDDATASIZE+5+LIXA_SERIALIZED_LONG_INT+1)
 
 
 
@@ -143,8 +135,8 @@ int lixa_my_parse_key_value(struct lixa_mysql_real_connect_s *lmrc,
 
 /**
  * Serialize XID to a string compatible with MySQL XA commands
- * @param xid IN the XID to be serialized
- * @param lmsx OUT the serialized XID
+ * @param[in] xid to be serialized
+ * @param[out] lmsx serialized XID
  * @return TRUE if serialization was completed, FALSE if there was an error
  */
 int lixa_my_xid_serialize(const XID *xid, lixa_my_ser_xid_t lmsx);
@@ -154,11 +146,11 @@ int lixa_my_xid_serialize(const XID *xid, lixa_my_ser_xid_t lmsx);
 /**
  * Deserialize the string fetched after XA RECOVER command and build a
  * XID standard object
- * @param xid OUT resulting XID (XA standard)
- * @param formatID IN a string containing formatID
- * @param gtrid_length IN a string containing the length of gtrid part
- * @param bqual_length IN a string containing the length of bqual part
- * @param data IN a string containing the concatenation of gtrid and bqual
+ * @param[out] xid resulting XID (XA standard)
+ * @param[in] formatID a string containing formatID
+ * @param[in] gtrid_length a string containing the length of gtrid part
+ * @param[in] bqual_length a string containing the length of bqual part
+ * @param[in] data a string containing the concatenation of gtrid and bqual
  * @return TRUE if deserialization was completed, FALSE if there was an error
  */
 int lixa_my_xid_deserialize(XID *xid, const char *formatID,

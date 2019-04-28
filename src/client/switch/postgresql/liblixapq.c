@@ -108,6 +108,186 @@ void g_module_unload(GModule *module)
 
 
 
+int lixa_pq_xid_serialize(const XID *xid, lixa_pq_ser_xid_t lpsx)
+{
+    gchar *base64_encoded = NULL;
+    long len = LIXA_SERIALIZED_LONG_INT /* formatID */ +
+        1 /* '_' separator */ +
+        xid->gtrid_length*4/3+4 /* gtrid */ +
+        1 /* '_' separator */ +
+        xid->bqual_length*4/3+4 /* bqual */ +
+        1 /* '\0' terminator */ ;
+    size_t lpsx_len;
+    
+    /* check the XID can be serialized for PostgreSQL by this routine */
+    if (len > sizeof(lixa_pq_ser_xid_t)) {
+        LIXA_TRACE(("lixa_pq_xid_serialize: xid can not be serialized "
+                    "because it would need %ld bytes instead of "
+                    SIZE_T_FORMAT " (xid->gtrid_length=%ld,"
+                    "xid->bqual_length=%ld)\n",
+                    len, sizeof(lixa_ser_xid_t),
+                    xid->gtrid_length, xid->bqual_length));
+        return FALSE;
+    }
+    /* serialize formatID and put the first separator */
+    sprintf(lpsx, "%ld%c", xid->formatID, LIXA_PQ_XID_SEPARATOR);
+
+    /* serialize gtrid using base64 */
+    if (NULL == (base64_encoded = g_base64_encode(
+                     (const guchar *)&(xid->data[0]),
+                     (gsize)xid->gtrid_length))) {
+        LIXA_TRACE(("lixa_pq_xid_serialize: xid can not be serialized "
+                    "because g_base64_encode returned NULL\n"));
+        return FALSE;
+    }
+    strcat(lpsx, base64_encoded);
+    g_free(base64_encoded);
+    base64_encoded = NULL;
+    
+    /* put the second separator */
+    lpsx_len = strlen(lpsx);
+    lpsx[lpsx_len++] = LIXA_PQ_XID_SEPARATOR;
+    lpsx[lpsx_len++] = '\0';
+
+    /* check size */
+    if (lpsx_len > len) {
+        LIXA_TRACE(("lixa_pq_xid_serialize: current len (" SIZE_T_FORMAT
+                    ", '%s') exceeds total len (%ld)\n",
+                    lpsx_len, lpsx, len));
+        return FALSE;
+    }
+    
+    /* serialize bqual using base64 */
+    if (NULL == (base64_encoded = g_base64_encode(
+                     (const guchar *)&(xid->data[xid->gtrid_length]),
+                     (gsize)xid->bqual_length))) {
+        LIXA_TRACE(("lixa_pq_xid_serialize: xid can not be serialized "
+                    "because g_base64_encode returned NULL\n"));
+        return FALSE;
+    }
+    strcat(lpsx, base64_encoded);
+    g_free(base64_encoded);
+    base64_encoded = NULL;
+    
+    /* check size */
+    lpsx_len = strlen(lpsx);
+    if (lpsx_len > len) {
+        /* this is a possible severe bug: memory corruption happened */
+        LIXA_TRACE(("lixa_pq_xid_serialize: current len (" SIZE_T_FORMAT
+                    ", '%s') exceeds total len (%ld)\n",
+                    lpsx_len, lpsx, len));
+        return FALSE;
+    }
+    
+    LIXA_TRACE(("lixa_pq_xid_serialize: '%s'\n", lpsx));
+    return TRUE;
+}
+
+
+
+int lixa_pq_xid_deserialize(XID *xid, const lixa_pq_ser_xid_t lpsx)
+{
+    enum Exception {
+        SEPARATOR1,
+        SEPARATOR2,
+        G_BASE64_DECODE_ERROR1,
+        G_BASE64_DECODE_ERROR2,
+        NONE
+    } excp;
+    int ret_cod = FALSE;
+    guchar *base64_decoded = NULL;
+    
+    LIXA_TRACE(("lixa_pq_xid_deserialize\n"));
+    TRY {
+        char tmp[LIXA_PQ_XID_SERIALIZE_LENGTH];
+        char *first_sep = NULL, *second_sep = NULL;
+        size_t formatID_len, gtrid_len, bqual_len;
+        gsize base64_decoded_len;
+        unsigned long l = 0;
+        
+        /* discover first separator */
+        if (NULL == (first_sep = strchr(lpsx, LIXA_PQ_XID_SEPARATOR))) {
+            LIXA_TRACE(("lixa_pq_xid_deserialize: '%s' does "
+                        "not contain the first '%c' separator\n", lpsx, 
+                        LIXA_PQ_XID_SEPARATOR));
+            THROW(SEPARATOR1);
+        }
+
+        /* discover second separator */
+        if (NULL == (second_sep = strchr(
+                         first_sep+1, LIXA_PQ_XID_SEPARATOR))) {
+            LIXA_TRACE(("lixa_pq_xid_deserialize: '%s' does "
+                        "not contain the second '%c' separator\n", lpsx, 
+                        LIXA_PQ_XID_SEPARATOR));
+            THROW(SEPARATOR2);
+        }
+        
+        /* retrieve formatID */
+        formatID_len = first_sep - lpsx;
+        strncpy(tmp, lpsx, formatID_len);
+        tmp[formatID_len] = '\0';
+        sscanf(tmp, "%ld", &l);
+        xid->formatID = l;
+
+        /* retrieve gtrid */
+        gtrid_len = second_sep-first_sep;
+        strncpy(tmp, first_sep+1, gtrid_len);
+        tmp[gtrid_len] = '\0';
+        if (NULL == (base64_decoded = g_base64_decode(
+                         tmp, &base64_decoded_len))) {
+            LIXA_TRACE(("lixa_pq_xid_deserialize: g_base64_decode returned "
+                        "NULL while decoding gtrid\n"));
+            THROW(G_BASE64_DECODE_ERROR1);
+        }
+        memcpy(&(xid->data[0]), base64_decoded, base64_decoded_len);
+        g_free(base64_decoded);
+        base64_decoded = NULL;
+        xid->gtrid_length = base64_decoded_len;
+
+        /* retrieve bqual */
+        bqual_len = strchr(lpsx, '\0') - second_sep - 1;
+        strncpy(tmp, second_sep+1, bqual_len);
+        tmp[bqual_len] = '\0';
+        if (NULL == (base64_decoded = g_base64_decode(
+                         tmp, &base64_decoded_len))) {
+            LIXA_TRACE(("lixa_pq_xid_deserialize: g_base64_decode returned "
+                        "NULL while decoding bqual\n"));
+            THROW(G_BASE64_DECODE_ERROR2);
+        }
+        memcpy(&(xid->data[xid->gtrid_length]), base64_decoded,
+               base64_decoded_len);
+        g_free(base64_decoded);
+        base64_decoded = NULL;
+        xid->bqual_length = base64_decoded_len;
+                
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case SEPARATOR1:
+            case SEPARATOR2:
+            case G_BASE64_DECODE_ERROR1:
+            case G_BASE64_DECODE_ERROR2:
+                ret_cod = FALSE;
+                break;
+            case NONE:
+                ret_cod = TRUE;
+                break;
+            default:
+                ret_cod = FALSE;
+        } /* switch (excp) */
+        /* memory recovery if necessary */
+        if (NULL != base64_decoded) {
+            g_free(base64_decoded);
+            base64_decoded = NULL;
+        }
+    } /* TRY-CATCH */
+    LIXA_TRACE(("lixa_pq_xid_deserialize/excp=%d/ret_cod=%d\n",
+                excp, ret_cod));
+    return ret_cod;
+}
+
+
+
 int lixa_pq_open(char *xa_info, int rmid, long flags)
 {
     enum Exception { INVALID_FLAGS
@@ -367,7 +547,6 @@ int lixa_pq_start(const XID *xid, int rmid, long flags)
                 xa_rc = XAER_PROTO;
                 break;
             case NONE:
-                xa_rc = XA_OK;
                 break;
             default:
                 xa_rc = XAER_RMFAIL;
@@ -426,7 +605,7 @@ int lixa_pq_start_core(struct lixa_sw_status_rm_s *lpsr,
         }
 
         /* serialize XID */
-        if (!lixa_xid_serialize(xid, lsx)) {
+        if (!lixa_pq_xid_serialize(xid, lsx)) {
             LIXA_TRACE(("lixa_pq_start_core: unable to serialize XID\n"));
             THROW(XID_SERIALIZE_ERROR);
         }
@@ -506,7 +685,6 @@ int lixa_pq_end(const XID *xid, int rmid, long flags)
                 xa_rc = XAER_PROTO;
                 break;
             case NONE:
-                xa_rc = XA_OK;
                 break;
             default:
                 xa_rc = XAER_RMFAIL;
@@ -563,7 +741,7 @@ int lixa_pq_end_core(struct lixa_sw_status_rm_s *lpsr,
         }
 
         /* serialize XID */
-        if (!lixa_xid_serialize(xid, lsx)) {
+        if (!lixa_pq_xid_serialize(xid, lsx)) {
             LIXA_TRACE(("lixa_pq_end_core: unable to serialize XID\n"));
             THROW(XID_SERIALIZE_ERROR);
         }
@@ -571,7 +749,7 @@ int lixa_pq_end_core(struct lixa_sw_status_rm_s *lpsr,
         /* checking xid is the started one */
         if (0 != lixa_xid_compare(xid, &(lpsr->xid))) {
             lixa_ser_xid_t lsx2;
-            lixa_xid_serialize(&(lpsr->xid), lsx2);
+            lixa_pq_xid_serialize(&(lpsr->xid), lsx2);
             LIXA_TRACE(("lixa_pq_end_core: ending XID '%s' is not the same "
                         "of started XID '%s'\n", lsx, lsx2));
             THROW(XID_MISMATCH);
@@ -650,7 +828,6 @@ int lixa_pq_rollback(const XID *xid, int rmid, long flags)
                 xa_rc = XAER_PROTO;
                 break;
             case NONE:
-                xa_rc = XA_OK;
                 break;
             default:
                 xa_rc = XAER_RMFAIL;
@@ -714,7 +891,7 @@ int lixa_pq_rollback_core(struct lixa_sw_status_rm_s *lpsr,
         }
 
         /* serialize XID */
-        if (!lixa_xid_serialize(xid, lsx)) {
+        if (!lixa_pq_xid_serialize(xid, lsx)) {
             LIXA_TRACE(("lixa_pq_rollback_core: unable to serialize XID\n"));
             THROW(XID_SERIALIZE_ERROR);
         }
@@ -760,7 +937,7 @@ int lixa_pq_rollback_core(struct lixa_sw_status_rm_s *lpsr,
         /* checking xid is the started one */
         if (0 != lixa_xid_compare(xid, &(lpsr->xid))) {
             lixa_ser_xid_t lsx2;
-            lixa_xid_serialize(&(lpsr->xid), lsx2);
+            lixa_pq_xid_serialize(&(lpsr->xid), lsx2);
             LIXA_TRACE(("lixa_pq_rollback_core: rolling back XID '%s' is not "
                         "the same of started XID '%s'\n", lsx, lsx2));
             THROW(XID_MISMATCH);
@@ -865,7 +1042,6 @@ int lixa_pq_prepare(const XID *xid, int rmid, long flags)
                 xa_rc = XAER_PROTO;
                 break;
             case NONE:
-                xa_rc = XA_OK;
                 break;
             default:
                 xa_rc = XAER_RMFAIL;
@@ -927,7 +1103,7 @@ int lixa_pq_prepare_core(struct lixa_sw_status_rm_s *lpsr,
         }
 
         /* serialize XID */
-        if (!lixa_xid_serialize(xid, lsx)) {
+        if (!lixa_pq_xid_serialize(xid, lsx)) {
             LIXA_TRACE(("lixa_pq_prepare_core: unable to serialize XID\n"));
             THROW(XID_SERIALIZE_ERROR);
         }
@@ -935,7 +1111,7 @@ int lixa_pq_prepare_core(struct lixa_sw_status_rm_s *lpsr,
         /* checking xid is the started one */
         if (0 != lixa_xid_compare(xid, &(lpsr->xid))) {
             lixa_ser_xid_t lsx2;
-            lixa_xid_serialize(&(lpsr->xid), lsx2);
+            lixa_pq_xid_serialize(&(lpsr->xid), lsx2);
             LIXA_TRACE(("lixa_pq_prepare_core: preparing XID '%s' is not the "
                         "same of started XID '%s'\n", lsx, lsx2));
             THROW(XID_MISMATCH);
@@ -1021,7 +1197,6 @@ int lixa_pq_commit(const XID *xid, int rmid, long flags)
                 xa_rc = XAER_PROTO;
                 break;
             case NONE:
-                xa_rc = XA_OK;
                 break;
             default:
                 xa_rc = XAER_RMFAIL;
@@ -1085,7 +1260,7 @@ int lixa_pq_commit_core(struct lixa_sw_status_rm_s *lpsr,
         }
 
         /* serialize XID */
-        if (!lixa_xid_serialize(xid, lsx)) {
+        if (!lixa_pq_xid_serialize(xid, lsx)) {
             LIXA_TRACE(("lixa_pq_commit_core: unable to serialize XID\n"));
             THROW(XID_SERIALIZE_ERROR);
         }
@@ -1133,7 +1308,7 @@ int lixa_pq_commit_core(struct lixa_sw_status_rm_s *lpsr,
         /* checking xid is the started one */
         if (0 != lixa_xid_compare(xid, &(lpsr->xid))) {
             lixa_ser_xid_t lsx2;
-            lixa_xid_serialize(&(lpsr->xid), lsx2);
+            lixa_pq_xid_serialize(&(lpsr->xid), lsx2);
             LIXA_TRACE(("lixa_pq_commit_core: committing XID '%s' is not the "
                         "same of started XID '%s'\n", lsx, lsx2));
             THROW(XID_MISMATCH);
@@ -1354,7 +1529,7 @@ int lixa_pq_recover_core(struct lixa_sw_status_rm_s *lpsr,
         }
         for (row=0; row<PQntuples(res); ++row) {
             XID xid;            
-            if (lixa_xid_deserialize(&xid, PQgetvalue(res, row, 0))) {
+            if (lixa_pq_xid_deserialize(&xid, PQgetvalue(res, row, 0))) {
                 LIXA_TRACE(("lixa_pq_recover_core: xids[%d]='%s'\n", out_count,
                             PQgetvalue(res, row, 0)));
                 xids[out_count++] = xid;
