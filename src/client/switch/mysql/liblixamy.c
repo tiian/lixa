@@ -1517,6 +1517,8 @@ int lixa_my_commit_core(struct lixa_sw_status_rm_s *lpsr,
             THROW(XID_SERIALIZE_ERROR);
         }
 
+        LIXA_TRACE(("lixa_my_commit_core: lpsr->state.S=%d, one_phase=%d\n",
+                    lpsr->state.S, one_phase));
         if (lpsr->state.S != 3 && !one_phase) {
             MYSQL_RES *res;
             MYSQL_ROW row;

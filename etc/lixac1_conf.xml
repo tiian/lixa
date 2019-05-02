@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<client>
+<client
+  connection_timeout="5000">
   <sttsrvs>
     <sttsrv name="default" domain="AF_INET" address="@ADDRESS@" port="@PORT@"/>
   </sttsrvs>

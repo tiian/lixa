@@ -70,7 +70,7 @@
 #define LIXA_SYSLOG_LXC007N "LXC007N resource manager '%s' returned " \
     "XA_RDONLY (%d) while rolling back (xa_rollback) during recovery phase " \
     "for transaction '%s'"
-#define LIXA_SYSLOG_LXC008I "LXC008I resource manager '%s' returned " \
+#define LIXA_SYSLOG_LXC008N "LXC008N resource manager '%s' returned " \
     "XAER_NOTA during recovery commit: the resource manager already " \
     "committed the transaction with xid '%s'"
 #define LIXA_SYSLOG_LXC009W "LXC009W resource manager '%s' (rmid=%d) " \
@@ -145,8 +145,12 @@
 #define LIXA_SYSLOG_LXC033E "LXC033E syntax error in environment variable %s: '%s'"
 #define LIXA_SYSLOG_LXC034N "LXC034N timeout expired (%d ms) in function '%s'"
 #define LIXA_SYSLOG_LXC035I "LXC035I connection_timeout parameter can not " \
-    "be %d, default value (%d) will be used" 
-    
+    "be %d, default value (%d) will be used"
+#define LIXA_SYSLOG_LXC036I "LXC036I state server noticed there is at least " \
+    "one recovery pending transaction"
+#define LIXA_SYSLOG_LXC037N "LXC037N recovery pending transaction has xid='%s'"
+#define LIXA_SYSLOG_LXC038N "LXC038N transaction with xid='%s' must be %s"
+
 
 
 #define LIXA_SYSLOG_LXD000N "LXD000N this process is starting a new LIXA " \

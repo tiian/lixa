@@ -148,6 +148,7 @@ int client_recovery(client_config_coll_t *ccc, client_status_t *cs,
             if (!lixa_xid_serialize(
                     &rpl.body.qrcvr_16.client.state.xid, ser_xid))
                 THROW(SERIALIZE_ERROR);
+            LIXA_SYSLOG((LOG_NOTICE, LIXA_SYSLOG_LXC037N, ser_xid));
         
             /* check config digest */
             if (strncmp(rqst.body.qrcvr_8.client.config_digest,
@@ -171,7 +172,8 @@ int client_recovery(client_config_coll_t *ccc, client_status_t *cs,
                 THROW(ANALYZE_ERROR);
             LIXA_TRACE(("client_recovery: transaction '%s' must be %s\n",
                         ser_xid, commit ? "committed" : "rolled back"));
-
+            LIXA_SYSLOG((LOG_NOTICE, LIXA_SYSLOG_LXC038N, ser_xid,
+                         commit ? "committed" : "rolled back"));
             /* build the message */
             updt.header.level = LIXA_MSG_LEVEL;
             updt.header.pvs.verb = LIXA_MSG_VERB_QRCVR;
@@ -395,8 +397,7 @@ int client_recovery_commit(client_config_coll_t *ccc,
                         lixa_iface_get_name(&act_rsrmgr->lixa_iface)));
             rc = lixa_iface_xa_commit(
                 &act_rsrmgr->lixa_iface,
-                &rpl->body.qrcvr_16.client.state.xid, i,
-                rpl->body.qrcvr_16.rsrmgrs->len == 1 ? TMONEPHASE : TMNOFLAGS);
+                &rpl->body.qrcvr_16.client.state.xid, i, TMNOFLAGS);
             LIXA_TRACE(("client_recovery_commit: rc=%d\n", rc));
             switch (rc) {
                 case XA_OK:
@@ -406,7 +407,7 @@ int client_recovery_commit(client_config_coll_t *ccc,
                                  act_rsrmgr->generic->name, rc, ser_xid));
                     break;
                 case XAER_NOTA:
-                    LIXA_SYSLOG((LOG_INFO, LIXA_SYSLOG_LXC008I,
+                    LIXA_SYSLOG((LOG_NOTICE, LIXA_SYSLOG_LXC008N,
                                  act_rsrmgr->generic->name, ser_xid));
                     break;
                 default:

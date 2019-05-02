@@ -1278,6 +1278,7 @@ int lixa_xa_open(client_config_coll_t *ccc, client_status_t *cs,
         /* check the answer from the server */
         if (LIXA_RC_RECOVERY_PENDING_TX == (
                 ret_cod = msg.body.open_16.answer.rc)) {
+            LIXA_SYSLOG((LOG_INFO, LIXA_SYSLOG_LXC036I));
             recovery_pending = TRUE;
             LIXA_TRACE(("lixa_xa_open: the server replied RECOVERY "
                         "PENDING condition\n"));
