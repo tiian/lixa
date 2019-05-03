@@ -184,10 +184,14 @@ int client_recovery(client_config_coll_t *ccc, client_status_t *cs,
                 if (LIXA_RC_OK != (ret_cod = client_recovery_commit(
                                        ccc, cs, &rpl, &updt)))
                     THROW(COMMIT_ERROR);
+                LIXA_SYSLOG((LOG_INFO, LIXA_SYSLOG_LXC039I, ser_xid,
+                             "committed"));
             } else {
                 if (LIXA_RC_OK != (ret_cod = client_recovery_rollback(
                                        ccc, cs, &rpl, &updt)))
                     THROW(ROLLBACK_ERROR);
+                LIXA_SYSLOG((LOG_INFO, LIXA_SYSLOG_LXC039I, ser_xid,
+                             "rolled back"));
             }
             if (updt.body.qrcvr_24.recovery.failed)
                 LIXA_SYSLOG((LOG_WARNING, LIXA_SYSLOG_LXC005W, ser_xid));

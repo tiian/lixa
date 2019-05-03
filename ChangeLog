@@ -14,6 +14,9 @@ LOG:
 		 PostgreSQL's JDBC driver (formatID_Base64(gtrid)_Base64(bqual))
 		 Fixed some errors in return codes of MySQL and PostgreSQL
 		 LIXA adapters.
+		 Implemented a workaround to mitigate a MySQL bug that LIXA
+		 exploited during autorecovery of prepared transactions
+		 https://bugs.mysql.com/bug.php?id=87836
 
 2019-04-07 1.7.7 Documentation fix
 

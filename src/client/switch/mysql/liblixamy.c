@@ -1114,17 +1114,20 @@ int lixa_my_rollback(const XID *xid, int rmid, long flags)
 int lixa_my_rollback_core(struct lixa_sw_status_rm_s *lpsr,
                           const XID *xid, int rmid, long flags)
 {
-    enum Exception { INVALID_FLAGS1
-                     , INVALID_FLAGS2
-                     , PROTOCOL_ERROR2
-                     , NULL_CONN
-                     , XID_SERIALIZE_ERROR
-                     , XA_RECOVER_ERROR
-                     , XID_NOT_AVAILABLE
-                     , PROTOCOL_ERROR3
-                     , XID_MISMATCH
-                     , ROLLBACK_ERROR
-                     , NONE } excp;
+    enum Exception {
+        INVALID_FLAGS1,
+        INVALID_FLAGS2,
+        PROTOCOL_ERROR2,
+        NULL_CONN,
+        XID_SERIALIZE_ERROR,
+        AUTOCOMMIT_ERROR,
+        XA_RECOVER_ERROR,
+        XID_NOT_AVAILABLE,
+        PROTOCOL_ERROR3,
+        XID_MISMATCH,
+        ROLLBACK_ERROR,
+        NONE
+    } excp;
     int xa_rc = XAER_RMFAIL;
     
     LIXA_TRACE(("lixa_my_rollback_core\n"));
@@ -1169,9 +1172,25 @@ int lixa_my_rollback_core(struct lixa_sw_status_rm_s *lpsr,
             MYSQL_ROW row;
             XID xid_r;
             int num_fields;
-            if (mysql_query(lpsr->conn, "XA RECOVER")) {
+            const char *autocommit_stmt = "SET autocommit=1";
+            const char *xa_recover_stmt = "XA RECOVER";
+
+            /* due to bug #87836 in MySQL 5.7.x
+               https://bugs.mysql.com/bug.php?id=87836
+               we need to forse AUTOCOMMIT */            
+            LIXA_TRACE(("lixa_my_rollback_core: executing statement >%s<\n",
+                        autocommit_stmt));
+            if (mysql_query(lpsr->conn, autocommit_stmt)) {
                 LIXA_TRACE(("lixa_my_rollback_core: error while executing "
-                            "'XA RECOVER' command: %u/%s\n",
+                            ">%s< statement: %u/%s\n", autocommit_stmt,
+                            mysql_errno(lpsr->conn), mysql_error(lpsr->conn)));
+                THROW(AUTOCOMMIT_ERROR);
+            }
+            LIXA_TRACE(("lixa_my_rollback_core: executing statement >%s<\n",
+                        xa_recover_stmt));
+            if (mysql_query(lpsr->conn, xa_recover_stmt)) {
+                LIXA_TRACE(("lixa_my_rollback_core: error while executing "
+                            ">%s< statement: %u/%s\n", xa_recover_stmt,
                             mysql_errno(lpsr->conn), mysql_error(lpsr->conn)));
                 THROW(XA_RECOVER_ERROR);
             }
@@ -1232,7 +1251,7 @@ int lixa_my_rollback_core(struct lixa_sw_status_rm_s *lpsr,
             snprintf(my_cmd_buf, sizeof(my_cmd_buf), ROLLBACK_PREP_FMT, lmsx);
             if (mysql_query(lpsr->conn, my_cmd_buf)) {
                 LIXA_TRACE(("lixa_my_rollback_core: error while executing "
-                            "'%s': %u/%s\n", my_cmd_buf,
+                            ">%s> statement: %u/%s\n", my_cmd_buf,
                             mysql_errno(lpsr->conn), mysql_error(lpsr->conn)));
                 THROW(ROLLBACK_ERROR);
             }
@@ -1252,6 +1271,7 @@ int lixa_my_rollback_core(struct lixa_sw_status_rm_s *lpsr,
             case XID_NOT_AVAILABLE:
                 xa_rc = XAER_NOTA;
                 break;
+            case AUTOCOMMIT_ERROR:
             case XA_RECOVER_ERROR:
             case NULL_CONN:
                 xa_rc = XAER_RMFAIL;
@@ -1467,17 +1487,20 @@ int lixa_my_commit(const XID *xid, int rmid, long flags)
 int lixa_my_commit_core(struct lixa_sw_status_rm_s *lpsr,
                         const XID *xid, int rmid, long flags)
 {
-    enum Exception { INVALID_FLAGS1
-                     , INVALID_FLAGS2
-                     , PROTOCOL_ERROR2
-                     , NULL_CONN
-                     , XID_SERIALIZE_ERROR
-                     , XA_RECOVER_ERROR
-                     , XID_NOT_AVAILABLE
-                     , XID_MISMATCH
-                     , PROTOCOL_ERROR3
-                     , COMMIT_ERROR
-                     , NONE } excp;
+    enum Exception {
+        INVALID_FLAGS1,
+        INVALID_FLAGS2,
+        PROTOCOL_ERROR2,
+        NULL_CONN,
+        XID_SERIALIZE_ERROR,
+        AUTOCOMMIT_ERROR,
+        XA_RECOVER_ERROR,
+        XID_NOT_AVAILABLE,
+        XID_MISMATCH,
+        PROTOCOL_ERROR3,
+        COMMIT_ERROR,
+        NONE
+    } excp;
     int xa_rc = XAER_RMFAIL;
     
     LIXA_TRACE(("lixa_my_commit_core\n"));
@@ -1524,8 +1547,20 @@ int lixa_my_commit_core(struct lixa_sw_status_rm_s *lpsr,
             MYSQL_ROW row;
             XID xid_r;
             int num_fields;
+            const char *autocommit_stmt = "SET autocommit=1";
             const char *xa_recover_stmt = "XA RECOVER";
 
+            /* due to bug #87836 in MySQL 5.7.x
+               https://bugs.mysql.com/bug.php?id=87836
+               we need to forse AUTOCOMMIT */            
+            LIXA_TRACE(("lixa_my_commit_core: executing statement >%s<\n",
+                        autocommit_stmt));
+            if (mysql_query(lpsr->conn, autocommit_stmt)) {
+                LIXA_TRACE(("lixa_my_commit_core: error while executing "
+                            ">%s< statement: %u/%s\n", autocommit_stmt,
+                            mysql_errno(lpsr->conn), mysql_error(lpsr->conn)));
+                THROW(AUTOCOMMIT_ERROR);
+            }
             LIXA_TRACE(("lixa_my_commit_core: executing statement >%s<\n",
                         xa_recover_stmt));
             if (mysql_query(lpsr->conn, xa_recover_stmt)) {
@@ -1615,6 +1650,7 @@ int lixa_my_commit_core(struct lixa_sw_status_rm_s *lpsr,
             case XID_NOT_AVAILABLE:
                 xa_rc = XAER_NOTA;
                 break;
+            case AUTOCOMMIT_ERROR:
             case XA_RECOVER_ERROR:
             case NULL_CONN:
                 xa_rc = XAER_RMFAIL;

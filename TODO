@@ -1,8 +1,4 @@
-Find a bug related to MySQL 5.7, as described here: https://bugs.mysql.com/bug.php?id=87836
-Unfortunately MySQL 8.0 seems to introduce another one with message 
-ERROR 1401 (XAE03): XAER_RMERR: Fatal error occurred in the transaction branch - check your data for consistency
-when XA RECOVER is issued... :(
-
+Test a crash before xa_prepare (in the middle) that requires a MySQL rollback instead of a MySQL commit to recover.
 
 Improving the state file synchronization elapsed time is now a priority to
 avoid annoying connection timeout errors!!!

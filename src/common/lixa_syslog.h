@@ -148,8 +148,11 @@
     "be %d, default value (%d) will be used"
 #define LIXA_SYSLOG_LXC036I "LXC036I state server noticed there is at least " \
     "one recovery pending transaction"
-#define LIXA_SYSLOG_LXC037N "LXC037N recovery pending transaction has xid='%s'"
+#define LIXA_SYSLOG_LXC037N "LXC037N recovery pending transaction with " \
+    "xid='%s'"
 #define LIXA_SYSLOG_LXC038N "LXC038N transaction with xid='%s' must be %s"
+#define LIXA_SYSLOG_LXC039I "LXC039I transaction with xid='%s' has been " \
+    "recovered (%s)"
 
 
 
