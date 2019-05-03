@@ -1524,9 +1524,13 @@ int lixa_my_commit_core(struct lixa_sw_status_rm_s *lpsr,
             MYSQL_ROW row;
             XID xid_r;
             int num_fields;
-            if (mysql_query(lpsr->conn, "XA RECOVER")) {
+            const char *xa_recover_stmt = "XA RECOVER";
+
+            LIXA_TRACE(("lixa_my_commit_core: executing statement >%s<\n",
+                        xa_recover_stmt));
+            if (mysql_query(lpsr->conn, xa_recover_stmt)) {
                 LIXA_TRACE(("lixa_my_commit_core: error while executing "
-                            "'XA RECOVER' command: %u/%s\n",
+                            ">%s< statement: %u/%s\n", xa_recover_stmt,
                             mysql_errno(lpsr->conn), mysql_error(lpsr->conn)));
                 THROW(XA_RECOVER_ERROR);
             }
@@ -1588,9 +1592,11 @@ int lixa_my_commit_core(struct lixa_sw_status_rm_s *lpsr,
             /* committing transaction */
             snprintf(my_cmd_buf, sizeof(my_cmd_buf),
                      one_phase ? COMMIT_1_FMT : COMMIT_2_FMT, lmsx);
+            LIXA_TRACE(("lixa_my_commit_core: executing statement >%s<\n",
+                        my_cmd_buf));
             if (mysql_query(lpsr->conn, my_cmd_buf)) {
                 LIXA_TRACE(("lixa_my_commit_core: error while executing "
-                            "'%s': %u/%s\n", my_cmd_buf,
+                            ">%s< statement: %u/%s\n", my_cmd_buf,
                             mysql_errno(lpsr->conn), mysql_error(lpsr->conn)));
                 THROW(COMMIT_ERROR);
             }
