@@ -29,8 +29,9 @@
 
 
 
-#include <lixa_crash.h>
-#include <lixa_trace.h>
+#include "lixa_crash.h"
+#include "lixa_trace.h"
+#include "lixa_syslog.h"
 
 
 
@@ -108,6 +109,7 @@ void lixa_crash(lixa_word_t crash_point, long *count)
             LIXA_TRACE(("lixa_crash: crash threshold reached (%d) for crash "
                         "point "UINT32_T_FORMAT", crashing!\n",
                         *count, crash_point));
+            LIXA_SYSLOG((LOG_CRIT, LIXA_SYSLOG_LXG000C, crash_point));
             abort();
         }
         g_mutex_unlock(&lixa_crash_mutex);

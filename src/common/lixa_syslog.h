@@ -100,7 +100,7 @@
     "xa_commit() without TMONEPHASE flag: there probably is a bug inside " \
     "the RM code"
 #define LIXA_SYSLOG_LXC018I "LXC018I Resource Manager '%s' returned " \
-    "XAER_NOTA during recovery rollback: the Resource Manager already " \
+    "XAER_NOTA during recovery rollback: the Resource Manager has already " \
     "rolled back the transaction with xid '%s'"
 #define LIXA_SYSLOG_LXC019W "LXC019W Resource Manager '%s' (rmid=%d) " \
     "returned an unexpected return code (%d) to xa_close() call; this might " \
@@ -212,13 +212,23 @@
     "from address '%s', port " IN_PORT_T_FORMAT
 
 
+
 #define LIXA_SYSLOG_LXR000I "LXR000I LIXA recovery process is starting " \
     "(%s package version is %s)"
 #define LIXA_SYSLOG_LXR001E "LXR001E failed to parse options: %s"
 #define LIXA_SYSLOG_LXR002I "LXR002I this LIXA recovery process is terminating"
 #define LIXA_SYSLOG_LXR003E "LXR003E unable to perform tx_open() (rc=%d)"
-#define LIXA_SYSLOG_LXR004W "LXR004W Resource Manager returned %d while performing cold commit recovery, xa_forget will be issued to clean-up transaction '%s'"
-#define LIXA_SYSLOG_LXR005W "LXR005W Resource Manager returned %d while performing cold rollback recovery, xa_forget will be issued to clean-up transaction '%s'"
+#define LIXA_SYSLOG_LXR004W "LXR004W Resource Manager returned %d while " \
+    "performing cold commit recovery, xa_forget will be issued to clean-up " \
+    "transaction '%s'"
+#define LIXA_SYSLOG_LXR005W "LXR005W Resource Manager returned %d while " \
+    "performing cold rollback recovery, xa_forget will be issued to " \
+    "clean-up transaction '%s'"
+
+
+
+#define LIXA_SYSLOG_LXG000C "LXG000C crash point " UINT32_T_FORMAT " will " \
+    "immediately terminate the process"
 
 
 
