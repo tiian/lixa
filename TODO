@@ -1,5 +1,5 @@
 If rest-client crash at point 12, rest-server enters recovery pending and
-automatic recovery does not start
+automatic recovery does not start: lixad does not return a record
 
 
 Improving the state file synchronization elapsed time is now a priority to

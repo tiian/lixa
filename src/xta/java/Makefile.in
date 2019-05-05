@@ -462,7 +462,7 @@ dist_noinst_DATA = LixaErrorCodes.awk \
 	$(JAVA_PKGDIR)/LixaDummyXAResource.java \
 	$(JAVA_PKGDIR)/LixaMonkeyXAResource.java
 
-dist_noinst_HEADERS = transaction_jni.h xta_java_xa_resource.h \
+dist_noinst_HEADERS = config_jni.h transaction_jni.h xta_java_xa_resource.h \
 	xtaexception_jni.h xtaxid_jni.h
 
 javadir = $(datadir)/$(PACKAGE)/java
