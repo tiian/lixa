@@ -426,6 +426,45 @@ AT_CHECK([rm fifo_request], [0], [ignore], [ignore])
 AT_CHECK([rm fifo_reply], [0], [ignore], [ignore])
 AT_CLEANUP
 
+AT_SETUP([XTA/6.0/1.6 SUP Crash after xa_end])
+# This test case tests even the behaviour of the client connection timeout
+# configuration option (environment variable)
+AT_CHECK([if test "$LIXA_XTA" = "no"; then exit 77; fi])
+AT_CHECK([if test "$LIXA_CRASH" = "no"; then exit 77; fi])
+# create FIFO objects for communication between superior and subordinate
+# process
+AT_CHECK([mkfifo fifo_request], [0], [ignore], [ignore])
+AT_CHECK([mkfifo fifo_reply], [0], [ignore], [ignore])
+# first case test require a high timeout because the resource managers can be
+# "sleeping"
+AT_DATA([insert],
+[[export LIXA_CRASH_POINT=12 ; timeout 3 lixa_test_exec.sh noreset none case0107 0 1 1 1 fifo_request fifo_reply
+export LIXA_CLIENT_CONNECTION_TIMEOUT=5000; lixa_test_exec.sh noreset none case0107 1 1 2 1 fifo_request fifo_reply
+]])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027 ; lixa_test_group.sh insert], [147], [ignore], [ignore])
+AT_CHECK([rm fifo_request], [0], [ignore], [ignore])
+AT_CHECK([rm fifo_reply], [0], [ignore], [ignore])
+AT_CLEANUP
+
+AT_SETUP([XTA/6.0/1.7 Recovery after crash])
+AT_CHECK([if test "$LIXA_XTA" = "no"; then exit 77; fi])
+AT_CHECK([if test "$LIXA_CRASH" = "no"; then exit 77; fi])
+# create FIFO objects for communication between superior and subordinate
+# process
+AT_CHECK([sleep 20], [0], [ignore], [ignore])
+AT_CHECK([mkfifo fifo_request], [0], [ignore], [ignore])
+AT_CHECK([mkfifo fifo_reply], [0], [ignore], [ignore])
+# first case test require a high timeout because the resource managers can be
+# "sleeping"
+AT_DATA([delete],
+[[timeout 5 lixa_test_exec.sh noreset none case0107 0 0 1 1 fifo_request fifo_reply
+timeout 5 lixa_test_exec.sh noreset none case0107 1 0 2 1 fifo_request fifo_reply
+]])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027 ; lixa_test_group.sh delete], [0], [ignore], [ignore])
+AT_CHECK([rm fifo_request], [0], [ignore], [ignore])
+AT_CHECK([rm fifo_reply], [0], [ignore], [ignore])
+AT_CLEANUP
+
 AT_SETUP([XTA/6.0/2.0 SUP Crash in the middle of xa_prepare])
 AT_CHECK([if test "$LIXA_XTA" = "no"; then exit 77; fi])
 AT_CHECK([if test "$LIXA_CRASH" = "no"; then exit 77; fi])

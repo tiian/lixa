@@ -40,8 +40,13 @@
 /*
  * Pseudo synchronous branch case test for XTA
  *
- * This is as much as possible as case0106, but without Oracle DBMS to avoid
- * some long locks that are not practicals for automatic testing
+ * This is similar to case0106, but:
+ * - without Oracle DBMS to avoid some long locks that are not practicals for
+ *   automatic testing
+ * - optional MonkeyRM (without MonkeyRM superior is just MySQL and
+ *   subordinate only PostgreSQL)
+ * - subordinate open the connection to the LIXA state server after the
+ *   emulated RPC call from the superior
  *
  * NOTE: this is not a good example to learn the C programming language
  *       because the usage of global variables has been abused and you should
@@ -165,7 +170,7 @@ int main(int argc, char *argv[])
     /* parse command line parameters */
     pgm = argv[0];
     fprintf(stderr, "%s/%u| starting...\n", pgm, pid);
-    if (argc < 8) {
+    if (argc < 7) {
         fprintf(stderr, "%s/%u: at least seven options must be specified\n",
                 argv[0], pid);
         return 1;
@@ -176,7 +181,9 @@ int main(int argc, char *argv[])
     commit = strtol(argv[4], NULL, 0);
     fifo_request = argv[5];
     fifo_reply = argv[6];
-    monkeyrm_config = argv[7];
+    /* check if the seventh parameter is available */
+    if (argc > 7)
+        monkeyrm_config = argv[7];
 
     /* choose the SQL statements that must be executed by this branch */
     statements_setup();
@@ -292,11 +299,6 @@ void subordinate(void)
 {
     fprintf(stderr, "%s/%u| branch_type=%d (SUBORDINATE)\n",
             pgm, pid, branch_type);
-    /* initial boilerplate code */
-    create_dynamic_native_xa_resources();
-    create_a_new_transaction_manager();
-    create_a_new_transaction();
-    enlist_resources_to_transaction();
     /*
      * interesting code for XTA branching
      */
@@ -306,6 +308,11 @@ void subordinate(void)
                 pgm, pid);
         exit(1);
     }
+    /* initial boilerplate code */
+    create_dynamic_native_xa_resources();
+    create_a_new_transaction_manager();
+    create_a_new_transaction();
+    enlist_resources_to_transaction();
     /*
      * CREATE A NEW BRANCH IN THE SAME GLOBAL TRANSACTION
      */
@@ -406,14 +413,16 @@ void create_dynamic_native_xa_resources()
      * dynamically create an XA native resource object for the LIXA
      * Monkey Resource Manager (test & debugging tool)
      */
-    dynamic_native_xa_res_monkey = xta_native_xa_resource_new(
-        "LIXA Monkey RM (static)",
-        "/opt/lixa/lib/switch_lixa_monkeyrm_stareg.so",
-        monkeyrm_config, "FREE MEMORY");
-    if (dynamic_native_xa_res_monkey == NULL) {
-        fprintf(stderr, "%s/%u| xta_native_xa_resource_new: returned NULL for "
-                "dynamically creted resource\n", pgm, pid);
-        exit(1);
+    if (NULL != monkeyrm_config) {
+        dynamic_native_xa_res_monkey = xta_native_xa_resource_new(
+            "LIXA Monkey RM (static)",
+            "/opt/lixa/lib/switch_lixa_monkeyrm_stareg.so",
+            monkeyrm_config, "FREE MEMORY");
+        if (dynamic_native_xa_res_monkey == NULL) {
+            fprintf(stderr, "%s/%u| xta_native_xa_resource_new: returned NULL "
+                    "for dynamically creted resource\n", pgm, pid);
+            exit(1);
+        }
     }
 #ifdef HAVE_MYSQL
     if (branch_type == SUPERIOR) {
@@ -504,12 +513,15 @@ void create_a_new_transaction(void)
 void enlist_resources_to_transaction(void)
 {
     /* enlist the dynamic native XA Resources to the transaction */
-    rc = xta_transaction_enlist_resource(
-        tx, (xta_xa_resource_t *)dynamic_native_xa_res_monkey);
-    if (rc != LIXA_RC_OK) {
-        fprintf(stderr, "%s/%u| xta_transaction_enlist_resource/"
-                "dynamic_native_xa_res_monkey: returned %d\n", pgm, pid, rc);
-        exit(1);
+    if (NULL != monkeyrm_config) {
+        rc = xta_transaction_enlist_resource(
+            tx, (xta_xa_resource_t *)dynamic_native_xa_res_monkey);
+        if (rc != LIXA_RC_OK) {
+            fprintf(stderr, "%s/%u| xta_transaction_enlist_resource/"
+                    "dynamic_native_xa_res_monkey: returned %d\n",
+                    pgm, pid, rc);
+            exit(1);
+        }
     }
 #ifdef HAVE_MYSQL
     if (branch_type == SUPERIOR) {
@@ -662,5 +674,6 @@ void delete_all_xa_resources(void)
     /*
      * delete native XA Resource object
      */
-    xta_native_xa_resource_delete(dynamic_native_xa_res_monkey);
+    if (NULL != monkeyrm_config)
+        xta_native_xa_resource_delete(dynamic_native_xa_res_monkey);
 }

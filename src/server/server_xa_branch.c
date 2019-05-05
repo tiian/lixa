@@ -553,7 +553,7 @@ int server_xa_branch_check_recovery(const struct thread_status_s *ts,
                 case LIXA_MSG_VERB_END:
                     LIXA_TRACE(("server_xa_branch_check_recovery: this branch "
                                 "started but didn't prepare, there can be a "
-                                "possigle 'in flight' transaction, forcing "
+                                "possible 'in flight' transaction, forcing "
                                 "rollback\n"));
                     *global_recovery = XTA_GLOBAL_RECOV_FORCE_ROLLBACK;
                     THROW(POSSIBLE_IN_FLIGHT_TX);
