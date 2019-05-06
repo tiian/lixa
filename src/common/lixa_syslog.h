@@ -143,7 +143,8 @@
     "a non branchable transaction"
 #define LIXA_SYSLOG_LXC032E "LXC032E nested exception in XTA for Java: XtaException_throw method is not able to throw exception for ret_cod=%d ('%s')"
 #define LIXA_SYSLOG_LXC033E "LXC033E syntax error in environment variable %s: '%s'"
-#define LIXA_SYSLOG_LXC034N "LXC034N timeout expired (%d ms) in function '%s'"
+#define LIXA_SYSLOG_LXC034E "LXC034E a message has not arrived before " \
+    "timeout expiration (%d ms) and its socket has been closed"
 #define LIXA_SYSLOG_LXC035I "LXC035I connection_timeout parameter can not " \
     "be %d, default value (%d) will be used"
 #define LIXA_SYSLOG_LXC036I "LXC036I state server noticed there is at least " \

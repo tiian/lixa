@@ -81,7 +81,7 @@ xa_commit/0
 xa_close/0
 ]])
 # Decreased from 500 to 250 due to an overload issued with CentOS 6.6 (32 bit)
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002; lixa_test_exec.sh reset start case0031 commit 0 250 100], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_CLIENT_CONNECTION_TIMEOUT=-1; export LIXA_PROFILE=CASE_PROF_0002; lixa_test_exec.sh reset start case0031 commit 0 250 100], [0], [ignore], [ignore])
 AT_CLEANUP
 
 # a lot of rollbacks
@@ -153,6 +153,6 @@ xa_rollback/0
 xa_close/0
 ]])
 # Decreased from 500 to 250 due to an overload issued with CentOS 6.6 (32 bit)
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002; lixa_test_exec.sh none stop case0031 rollback 0 250 100], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_CLIENT_CONNECTION_TIMEOUT=-1; export LIXA_PROFILE=CASE_PROF_0002; lixa_test_exec.sh none stop case0031 rollback 0 250 100], [0], [ignore], [ignore])
 AT_CLEANUP
 

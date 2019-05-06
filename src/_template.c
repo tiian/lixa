@@ -1,5 +1,7 @@
 {
-    enum Exception { NONE } excp;
+    enum Exception {
+        NONE
+    } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     
     LIXA_TRACE(("\n"));

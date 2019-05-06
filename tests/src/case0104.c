@@ -64,9 +64,9 @@
  *  2:   superior branch / xta_transaction_commit() -> LIXA_RC_TX_ROLLBACK
  *  3:   intermediate branch / xta_transaction_commit() -> LIXA_RC_TX_ROLLBACK
  *  4:   subordinate branch / xta_transaction_commit() -> LIXA_RC_TX_ROLLBACK
- *  5:   superior branch / xta_transaction_commit() -> LIXA_RC_MESSAGE_TIMEOUT_EXPIRED
- *  6:   intermediate branch / xta_transaction_commit() -> LIXA_RC_MESSAGE_TIMEOUT_EXPIRED
- *  7:   subordinate branch / xta_transaction_commit() -> LIXA_RC_MESSAGE_TIMEOUT_EXPIRED
+ *  5:   superior branch / xta_transaction_commit() -> LIXA_RC_MSG_TIMEOUT_SOCKET_CLOSED
+ *  6:   intermediate branch / xta_transaction_commit() -> LIXA_RC_MSG_TIMEOUT_SOCKET_CLOSED
+ *  7:   subordinate branch / xta_transaction_commit() -> LIXA_RC_MSG_TIMEOUT_SOCKET_CLOSED
  */
 
 
@@ -300,7 +300,7 @@ void superior(void)
                     "%d (%s)\n", pgm, pid, rc, lixa_strerror(rc));
             if (LIXA_RC_TX_ROLLBACK == rc)
                 exit(2);
-            else if (LIXA_RC_MESSAGE_TIMEOUT_EXPIRED == rc)
+            else if (LIXA_RC_MSG_TIMEOUT_SOCKET_CLOSED == rc)
                 exit(5);
             else
                 exit(1);
@@ -371,7 +371,7 @@ void intermediate(void)
                     "%d (%s)\n", pgm, pid, rc, lixa_strerror(rc));
             if (LIXA_RC_TX_ROLLBACK == rc)
                 exit(3);
-            else if (LIXA_RC_MESSAGE_TIMEOUT_EXPIRED == rc)
+            else if (LIXA_RC_MSG_TIMEOUT_SOCKET_CLOSED == rc)
                 exit(6);
             else
                 exit(1);
@@ -434,7 +434,7 @@ void subordinate(void)
                     "%d (%s)\n", pgm, pid, rc, lixa_strerror(rc));
             if (LIXA_RC_TX_ROLLBACK == rc)
                 exit(4);
-            else if (LIXA_RC_MESSAGE_TIMEOUT_EXPIRED == rc)
+            else if (LIXA_RC_MSG_TIMEOUT_SOCKET_CLOSED == rc)
                 exit(7);
             else
                 exit(1);

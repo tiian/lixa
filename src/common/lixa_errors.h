@@ -243,9 +243,10 @@
  */
 #define LIXA_RC_INVALID_STATE_TRANSITION       -31
 /**
- * A message has not been received before timeout expiration
+ * A message has not been received before timeout expiration and the TCP
+ * socket has been closed
  */
-#define LIXA_RC_MESSAGE_TIMEOUT_EXPIRED        -32
+#define LIXA_RC_MSG_TIMEOUT_SOCKET_CLOSED      -32
 
 
 

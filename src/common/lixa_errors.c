@@ -152,9 +152,9 @@ const char *lixa_strerror(int ret_cod)
         case LIXA_RC_INVALID_STATE_TRANSITION:
             return "ERROR: an invalid state transtion has been requested to "
                 "a Finite State Machine";
-        case LIXA_RC_MESSAGE_TIMEOUT_EXPIRED:
+        case LIXA_RC_MSG_TIMEOUT_SOCKET_CLOSED:
             return "ERROR: a message has not been received before timeout "
-                "expiration";
+                "expiration and the TCP socket has been closed";
         case LIXA_RC_RM_ERROR:
             return "ERROR: generic errof for a Resource Manager operation";
         case LIXA_RC_TX_FAIL:

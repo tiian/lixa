@@ -130,17 +130,19 @@ int lixa_msg_retrieve(int fd, int timeout,
                       char *buf, size_t buf_size,
                       ssize_t *read_bytes)
 {
-    enum Exception { POLLHUP_POLLERR
-                     , MESSAGE_TIMEOUT_EXPIRED
-                     , POLL_ERROR
-                     , INTERNAL_ERROR
-                     , RECV_ERROR1
-                     , CONNECTION_CLOSED
-                     , INVALID_PREFIX_SIZE
-                     , BUFFER_OVERFLOW
-                     , RECV_ERROR2
-                     , INVALID_LENGTH_XML_MSG
-                     , NONE } excp;
+    enum Exception {
+        POLLHUP_POLLERR,
+        MSG_TIMEOUT_SOCKET_CLOSED,
+        POLL_ERROR,
+        INTERNAL_ERROR,
+        RECV_ERROR1,
+        CONNECTION_CLOSED,
+        INVALID_PREFIX_SIZE,
+        BUFFER_OVERFLOW,
+        RECV_ERROR2,
+        INVALID_LENGTH_XML_MSG,
+        NONE
+    } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
 
     LIXA_TRACE(("lixa_msg_retrieve\n"));
@@ -165,9 +167,17 @@ int lixa_msg_retrieve(int fd, int timeout,
         } else if (0 == ready_fd) {
             LIXA_TRACE(("lixa_msg_retrieve: poll time out (%d ms) exceeded\n",
                         timeout));
-            LIXA_SYSLOG((LOG_NOTICE, LIXA_SYSLOG_LXC034N, timeout,
-                         "lixa_msg_retrieve"));
-            THROW(MESSAGE_TIMEOUT_EXPIRED);
+            /*
+             * This "brutal" socket close is intentional: in the event that a
+             * message does not arrive before the timeout deadline, there's no
+             * clear and safe way to go on with the transaction. The earlier
+             * the state server (lixad) recognizes the issue, the earlier the
+             * transaction will be automatically recoverable by another task.
+             * A subsequent usage of the socket will generate an error.
+             */
+            close(fd);
+            LIXA_SYSLOG((LOG_ERR, LIXA_SYSLOG_LXC034E, timeout));
+            THROW(MSG_TIMEOUT_SOCKET_CLOSED);
         } else if (0 > ready_fd) {
             THROW(POLL_ERROR);
         } else {
@@ -216,8 +226,8 @@ int lixa_msg_retrieve(int fd, int timeout,
             case POLLHUP_POLLERR:
                 ret_cod = LIXA_RC_POLL_ERROR;
                 break;
-            case MESSAGE_TIMEOUT_EXPIRED:
-                ret_cod = LIXA_RC_MESSAGE_TIMEOUT_EXPIRED;
+            case MSG_TIMEOUT_SOCKET_CLOSED:
+                ret_cod = LIXA_RC_MSG_TIMEOUT_SOCKET_CLOSED;
                 break;
             case POLL_ERROR:
                 ret_cod = LIXA_RC_POLL_ERROR;

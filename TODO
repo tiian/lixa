@@ -1,11 +1,3 @@
-If rest-client crash at point 12, rest-server enters recovery pending and
-automatic recovery does not start: lixad does not return a record
-
-SOLUTION:
-A method like TransactionManager.destroyTransaction(Transaction)
-is necessary to force client connection shutdown, especially in Java: the
-TransactionManager object is not delete until first GC and the connection 
-stays open.
 
 
 Improving the state file synchronization elapsed time is now a priority to
