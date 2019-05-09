@@ -439,6 +439,10 @@ public class case4104 {
         }  catch (Exception e) {
             e.printStackTrace();
             System.exit(1);
+        } finally {
+            // Destroy TransactionManager object and close the connection
+            // with the LIXA state server
+            tm.delete();
         }
     }
     private static void intermediate() {
@@ -485,7 +489,11 @@ public class case4104 {
         } catch (Exception e) {
             e.printStackTrace();
             System.exit(1);
-        }        
+        } finally {
+            // Destroy TransactionManager object and close the connection
+            // with the LIXA state server
+            tm.delete();
+        }
     }
     private static void subordinate() {
         System.err.println("branchType=" + branchType + " (SUBORDINATE)");
@@ -527,6 +535,10 @@ public class case4104 {
         } catch (Exception e) {
             e.printStackTrace();
             System.exit(1);
+        } finally {
+            // Destroy TransactionManager object and close the connection
+            // with the LIXA state server
+            tm.delete();
         }
     }
     private static String msgReceive(String fifoName) {

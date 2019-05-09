@@ -390,6 +390,10 @@ public class case4107 {
         } catch (XAException e) {
             e.printStackTrace();
             System.exit(1);
+        } finally {
+            // Destroy TransactionManager object and close the connection
+            // with the LIXA state server
+            tm.delete();
         }
     }
     private static void subordinate() {
@@ -482,6 +486,10 @@ public class case4107 {
         } catch (Exception e) {
             e.printStackTrace();
             System.exit(1);
+        } finally {
+            // Destroy TransactionManager object and close the connection
+            // with the LIXA state server
+            tm.delete();
         }
     }
     private static String msgReceive(String fifoName) {

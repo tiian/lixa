@@ -84,7 +84,7 @@ public class ExampleXtaMACBPA31 {
         String sqlStmt;
 
         // XTA Transaction Manager
-        TransactionManager tm;
+        TransactionManager tm = null;
         // XTA Transaction
         Transaction tx;
         
@@ -207,6 +207,9 @@ public class ExampleXtaMACBPA31 {
                  stmt.close();
                  conn.close();
                  xac.close();
+                 // Destroy TransactionManager object and close the connection
+                 // with the LIXA state server
+                 tm.delete();
              } catch (Exception e) {
                  e.printStackTrace();
                  System.exit(1);

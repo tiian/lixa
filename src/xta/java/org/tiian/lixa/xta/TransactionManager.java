@@ -74,4 +74,13 @@ public class TransactionManager {
      * an error condition
      */
     public native Transaction createTransaction() throws XtaException;
+    /**
+     * This method is a public interface for object finalization: it's
+     * helpful to avoid useless open connection between the Java application
+     * and the LIXA state server, especially for web services that create a
+     * new TransactionManager instance for every client call.
+     */
+    public void delete() {
+        finalize();
+    }
 }

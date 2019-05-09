@@ -51,6 +51,10 @@ public class case4103 {
         // Lixa XA Resources
         LixaMonkeyXAResource xar1 = null;
         LixaMonkeyXAResource xar2 = null;
+        // XTA Transaction Manager
+        TransactionManager tm = null;
+        // XTA Transaction
+        Transaction tx = null;
         
         try {
             BufferedWriter output = null;
@@ -75,11 +79,6 @@ public class case4103 {
                 default:
                     System.err.println("phase=" + phase + " UNKNOWN!");
             } // switch (phase)
-
-            // XTA Transaction Manager
-            TransactionManager tm = null;
-            // XTA Transaction
-            Transaction tx = null;
 
             // Create two LixaMonkey RMs
             xar1 = new LixaMonkeyXAResource("monkey1s.conf");
@@ -152,6 +151,10 @@ public class case4103 {
         } catch (Exception e) {
             e.printStackTrace();
             System.exit(1);
+        } finally {
+            // Destroy TransactionManager object and close the connection
+            // with the LIXA state server
+            tm.delete();
         }
     }
 }

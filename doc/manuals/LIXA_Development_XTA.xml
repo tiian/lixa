@@ -2910,6 +2910,7 @@ SQL&gt;
 	<table frame="box">
 	  <thead><tr><td>[Shell terminal session - AP1]</td></tr></thead>
 	  <tbody><tr><td><screen>
+tiian@ubuntu1404-64:~/tmp$ mkfifo xid.fifo
 tiian@ubuntu1404-64:~/tmp$ ls -la
 total 28
 drwxrwxr-x  2 tiian tiian 4096 gen 15 22:06 .

@@ -19,6 +19,9 @@ LOG:
 		 Implemented a workaround to mitigate a MySQL bug that LIXA
 		 exploited during autorecovery of prepared transactions
 		 https://bugs.mysql.com/bug.php?id=87836
+		 Introduced method TransactionManager.delete() in XTA for Java
+		 to force TCP/IP socket close before Java garbage collection
+		 execution.
 
 2019-04-07 1.7.7 Documentation fix
 

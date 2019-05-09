@@ -77,6 +77,10 @@ public class case4102 {
         Statement stmt1 = null;
         // Lixa XA Resource
         LixaMonkeyXAResource xar2 = null;
+        // XTA Transaction Manager
+        TransactionManager tm = null;
+        // XTA Transaction
+        Transaction tx = null;
 
         switch (stmtNum) {
             case 0:
@@ -153,11 +157,6 @@ public class case4102 {
             // 5. get an SQL Connection from the XA Connection
             conn1 = xac1.getConnection();
             
-            // XTA Transaction Manager
-            TransactionManager tm = null;
-            // XTA Transaction
-            Transaction tx = null;
-
             // Create a LixaMonkey RM
             xar2 = new LixaMonkeyXAResource("monkey1s.conf");
             
@@ -240,6 +239,10 @@ public class case4102 {
         } catch (Exception e) {
             e.printStackTrace();
             System.exit(1);
+        } finally {
+            // Destroy TransactionManager object and close the connection
+            // with the LIXA state server
+            tm.delete();
         }
     }
 }
