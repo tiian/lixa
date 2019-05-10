@@ -228,6 +228,8 @@ xa_end/0
 xa_prepare/0
 xa_commit/0
 ]])
+# wait 1 second for recovery pending transaction
+AT_CHECK([sleep 1], [0], [ignore], [ignore])
 AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027 ; lixa_test_exec.sh noreset none case4100 1 0 2], [0], [ignore], [ignore])
 AT_CHECK([lixad --config-file=$TESTS_ETC_DIR/lixad_conf.xml --dump=u|tee $TESTS_TMP_FILE1 ; grep 'recovery failed: 1' $TESTS_TMP_FILE1], [1], [ignore], [ignore])
 AT_CLEANUP

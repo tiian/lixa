@@ -22,6 +22,8 @@ LOG:
 		 Introduced method TransactionManager.delete() in XTA for Java
 		 to force TCP/IP socket close before Java garbage collection
 		 execution.
+		 Fixed a bug in XTA: the client TCP connection was not
+		 explicitly closed by xta_transaction_delete.
 
 2019-04-07 1.7.7 Documentation fix
 

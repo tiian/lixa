@@ -1046,7 +1046,7 @@ int lixa_tx_open(int *txrc, int mmode)
                     break;
                 case LIXA_XA_OPEN_ERROR:
                     /* clean-up socket and free thread status */
-                    client_disconnect(&global_csc);
+                    client_disconnect_thread(&global_csc);
                     lixa_tx_cleanup();
                     *txrc = tmp_txrc;
                     break;
@@ -1845,12 +1845,14 @@ int lixa_tx_tpm(GArray *xida, int maint, int report, int unique)
     return ret_cod;
 }
 
+
+
 void lixa_tx_cleanup(void)
 {
     int ret_cod;
 
     LIXA_TRACE(("lixa_tx_cleanup: emergency socket & memory clean-up\n"));
-    ret_cod = client_disconnect(&global_csc);
+    ret_cod = client_disconnect_thread(&global_csc);
     LIXA_TRACE(("lixa_tx_cleanup/client_disconnect/ret_cod=%d\n", ret_cod));
     ret_cod = client_unconfig(&global_ccc, TRUE);
     LIXA_TRACE(("lixa_tx_cleanup/client_unconfig/ret_cod=%d\n", ret_cod));

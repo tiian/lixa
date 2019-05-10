@@ -47,9 +47,9 @@ extern "C" {
 
 
     /**
-     * Connect this client to the transaction manager
-     * @param cs OUT object containing the status of this client
-     * @param ccc OUT object containing the configuration of this client
+     * Connect this client to the LIXA state server
+     * @param[out] cs object containing the status of this client
+     * @param[out] ccc object containing the configuration of this client
      * @return a standardized return code
      */
     int client_connect(client_status_t *cs,
@@ -58,14 +58,24 @@ extern "C" {
     
 
     /**
-     * Disconnect this client from the transaction manager
-     * @param csc OUT object containing the status of this client
+     * Disconnect the client associated to the current thread from the LIXA
+     * state server
+     * @param[in,out] csc object containing the status of all the threads
      * @return a standardized return code
      */     
-    int client_disconnect(client_status_coll_t *csc);
+    int client_disconnect_thread(client_status_coll_t *csc);
 
     
 
+    /**
+     * Disconnect a client from the LIXA state server
+     * @param[in,out] cs status of the client that must be disconnect
+     * @return a reason code
+     */
+    int client_disconnect(client_status_t *cs);
+
+
+    
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

@@ -197,6 +197,12 @@ void xta_transaction_delete(xta_transaction_t *transact)
                             "xta_transaction_close_internal: ret_cod=%d\n",
                             ret_cod));
             }
+        /* close the client connection */
+        if (LIXA_RC_OK != (ret_cod = client_disconnect(
+                               transact->client_status))) {
+            LIXA_TRACE(("xta_transaction_delete/client_disconnect: "
+                        "rec_cod=%d\n", ret_cod));
+        }
         /* unconfigure and release the memory related to client configuration
            collection */
         if (LIXA_RC_OK != (ret_cod = client_unconfig(
