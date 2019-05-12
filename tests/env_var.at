@@ -2,7 +2,7 @@ AT_BANNER([Environment Variables])
 
 AT_SETUP([EV/0.0 no LIXA_STATE_SERVERS])
 # use config file
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0008 ; lixa_test_exec.sh noreset start lixat], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0008 ; lixa_test_exec.sh reset start lixat], [0], [ignore], [ignore])
 AT_CLEANUP
 # pass the same value using the environment variable
 AT_SETUP([EV/0.1 good LIXA_STATE_SERVERS])

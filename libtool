@@ -1,7 +1,7 @@
 #! /bin/bash
 
 # libtool - Provide generalized library-building support services.
-# Generated automatically by config.status (lixa) 1.7.8-rc
+# Generated automatically by config.status (lixa) 1.7.8
 # Libtool was configured on host ubuntu1404-64:
 # NOTE: Changes made to this file will be lost: look at ltmain.sh.
 #

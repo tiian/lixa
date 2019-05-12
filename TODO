@@ -1,5 +1,3 @@
-Check socket close in rest-server rest-client
-
 Improving the state file synchronization elapsed time is now a priority to
 avoid annoying connection timeout errors!!!
 

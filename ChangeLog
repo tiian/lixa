@@ -1,16 +1,16 @@
 LOG:
 
-           1.7.8 Added (client) connection timeout; default value = 5000 ms
+2019-05-12 1.7.8 Added (client) connection timeout; default value = 5000 ms
 		 A new error message (LXC034E) is sent to the syslog in the
 		 event that the client doesn't get a reply before timeout
 		 expiration. The previous behaviour can be obtained setting a
 		 new environment variable:
 		 export LIXA_CLIENT_CONNECTION_TIMEOUT=-1
-		 A shorter timeouts can be set as well:
+		 A shorter timeout can be set as well:
 		 export LIXA_CLIENT_CONNECTION_TIMEOUT=1000
-		 In the event of timeout, the socket is immediately close and
+		 In the event of timeout, the socket is immediately closed and
 		 it can't re-used to guarantee consistency.
-		 New getConnectionTimeout() and setConnectionTimeout() methods
+		 New getConnectionTimeout() and setConnectionTimeout() methods.
 		 XID serialization for PostgreSQL has been changed from native
 		 LIXA (formatID.Hex(gtrid).Hex(bqual)) to the same used by
 		 PostgreSQL's JDBC driver (formatID_Base64(gtrid)_Base64(bqual))
