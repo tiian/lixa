@@ -3,50 +3,6 @@ It's just a place to avoid human memory leak.
 
 
 
-*** XTA timeout ***
-Naive analysis suggests some sort of timeout for xta_transaction_commit in
-the event of a multiple applications configuration.
-After some more thinking on the subject, I have found out two possible
-"error cases":
-1. a bug inside an Application Program that's cooperating in the DTP
-2. a very slow commit phase in charge of some Resource Manager and/or the
-   LIXA state server
-Trying to solve an application bug with an infrastructure timeout does not
-sound a good idea: fix the Application Program and you will be done.
-The second "error case" seems to be more interesting, but it creates more
-questions than answers: in a multiple application DTP there's high chance at
-least one AP performed xa_prepare in the right way and interrupting the two
-phase commit can generate further complexity that must be handled by a
-recovery phase.
-At the time of this writing (2018-04-17) there are a lot of unclear items:
-1. what's type of hang will real application meet in production?
-2. in what hang behaviors a timeout can be fruitful?
-3. what should be the consequence of the timeout? (A signal to crash the AP,
-   an exit(X>0) to close the AP, a LIXA return code after complete clean-up of
-   most XTA resources, ...) Unfortunately there's no an "easy way" to handle
-   it because LIXA supports and probably will support two completely different
-   programming models: XTA and TX.
-Nevertheless, here are some notes I collected in TODO and moved in this place
-to avoid the trash can, but even to avoid the implementation of a sloppy
-feature.
-Implement timeout to avoid a too long block time for clients (timeout parameter
-in xa_prepare step 8 and step 24 messages):
-- client side only (remove from messsages)
-- pick-up current time at function entry
-- use poll to avoid too long blocking for msg put and msg get
-- in the event of timeout, use shutdown to close the local half pipe of the
-  socket
-  - do all the necessary operation, maybe rollback resource managers if
-    necessary
-  - destroy all the objects
-  - close the socket (it could be a not clean close if the server has not close
-    the socket on its side in the meantime, but waiting will break the timeout)
-  - connection can't be reused: invalidate Transaction Manager and Transaction
-  - return to caller different return codes for the different timeout point
-    (ended, prepared, committed)
-
-
-
 *** Low Latency Persistence ***
 A partial improvement, without completely redesigning the foundation of the
 state server, can be obtained as explained in document "Low Latency State Server
@@ -54,10 +10,28 @@ Enhancement".
 Useful info related to disk sync latency are available at these URLs:
 http://yoshinorimatsunobu.blogspot.it/2014/03/why-buffered-writes-are-sometimes.html
 http://yoshinorimatsunobu.blogspot.it/2009/05/overwriting-is-much-faster-than_28.html
+http://www.thesubodh.com/2013/07/what-are-exactly-odirect-osync-flags.html
 Another possible improvement of the current state server is the adoption of
 files dedicated to the redo log: it must be understood if memory mapping or
 standard write/fdatasync is the best solution for few records between two
 syncpoints.
+
+Stuff for redo log:
+- pre-allocate it to avoid appending, reset the full file with 0 before start
+  using it: the 4KB write aligned will create holes and during reading only a
+  full 4KB of 0s would tell "no more records"
+- use 4KB multiple to avoid the read-modify-write: this is easy because the
+  record to flush are already available in RAM, just use a pre-defined static
+  buffer and flush the piece that's interesting
+- just in case, put an hash in front of every record: during redo log apply it
+  would be very useful to avoid a "dirty last record" 
+- option for O_DIRECT (to be tuned with utility, maybe lixau or lixat)
+- option for one of O_SYNC or O_DSYNC (to be tuned with utility, O_SYNC default)
+  even nothing can be acceptable for LIXA state server, but with the risk of
+  missing some transactions
+- keep the redo log and synchronize the state file only after some time, maybe
+  in async thread as described below
+
 2018-06-18 The best option I have found till now is based on snapshots +
 journals. 3 snapshots (with msync like now) + 3 journals (with fdatasync) and
 a background thread used to avoid pauses during snapshotting (snapshots must be
@@ -79,7 +53,7 @@ two points must be considered:
 - LIXA state server would require a major review because the current 
   implementation use a memory mapped file to obtain full in memory (read)
   access; accessing the data is just a matter of pointer dereferencing.
-In the end, the key/value db is an idea, but only additional requires will
+In the end, the key/value db is an idea, but only additional requirements will
 justify such a change.
 
 
