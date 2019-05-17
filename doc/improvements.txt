@@ -25,12 +25,37 @@ Stuff for redo log:
   buffer and flush the piece that's interesting
 - just in case, put an hash in front of every record: during redo log apply it
   would be very useful to avoid a "dirty last record" 
+- all the record have an ID, 32 bit unsigned; a function _is_after() is 
+  necessary to establish if an ID follows another (the ID cycle after 2^32
+  records)
 - option for O_DIRECT (to be tuned with utility, maybe lixau or lixat)
 - option for one of O_SYNC or O_DSYNC (to be tuned with utility, O_SYNC default)
   even nothing can be acceptable for LIXA state server, but with the risk of
   missing some transactions
-- keep the redo log and synchronize the state file only after some time, maybe
-  in async thread as described below
+- source of truth is: last consistent state file + all the following log
+  records
+- consistent state file contains the first ID of log record to be applied
+- when a state file must be enlarged, a new redo log is created
+- when a switch to another state file must be performed, the "new" state file
+  must be truncated to the size of the previous one, the data must be copied
+  (it's an in memory copy), a new redo log is used, synchronization of the old
+  state file is started in background with another dedicated thread
+- redo log records are kept in memory until the buffer is full or a
+  synchronization is asked
+- redo log records buffer is 4K multiplier, configurable, allocated on heap
+- pwrite is used to copy the buffer from memory to disk
+- the tail of the redo log contains 0s, some unused space, but it doesn't
+  matter
+- every record in the redo log contains an hash to check consistency, the ID
+  to understand the sequence and the data; the size of the record only if
+  records are of different size (I don't think so)
+- log record ID = 0 is reserved because unused log space is 0 filled
+- change of state file happens when redo log reach a threashold when state file
+  requires a resize (see above)
+- 
+
+
+
 
 2018-06-18 The best option I have found till now is based on snapshots +
 journals. 3 snapshots (with msync like now) + 3 journals (with fdatasync) and
