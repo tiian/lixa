@@ -340,17 +340,9 @@
  */
 #define LIXA_RC_WAITPID_ERROR                 -120
 /**
- * "ftruncate" function error
-define LIXA_RC_FTRUNCATE_ERROR               -121
+ * "posix_memalign" function error
  */
-/**
- * "fileno" function error
-define LIXA_RC_FILENO_ERROR                  -122
- */
-/**
- * "rename" function error
-define LIXA_RC_RENAME_ERROR                  -123
- */
+#define LIXA_RC_POSIX_MEMALIGN_ERROR          -121
 /**
  * "stat" function error
  */
@@ -472,6 +464,14 @@ define LIXA_RC_UNLINK_ERROR                  -129
  * "pthread_rwlock_unlock" function error
  */
 #define LIXA_RC_PTHREAD_RWLOCK_UNLOCK_ERROR    -155
+/**
+ * "pread" function error
+ */
+#define LIXA_RC_PREAD_ERROR                    -156
+/**
+ * "pwrite" function error
+ */
+#define LIXA_RC_PWRITE_ERROR                   -157
 /**
  * "xmlReadFile" function error
  */

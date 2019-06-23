@@ -202,23 +202,9 @@ const char *lixa_strerror(int ret_cod)
             return "ERROR: 'fgets' function returned an error condition";
         case LIXA_RC_WAITPID_ERROR:
             return "ERROR: 'waitpid' function returned an error condition";
-            /*
-              case LIXA_RC_FDATASYNC_ERROR:
-              return "ERROR: 'fdatasync' function returned an error "
-              "condition";
-              case LIXA_RC_FPUTC_ERROR:
-              return "ERROR: 'fputc' function (or 'putc' macro) returned an "
-              "error condition";
-              case LIXA_RC_FTRUNCATE_ERROR:
-              return "ERROR: 'ftruncate' function returned an error "
-              "condition";
-              case LIXA_RC_FILENO_ERROR:
-              return "ERROR: 'fileno' function returned an error "
-              "condition";
-              case LIXA_RC_RENAME_ERROR:
-              return "ERROR: 'rename' function returned an error "
-              "condition";
-            */
+        case LIXA_RC_POSIX_MEMALIGN_ERROR:
+            return "ERROR: 'posix_memalign' function returned an error "
+                "condition";
         case LIXA_RC_STAT_ERROR:
             return "ERROR: 'stat' function returned an error condition";
         case LIXA_RC_FSTAT_ERROR:
@@ -292,6 +278,10 @@ const char *lixa_strerror(int ret_cod)
         case LIXA_RC_PTHREAD_RWLOCK_UNLOCK_ERROR:
             return "ERROR: 'pthread_rwlock_unlock' function returned an "
                 "error condition";
+        case LIXA_RC_PREAD_ERROR:
+            return "ERROR: 'pread' function returned an error condition";
+        case LIXA_RC_PWRITE_ERROR:
+            return "ERROR: 'pwrite' function returned an error condition";
         case LIXA_RC_XML_READ_FILE_ERROR:
             return "ERROR: 'xmlReadFile' function returned an error condition";
         case LIXA_RC_XML_READ_DOC_ERROR:
