@@ -72,10 +72,6 @@ typedef struct lixa_state_log_s {
      */
     int                              fd;
     /**
-     * System page file
-     */
-    size_t                           page_size;
-    /**
      * Buffer used to manage I/O
      */
     void                            *buffer;
@@ -83,6 +79,10 @@ typedef struct lixa_state_log_s {
      * Size of the buffer used to manage I/O
      */
     size_t                           buffer_size;
+    /**
+     * A single memory page used for special purposes like formatting
+     */
+    void                            *single_page;
 } lixa_state_log_t;
 
 
@@ -98,6 +98,7 @@ extern "C" {
      * @param[in,out] this object to be initialized
      * @param[in] pathname that must be used to open or create the underlying
      *            file
+     * @param[in] system page size
      * @param[in] o_direct_bool activates O_DIRECT POSIX flag
      * @param[in] o_dsync_bool activates O_DSYNC POSIX flag
      * @param[in] o_rsync_bool activates O_RSYNC POSIX flag
@@ -106,6 +107,7 @@ extern "C" {
      */
     int lixa_state_log_init(lixa_state_log_t *this,
                             const char *pathname,
+                            size_t system_page_size,
                             int o_direct_bool,
                             int o_dsync_bool,
                             int o_rsync_bool,
@@ -117,11 +119,13 @@ extern "C" {
      * Create a new underlying file for the state log object
      * @param[in,out] this current state file object
      * @param[in] pathname that must be used to create the underlying file
+     * @param[in] system page size
      * @param[in] flags that must be used to create the file
      * @return a reason code
      */
     int lixa_state_log_create_new_file(lixa_state_log_t *this,
                                        const char *pathname,
+                                       size_t system_page_size,
                                        int flags);
 
     

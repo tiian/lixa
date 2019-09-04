@@ -20,6 +20,13 @@
 
 
 
+#ifdef HAVE_UNISTD_H
+# include <unistd.h>
+#endif
+
+
+
+#include "lixa_errors.h"
 #include "lixa_trace.h"
 #include "lixa_state.h"
 
@@ -30,3 +37,97 @@
 # undef LIXA_TRACE_MODULE
 #endif /* LIXA_TRACE_MODULE */
 #define LIXA_TRACE_MODULE   LIXA_TRACE_MOD_SERVER_STATUS
+
+
+
+int lixa_state_init(lixa_state_t *this)
+{
+    enum Exception {
+        NULL_OBJECT,
+        INTERNAL_ERROR,
+        STATE_LOG_INIT_ERROR,
+        NONE
+    } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    
+    LIXA_TRACE(("lixa_state_init\n"));
+    TRY {
+        /* check the object is not null */
+        if (NULL == this)
+            THROW(NULL_OBJECT);
+        /* clean-up the object memory, maybe not necessary, but safer */
+        memset(this, 0, sizeof(lixa_state_t));
+        /* retrieve system page size */
+        if (-1 == (this->system_page_size = (size_t)sysconf(_SC_PAGESIZE)))
+            THROW(INTERNAL_ERROR);
+        /* initialize the first state log file */
+        if (LIXA_RC_OK != (ret_cod = lixa_state_log_init(
+                               &(this->logs[0]),
+                               "/tmp/state_log0", this->system_page_size,
+                               TRUE, FALSE, FALSE, FALSE)))
+            THROW(STATE_LOG_INIT_ERROR);
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case NULL_OBJECT:
+                ret_cod = LIXA_RC_NULL_OBJECT;
+                break;
+            case INTERNAL_ERROR:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+                break;
+            case STATE_LOG_INIT_ERROR:
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("lixa_state_init/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
+
+int lixa_state_clean(lixa_state_t *this)
+{
+    enum Exception {
+        NULL_OBJECT,
+        STATE_LOG_CLEAN_ERROR,
+        NONE
+    } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    
+    LIXA_TRACE(("lixa_state_clean\n"));
+    TRY {
+        if (NULL == this)
+            THROW(NULL_OBJECT);
+        /* @@@
+           here we need a cycle on all state logs */
+        if (LIXA_RC_OK != (ret_cod = lixa_state_log_clean(
+                               &(this->logs[0]))))
+            THROW(STATE_LOG_CLEAN_ERROR);
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case NULL_OBJECT:
+                ret_cod = LIXA_RC_NULL_OBJECT;
+                break;
+            case STATE_LOG_CLEAN_ERROR:
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("lixa_state_clean/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+

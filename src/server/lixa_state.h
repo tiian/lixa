@@ -51,6 +51,10 @@
  */
 typedef struct lixa_state_s {
     /**
+     * System page file
+     */
+    size_t                system_page_size;
+    /**
      * Array of state files
      */
     lixa_state_file_t     files[LIXA_STATE_FILES];
@@ -67,7 +71,23 @@ extern "C" {
 #endif /* __cplusplus */
 
 
+    
+    /**
+     * Initialize a State object to manage state server persistence
+     * @param[in,out] this object to be initialized
+     * @return a reason code
+     */
+    int lixa_state_init(lixa_state_t *this);
 
+
+    
+    /**
+     * Cleanup a State object
+     */
+    int lixa_state_clean(lixa_state_t *this);
+
+
+    
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

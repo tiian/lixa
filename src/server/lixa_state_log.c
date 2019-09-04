@@ -41,9 +41,9 @@
 
 
 
+#include "lixa_errors.h"
 #include "lixa_trace.h"
 #include "lixa_state_log.h"
-#include "lixa_errors.h"
 
 
 
@@ -57,6 +57,7 @@
 
 int lixa_state_log_init(lixa_state_log_t *this,
                         const char *pathname,
+                        size_t system_page_size,
                         int o_direct_bool,
                         int o_dsync_bool,
                         int o_rsync_bool,
@@ -66,8 +67,8 @@ int lixa_state_log_init(lixa_state_log_t *this,
         NULL_OBJECT1,
         NULL_OBJECT2,
         INVALID_STATUS,
-        INTERNAL_ERROR,
-        POSIX_MEMALIGN_ERROR,
+        POSIX_MEMALIGN_ERROR1,
+        POSIX_MEMALIGN_ERROR2,
         OPEN_ERROR,
         CREATE_NEW_FILE_ERROR,
         NONE
@@ -92,17 +93,22 @@ int lixa_state_log_init(lixa_state_log_t *this,
             THROW(INVALID_STATUS);
         /* clean-up the object memory, maybe not necessary, but safer */
         memset(this, 0, sizeof(lixa_state_log_t));
-        /* retrieve system page size */
-        if (-1 == (this->page_size = (size_t)sysconf(_SC_PAGESIZE)))
-            THROW(INTERNAL_ERROR);
+        /* allocate the single memory page */
+        if (0 != (error = posix_memalign(&this->single_page, system_page_size,
+                                         system_page_size))) {
+            LIXA_TRACE(("lixa_state_log_init/posix_memalign: error=%d\n",
+                        error));
+            THROW(POSIX_MEMALIGN_ERROR1);
+        }
+        memset(this->buffer, 0, this->buffer_size);
         /* allocate the buffer for I/O */
-        this->buffer_size = this->page_size *
+        this->buffer_size = system_page_size *
             LIXA_STATE_LOG_BUFFER_SIZE_DEFAULT;
-        if (0 != (error = posix_memalign(&this->buffer, this->page_size,
+        if (0 != (error = posix_memalign(&this->buffer, system_page_size,
                                          this->buffer_size))) {
             LIXA_TRACE(("lixa_state_log_init/posix_memalign: error=%d\n",
                         error));
-            THROW(POSIX_MEMALIGN_ERROR);
+            THROW(POSIX_MEMALIGN_ERROR2);
         }
         memset(this->buffer, 0, this->buffer_size);
         
@@ -119,7 +125,7 @@ int lixa_state_log_init(lixa_state_log_t *this,
             LIXA_TRACE(("lixa_state_log_init: pathname '%s' does not exists, "
                         "creating it...\n", pathname));
             if (LIXA_RC_OK != (ret_cod = lixa_state_log_create_new_file(
-                                   this, pathname, flags)))
+                                   this, pathname, system_page_size, flags)))
                 THROW(CREATE_NEW_FILE_ERROR);
         }
         /* @@@ go on from here */
@@ -134,10 +140,8 @@ int lixa_state_log_init(lixa_state_log_t *this,
             case INVALID_STATUS:
                 ret_cod = LIXA_RC_INVALID_STATUS;
                 break;
-            case INTERNAL_ERROR:
-                ret_cod = LIXA_RC_INTERNAL_ERROR;
-                break;
-            case POSIX_MEMALIGN_ERROR:
+            case POSIX_MEMALIGN_ERROR1:
+            case POSIX_MEMALIGN_ERROR2:
                 ret_cod = LIXA_RC_POSIX_MEMALIGN_ERROR;
                 break;
             case OPEN_ERROR:
@@ -161,6 +165,7 @@ int lixa_state_log_init(lixa_state_log_t *this,
 
 int lixa_state_log_create_new_file(lixa_state_log_t *this,
                                    const char *pathname,
+                                   size_t system_page_size,
                                    int flags)
 {
     enum Exception {
@@ -182,11 +187,11 @@ int lixa_state_log_create_new_file(lixa_state_log_t *this,
         if (-1 == (this->fd = open(pathname, flags, mode)))
             THROW(OPEN_ERROR);
         /* format the file, review me later @@@ */
-        for (i=0; i<LIXA_STATE_LOG_FILE_SIZE_DEFAULT/
-                 LIXA_STATE_LOG_BUFFER_SIZE_DEFAULT; ++i) {
-            off_t offset = i * this->buffer_size;
-            if (this->buffer_size != pwrite(this->fd, this->buffer,
-                                            this->buffer_size, offset))
+        memset(this->single_page, 0, system_page_size);
+        for (i=0; i<LIXA_STATE_LOG_FILE_SIZE_DEFAULT; ++i) {
+            off_t offset = i * system_page_size;
+            if (system_page_size != pwrite(this->fd, this->single_page,
+                                           system_page_size, offset))
                 THROW(PWRITE_ERROR);
         }
         
@@ -225,7 +230,8 @@ int lixa_state_log_clean(lixa_state_log_t *this)
     TRY {
         if (NULL == this)
             THROW(NULL_OBJECT);
-        if (NULL != this->buffer)  free(this->buffer);
+        if (NULL != this->buffer)
+            free(this->buffer);
         if (UNDEFINED == this->status) {
             LIXA_TRACE(("lixa_state_log_clean: WARNING, status is "
                         "UNDEFINED!\n"));

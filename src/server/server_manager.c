@@ -20,6 +20,9 @@
 
 
 
+#ifdef HAVE_ASSERT_H
+# include <assert.h>
+#endif
 #ifdef HAVE_ERRNO_H
 # include <errno.h>
 #endif
@@ -50,7 +53,7 @@
 #include "lixa_syslog.h"
 #include "lixa_xml_msg_deserialize.h"
 #include "lixa_xml_msg_trace.h"
-#include "lixa_state_log.h"   /* @@@ maybe only temporary necessary, 20190623 */
+#include "lixa_state.h"   /* @@@ maybe only temporary necessary, 20190904 */
 #include "server_manager.h"
 #include "server_messages.h"
 #include "server_thread_status.h"
@@ -100,12 +103,12 @@ int server_manager(struct server_config_s *sc,
         int i;
         static long crash_count = 0; /* this mimics a global var */
 
-        /* @@@ REMOVE ME, JUST FOR DEBUGGING lixa_state_log 20190623 */
-        lixa_state_log_t tmp_log;
-        memset(&tmp_log, 0, sizeof(tmp_log));
-        lixa_state_log_init(&tmp_log, "/tmp/state_log", TRUE, FALSE, FALSE,
-                            FALSE);
-        lixa_state_log_clean(&tmp_log);
+        /* @@@ REMOVE ME, JUST FOR DEBUGGING lixa_state 20190904 */
+        lixa_state_t tmp_state;
+        assert(lixa_state_init(&tmp_state) == LIXA_RC_OK);
+        assert(lixa_state_clean(&tmp_state) == LIXA_RC_OK);
+        /* @@@ end of REMOVE ME SECTION */
+        
         
         LIXA_TRACE(("server_manager: number of managers to activate = %d\n",
                     sc->managers.n));
