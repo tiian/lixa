@@ -45,6 +45,7 @@ int lixa_state_init(lixa_state_t *this)
     enum Exception {
         NULL_OBJECT,
         INTERNAL_ERROR,
+        STATE_FILE_INIT_ERROR,
         STATE_LOG_INIT_ERROR,
         NONE
     } excp;
@@ -60,7 +61,11 @@ int lixa_state_init(lixa_state_t *this)
         /* retrieve system page size */
         if (-1 == (this->system_page_size = (size_t)sysconf(_SC_PAGESIZE)))
             THROW(INTERNAL_ERROR);
-        /* initialize the first state log file */
+        /* initialize the first state file */
+        if (LIXA_RC_OK != (ret_cod = lixa_state_file_init(
+                               &(this->files[0]), "/tmp/state_file0")))
+            THROW(STATE_FILE_INIT_ERROR);
+        /* initialize the first state log */
         if (LIXA_RC_OK != (ret_cod = lixa_state_log_init(
                                &(this->logs[0]),
                                "/tmp/state_log0", this->system_page_size,
@@ -76,6 +81,7 @@ int lixa_state_init(lixa_state_t *this)
             case INTERNAL_ERROR:
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
                 break;
+            case STATE_FILE_INIT_ERROR:
             case STATE_LOG_INIT_ERROR:
                 break;
             case NONE:
@@ -97,6 +103,7 @@ int lixa_state_clean(lixa_state_t *this)
     enum Exception {
         NULL_OBJECT,
         STATE_LOG_CLEAN_ERROR,
+        STATE_FILE_CLEAN_ERROR,
         NONE
     } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
@@ -110,6 +117,9 @@ int lixa_state_clean(lixa_state_t *this)
         if (LIXA_RC_OK != (ret_cod = lixa_state_log_clean(
                                &(this->logs[0]))))
             THROW(STATE_LOG_CLEAN_ERROR);
+        if (LIXA_RC_OK != (ret_cod = lixa_state_file_clean(
+                               &(this->files[0]))))
+            THROW(STATE_FILE_CLEAN_ERROR);
         
         THROW(NONE);
     } CATCH {
@@ -118,6 +128,7 @@ int lixa_state_clean(lixa_state_t *this)
                 ret_cod = LIXA_RC_NULL_OBJECT;
                 break;
             case STATE_LOG_CLEAN_ERROR:
+            case STATE_FILE_CLEAN_ERROR:
                 break;
             case NONE:
                 ret_cod = LIXA_RC_OK;

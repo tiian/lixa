@@ -398,16 +398,15 @@ int status_record_load(status_record_t **sr,
                        GTree **updated_records,
                        int readonly)
 {
-    enum Exception { FILE_NOT_EXISTS
-                     , OPEN_ERROR1
-                     , OPEN_ERROR2
-                     , GETTIMEOFDAY_ERROR
-                     , STATUS_RECORD_SYNC_ERROR
-                     , WRITE_ERROR
-                     , FSTAT_ERROR
-                     , MMAP_ERROR
-                     , CLOSE_ERROR
-                     , NONE } excp;
+    enum Exception {
+        FILE_NOT_EXISTS,
+        OPEN_ERROR,
+        STATUS_RECORD_CREATE_FILE_ERROR,
+        FSTAT_ERROR,
+        MMAP_ERROR,
+        CLOSE_ERROR,
+        NONE
+    } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
 
     int fd = LIXA_NULL_FD;
@@ -419,7 +418,6 @@ int status_record_load(status_record_t **sr,
         LIXA_TRACE(("status_record_load: trying to open '%s' status file...\n",
                     status_file));
         if (-1 == (fd = open(status_file, readonly ? O_RDONLY : O_RDWR))) {
-            int i;
 
             if (ENOENT == errno) {
                 LIXA_TRACE(("status_record_load: status file '%s' does not "
@@ -427,41 +425,11 @@ int status_record_load(status_record_t **sr,
                 if (readonly)
                     THROW(FILE_NOT_EXISTS);
             } else
-                THROW(OPEN_ERROR1);
-            
+                THROW(OPEN_ERROR);
             /* the file does not exist and must be created */
-            if (-1 == (fd = open(status_file, O_RDWR | O_CREAT | O_EXCL,
-                                 S_IRUSR | S_IWUSR | S_IRGRP)))
-                THROW(OPEN_ERROR2);
-            LIXA_TRACE(("status_record_load: created new status file '%s' "
-                        "with file descriptor %d\n",
-                        status_file, fd));
-            for (i = 0; i < STATUS_FILE_INIT_SIZE; ++i) {
-                struct status_record_s tmp_sr;
-
-                memset(&tmp_sr, 0, sizeof(tmp_sr));
-                tmp_sr.counter = 1;
-                if (!i) {
-                    /* write control record */
-                    tmp_sr.sr.ctrl.magic_number = STATUS_FILE_MAGIC_NUMBER;
-                    tmp_sr.sr.ctrl.level = STATUS_FILE_LEVEL;
-                    if (LIXA_RC_OK != (ret_cod = gettimeofday(
-                                           &tmp_sr.sr.ctrl.last_sync, NULL)))
-                        THROW(GETTIMEOFDAY_ERROR);
-                    tmp_sr.sr.ctrl.number_of_blocks = STATUS_FILE_INIT_SIZE;
-                    tmp_sr.sr.ctrl.first_used_block = 0;
-                    tmp_sr.sr.ctrl.first_free_block = 1;
-                } else {
-                    if (i == STATUS_FILE_INIT_SIZE - 1)
-                        tmp_sr.sr.data.next_block = 0;
-                    else
-                        tmp_sr.sr.data.next_block = i + 1;
-                }
-                if (LIXA_RC_OK != (ret_cod = status_record_sync(&tmp_sr)))
-                    THROW(STATUS_RECORD_SYNC_ERROR);
-                if (sizeof(tmp_sr) != write(fd, &tmp_sr, sizeof(tmp_sr)))
-                    THROW(WRITE_ERROR);
-            }
+            if (LIXA_RC_OK != (ret_cod = status_record_create_file(
+                                   status_file, &fd)))
+                THROW(STATUS_RECORD_CREATE_FILE_ERROR);
         }
         /* clean updated records set */
         g_tree_destroy(*updated_records);
@@ -492,8 +460,7 @@ int status_record_load(status_record_t **sr,
             case FILE_NOT_EXISTS:
                 ret_cod = LIXA_RC_FILE_NOT_EXISTS;
                 break;
-            case OPEN_ERROR1:
-            case OPEN_ERROR2:
+            case OPEN_ERROR:
                 if (!run_as_daemon)
                     fprintf(stderr, "Error while opening file '%s' "
                             "(errno=%d '%s')\n",
@@ -503,13 +470,7 @@ int status_record_load(status_record_t **sr,
                                  errno, strerror(errno)));
                 ret_cod = LIXA_RC_OPEN_ERROR;
                 break;
-            case GETTIMEOFDAY_ERROR:
-                ret_cod = LIXA_RC_GETTIMEOFDAY_ERROR;
-                break;
-            case STATUS_RECORD_SYNC_ERROR:
-                break;
-            case WRITE_ERROR:
-                ret_cod = LIXA_RC_WRITE_ERROR;
+            case STATUS_RECORD_CREATE_FILE_ERROR:
                 break;
             case FSTAT_ERROR:
                 ret_cod = LIXA_RC_FSTAT_ERROR;
@@ -539,6 +500,89 @@ int status_record_load(status_record_t **sr,
         }
     } /* TRY-CATCH */
     LIXA_TRACE(("status_record_load/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
+
+int status_record_create_file(const char *status_file_name,
+                              int *fd)
+{
+    enum Exception {
+        OPEN_ERROR,
+        GETTIMEOFDAY_ERROR,
+        STATUS_RECORD_SYNC_ERROR,
+        WRITE_ERROR,
+        NONE
+    } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    
+    LIXA_TRACE(("status_record_create_file\n"));
+    TRY {
+        int i;
+        if (-1 == (*fd = open(status_file_name, O_RDWR | O_CREAT | O_EXCL,
+                              S_IRUSR | S_IWUSR | S_IRGRP)))
+                THROW(OPEN_ERROR);
+        LIXA_TRACE(("status_record_create_file: created new status file '%s' "
+                    "with file descriptor %d\n",
+                    status_file_name, *fd));
+        for (i = 0; i < STATUS_FILE_INIT_SIZE; ++i) {
+            struct status_record_s tmp_sr;
+
+            memset(&tmp_sr, 0, sizeof(tmp_sr));
+            tmp_sr.counter = 1;
+            if (!i) {
+                /* write control record */
+                tmp_sr.sr.ctrl.magic_number = STATUS_FILE_MAGIC_NUMBER;
+                tmp_sr.sr.ctrl.level = STATUS_FILE_LEVEL;
+                if (LIXA_RC_OK != (ret_cod = gettimeofday(
+                                       &tmp_sr.sr.ctrl.last_sync, NULL)))
+                    THROW(GETTIMEOFDAY_ERROR);
+                tmp_sr.sr.ctrl.number_of_blocks = STATUS_FILE_INIT_SIZE;
+                tmp_sr.sr.ctrl.first_used_block = 0;
+                tmp_sr.sr.ctrl.first_free_block = 1;
+            } else {
+                if (i == STATUS_FILE_INIT_SIZE - 1)
+                    tmp_sr.sr.data.next_block = 0;
+                else
+                    tmp_sr.sr.data.next_block = i + 1;
+            }
+            if (LIXA_RC_OK != (ret_cod = status_record_sync(&tmp_sr)))
+                THROW(STATUS_RECORD_SYNC_ERROR);
+            if (sizeof(tmp_sr) != write(*fd, &tmp_sr, sizeof(tmp_sr)))
+                THROW(WRITE_ERROR);
+        }
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case OPEN_ERROR:
+                if (!run_as_daemon)
+                    fprintf(stderr, "Error while opening file '%s' "
+                            "(errno=%d '%s')\n",
+                            status_file_name, errno, strerror(errno));
+                else
+                    LIXA_SYSLOG((LOG_ERR, LIXA_SYSLOG_LXD025E,
+                                 status_file_name, errno, strerror(errno)));
+                ret_cod = LIXA_RC_OPEN_ERROR;
+                break;
+            case GETTIMEOFDAY_ERROR:
+                ret_cod = LIXA_RC_GETTIMEOFDAY_ERROR;
+                break;
+            case STATUS_RECORD_SYNC_ERROR:
+                break;
+            case WRITE_ERROR:
+                ret_cod = LIXA_RC_WRITE_ERROR;
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("status_record_create_file/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }

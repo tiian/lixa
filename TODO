@@ -1,3 +1,6 @@
+Can function status_record_create_file removed and its code moved in 
+lixa_state_file_create_new_file?
+
 Improving the state file synchronization elapsed time is now a priority to
 avoid annoying connection timeout errors!!!
 

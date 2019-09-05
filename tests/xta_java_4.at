@@ -149,6 +149,7 @@ AT_CLEANUP
 
 AT_SETUP([XTA Java/4.0/1.3 Sync branch and rollback])
 AT_CHECK([if test "$LIXA_XTA_JAVA" = "no"; then exit 77; fi])
+AT_CHECK([if test "$HAVE_POSTGRESQL" = "no" -o "$HAVE_MYSQL" = "no" -o "$HAVE_ORACLE" = "no"; then exit 77; fi])
 # create a FIFO object for communication between superior and subordinate
 # process
 AT_CHECK([mkfifo fifo_request], [0], [ignore], [ignore])

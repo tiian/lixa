@@ -48,13 +48,13 @@
  * Possible statuses of a state log
  */
 enum lixa_state_log_status_e {
-    UNDEFINED = 0,
-    FORMATTED,
-    USED,
-    FULL,
-    EXTENDED,
-    CLOSED,
-    DISPOSED
+    STATE_LOG_UNDEFINED = 0,
+    STATE_LOG_FORMATTED,
+    STATE_LOG_USED,
+    STATE_LOG_FULL,
+    STATE_LOG_EXTENDED,
+    STATE_LOG_CLOSED,
+    STATE_LOG_DISPOSED
 };
 
 

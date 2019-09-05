@@ -89,7 +89,7 @@ int lixa_state_log_init(lixa_state_log_t *this,
         if (NULL == pathname)
             THROW(NULL_OBJECT2);
         /* check the state log has not been already used */
-        if (UNDEFINED != this->status)
+        if (STATE_LOG_UNDEFINED != this->status)
             THROW(INVALID_STATUS);
         /* clean-up the object memory, maybe not necessary, but safer */
         memset(this, 0, sizeof(lixa_state_log_t));
@@ -232,7 +232,9 @@ int lixa_state_log_clean(lixa_state_log_t *this)
             THROW(NULL_OBJECT);
         if (NULL != this->buffer)
             free(this->buffer);
-        if (UNDEFINED == this->status) {
+        if (NULL != this->single_page)
+            free(this->single_page);
+        if (STATE_LOG_UNDEFINED == this->status) {
             LIXA_TRACE(("lixa_state_log_clean: WARNING, status is "
                         "UNDEFINED!\n"));
         }

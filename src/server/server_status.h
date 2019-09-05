@@ -897,6 +897,17 @@ extern "C" {
                            int readonly);
 
 
+
+    /**
+     * Create and format a state file (status record)
+     * @param[in] status_file_name the name of the state file to be created
+     * @param[out] fd file descriptor of the (created and) opened file
+     * @return a standardized return code
+     */
+    int status_record_create_file(const char *status_file_name,
+                                  int *fd);
+    
+
     
     /**
      * Check status integrity

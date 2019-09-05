@@ -565,6 +565,11 @@ AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027 ; lixa_test_group.sh delete], [0], 
 AT_CHECK([rm tmp_fifo1], [0], [ignore], [ignore])
 AT_CHECK([rm tmp_fifo2], [0], [ignore], [ignore])
 # just stop the state server
+AT_CLEANUP
+
+# just stop the state server
+AT_SETUP([Stop the state server])
+AT_CHECK([if test "$LIXA_XTA" = "no"; then exit 77; fi])
 AT_CHECK([lixa_test_exec.sh none stop true], [0], [ignore], [ignore])
 AT_CLEANUP
 
