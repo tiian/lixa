@@ -105,7 +105,7 @@ int server_manager(struct server_config_s *sc,
 
         /* @@@ REMOVE ME, JUST FOR DEBUGGING lixa_state 20190904 */
         lixa_state_t tmp_state;
-        assert(lixa_state_init(&tmp_state) == LIXA_RC_OK);
+        assert(lixa_state_init(&tmp_state, "/tmp/lixad_state1") == LIXA_RC_OK);
         assert(lixa_state_clean(&tmp_state) == LIXA_RC_OK);
         /* @@@ end of REMOVE ME SECTION */
         

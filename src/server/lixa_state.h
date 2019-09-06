@@ -47,6 +47,17 @@
 
 
 /**
+ * Suffix appended when a new state file is created
+ */
+extern const char *LIXA_STATE_FILE_SUFFIX;
+/**
+ * Suffix appended when a new log file is created
+ */
+extern const char *LIXA_STATE_LOG_SUFFIX;
+
+
+
+/**
  * LIXA State data type ("class")
  */
 typedef struct lixa_state_s {
@@ -75,11 +86,22 @@ extern "C" {
     /**
      * Initialize a State object to manage state server persistence
      * @param[in,out] this object to be initialized
+     * @param[in] path_prefix of the state and log files
      * @return a reason code
      */
-    int lixa_state_init(lixa_state_t *this);
+    int lixa_state_init(lixa_state_t *this, const char *path_prefix);
 
 
+
+    /**
+     * Create new state and log files for this state object
+     * @param[in,out] this state object
+     * @param[in] path_prefix of the state and log files
+     * @return a reason code
+     */
+    int lixa_state_create_new(lixa_state_t *this, const char *path_prefix);
+
+    
     
     /**
      * Cleanup a State object
