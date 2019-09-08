@@ -62,11 +62,19 @@ typedef struct lixa_state_file_s {
     /**
      * Current status of the state file
      */
-    enum lixa_state_file_status_e     status;
+    enum lixa_state_file_status_e    status;
     /**
      * File descriptor associated to the underlying file
      */
     int                              fd;
+    /**
+     * Open flags associated to the underlying file
+     */
+    int                              flags;
+    /**
+     * Name of the associated underlying file
+     */
+    char                            *pathname;
 } lixa_state_file_t;
 
 
@@ -101,11 +109,30 @@ extern "C" {
     
 
     /**
+     * Check if the underlying file exists and can be opened
+     * @param[in] this current state file object
+     * @return a reason code, LIXA_RC_OK if the file exists and can be opened
+     */
+    int lixa_state_file_exist_file(lixa_state_file_t *this);
+
+    
+    
+    /**
      * Cleanup a StateFile object
      */
     int lixa_state_file_clean(lixa_state_file_t *this);
 
 
+    
+    /**
+     * Return the pathname of the file associated to the state file object
+     */
+    static inline const char* lixa_state_file_get_pathname(
+        const lixa_state_file_t *this) {
+        return this->pathname;
+    }
+
+    
     
 #ifdef __cplusplus
 }

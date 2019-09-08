@@ -72,6 +72,14 @@ typedef struct lixa_state_log_s {
      */
     int                              fd;
     /**
+     * Persistency flags associated to the underlying file
+     */
+    int                              pers_flags;
+    /**
+     * Name of the associated underlying file
+     */
+    char                            *pathname;
+    /**
      * Buffer used to manage I/O
      */
     void                            *buffer;
@@ -128,14 +136,33 @@ extern "C" {
                                        size_t system_page_size,
                                        int flags);
 
-    
 
+
+    /**
+     * Check if the underlying file exists and can be opened
+     * @param[in] this current state log object
+     * @return a reason code, LIXA_RC_OK if the file exists and can be opened
+     */
+    int lixa_state_log_exist_file(lixa_state_log_t *this);
+
+    
+    
     /**
      * Cleanup a StateLog object
      */
     int lixa_state_log_clean(lixa_state_log_t *this);
 
 
+
+    /**
+     * Return the pathname of the file associated to the state log object
+     */
+    static inline const char* lixa_state_log_get_pathname(
+        const lixa_state_log_t *this) {
+        return this->pathname;
+    }
+
+    
     
 #ifdef __cplusplus
 }

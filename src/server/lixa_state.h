@@ -96,10 +96,9 @@ extern "C" {
     /**
      * Create new state and log files for this state object
      * @param[in,out] this state object
-     * @param[in] path_prefix of the state and log files
      * @return a reason code
      */
-    int lixa_state_create_new(lixa_state_t *this, const char *path_prefix);
+    int lixa_state_create_new(lixa_state_t *this);
 
     
     

@@ -69,6 +69,7 @@ int lixa_state_log_init(lixa_state_log_t *this,
         INVALID_STATUS,
         POSIX_MEMALIGN_ERROR1,
         POSIX_MEMALIGN_ERROR2,
+        STRDUP_ERROR,
         OPEN_ERROR,
         CREATE_NEW_FILE_ERROR,
         NONE
@@ -80,7 +81,6 @@ int lixa_state_log_init(lixa_state_log_t *this,
                 pathname, o_direct_bool, o_dsync_bool, o_rsync_bool,
                 o_sync_bool));
     TRY {
-        int flags;
         int error;
         
         /* check the object is not null */
@@ -111,23 +111,32 @@ int lixa_state_log_init(lixa_state_log_t *this,
             THROW(POSIX_MEMALIGN_ERROR2);
         }
         memset(this->buffer, 0, this->buffer_size);
+        /* keep a local copy of the pathname */
+        if (NULL == (this->pathname = strdup(pathname)))
+            THROW(STRDUP_ERROR);
         
         /* try to open the already existent file */
-        flags = O_RDWR;
-        if (o_direct_bool) flags |= O_DIRECT;
-        if (o_dsync_bool)  flags |= O_DSYNC;
-        if (o_rsync_bool)  flags |= O_RSYNC;
-        if (o_sync_bool)   flags |= O_SYNC;
-        if (-1 == (this->fd = open(pathname, flags)) && ENOENT != errno)
+        this->pers_flags = O_RDWR;
+        if (o_direct_bool) this->pers_flags |= O_DIRECT;
+        if (o_dsync_bool)  this->pers_flags |= O_DSYNC;
+        if (o_rsync_bool)  this->pers_flags |= O_RSYNC;
+        if (o_sync_bool)   this->pers_flags |= O_SYNC;
+        /*
+        if (-1 == (this->fd = open(
+                       pathname, this->pers_flags)) && ENOENT != errno)
             THROW(OPEN_ERROR);
+        */
         /* create the file if necessary */
+        /*
         if (-1 == this->fd && ENOENT == errno) {
             LIXA_TRACE(("lixa_state_log_init: pathname '%s' does not exists, "
                         "creating it...\n", pathname));
             if (LIXA_RC_OK != (ret_cod = lixa_state_log_create_new_file(
-                                   this, pathname, system_page_size, flags)))
+                                   this, pathname, system_page_size,
+                                   this->pers_flags)))
                 THROW(CREATE_NEW_FILE_ERROR);
         }
+        */
         /* @@@ go on from here */
         
         THROW(NONE);
@@ -143,6 +152,9 @@ int lixa_state_log_init(lixa_state_log_t *this,
             case POSIX_MEMALIGN_ERROR1:
             case POSIX_MEMALIGN_ERROR2:
                 ret_cod = LIXA_RC_POSIX_MEMALIGN_ERROR;
+                break;
+            case STRDUP_ERROR:
+                ret_cod = LIXA_RC_STRDUP_ERROR;
                 break;
             case OPEN_ERROR:
                 ret_cod = LIXA_RC_OPEN_ERROR;
@@ -169,6 +181,7 @@ int lixa_state_log_create_new_file(lixa_state_log_t *this,
                                    int flags)
 {
     enum Exception {
+        NULL_OBJECT,
         OPEN_ERROR,
         PWRITE_ERROR,
         NONE
@@ -180,6 +193,10 @@ int lixa_state_log_create_new_file(lixa_state_log_t *this,
     TRY {
         mode_t mode;
         size_t i;
+        
+        /* check the object is not null */
+        if (NULL == this)
+            THROW(NULL_OBJECT);
         /* add O_EXCL and O_CREAT flags and try to open again the file */
         flags |= O_EXCL | O_CREAT;
         /* mode flags (security) */
@@ -198,6 +215,9 @@ int lixa_state_log_create_new_file(lixa_state_log_t *this,
         THROW(NONE);
     } CATCH {
         switch (excp) {
+            case NULL_OBJECT:
+                ret_cod = LIXA_RC_NULL_OBJECT;
+                break;
             case OPEN_ERROR:
                 ret_cod = LIXA_RC_OPEN_ERROR;
                 break;
@@ -218,6 +238,50 @@ int lixa_state_log_create_new_file(lixa_state_log_t *this,
 
 
 
+int lixa_state_log_exist_file(lixa_state_log_t *this)
+{
+    enum Exception {
+        NULL_OBJECT,
+        OPEN_ERROR,
+        NONE
+    } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    
+    LIXA_TRACE(("lixa_state_log_exist_file\n"));
+    TRY {
+        int fd;
+        
+        /* check the object is not null */
+        if (NULL == this)
+            THROW(NULL_OBJECT);
+        /* try to open the file with the same flags of a real usage */
+        if (-1 == (fd = open(this->pathname, this->pers_flags)))
+            THROW(OPEN_ERROR);
+        close(fd);
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case NULL_OBJECT:
+                ret_cod = LIXA_RC_NULL_OBJECT;
+                break;
+            case OPEN_ERROR:
+                ret_cod = LIXA_RC_OPEN_ERROR;
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("lixa_state_log_exist_file/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
+
 int lixa_state_log_clean(lixa_state_log_t *this)
 {
     enum Exception {
@@ -230,6 +294,8 @@ int lixa_state_log_clean(lixa_state_log_t *this)
     TRY {
         if (NULL == this)
             THROW(NULL_OBJECT);
+        if (NULL != this->pathname)
+            free(this->pathname);
         if (NULL != this->buffer)
             free(this->buffer);
         if (NULL != this->single_page)

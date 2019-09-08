@@ -29,6 +29,9 @@
 #ifdef HAVE_FCNTL_H
 # include <fcntl.h>
 #endif
+#ifdef HAVE_UNISTD_H
+# include <unistd.h>
+#endif
 
 
 
@@ -54,16 +57,15 @@ int lixa_state_file_init(lixa_state_file_t *this,
         NULL_OBJECT1,
         NULL_OBJECT2,
         INVALID_STATUS,
+        STRDUP_ERROR,
         OPEN_ERROR,
         CREATE_NEW_FILE_ERROR,
         NONE
     } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     
-    LIXA_TRACE(("lixa_state_file_init\n"));
+    LIXA_TRACE(("lixa_state_file_init: pathname='%s'\n", pathname));
     TRY {
-        int flags = O_RDWR;
-        
         /* check the object is not null */
         if (NULL == this)
             THROW(NULL_OBJECT1);
@@ -74,9 +76,16 @@ int lixa_state_file_init(lixa_state_file_t *this,
             THROW(INVALID_STATUS);
         /* clean-up the object memory, maybe not necessary, but safer */
         memset(this, 0, sizeof(lixa_state_file_t));
+        /* keep a local copy of the pathname */
+        if (NULL == (this->pathname = strdup(pathname)))
+            THROW(STRDUP_ERROR);
+        this->flags = O_RDWR;
+        /*
         if (-1 == (this->fd = open(pathname, flags)) && ENOENT != errno)
             THROW(OPEN_ERROR);
+        */
         /* create the file if necessary */
+        /*
         if (-1 == this->fd && ENOENT == errno) {
             LIXA_TRACE(("lixa_state_file_init: pathname '%s' does not exists, "
                         "creating it...\n", pathname));
@@ -84,7 +93,7 @@ int lixa_state_file_init(lixa_state_file_t *this,
                                    this, pathname)))
                 THROW(CREATE_NEW_FILE_ERROR);
         }
-        
+        */
         THROW(NONE);
     } CATCH {
         switch (excp) {
@@ -94,6 +103,9 @@ int lixa_state_file_init(lixa_state_file_t *this,
                 break;
             case INVALID_STATUS:
                 ret_cod = LIXA_RC_INVALID_STATUS;
+                break;
+            case STRDUP_ERROR:
+                ret_cod = LIXA_RC_STRDUP_ERROR;
                 break;
             case OPEN_ERROR:
                 ret_cod = LIXA_RC_OPEN_ERROR;
@@ -143,6 +155,50 @@ int lixa_state_file_create_new_file(lixa_state_file_t *this,
         } /* switch (excp) */
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_state_file_create_new_file/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
+
+int lixa_state_file_exist_file(lixa_state_file_t *this)
+{
+    enum Exception {
+        NULL_OBJECT,
+        OPEN_ERROR,
+        NONE
+    } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    
+    LIXA_TRACE(("lixa_state_file_exist_file\n"));
+    TRY {
+        int fd;
+        
+        /* check the object is not null */
+        if (NULL == this)
+            THROW(NULL_OBJECT);
+        /* try to open the file with the same flags of a real usage */
+        if (-1 == (fd = open(this->pathname, this->flags)))
+            THROW(OPEN_ERROR);
+        close(fd);
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case NULL_OBJECT:
+                ret_cod = LIXA_RC_NULL_OBJECT;
+                break;
+            case OPEN_ERROR:
+                ret_cod = LIXA_RC_OPEN_ERROR;
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("lixa_state_file_exist_file/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }

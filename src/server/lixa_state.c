@@ -29,6 +29,7 @@
 #include "lixa_errors.h"
 #include "lixa_trace.h"
 #include "lixa_state.h"
+#include "lixa_syslog.h"
 
 
 
@@ -48,71 +49,25 @@ const char *LIXA_STATE_LOG_SUFFIX = ".log";
 int lixa_state_init(lixa_state_t *this, const char *path_prefix)
 {
     enum Exception {
-        NULL_OBJECT,
+        NULL_OBJECT1,
+        NULL_OBJECT2,
+        INVALID_OPTION,
+        MALLOC_ERROR,
+        STATE_LOG_INIT_ERROR,
+        STATE_FILE_INIT_ERROR,
         INTERNAL_ERROR,
         CREATE_NEW_ERROR,
         NONE
     } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    char *pathname = NULL;
     
     LIXA_TRACE(("lixa_state_init\n"));
     TRY {
-        /* check the object is not null */
-        if (NULL == this)
-            THROW(NULL_OBJECT);
-        /* clean-up the object memory, maybe not necessary, but safer */
-        memset(this, 0, sizeof(lixa_state_t));
-        /* retrieve system page size */
-        if (-1 == (this->system_page_size = (size_t)sysconf(_SC_PAGESIZE)))
-            THROW(INTERNAL_ERROR);
-        
-        /* @@@ restart from available files or create new ones... */
-        if (LIXA_RC_OK != (ret_cod = lixa_state_create_new(
-                               this, path_prefix)))
-            THROW(CREATE_NEW_ERROR);
-        
-        THROW(NONE);
-    } CATCH {
-        switch (excp) {
-            case NULL_OBJECT:
-                ret_cod = LIXA_RC_NULL_OBJECT;
-                break;
-            case INTERNAL_ERROR:
-                ret_cod = LIXA_RC_INTERNAL_ERROR;
-                break;
-            case CREATE_NEW_ERROR:
-                break;
-            case NONE:
-                ret_cod = LIXA_RC_OK;
-                break;
-            default:
-                ret_cod = LIXA_RC_INTERNAL_ERROR;
-        } /* switch (excp) */
-    } /* TRY-CATCH */
-    LIXA_TRACE(("lixa_state_init/excp=%d/"
-                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
-    return ret_cod;
-}
-
-
-
-int lixa_state_create_new(lixa_state_t *this, const char *path_prefix)
-{
-    enum Exception {
-        NULL_OBJECT1,
-        NULL_OBJECT2,
-        INVALID_OPTION,
-        MALLOC_ERROR,
-        STATE_FILE_INIT_ERROR,
-        STATE_LOG_INIT_ERROR,
-        NONE
-    } excp;
-    int ret_cod = LIXA_RC_INTERNAL_ERROR;
-    char *tmp_name = NULL;
-    
-    LIXA_TRACE(("lixa_state_create_new\n"));
-    TRY {
-        size_t tmp_name_len;
+        int i;
+        size_t pathname_len;
+        int file_exists[LIXA_STATE_FILES];
+        int log_exists[LIXA_STATE_FILES];
         
         /* check the object is not null */
         if (NULL == this)
@@ -120,27 +75,65 @@ int lixa_state_create_new(lixa_state_t *this, const char *path_prefix)
         /* check the prefix of the path is not null */
         if (NULL == path_prefix)
             THROW(NULL_OBJECT2);
-        if (0 == (tmp_name_len = strlen(path_prefix)))
+        if (0 == (pathname_len = strlen(path_prefix)))
             THROW(INVALID_OPTION);
+        /* clean-up the object memory, maybe not necessary, but safer */
+        memset(this, 0, sizeof(lixa_state_t));
+        /* retrieve system page size */
+        if (-1 == (this->system_page_size = (size_t)sysconf(_SC_PAGESIZE)))
+            THROW(INTERNAL_ERROR);
         /* allocate a buffer for the file names */
-        tmp_name_len += strlen(LIXA_STATE_FILE_SUFFIX) +
+        pathname_len += strlen(LIXA_STATE_FILE_SUFFIX) +
             strlen(LIXA_STATE_LOG_SUFFIX) + 100;
-        if (NULL == (tmp_name = (char *)malloc(tmp_name_len)))
-            THROW(MALLOC_ERROR);
-        snprintf(tmp_name, tmp_name_len, "%s_%d%s", path_prefix, 0,
-                 LIXA_STATE_FILE_SUFFIX);
-        /* initialize the first state file */
-        if (LIXA_RC_OK != (ret_cod = lixa_state_file_init(
-                               &(this->files[0]), tmp_name)))
-            THROW(STATE_FILE_INIT_ERROR);
-        /* initialize the first state log */
-        snprintf(tmp_name, tmp_name_len, "%s_%d%s", path_prefix, 0,
-                 LIXA_STATE_LOG_SUFFIX);
-        if (LIXA_RC_OK != (ret_cod = lixa_state_log_init(
-                               &(this->logs[0]), tmp_name,
-                               this->system_page_size,
-                               TRUE, FALSE, FALSE, FALSE)))
-            THROW(STATE_LOG_INIT_ERROR);
+        if (NULL == (pathname = (char *)malloc(pathname_len)))
+            THROW(MALLOC_ERROR);        
+        /* initialize state log objects */
+        for (i=0; i<LIXA_STATE_FILES; ++i) {
+            snprintf(pathname, pathname_len, "%s_%d%s", path_prefix, i,
+                     LIXA_STATE_LOG_SUFFIX);
+            if (LIXA_RC_OK != (ret_cod = lixa_state_log_init(
+                                   &(this->logs[i]), pathname,
+                                   this->system_page_size,
+                                   TRUE, FALSE, FALSE, FALSE)))
+                THROW(STATE_LOG_INIT_ERROR);
+            snprintf(pathname, pathname_len, "%s_%d%s", path_prefix, i,
+                     LIXA_STATE_FILE_SUFFIX);
+            /* initialize the first state file */
+            if (LIXA_RC_OK != (ret_cod = lixa_state_file_init(
+                                   &(this->files[i]), pathname)))
+                THROW(STATE_FILE_INIT_ERROR);
+        }
+        /* check for file existence */
+        for (i=0; i<LIXA_STATE_FILES; ++i) {
+            /* check log files */
+            if (LIXA_RC_OK == (ret_cod = lixa_state_log_exist_file(
+                                   &(this->logs[i])))) {
+                LIXA_SYSLOG((LOG_INFO, LIXA_SYSLOG_LXD034I,
+                             lixa_state_log_get_pathname(&(this->logs[i]))));
+                log_exists[i] = TRUE;
+            } else {
+                LIXA_SYSLOG((LOG_NOTICE, LIXA_SYSLOG_LXD035N,
+                             lixa_state_log_get_pathname(&(this->logs[i]))));
+                log_exists[i] = FALSE;
+            }
+            /* check state files */
+            if (LIXA_RC_OK == (ret_cod = lixa_state_file_exist_file(
+                                   &(this->files[i])))) {
+                LIXA_SYSLOG((LOG_INFO, LIXA_SYSLOG_LXD036I,
+                             lixa_state_file_get_pathname(&(this->files[i]))));
+                file_exists[i] = TRUE;
+            } else {
+                LIXA_SYSLOG((LOG_NOTICE, LIXA_SYSLOG_LXD037N,
+                             lixa_state_file_get_pathname(&(this->files[i]))));
+                file_exists[i] = FALSE;
+            }
+        }
+        /* @@@ analyze how many file exists and how to proceed... */
+        
+        /* @@@ restart from available files or create new ones... */
+        if (LIXA_RC_OK != (ret_cod = lixa_state_create_new(
+                               this)))
+            THROW(CREATE_NEW_ERROR);
         
         THROW(NONE);
     } CATCH {
@@ -155,8 +148,14 @@ int lixa_state_create_new(lixa_state_t *this, const char *path_prefix)
             case MALLOC_ERROR:
                 ret_cod = LIXA_RC_MALLOC_ERROR;
                 break;
-            case STATE_FILE_INIT_ERROR:
             case STATE_LOG_INIT_ERROR:
+            case STATE_FILE_INIT_ERROR:
+                break;
+                break;
+            case INTERNAL_ERROR:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+                break;
+            case CREATE_NEW_ERROR:
                 break;
             case NONE:
                 ret_cod = LIXA_RC_OK;
@@ -165,8 +164,42 @@ int lixa_state_create_new(lixa_state_t *this, const char *path_prefix)
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
         } /* switch (excp) */
         /* memory recovery */
-        if (NULL != tmp_name)
-            free(tmp_name);
+        if (NULL != pathname)
+            free(pathname);
+    } /* TRY-CATCH */
+    LIXA_TRACE(("lixa_state_init/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
+
+int lixa_state_create_new(lixa_state_t *this)
+{
+    enum Exception {
+        NULL_OBJECT,
+        NONE
+    } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    
+    LIXA_TRACE(("lixa_state_create_new\n"));
+    TRY {
+        /* check the object is not null */
+        if (NULL == this)
+            THROW(NULL_OBJECT);
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case NULL_OBJECT:
+                ret_cod = LIXA_RC_NULL_OBJECT;
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_state_create_new/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
@@ -187,16 +220,18 @@ int lixa_state_clean(lixa_state_t *this)
     
     LIXA_TRACE(("lixa_state_clean\n"));
     TRY {
+        int i;
         if (NULL == this)
             THROW(NULL_OBJECT);
-        /* @@@
-           here we need a cycle on all state logs */
-        if (LIXA_RC_OK != (ret_cod = lixa_state_log_clean(
-                               &(this->logs[0]))))
-            THROW(STATE_LOG_CLEAN_ERROR);
-        if (LIXA_RC_OK != (ret_cod = lixa_state_file_clean(
-                               &(this->files[0]))))
-            THROW(STATE_FILE_CLEAN_ERROR);
+
+        for (i=0; i<LIXA_STATE_FILES; ++i) {
+            if (LIXA_RC_OK != (ret_cod = lixa_state_log_clean(
+                                   &(this->logs[0]))))
+                THROW(STATE_LOG_CLEAN_ERROR);
+            if (LIXA_RC_OK != (ret_cod = lixa_state_file_clean(
+                                   &(this->files[0]))))
+                THROW(STATE_FILE_CLEAN_ERROR);
+        } /* for (i=0 */
         
         THROW(NONE);
     } CATCH {

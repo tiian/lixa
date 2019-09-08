@@ -211,6 +211,12 @@
     "transaction has already started the XA prepare phase"
 #define LIXA_SYSLOG_LXD033I "LXD033I is accepting a new incoming connection " \
     "from address '%s', port " IN_PORT_T_FORMAT
+#define LIXA_SYSLOG_LXD034I "LXD034I state log '%s' exists and can be open"
+#define LIXA_SYSLOG_LXD035N "LXD035N state log '%s' does not exist or can " \
+    "not be open"
+#define LIXA_SYSLOG_LXD036I "LXD036I state file '%s' exists and can be open"
+#define LIXA_SYSLOG_LXD037N "LXD037N state file '%s' does not exist or can " \
+    "not be open"
 
 
 
