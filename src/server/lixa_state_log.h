@@ -106,7 +106,7 @@ extern "C" {
      * @param[in,out] this object to be initialized
      * @param[in] pathname that must be used to open or create the underlying
      *            file
-     * @param[in] system page size
+     * @param[in] system_page_size size of a memory page
      * @param[in] o_direct_bool activates O_DIRECT POSIX flag
      * @param[in] o_dsync_bool activates O_DSYNC POSIX flag
      * @param[in] o_rsync_bool activates O_RSYNC POSIX flag
@@ -127,7 +127,7 @@ extern "C" {
      * Create a new underlying file for the state log object
      * @param[in,out] this current state file object
      * @param[in] pathname that must be used to create the underlying file
-     * @param[in] system page size
+     * @param[in] system_page_size size of a memory page
      * @param[in] flags that must be used to create the file
      * @return a reason code
      */

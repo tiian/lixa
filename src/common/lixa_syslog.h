@@ -211,12 +211,26 @@
     "transaction has already started the XA prepare phase"
 #define LIXA_SYSLOG_LXD033I "LXD033I is accepting a new incoming connection " \
     "from address '%s', port " IN_PORT_T_FORMAT
-#define LIXA_SYSLOG_LXD034I "LXD034I state log '%s' exists and can be open"
+#define LIXA_SYSLOG_LXD034I "LXD034I state log '%s' exists and can be opened"
 #define LIXA_SYSLOG_LXD035N "LXD035N state log '%s' does not exist or can " \
-    "not be open"
-#define LIXA_SYSLOG_LXD036I "LXD036I state file '%s' exists and can be open"
+    "not be opened"
+#define LIXA_SYSLOG_LXD036I "LXD036I state file '%s' exists and can be opened"
 #define LIXA_SYSLOG_LXD037N "LXD037N state file '%s' does not exist or can " \
-    "not be open"
+    "not be opened"
+#define LIXA_SYSLOG_LXD038N "LXD038D neither state files nor log files are " \
+    "available: new ones will be created; a cold start will be performed"
+#define LIXA_SYSLOG_LXD039W "LXD039W only the first state file '%s' is " \
+    "available: probably a previous bootstrap failed prematurely; a cold " \
+    "start will be attempted"
+#define LIXA_SYSLOG_LXD040W "LXD040W only the first two state files '%s' " \
+    "and '%s' are " \
+    "available: probably a previous bootstrap failed prematurely; a cold " \
+    "start will be attempted"
+#define LIXA_SYSLOG_LXD041N "LXD041N %d state files and %d log files are " \
+    "available: a warm restart will be attempted"
+#define LIXA_SYSLOG_LXD042E "LXD042E the available state files and log " \
+    "files are not consistent: recover the missing ones to attempt a warm " \
+    "restart or delete all to attempt a cold start"
 
 
 

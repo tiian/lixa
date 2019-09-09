@@ -94,6 +94,19 @@ extern "C" {
 
 
     /**
+     * Analyze the available state and log files, start them accordingly
+     * @param[in,out] this state object
+     * @param[in] state_exists specifies which state files are available
+     * @param[in] log_exists specifies which log files are available
+     * @return a reason code
+     */     
+    int lixa_state_analyze_and_start(lixa_state_t *this,
+                                     const int *state_exists,
+                                     const int *log_exists);
+
+    
+    
+    /**
      * Create new state and log files for this state object
      * @param[in,out] this state object
      * @return a reason code

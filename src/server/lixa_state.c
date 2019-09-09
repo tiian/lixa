@@ -52,10 +52,11 @@ int lixa_state_init(lixa_state_t *this, const char *path_prefix)
         NULL_OBJECT1,
         NULL_OBJECT2,
         INVALID_OPTION,
+        INTERNAL_ERROR,
         MALLOC_ERROR,
         STATE_LOG_INIT_ERROR,
         STATE_FILE_INIT_ERROR,
-        INTERNAL_ERROR,
+        ANALYZE_AND_START,
         CREATE_NEW_ERROR,
         NONE
     } excp;
@@ -66,7 +67,7 @@ int lixa_state_init(lixa_state_t *this, const char *path_prefix)
     TRY {
         int i;
         size_t pathname_len;
-        int file_exists[LIXA_STATE_FILES];
+        int state_exists[LIXA_STATE_FILES];
         int log_exists[LIXA_STATE_FILES];
         
         /* check the object is not null */
@@ -105,6 +106,17 @@ int lixa_state_init(lixa_state_t *this, const char *path_prefix)
         }
         /* check for file existence */
         for (i=0; i<LIXA_STATE_FILES; ++i) {
+            /* check state files */
+            if (LIXA_RC_OK == (ret_cod = lixa_state_file_exist_file(
+                                   &(this->files[i])))) {
+                LIXA_SYSLOG((LOG_INFO, LIXA_SYSLOG_LXD036I,
+                             lixa_state_file_get_pathname(&(this->files[i]))));
+                state_exists[i] = TRUE;
+            } else {
+                LIXA_SYSLOG((LOG_NOTICE, LIXA_SYSLOG_LXD037N,
+                             lixa_state_file_get_pathname(&(this->files[i]))));
+                state_exists[i] = FALSE;
+            }
             /* check log files */
             if (LIXA_RC_OK == (ret_cod = lixa_state_log_exist_file(
                                    &(this->logs[i])))) {
@@ -116,19 +128,11 @@ int lixa_state_init(lixa_state_t *this, const char *path_prefix)
                              lixa_state_log_get_pathname(&(this->logs[i]))));
                 log_exists[i] = FALSE;
             }
-            /* check state files */
-            if (LIXA_RC_OK == (ret_cod = lixa_state_file_exist_file(
-                                   &(this->files[i])))) {
-                LIXA_SYSLOG((LOG_INFO, LIXA_SYSLOG_LXD036I,
-                             lixa_state_file_get_pathname(&(this->files[i]))));
-                file_exists[i] = TRUE;
-            } else {
-                LIXA_SYSLOG((LOG_NOTICE, LIXA_SYSLOG_LXD037N,
-                             lixa_state_file_get_pathname(&(this->files[i]))));
-                file_exists[i] = FALSE;
-            }
         }
-        /* @@@ analyze how many file exists and how to proceed... */
+        /* analyze how many file exists and how to proceed... */
+        if (LIXA_RC_OK != (ret_cod = lixa_state_analyze_and_start(
+                               this, state_exists, log_exists)))
+            THROW(ANALYZE_AND_START);
         
         /* @@@ restart from available files or create new ones... */
         if (LIXA_RC_OK != (ret_cod = lixa_state_create_new(
@@ -145,15 +149,15 @@ int lixa_state_init(lixa_state_t *this, const char *path_prefix)
             case INVALID_OPTION:
                 ret_cod = LIXA_RC_INVALID_OPTION;
                 break;
+            case INTERNAL_ERROR:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+                break;
             case MALLOC_ERROR:
                 ret_cod = LIXA_RC_MALLOC_ERROR;
                 break;
             case STATE_LOG_INIT_ERROR:
             case STATE_FILE_INIT_ERROR:
-                break;
-                break;
-            case INTERNAL_ERROR:
-                ret_cod = LIXA_RC_INTERNAL_ERROR;
+            case ANALYZE_AND_START:
                 break;
             case CREATE_NEW_ERROR:
                 break;
@@ -168,6 +172,110 @@ int lixa_state_init(lixa_state_t *this, const char *path_prefix)
             free(pathname);
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_state_init/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
+
+int lixa_state_analyze_and_start(lixa_state_t *this,
+                                 const int *state_exists,
+                                 const int *log_exists)
+{
+    enum Exception {
+        CORRUPTED_STATUS_FILE,
+        NONE
+    } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    
+    LIXA_TRACE(("lixa_state_analyze_and_start\n"));
+    TRY {
+        int i, number_of_states, number_of_logs, number_of_consec_states,
+            number_of_consec_logs, previous_state, previous_log;
+        /* count the number of state files and log files */
+        number_of_states = number_of_logs = number_of_consec_states =
+            number_of_consec_logs = 0;
+        previous_state = previous_log = TRUE;
+        for (i=0; i<LIXA_STATE_FILES; ++i) {
+            if (state_exists[i])
+                number_of_states++;
+            if (log_exists[i])
+                number_of_logs++;
+            if (0 == i) {
+                if (previous_state && state_exists[i])
+                    number_of_consec_states++;
+                else
+                    previous_state = FALSE;
+            } else {
+                if (previous_state && state_exists[i])
+                    number_of_consec_states++;
+                else
+                    previous_state = FALSE;
+                if (previous_log && log_exists[i])
+                    number_of_consec_logs++;
+                else
+                    previous_log = FALSE;
+            }
+        }
+        /* fix the number of ordered logs if necessary */
+        if (number_of_consec_states == LIXA_STATE_FILES &&
+            number_of_consec_logs == LIXA_STATE_FILES-1 &&
+            log_exists[0])
+            number_of_consec_logs++;
+            
+        LIXA_TRACE(("lixa_state_analyze_and_start: number of state files "
+                    "is %d/%d, number of log files is %d/%d\n",
+                    number_of_consec_states, number_of_states,
+                    number_of_consec_logs, number_of_logs));
+        if (0 == number_of_states && 0 == number_of_logs) {
+            /* no file exists */
+            LIXA_SYSLOG((LOG_NOTICE, LIXA_SYSLOG_LXD038N));
+            /* @@@ attempt cold start*/
+        } else if (1 == number_of_consec_states &&
+                   0 == number_of_consec_logs) {
+            /* only first state file is available */
+            LIXA_SYSLOG((LOG_WARNING, LIXA_SYSLOG_LXD039W,
+                         lixa_state_file_get_pathname(&(this->files[0]))));
+            /* @@@ attempt cold start */
+        } else if (2 == number_of_consec_states &&
+                   0 == number_of_consec_logs) {
+            /* only first and second state files are available */
+            LIXA_SYSLOG((LOG_WARNING, LIXA_SYSLOG_LXD040W,
+                         lixa_state_file_get_pathname(&(this->files[0])),
+                         lixa_state_file_get_pathname(&(this->files[1]))));
+            /* @@@ attempt cold start */
+        } else if (
+            (number_of_states == number_of_consec_states &&
+             number_of_logs == number_of_consec_logs) && (
+                 /* state files are 1 more than log files */
+                 (number_of_consec_states == number_of_consec_logs+1) ||
+                 /* state files are 2 more than log files */
+                 (number_of_consec_states == number_of_consec_logs+2) ||
+                 /* state files and log files are the same number */
+                 (number_of_consec_states == number_of_consec_logs)
+                                                           )) {
+            LIXA_SYSLOG((LOG_WARNING, LIXA_SYSLOG_LXD041N,
+                         number_of_states, number_of_logs));
+            /* @@@ attempt warm start */
+        } else {
+            LIXA_SYSLOG((LOG_WARNING, LIXA_SYSLOG_LXD042E));
+            THROW(CORRUPTED_STATUS_FILE);
+        }
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case CORRUPTED_STATUS_FILE:
+                ret_cod = LIXA_RC_CORRUPTED_STATUS_FILE;
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("lixa_state_analyze_and_start/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }
