@@ -57,7 +57,7 @@ int lixa_state_init(lixa_state_t *this, const char *path_prefix)
         STATE_LOG_INIT_ERROR,
         STATE_FILE_INIT_ERROR,
         ANALYZE_AND_START,
-        CREATE_NEW_ERROR,
+        COLD_START_ERROR,
         NONE
     } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
@@ -69,6 +69,7 @@ int lixa_state_init(lixa_state_t *this, const char *path_prefix)
         size_t pathname_len;
         int state_exists[LIXA_STATE_FILES];
         int log_exists[LIXA_STATE_FILES];
+        int cold_start = FALSE;
         
         /* check the object is not null */
         if (NULL == this)
@@ -130,15 +131,19 @@ int lixa_state_init(lixa_state_t *this, const char *path_prefix)
             }
         }
         /* analyze how many file exists and how to proceed... */
-        if (LIXA_RC_OK != (ret_cod = lixa_state_analyze_and_start(
-                               this, state_exists, log_exists)))
+        if (LIXA_RC_OK != (ret_cod = lixa_state_analyze(
+                               this, state_exists, log_exists, &cold_start)))
             THROW(ANALYZE_AND_START);
         
-        /* @@@ restart from available files or create new ones... */
-        if (LIXA_RC_OK != (ret_cod = lixa_state_create_new(
-                               this)))
-            THROW(CREATE_NEW_ERROR);
-        
+        /* cold start or warm restart */
+        if (cold_start) {
+            if (LIXA_RC_OK != (ret_cod = lixa_state_cold_start(this)))
+                THROW(COLD_START_ERROR);
+        } else {
+            /* @@@ warm start */
+            ;
+        }
+                    
         THROW(NONE);
     } CATCH {
         switch (excp) {
@@ -159,7 +164,7 @@ int lixa_state_init(lixa_state_t *this, const char *path_prefix)
             case STATE_FILE_INIT_ERROR:
             case ANALYZE_AND_START:
                 break;
-            case CREATE_NEW_ERROR:
+            case COLD_START_ERROR:
                 break;
             case NONE:
                 ret_cod = LIXA_RC_OK;
@@ -178,9 +183,10 @@ int lixa_state_init(lixa_state_t *this, const char *path_prefix)
 
 
 
-int lixa_state_analyze_and_start(lixa_state_t *this,
-                                 const int *state_exists,
-                                 const int *log_exists)
+int lixa_state_analyze(lixa_state_t *this,
+                       const int *state_exists,
+                       const int *log_exists,
+                       int *cold_start)
 {
     enum Exception {
         CORRUPTED_STATUS_FILE,
@@ -188,10 +194,12 @@ int lixa_state_analyze_and_start(lixa_state_t *this,
     } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     
-    LIXA_TRACE(("lixa_state_analyze_and_start\n"));
+    LIXA_TRACE(("lixa_state_analyze\n"));
     TRY {
         int i, number_of_states, number_of_logs, number_of_consec_states,
             number_of_consec_logs, previous_state, previous_log;
+        /* by default, the state server restart from previous state */
+        *cold_start = FALSE;
         /* count the number of state files and log files */
         number_of_states = number_of_logs = number_of_consec_states =
             number_of_consec_logs = 0;
@@ -223,27 +231,27 @@ int lixa_state_analyze_and_start(lixa_state_t *this,
             log_exists[0])
             number_of_consec_logs++;
             
-        LIXA_TRACE(("lixa_state_analyze_and_start: number of state files "
+        LIXA_TRACE(("lixa_state_analyze: number of state files "
                     "is %d/%d, number of log files is %d/%d\n",
                     number_of_consec_states, number_of_states,
                     number_of_consec_logs, number_of_logs));
         if (0 == number_of_states && 0 == number_of_logs) {
             /* no file exists */
             LIXA_SYSLOG((LOG_NOTICE, LIXA_SYSLOG_LXD038N));
-            /* @@@ attempt cold start*/
+            *cold_start = TRUE;
         } else if (1 == number_of_consec_states &&
                    0 == number_of_consec_logs) {
             /* only first state file is available */
             LIXA_SYSLOG((LOG_WARNING, LIXA_SYSLOG_LXD039W,
                          lixa_state_file_get_pathname(&(this->files[0]))));
-            /* @@@ attempt cold start */
+            *cold_start = TRUE;
         } else if (2 == number_of_consec_states &&
                    0 == number_of_consec_logs) {
             /* only first and second state files are available */
             LIXA_SYSLOG((LOG_WARNING, LIXA_SYSLOG_LXD040W,
                          lixa_state_file_get_pathname(&(this->files[0])),
                          lixa_state_file_get_pathname(&(this->files[1]))));
-            /* @@@ attempt cold start */
+            *cold_start = TRUE;
         } else if (
             (number_of_states == number_of_consec_states &&
              number_of_logs == number_of_consec_logs) && (
@@ -256,11 +264,11 @@ int lixa_state_analyze_and_start(lixa_state_t *this,
                                                            )) {
             LIXA_SYSLOG((LOG_WARNING, LIXA_SYSLOG_LXD041N,
                          number_of_states, number_of_logs));
-            /* @@@ attempt warm start */
         } else {
             LIXA_SYSLOG((LOG_WARNING, LIXA_SYSLOG_LXD042E));
             THROW(CORRUPTED_STATUS_FILE);
         }
+        LIXA_TRACE(("lixa_state_analyze: *cold_start=%d\n", *cold_start));
         
         THROW(NONE);
     } CATCH {
@@ -275,32 +283,53 @@ int lixa_state_analyze_and_start(lixa_state_t *this,
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
         } /* switch (excp) */
     } /* TRY-CATCH */
-    LIXA_TRACE(("lixa_state_analyze_and_start/excp=%d/"
+    LIXA_TRACE(("lixa_state_analyze/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }
 
 
 
-int lixa_state_create_new(lixa_state_t *this)
+int lixa_state_cold_start(lixa_state_t *this)
 {
     enum Exception {
         NULL_OBJECT,
+        UNLINK_ERROR,
+        FILE_CREATE_NEW_FILE,
         NONE
     } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     
-    LIXA_TRACE(("lixa_state_create_new\n"));
+    LIXA_TRACE(("lixa_state_cold_start\n"));
     TRY {
         /* check the object is not null */
         if (NULL == this)
             THROW(NULL_OBJECT);
+        /* create first state file */
+        LIXA_SYSLOG((LOG_ERR, LIXA_SYSLOG_LXD044I,
+                     lixa_state_file_get_pathname(&(this->files[0]))));
+        /* remove the old file if it exists */
+        if (-1 == unlink(lixa_state_file_get_pathname(&(this->files[0]))) &&
+            errno != ENOENT)
+            THROW(UNLINK_ERROR);
+        if (LIXA_RC_OK != (ret_cod = (lixa_state_file_create_new_file(
+                                          &(this->files[0]))))) {
+            LIXA_SYSLOG((LOG_ERR, LIXA_SYSLOG_LXD043E, "first",
+                         lixa_state_file_get_pathname(&(this->files[0]))));
+            THROW(FILE_CREATE_NEW_FILE);
+        }
+        /* @@@ the state file must be synchronized and closed */
         
         THROW(NONE);
     } CATCH {
         switch (excp) {
             case NULL_OBJECT:
                 ret_cod = LIXA_RC_NULL_OBJECT;
+                break;
+            case UNLINK_ERROR:
+                ret_cod = LIXA_RC_UNLINK_ERROR;
+                break;
+            case FILE_CREATE_NEW_FILE:
                 break;
             case NONE:
                 ret_cod = LIXA_RC_OK;
@@ -309,7 +338,7 @@ int lixa_state_create_new(lixa_state_t *this)
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
         } /* switch (excp) */
     } /* TRY-CATCH */
-    LIXA_TRACE(("lixa_state_create_new/excp=%d/"
+    LIXA_TRACE(("lixa_state_cold_start/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }
@@ -334,10 +363,10 @@ int lixa_state_clean(lixa_state_t *this)
 
         for (i=0; i<LIXA_STATE_FILES; ++i) {
             if (LIXA_RC_OK != (ret_cod = lixa_state_log_clean(
-                                   &(this->logs[0]))))
+                                   &(this->logs[i]))))
                 THROW(STATE_LOG_CLEAN_ERROR);
             if (LIXA_RC_OK != (ret_cod = lixa_state_file_clean(
-                                   &(this->files[0]))))
+                                   &(this->files[i]))))
                 THROW(STATE_FILE_CLEAN_ERROR);
         } /* for (i=0 */
         

@@ -385,21 +385,17 @@ define LIXA_RC_TIMES_ERROR                   -126
  */
 #define LIXA_RC_GETTIMEOFDAY_ERROR            -129
 /**
- * "unlink" function error
-define LIXA_RC_UNLINK_ERROR                  -129
- */
-/**
  * "socket" function error
  */
-#define LIXA_RC_SOCKET_ERROR                   -130
+#define LIXA_RC_SOCKET_ERROR                  -130
 /**
  * "setsockopt" function error
  */
-#define LIXA_RC_SETSOCKOPT_ERROR               -131
+#define LIXA_RC_SETSOCKOPT_ERROR              -131
 /**
  * "getsockopt" function error
  */
-#define LIXA_RC_GETSOCKOPT_ERROR               -132
+#define LIXA_RC_GETSOCKOPT_ERROR              -132
 /**
  * "bind" function error
  */
@@ -440,6 +436,10 @@ define LIXA_RC_UNLINK_ERROR                  -129
  * "getsockname" function error
  */
 #define LIXA_RC_GETPEERNAME_ERROR              -142
+/**
+ * "unlink" function error
+ */
+#define LIXA_RC_UNLINK_ERROR                   -143
 /**
  * "pthread_create" function error
  */

@@ -230,10 +230,6 @@ const char *lixa_strerror(int ret_cod)
         case LIXA_RC_GETTIMEOFDAY_ERROR:
             return "ERROR: 'gettimeofday' function returned an error "
                 "condition";
-            /*
-              case LIXA_RC_UNLINK_ERROR:
-              return "ERROR: 'unlink' function returned an error condition";
-            */
         case LIXA_RC_SOCKET_ERROR:
             return "ERROR: 'socket' function returned an error condition";
         case LIXA_RC_SETSOCKOPT_ERROR:
@@ -260,6 +256,8 @@ const char *lixa_strerror(int ret_cod)
             return "ERROR: 'getsockname' function returned an error condition";
         case LIXA_RC_GETPEERNAME_ERROR:
             return "ERROR: 'getpeername' function returned an error condition";
+        case LIXA_RC_UNLINK_ERROR:
+            return "ERROR: 'unlink' function returned an error condition";
         case LIXA_RC_PTHREAD_CREATE_ERROR:
             return "ERROR: 'pthread_create' function returned an error "
                 "condition";

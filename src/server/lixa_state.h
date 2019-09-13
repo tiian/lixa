@@ -42,6 +42,9 @@
 
 
 
+/**
+ * Number of state files and log files; can NOT be less than 3
+ */
 #define LIXA_STATE_FILES   3
 
 
@@ -94,29 +97,35 @@ extern "C" {
 
 
     /**
-     * Analyze the available state and log files, start them accordingly
+     * Analyze the available state and log files: establish if a warm restart
+     * or a cold start must be performed
      * @param[in,out] this state object
      * @param[in] state_exists specifies which state files are available
      * @param[in] log_exists specifies which log files are available
+     * @param[out] cold_start returns TRUE if a cold start must be performed
      * @return a reason code
      */     
-    int lixa_state_analyze_and_start(lixa_state_t *this,
-                                     const int *state_exists,
-                                     const int *log_exists);
+    int lixa_state_analyze(lixa_state_t *this,
+                           const int *state_exists,
+                           const int *log_exists,
+                           int *cold_start);
 
     
     
     /**
-     * Create new state and log files for this state object
+     * Create new state and log files for this state object because a cold
+     * start must be done
      * @param[in,out] this state object
      * @return a reason code
      */
-    int lixa_state_create_new(lixa_state_t *this);
+    int lixa_state_cold_start(lixa_state_t *this);
 
     
     
     /**
      * Cleanup a State object
+     * @param[in,out] this state object
+     * @return a reason code
      */
     int lixa_state_clean(lixa_state_t *this);
 

@@ -1,3 +1,8 @@
+Restart from lixa_state_cold_start
+
+Create case test for different scenario restart:
+- verify lixa_state_analyze takes the right decision for all possible cases
+
 Can function status_record_create_file removed and its code moved in 
 lixa_state_file_create_new_file?
 

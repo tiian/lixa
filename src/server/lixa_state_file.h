@@ -99,18 +99,16 @@ extern "C" {
 
     /**
      * Create a new underlying file for the state file object
-     * @param[in,out] this current state file object
-     * @param[in] pathname that must be used to create the underlying file
+     * @param[in,out] this state file object
      * @return a reason code
      */
-    int lixa_state_file_create_new_file(lixa_state_file_t *this,
-                                        const char *pathname);
+    int lixa_state_file_create_new_file(lixa_state_file_t *this);
 
     
 
     /**
      * Check if the underlying file exists and can be opened
-     * @param[in] this current state file object
+     * @param[in] this state file object
      * @return a reason code, LIXA_RC_OK if the file exists and can be opened
      */
     int lixa_state_file_exist_file(lixa_state_file_t *this);

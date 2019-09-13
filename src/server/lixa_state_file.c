@@ -80,20 +80,7 @@ int lixa_state_file_init(lixa_state_file_t *this,
         if (NULL == (this->pathname = strdup(pathname)))
             THROW(STRDUP_ERROR);
         this->flags = O_RDWR;
-        /*
-        if (-1 == (this->fd = open(pathname, flags)) && ENOENT != errno)
-            THROW(OPEN_ERROR);
-        */
-        /* create the file if necessary */
-        /*
-        if (-1 == this->fd && ENOENT == errno) {
-            LIXA_TRACE(("lixa_state_file_init: pathname '%s' does not exists, "
-                        "creating it...\n", pathname));
-            if (LIXA_RC_OK != (ret_cod = lixa_state_file_create_new_file(
-                                   this, pathname)))
-                THROW(CREATE_NEW_FILE_ERROR);
-        }
-        */
+        
         THROW(NONE);
     } CATCH {
         switch (excp) {
@@ -126,10 +113,11 @@ int lixa_state_file_init(lixa_state_file_t *this,
 
 
 
-int lixa_state_file_create_new_file(lixa_state_file_t *this,
-                                    const char *pathname)
+int lixa_state_file_create_new_file(lixa_state_file_t *this)
 {
     enum Exception {
+        NULL_OBJECT,
+        OPEN_ERROR,
         STATUS_RECORD_CREATE_FILE_ERROR,
         NONE
     } excp;
@@ -137,14 +125,23 @@ int lixa_state_file_create_new_file(lixa_state_file_t *this,
     
     LIXA_TRACE(("lixa_state_file_create_new_file\n"));
     TRY {
+        /* check the object is not null */
+        if (NULL == this)
+            THROW(NULL_OBJECT);
         /* this is basically a wrapper to legacy code */
         if (LIXA_RC_OK != (ret_cod = status_record_create_file(
-                               pathname, &(this->fd))))
+                               this->pathname, &(this->fd))))
             THROW(STATUS_RECORD_CREATE_FILE_ERROR);
         
         THROW(NONE);
     } CATCH {
         switch (excp) {
+            case NULL_OBJECT:
+                ret_cod = LIXA_RC_NULL_OBJECT;
+                break;
+            case OPEN_ERROR:
+                ret_cod = LIXA_RC_OPEN_ERROR;
+                break;
             case STATUS_RECORD_CREATE_FILE_ERROR:
                 break;
             case NONE:
