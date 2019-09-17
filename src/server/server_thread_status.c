@@ -766,7 +766,6 @@ int thread_status_check_recovery_pending(
                      , RECOVERY_FAILED_TRANSACTION
                      , NOT_STARTED_TRANSACTION1
                      , NOT_STARTED_TRANSACTION2
-                     , ALL_PREPARED
                      , NOT_STARTED_TRANSACTION3
                      , INVALID_VERB
                      , NONE } excp;
@@ -841,13 +840,6 @@ int thread_status_check_recovery_pending(
             case LIXA_MSG_VERB_ROLLBACK:
             case LIXA_MSG_VERB_FORGET:
                 break;
-                /* check if all resource manager switched to "prepared" (S3)
-                   state */
-                /* 20180115 old stuff, remove me
-                if (thread_status_check_all_prepared(ts, data))
-                    THROW(ALL_PREPARED);
-                break;
-                */
             case LIXA_MSG_VERB_REG:
                 /* check TX state */
                 if (data->pld.ph.state.txstate != TX_STATE_S3 &&
@@ -877,7 +869,6 @@ int thread_status_check_recovery_pending(
             case RECOVERY_FAILED_TRANSACTION:
             case NOT_STARTED_TRANSACTION1:
             case NOT_STARTED_TRANSACTION2:
-            case ALL_PREPARED:
             case NOT_STARTED_TRANSACTION3:
                 *branch = FALSE;
                 ret_cod = LIXA_RC_OK;

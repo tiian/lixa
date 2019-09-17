@@ -107,6 +107,24 @@ extern "C" {
     
 
     /**
+     * Synchronize the underlying state file
+     * @param[in,out] this state file object
+     * @return a reason code
+     */
+    int lixa_state_file_synchronize(lixa_state_file_t *this);
+
+
+    
+    /**
+     * Close the underlying state file
+     * @param[in,out] this state file object
+     * @return a reason code
+     */
+    int lixa_state_file_close(lixa_state_file_t *this);
+
+
+    
+    /**
      * Check if the underlying file exists and can be opened
      * @param[in] this state file object
      * @return a reason code, LIXA_RC_OK if the file exists and can be opened

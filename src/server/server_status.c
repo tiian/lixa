@@ -1152,7 +1152,7 @@ int status_record_sync(status_record_t *sr)
         if (sr->counter%2) {
             sr->counter++;
         } else {
-            LIXA_TRACE(("status_record_sync: WARNING! record %p it's already "
+            LIXA_TRACE(("status_record_sync: WARNING! record %p is already "
                         "even (it was NOT updated before!)\n", sr));
         }
         if (NULL == (checksum = g_checksum_new(G_CHECKSUM_MD5)))

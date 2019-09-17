@@ -58,7 +58,6 @@ int lixa_state_file_init(lixa_state_file_t *this,
         NULL_OBJECT2,
         INVALID_STATUS,
         STRDUP_ERROR,
-        OPEN_ERROR,
         CREATE_NEW_FILE_ERROR,
         NONE
     } excp;
@@ -94,9 +93,6 @@ int lixa_state_file_init(lixa_state_file_t *this,
             case STRDUP_ERROR:
                 ret_cod = LIXA_RC_STRDUP_ERROR;
                 break;
-            case OPEN_ERROR:
-                ret_cod = LIXA_RC_OPEN_ERROR;
-                break;
             case CREATE_NEW_FILE_ERROR:
                 break;
             case NONE:
@@ -117,7 +113,6 @@ int lixa_state_file_create_new_file(lixa_state_file_t *this)
 {
     enum Exception {
         NULL_OBJECT,
-        OPEN_ERROR,
         STATUS_RECORD_CREATE_FILE_ERROR,
         NONE
     } excp;
@@ -139,9 +134,6 @@ int lixa_state_file_create_new_file(lixa_state_file_t *this)
             case NULL_OBJECT:
                 ret_cod = LIXA_RC_NULL_OBJECT;
                 break;
-            case OPEN_ERROR:
-                ret_cod = LIXA_RC_OPEN_ERROR;
-                break;
             case STATUS_RECORD_CREATE_FILE_ERROR:
                 break;
             case NONE:
@@ -152,6 +144,70 @@ int lixa_state_file_create_new_file(lixa_state_file_t *this)
         } /* switch (excp) */
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_state_file_create_new_file/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
+
+int lixa_state_file_synchronize(lixa_state_file_t *this)
+{
+    enum Exception {
+        NONE
+    } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    
+    LIXA_TRACE(("lixa_state_file_synchronize\n"));
+    TRY {
+        /* @@@ Implement this function, probably some other parameter is
+           necessary */
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("lixa_state_file_synchronize/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
+
+int lixa_state_file_close(lixa_state_file_t *this)
+{
+    enum Exception {
+        CLOSE_ERROR,
+        NONE
+    } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    
+    LIXA_TRACE(("lixa_state_file_close\n"));
+    TRY {
+        if (-1 == close(this->fd)) {
+            THROW(CLOSE_ERROR);
+        }
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case CLOSE_ERROR:
+                ret_cod = LIXA_RC_CLOSE_ERROR;
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+        /* anyway, set the file descriptor to null */
+        this->fd = LIXA_NULL_FD;
+    } /* TRY-CATCH */
+    LIXA_TRACE(("lixa_state_file_close/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }
