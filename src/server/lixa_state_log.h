@@ -84,6 +84,10 @@ typedef struct lixa_state_log_s {
      */
     void                            *buffer;
     /**
+     * System page file
+     */
+    size_t                           system_page_size;
+    /**
      * Size of the buffer used to manage I/O
      */
     size_t                           buffer_size;
@@ -126,15 +130,9 @@ extern "C" {
     /**
      * Create a new underlying file for the state log object
      * @param[in,out] this current state file object
-     * @param[in] pathname that must be used to create the underlying file
-     * @param[in] system_page_size size of a memory page
-     * @param[in] flags that must be used to create the file
      * @return a reason code
      */
-    int lixa_state_log_create_new_file(lixa_state_log_t *this,
-                                       const char *pathname,
-                                       size_t system_page_size,
-                                       int flags);
+    int lixa_state_log_create_new_file(lixa_state_log_t *this);
 
 
 

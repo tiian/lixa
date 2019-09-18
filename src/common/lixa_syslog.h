@@ -231,12 +231,14 @@
 #define LIXA_SYSLOG_LXD042E "LXD042E the available state files and log " \
     "files are not consistent: recover the missing ones to attempt a warm " \
     "restart or delete all to attempt a cold start"
-#define LIXA_SYSLOG_LXD043E "LXD043E unable to create state file " \
-    "('%s')"
+#define LIXA_SYSLOG_LXD043E "LXD043E unable to create state file ('%s')"
 #define LIXA_SYSLOG_LXD044I "LXD044I creating a new state file ('%s')"
-#define LIXA_SYSLOG_LXD045E "LXD045E unable to synchronize state " \
-    "file ('%s')"
+#define LIXA_SYSLOG_LXD045E "LXD045E unable to synchronize state file ('%s')"
 #define LIXA_SYSLOG_LXD046E "LXD046E unable to close state file ('%s')"
+#define LIXA_SYSLOG_LXD047I "LXD047I creating a new state log ('%s')"
+#define LIXA_SYSLOG_LXD048E "LXD048E unable to create state log ('%s')"
+#define LIXA_SYSLOG_LXD049I "LXD049I cold start was successful for new " \
+    "files '%s', '%s', and '%s'"
 
 
 

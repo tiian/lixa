@@ -294,10 +294,14 @@ int lixa_state_cold_start(lixa_state_t *this)
 {
     enum Exception {
         NULL_OBJECT,
-        UNLINK_ERROR,
-        FILE_CREATE_NEW_FILE,
+        UNLINK_ERROR1,
+        FILE_CREATE_NEW_FILE1,
         FILE_SYNCHRONIZE,
         FILE_CLOSE,
+        UNLINK_ERROR2,
+        FILE_CREATE_NEW_FILE2,
+        UNLINK_ERROR3,
+        LOG_CREATE_NEW_FILE,
         NONE
     } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
@@ -308,17 +312,17 @@ int lixa_state_cold_start(lixa_state_t *this)
         if (NULL == this)
             THROW(NULL_OBJECT);
         /* create first state file */
-        LIXA_SYSLOG((LOG_ERR, LIXA_SYSLOG_LXD044I,
+        LIXA_SYSLOG((LOG_INFO, LIXA_SYSLOG_LXD044I,
                      lixa_state_file_get_pathname(&(this->files[0]))));
         /* remove the old file if it exists */
         if (-1 == unlink(lixa_state_file_get_pathname(&(this->files[0]))) &&
             errno != ENOENT)
-            THROW(UNLINK_ERROR);
+            THROW(UNLINK_ERROR1);
         if (LIXA_RC_OK != (ret_cod = (lixa_state_file_create_new_file(
                                           &(this->files[0]))))) {
             LIXA_SYSLOG((LOG_ERR, LIXA_SYSLOG_LXD043E,
                          lixa_state_file_get_pathname(&(this->files[0]))));
-            THROW(FILE_CREATE_NEW_FILE);
+            THROW(FILE_CREATE_NEW_FILE1);
         }
         if (LIXA_RC_OK != (ret_cod = (lixa_state_file_synchronize(
                                           &(this->files[0]))))) {
@@ -332,9 +336,37 @@ int lixa_state_cold_start(lixa_state_t *this)
                          lixa_state_file_get_pathname(&(this->files[0]))));
             THROW(FILE_CLOSE);
         }
-        /* @@@ create second state file, but don't sync and close it */
-
-        /* @@@ create second state log */
+        /* create second state file, but don't sync and close it */
+        LIXA_SYSLOG((LOG_INFO, LIXA_SYSLOG_LXD044I,
+                     lixa_state_file_get_pathname(&(this->files[1]))));
+        /* remove the old file if it exists */
+        if (-1 == unlink(lixa_state_file_get_pathname(&(this->files[1]))) &&
+            errno != ENOENT)
+            THROW(UNLINK_ERROR2);
+        if (LIXA_RC_OK != (ret_cod = (lixa_state_file_create_new_file(
+                                          &(this->files[1]))))) {
+            LIXA_SYSLOG((LOG_ERR, LIXA_SYSLOG_LXD043E,
+                         lixa_state_file_get_pathname(&(this->files[1]))));
+            THROW(FILE_CREATE_NEW_FILE2);
+        }
+        /* create second state log */
+        LIXA_SYSLOG((LOG_INFO, LIXA_SYSLOG_LXD047I,
+                     lixa_state_log_get_pathname(&(this->logs[1]))));
+        /* remove the old file if it exists */
+        if (-1 == unlink(lixa_state_log_get_pathname(&(this->logs[1]))) &&
+            errno != ENOENT)
+            THROW(UNLINK_ERROR3);
+        if (LIXA_RC_OK != (ret_cod = (lixa_state_log_create_new_file(
+                                          &(this->logs[1]))))) {
+            LIXA_SYSLOG((LOG_ERR, LIXA_SYSLOG_LXD048E,
+                         lixa_state_file_get_pathname(&(this->files[1]))));
+            THROW(LOG_CREATE_NEW_FILE);
+        }
+        /* emit a message related to the cold start completion */
+        LIXA_SYSLOG((LOG_INFO, LIXA_SYSLOG_LXD049I,
+                     lixa_state_file_get_pathname(&(this->files[0])),
+                     lixa_state_file_get_pathname(&(this->files[1])),
+                     lixa_state_log_get_pathname(&(this->logs[1]))));
         
         THROW(NONE);
     } CATCH {
@@ -342,12 +374,16 @@ int lixa_state_cold_start(lixa_state_t *this)
             case NULL_OBJECT:
                 ret_cod = LIXA_RC_NULL_OBJECT;
                 break;
-            case UNLINK_ERROR:
+            case UNLINK_ERROR1:
+            case UNLINK_ERROR2:
+            case UNLINK_ERROR3:
                 ret_cod = LIXA_RC_UNLINK_ERROR;
                 break;
-            case FILE_CREATE_NEW_FILE:
+            case FILE_CREATE_NEW_FILE1:
+            case FILE_CREATE_NEW_FILE2:
             case FILE_SYNCHRONIZE:
             case FILE_CLOSE:
+            case LOG_CREATE_NEW_FILE:
                 break;
             case NONE:
                 ret_cod = LIXA_RC_OK;

@@ -93,6 +93,8 @@ int lixa_state_log_init(lixa_state_log_t *this,
             THROW(INVALID_STATUS);
         /* clean-up the object memory, maybe not necessary, but safer */
         memset(this, 0, sizeof(lixa_state_log_t));
+        /* save a copy of the (constant) value in the object */
+        this->system_page_size = system_page_size;
         /* allocate the single memory page */
         if (0 != (error = posix_memalign(&this->single_page, system_page_size,
                                          system_page_size))) {
@@ -121,23 +123,6 @@ int lixa_state_log_init(lixa_state_log_t *this,
         if (o_dsync_bool)  this->pers_flags |= O_DSYNC;
         if (o_rsync_bool)  this->pers_flags |= O_RSYNC;
         if (o_sync_bool)   this->pers_flags |= O_SYNC;
-        /*
-        if (-1 == (this->fd = open(
-                       pathname, this->pers_flags)) && ENOENT != errno)
-            THROW(OPEN_ERROR);
-        */
-        /* create the file if necessary */
-        /*
-        if (-1 == this->fd && ENOENT == errno) {
-            LIXA_TRACE(("lixa_state_log_init: pathname '%s' does not exists, "
-                        "creating it...\n", pathname));
-            if (LIXA_RC_OK != (ret_cod = lixa_state_log_create_new_file(
-                                   this, pathname, system_page_size,
-                                   this->pers_flags)))
-                THROW(CREATE_NEW_FILE_ERROR);
-        }
-        */
-        /* @@@ go on from here */
         
         THROW(NONE);
     } CATCH {
@@ -175,10 +160,7 @@ int lixa_state_log_init(lixa_state_log_t *this,
 
 
 
-int lixa_state_log_create_new_file(lixa_state_log_t *this,
-                                   const char *pathname,
-                                   size_t system_page_size,
-                                   int flags)
+int lixa_state_log_create_new_file(lixa_state_log_t *this)
 {
     enum Exception {
         NULL_OBJECT,
@@ -188,8 +170,7 @@ int lixa_state_log_create_new_file(lixa_state_log_t *this,
     } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     
-    LIXA_TRACE(("lixa_state_log_create_new_file: pathname='%s', flags=%d\n",
-                pathname, flags));
+    LIXA_TRACE(("lixa_state_log_create_new_file\n"));
     TRY {
         mode_t mode;
         size_t i;
@@ -198,17 +179,18 @@ int lixa_state_log_create_new_file(lixa_state_log_t *this,
         if (NULL == this)
             THROW(NULL_OBJECT);
         /* add O_EXCL and O_CREAT flags and try to open again the file */
-        flags |= O_EXCL | O_CREAT;
+        this->pers_flags |= O_EXCL | O_CREAT;
         /* mode flags (security) */
         mode = S_IRUSR | S_IWUSR | S_IRGRP;
-        if (-1 == (this->fd = open(pathname, flags, mode)))
+        if (-1 == (this->fd = open(this->pathname, this->pers_flags, mode)))
             THROW(OPEN_ERROR);
         /* format the file, review me later @@@ */
-        memset(this->single_page, 0, system_page_size);
+        memset(this->single_page, 0, this->system_page_size);
         for (i=0; i<LIXA_STATE_LOG_FILE_SIZE_DEFAULT; ++i) {
-            off_t offset = i * system_page_size;
-            if (system_page_size != pwrite(this->fd, this->single_page,
-                                           system_page_size, offset))
+            off_t offset = i * this->system_page_size;
+            if (this->system_page_size != pwrite(
+                    this->fd, this->single_page,
+                    this->system_page_size, offset))
                 THROW(PWRITE_ERROR);
         }
         

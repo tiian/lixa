@@ -1,4 +1,4 @@
-Restart from lixa_state_cold_start
+Create a wrapper for struct status_record_s: old functions will use the old record, new log functions with use another one, both must be update before the removal of the old persistence model. The purpose is to incercept all the calls to function status_record_update and produce the new log format in parallel with the old memory index.
 
 Create case test for different scenario restart:
 - verify lixa_state_analyze takes the right decision for all possible cases
