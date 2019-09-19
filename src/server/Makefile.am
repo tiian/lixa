@@ -3,6 +3,7 @@ noinst_HEADERS = ../common/lixa_trace.h server_config.h server_fsm.h \
 	server_manager.h server_messages.h server_recovery.h \
 	server_reply.h server_thread_status.h server_status.h server_xa.h \
 	server_xa_branch.h srvr_rcvr_tbl.h server_tpm.h server_trans_tbl.h \
+	status_record.h \
 	lixa_state.h lixa_state_file.h lixa_state_log.h
 AM_CPPFLAGS = -DLIXA_MULTITHREAD=1 -I$(srcdir)/../common
 AM_CFLAGS = -Wall -Wno-unused-but-set-variable

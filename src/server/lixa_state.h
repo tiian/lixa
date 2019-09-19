@@ -28,6 +28,7 @@
 #include "lixa_trace.h"
 #include "lixa_state_file.h"
 #include "lixa_state_log.h"
+#include "status_record.h"
 
 
 

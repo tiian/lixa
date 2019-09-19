@@ -25,6 +25,7 @@
 
 
 
+#include "lixa_state.h"
 #include "server_status.h"
 
 

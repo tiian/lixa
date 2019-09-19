@@ -1138,6 +1138,27 @@ int status_record_delete(struct thread_status_s *ts,
 
 
 
+void status_record_update(status_record_t *sr,
+                          uintptr_t index,
+                          GTree *updated_records)
+{
+    if (!(sr->counter & 0x1)) {
+        sr->counter++;
+        g_tree_insert(updated_records, (gpointer) index, NULL);
+        LIXA_TRACE(("status_record_update: inserted "
+                    "index "
+                    UINTPTR_T_FORMAT
+                    " (counter="
+                    UINT32_T_FORMAT
+                    ", address=%p) in updated records tree "
+                    "(number of nodes now is %d)\n",
+                    index, sr->counter, sr,
+                    g_tree_nnodes(updated_records)));
+    }
+}
+
+
+
 int status_record_sync(status_record_t *sr)
 {
     enum Exception { G_CHECKSUM_NEW_ERROR

@@ -3,6 +3,9 @@ Create a wrapper for struct status_record_s: old functions will use the old reco
 Create case test for different scenario restart:
 - verify lixa_state_analyze takes the right decision for all possible cases
 
+Remove from struct thread_status_s the useless fields related to the old
+persistency engine
+
 Can function status_record_create_file removed and its code moved in 
 lixa_state_file_create_new_file?
 
