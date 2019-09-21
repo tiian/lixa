@@ -1,4 +1,9 @@
-Create a wrapper for struct status_record_s: old functions will use the old record, new log functions with use another one, both must be update before the removal of the old persistence model. The purpose is to incercept all the calls to function status_record_update and produce the new log format in parallel with the old memory index.
+Replace status_record_update with thread_status_mark_block in these functions:
+ status_record_delete(), status_record_insert(), thread_status_set_global_recovery(), and thread_status_sync_files().
+
+rename status_record_update with something else to check no function but
+thread_status_mark_block 
+requires it
 
 Create case test for different scenario restart:
 - verify lixa_state_analyze takes the right decision for all possible cases

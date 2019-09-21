@@ -131,7 +131,11 @@ extern "C" {
     int lixa_state_clean(lixa_state_t *this);
 
 
-    
+    /* @@@ 
+    int lixa_state_record_update(status_record_t *sr,
+                                 uintptr_t index,
+                                 GTree *updated_records);
+    */
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

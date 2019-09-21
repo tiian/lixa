@@ -47,9 +47,13 @@ int server_xa_branch_chain(struct thread_status_s *ts,
                            uint32_t block_id,
                            server_trans_tbl_qry_arr_t *array)
 {
-    enum Exception { NOT_CHAINABLE_BRANCH
-                     , INTERNAL_ERROR
-                     , NONE } excp;
+    enum Exception {
+        NOT_CHAINABLE_BRANCH,
+        THREAD_STATUS_MARK_BLOCK_ERROR1,
+        THREAD_STATUS_MARK_BLOCK_ERROR2,
+        INTERNAL_ERROR,
+        NONE
+    } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     
     LIXA_TRACE(("server_xa_branch_chain\n"));
@@ -118,15 +122,25 @@ int server_xa_branch_chain(struct thread_status_s *ts,
             if (0 == next_branch_block) {
                 if (!chained) {
                     /* this is the point to connect to */
+                    /* @@@@
                     status_record_update(ts->curr_status + record->block_id,
                                          record->block_id,
                                          ts->updated_records);
+                    */
+                    if (LIXA_RC_OK != (ret_cod = thread_status_mark_block(
+                                           ts, record->block_id)))
+                        THROW(THREAD_STATUS_MARK_BLOCK_ERROR1);
                     ts->curr_status[record->block_id
                                     ].sr.data.pld.ph.next_branch_block =
                         block_id;
                     /* this is the block to connect */
+                    /* @@@@
                     status_record_update(ts->curr_status + block_id,
                                          block_id, ts->updated_records);
+                    */
+                    if (LIXA_RC_OK != (ret_cod = thread_status_mark_block(
+                                           ts, block_id)))
+                        THROW(THREAD_STATUS_MARK_BLOCK_ERROR2);
                     ts->curr_status[block_id
                                     ].sr.data.pld.ph.prev_branch_block =
                         record->block_id;
@@ -150,6 +164,9 @@ int server_xa_branch_chain(struct thread_status_s *ts,
             case NOT_CHAINABLE_BRANCH:
                 ret_cod = LIXA_RC_NOT_CHAINABLE_BRANCH;
                 break;
+            case THREAD_STATUS_MARK_BLOCK_ERROR1:
+            case THREAD_STATUS_MARK_BLOCK_ERROR2:
+                break;
             case INTERNAL_ERROR:
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
                 break;
@@ -170,8 +187,12 @@ int server_xa_branch_chain(struct thread_status_s *ts,
 int server_xa_branch_unchain(struct thread_status_s *ts,
                              uint32_t block_id)
 {
-    enum Exception { BYPASSED_OPERATION
-                     , NONE } excp;
+    enum Exception {
+        BYPASSED_OPERATION,
+        THREAD_STATUS_MARK_BLOCK_ERROR1,
+        THREAD_STATUS_MARK_BLOCK_ERROR2,
+        NONE
+    } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     
     LIXA_TRACE(("server_xa_branch_unchain\n"));
@@ -190,8 +211,13 @@ int server_xa_branch_unchain(struct thread_status_s *ts,
             LIXA_TRACE(("server_xa_branch_unchain: unchaining previous "
                         "block " UINT32_T_FORMAT " from this one ("
                         UINT32_T_FORMAT ")\n", prev_branch_block, block_id));
+            /* @@@@
             status_record_update(ts->curr_status + prev_branch_block,
                                  prev_branch_block, ts->updated_records);
+            */
+            if (LIXA_RC_OK != (ret_cod = thread_status_mark_block(
+                                   ts, prev_branch_block)))
+                THROW(THREAD_STATUS_MARK_BLOCK_ERROR1);
             ts->curr_status[prev_branch_block
                             ].sr.data.pld.ph.next_branch_block =
                 next_branch_block;
@@ -200,8 +226,13 @@ int server_xa_branch_unchain(struct thread_status_s *ts,
             LIXA_TRACE(("server_xa_branch_unchain: unchaining next "
                         "block " UINT32_T_FORMAT " from this one ("
                         UINT32_T_FORMAT ")\n", next_branch_block, block_id));
+            /* @@@@
             status_record_update(ts->curr_status + next_branch_block,
                                  next_branch_block, ts->updated_records);
+            */
+            if (LIXA_RC_OK != (ret_cod = thread_status_mark_block(
+                                   ts, next_branch_block)))
+                THROW(THREAD_STATUS_MARK_BLOCK_ERROR2);
             ts->curr_status[next_branch_block
                             ].sr.data.pld.ph.prev_branch_block =
                 prev_branch_block;
@@ -217,6 +248,9 @@ int server_xa_branch_unchain(struct thread_status_s *ts,
         switch (excp) {
             case BYPASSED_OPERATION:
                 ret_cod = LIXA_RC_BYPASSED_OPERATION;
+                break;
+            case THREAD_STATUS_MARK_BLOCK_ERROR1:
+            case THREAD_STATUS_MARK_BLOCK_ERROR2:
                 break;
             case NONE:
                 ret_cod = LIXA_RC_OK;

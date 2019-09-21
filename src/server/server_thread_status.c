@@ -930,6 +930,37 @@ int thread_status_set_global_recovery(struct thread_status_s *ts,
     return ret_cod;
 }
 
+int thread_status_mark_block(struct thread_status_s *ts,
+                             uint32_t block_id)
+{
+    enum Exception {
+        NONE
+    } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+
+    /* legacy way to do it, remove it when the new way is ok */
+    status_record_update(ts->curr_status + block_id, block_id,
+                         ts->updated_records);
+    /* new way to keep track with state logs */
+    
+    LIXA_TRACE(("thread_status_mark_block\n"));
+    TRY {
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("thread_status_mark_block/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
 
     
 int thread_status_sync_files(struct thread_status_s *ts)

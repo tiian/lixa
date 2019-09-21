@@ -40,6 +40,7 @@
 #include "lixa_trace.h"
 #include "lixa_syslog.h"
 #include "lixa_xid.h"
+#include "server_thread_status.h"
 #include "server_recovery.h"
 #include "server_xa_branch.h"
 
@@ -220,11 +221,15 @@ int server_recovery_24(struct thread_status_s *ts,
                        uint32_t block_id,
                        struct server_client_status_s *cs)
 {
-    enum Exception { PAYLOAD_CHAIN_RELEASE
-                     , GETTIMEOFDAY_ERROR
-                     , INVALID_STATUS
-                     , FSM_WANT_MESSAGE
-                     , NONE } excp;
+    enum Exception {
+        PAYLOAD_CHAIN_RELEASE,
+        THREAD_STATUS_MARK_BLOCK_ERROR1,
+        GETTIMEOFDAY_ERROR,
+        INVALID_STATUS,
+        THREAD_STATUS_MARK_BLOCK_ERROR2,
+        FSM_WANT_MESSAGE,
+        NONE
+    } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
 
     LIXA_TRACE(("server_recovery_24\n"));
@@ -256,8 +261,13 @@ int server_recovery_24(struct thread_status_s *ts,
                         " and its chain\n", recovering_block_id));
             ph->recovery_failed = TRUE;
             ph->recovery_commit = lmi->body.qrcvr_24.recovery.commit;
+            /* @@@@
             status_record_update(ts->curr_status + recovering_block_id,
                                  recovering_block_id, ts->updated_records);
+            */
+            if (LIXA_RC_OK != (ret_cod = thread_status_mark_block(
+                                   ts, recovering_block_id)))
+                THROW(THREAD_STATUS_MARK_BLOCK_ERROR1);
             if (0 != gettimeofday(&ph->recovery_failed_time, NULL))
                 THROW(GETTIMEOFDAY_ERROR);
             if (lmi->body.qrcvr_24.rsrmgrs->len != ph->n)
@@ -270,10 +280,15 @@ int server_recovery_24(struct thread_status_s *ts,
                                         i);
                 sr = ts->curr_status + ph->block_array[rsrmgr->rmid];
                 sr->sr.data.pld.rm.recovery_rc = rsrmgr->rc;
+                /* @@@@
                 status_record_update(ts->curr_status +
                                      ph->block_array[rsrmgr->rmid],
                                      ph->block_array[rsrmgr->rmid],
                                      ts->updated_records);
+                */
+                if (LIXA_RC_OK != (ret_cod = thread_status_mark_block(
+                                       ts, ph->block_array[rsrmgr->rmid])))
+                    THROW(THREAD_STATUS_MARK_BLOCK_ERROR2);
                 LIXA_SYSLOG((LOG_WARNING, LIXA_SYSLOG_LXD012W, ts->id,
                              recovering_block_id));
             }
@@ -288,6 +303,7 @@ int server_recovery_24(struct thread_status_s *ts,
     } CATCH {
         switch (excp) {
             case PAYLOAD_CHAIN_RELEASE:
+            case THREAD_STATUS_MARK_BLOCK_ERROR1:
                 break;
             case GETTIMEOFDAY_ERROR:
                 ret_cod = LIXA_RC_GETTIMEOFDAY_ERROR;
@@ -295,6 +311,7 @@ int server_recovery_24(struct thread_status_s *ts,
             case INVALID_STATUS:
                 ret_cod = LIXA_RC_INVALID_STATUS;
                 break;
+            case THREAD_STATUS_MARK_BLOCK_ERROR2:
             case FSM_WANT_MESSAGE:
                 break;
             case NONE:
@@ -320,8 +337,11 @@ int server_recovery_result(struct thread_status_s *ts,
                            struct lixa_msg_s *lmo,
                            uint32_t client_block_id)
 {
-    enum Exception { XML_CHAR_STRDUP_ERROR
-                     , NONE } excp;
+    enum Exception {
+        THREAD_STATUS_MARK_BLOCK_ERROR,
+        XML_CHAR_STRDUP_ERROR,
+        NONE
+    } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
 
     LIXA_TRACE(("server_recovery_result\n"));
@@ -334,8 +354,13 @@ int server_recovery_result(struct thread_status_s *ts,
         /* register the block is in recovery phase */
         ts->curr_status[client_block_id].sr.data.pld.ph.recovering_block_id =
             block_id;
+        /* @@@@
         status_record_update(ts->curr_status + client_block_id,
                              client_block_id, ts->updated_records);
+        */
+        if (LIXA_RC_OK != (ret_cod = thread_status_mark_block(
+                               ts, client_block_id)))
+            THROW(THREAD_STATUS_MARK_BLOCK_ERROR);
 
         /* set basic answer information */
         lmo->header.pvs.verb = LIXA_MSG_VERB_QRCVR;
@@ -412,6 +437,8 @@ int server_recovery_result(struct thread_status_s *ts,
         THROW(NONE);
     } CATCH {
         switch (excp) {
+            case THREAD_STATUS_MARK_BLOCK_ERROR:
+                break;
             case XML_CHAR_STRDUP_ERROR:
                 ret_cod = LIXA_RC_XML_CHAR_STRDUP_ERROR;
                 break;

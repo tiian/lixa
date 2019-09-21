@@ -934,11 +934,15 @@ int server_manager_switch_1(struct thread_status_s *ts,
 int server_manager_switch_2(struct thread_status_s *ts,
                             const struct srv_msg_s *msg)
 {
-    enum Exception { ADD_POLL_ERROR,
-                     NEW_CLIENT_ERROR,
-                     CHAIN_ALLOCATE_ERROR,
-                     MSG_PROC_ERROR,
-                     NONE } excp;
+    enum Exception {
+        ADD_POLL_ERROR,
+        NEW_CLIENT_ERROR,
+        CHAIN_ALLOCATE_ERROR,
+        THREAD_STATUS_MARK_BLOCK_ERROR1,
+        THREAD_STATUS_MARK_BLOCK_ERROR2,
+        MSG_PROC_ERROR,
+        NONE
+    } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
 
     struct srv_msg_s answer;
@@ -972,16 +976,26 @@ int server_manager_switch_2(struct thread_status_s *ts,
         memcpy(&ts->curr_status[block_id].sr.data.pld.ph.block_array,
                tmp_block_array,
                sizeof(tmp_block_array));
+        /* @@@@
         status_record_update(ts->curr_status + block_id, block_id,
                              ts->updated_records);
+        */
+        if (LIXA_RC_OK != (ret_cod = thread_status_mark_block(
+                               ts, block_id)))
+            THROW(THREAD_STATUS_MARK_BLOCK_ERROR1);
         /* copy rsrmgr blocks */
         for (i = 0; i < msg->body.sr.header->n; ++i) {
             uint32_t child_block_id =
                 ts->curr_status[block_id].sr.data.pld.ph.block_array[i];
             memcpy(&ts->curr_status[child_block_id].sr.data.pld.rm,
                    msg->body.sr.rsrmgr[i], sizeof(struct payload_rsrmgr_s));
+            /* @@@@
             status_record_update(ts->curr_status + child_block_id,
                                  child_block_id, ts->updated_records);
+            */
+            if (LIXA_RC_OK != (ret_cod = thread_status_mark_block(
+                                   ts, child_block_id)))
+                THROW(THREAD_STATUS_MARK_BLOCK_ERROR2);
         }
 
         if (LIXA_RC_OK != (ret_cod = server_manager_msg_proc(
@@ -995,6 +1009,8 @@ int server_manager_switch_2(struct thread_status_s *ts,
             case ADD_POLL_ERROR:
             case NEW_CLIENT_ERROR:
             case CHAIN_ALLOCATE_ERROR:
+            case THREAD_STATUS_MARK_BLOCK_ERROR1:
+            case THREAD_STATUS_MARK_BLOCK_ERROR2:
             case MSG_PROC_ERROR:
                 break;
             case NONE:

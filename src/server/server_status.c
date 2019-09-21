@@ -185,8 +185,11 @@ int payload_header_store_verb_step(struct thread_status_s *ts,
                                    uint32_t block_id,
                                    const struct lixa_msg_verb_step_s *vs)
 {
-    enum Exception { INVALID_RECORD
-                     , NONE } excp;
+    enum Exception {
+        INVALID_RECORD,
+        THREAD_STATUS_MARK_BLOCK_ERROR,
+        NONE
+    } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     
     LIXA_TRACE(("payload_header_store_verb_step\n"));
@@ -224,14 +227,21 @@ int payload_header_store_verb_step(struct thread_status_s *ts,
                     vs->verb, vs->step));
         pld->ph.last_verb_step[0] = *vs;
         /* update the record */
+        /* @@@@
         status_record_update(ts->curr_status + block_id, block_id,
                              ts->updated_records);
+        */
+        if (LIXA_RC_OK != (ret_cod = thread_status_mark_block(
+                               ts, block_id)))
+            THROW(THREAD_STATUS_MARK_BLOCK_ERROR);
 
         THROW(NONE);
     } CATCH {
         switch (excp) {
             case INVALID_RECORD:
                 ret_cod = LIXA_RC_INVALID_STATUS;
+                break;
+            case THREAD_STATUS_MARK_BLOCK_ERROR:
                 break;
             case NONE:
                 ret_cod = LIXA_RC_OK;
@@ -316,10 +326,13 @@ int payload_chain_release(struct thread_status_s *ts, uint32_t block_id)
 int payload_chain_allocate(struct thread_status_s *ts, uint32_t block_id,
                            int size)
 {
-    enum Exception { OUT_OF_RANGE
-                     , INVALID_BLOCK_TYPE
-                     , STATUS_RECORD_INSERT_ERROR
-                     , NONE } excp;
+    enum Exception {
+        OUT_OF_RANGE,
+        INVALID_BLOCK_TYPE,
+        STATUS_RECORD_INSERT_ERROR,
+        THREAD_STATUS_MARK_BLOCK_ERROR,
+        NONE
+    } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     
     LIXA_TRACE(("payload_chain_allocate\n"));
@@ -353,8 +366,13 @@ int payload_chain_allocate(struct thread_status_s *ts, uint32_t block_id,
             ts->curr_status[new_slot].sr.data.pld.type =
                 DATA_PAYLOAD_TYPE_RSRMGR;
             /* point the new block from chain */
+            /* @@@@
             status_record_update(ts->curr_status + block_id, block_id,
                                  ts->updated_records);
+            */
+            if (LIXA_RC_OK != (ret_cod = thread_status_mark_block(
+                                   ts, block_id)))
+                THROW(THREAD_STATUS_MARK_BLOCK_ERROR);
             ts->curr_status[block_id].sr.data.pld.ph.block_array[i] = new_slot;
             ts->curr_status[block_id].sr.data.pld.ph.n++;
             LIXA_TRACE(("payload_chain_allocate: number of children is now "
@@ -378,6 +396,8 @@ int payload_chain_allocate(struct thread_status_s *ts, uint32_t block_id,
                 if (LIXA_RC_OK == (ret_cod =
                                    payload_chain_release(ts, block_id)))
                     ret_cod = LIXA_RC_CONTAINER_FULL;
+                break;
+            case THREAD_STATUS_MARK_BLOCK_ERROR:
                 break;
             case NONE:
                 ret_cod = LIXA_RC_OK;
@@ -1037,9 +1057,11 @@ int status_record_insert(struct thread_status_s *ts,
 int status_record_delete(struct thread_status_s *ts,
                          uint32_t slot)
 {
-    enum Exception { USED_BLOCK_NOT_FOUND
-                     , OBJ_CORRUPTED
-                     , NONE } excp;
+    enum Exception {
+        USED_BLOCK_NOT_FOUND,
+        OBJ_CORRUPTED,
+        NONE
+    } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     
     LIXA_TRACE(("status_record_delete\n"));

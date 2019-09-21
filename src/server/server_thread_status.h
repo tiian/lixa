@@ -199,6 +199,18 @@ extern "C" {
                                           int global_recovery);
 
     
+
+    /**
+     * Mark a block as a changed one that requires to be persisted and
+     * synchronized
+     * @param[in,out] ts thread status reference
+     * @param[in] block_id of the record that must be marked as changed
+     * @return a standardized return code
+     */
+    int thread_status_mark_block(struct thread_status_s *ts,
+                                 uint32_t block_id);
+
+    
     
     /**
      * Synchronize status files: this is the atomic operation necessary to
