@@ -899,25 +899,33 @@ int thread_status_check_recovery_pending(
 
 
 
-
 int thread_status_set_global_recovery(struct thread_status_s *ts,
                                       uint32_t block_id,
                                       int global_recovery)
 {
-    enum Exception { NONE } excp;
+    enum Exception {
+        THREAD_STATUS_MARK_BLOCK_ERROR,
+        NONE
+    } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     
     LIXA_TRACE(("thread_status_set_global_recovery\n"));
     TRY {
         struct status_record_data_s *data =
             &(ts->curr_status[block_id].sr.data);
+        /* @@@@
         status_record_update(ts->curr_status + block_id, block_id,
                              ts->updated_records);
+        */
+        if (LIXA_RC_OK != (ret_cod = thread_status_mark_block(ts, block_id)))
+            THROW(THREAD_STATUS_MARK_BLOCK_ERROR);
         data->pld.ph.state.global_recovery = global_recovery;
         
         THROW(NONE);
     } CATCH {
         switch (excp) {
+            case THREAD_STATUS_MARK_BLOCK_ERROR:
+                break;
             case NONE:
                 ret_cod = LIXA_RC_OK;
                 break;
@@ -929,6 +937,8 @@ int thread_status_set_global_recovery(struct thread_status_s *ts,
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }
+
+
 
 int thread_status_mark_block(struct thread_status_s *ts,
                              uint32_t block_id)
@@ -965,16 +975,19 @@ int thread_status_mark_block(struct thread_status_s *ts,
     
 int thread_status_sync_files(struct thread_status_s *ts)
 {
-    enum Exception { GETTIMEOFDAY_ERROR
-                     , STATUS_RECORD_CHECK_INTEGRITY_ERROR
-                     , MSYNC_ERROR
-                     , MUNMAP_ERROR
-                     , TRUNCATE_ERROR
-                     , OPEN_ERROR
-                     , MMAP_ERROR
-                     , CLOSE_ERROR
-                     , MEMCMP_ERROR
-                     , NONE } excp;
+    enum Exception {
+        GETTIMEOFDAY_ERROR,
+        THREAD_STATUS_MARK_BLOCK_ERROR,
+        STATUS_RECORD_CHECK_INTEGRITY_ERROR,
+        MSYNC_ERROR,
+        MUNMAP_ERROR,
+        TRUNCATE_ERROR,
+        OPEN_ERROR,
+        MMAP_ERROR,
+        CLOSE_ERROR,
+        MEMCMP_ERROR,
+        NONE
+    } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
 
     int alt_fd = LIXA_NULL_FD;
@@ -993,7 +1006,11 @@ int thread_status_sync_files(struct thread_status_s *ts)
         if (LIXA_RC_OK != (ret_cod = gettimeofday(
                                &ts->curr_status->sr.ctrl.last_sync, NULL)))
             THROW(GETTIMEOFDAY_ERROR);
+        /* @@@@
         status_record_update(ts->curr_status, 0, ts->updated_records);
+        */
+        if (LIXA_RC_OK != (ret_cod = thread_status_mark_block(ts, 0)))
+            THROW(THREAD_STATUS_MARK_BLOCK_ERROR);
         g_tree_foreach(ts->updated_records, traverse_and_sync,
                        ts->curr_status);
 #ifdef LIXA_DEBUG
@@ -1091,6 +1108,7 @@ int thread_status_sync_files(struct thread_status_s *ts)
             case GETTIMEOFDAY_ERROR:
                 ret_cod = LIXA_RC_GETTIMEOFDAY_ERROR;
                 break;
+            case THREAD_STATUS_MARK_BLOCK_ERROR:
             case STATUS_RECORD_CHECK_INTEGRITY_ERROR:
                 break;
             case MSYNC_ERROR:

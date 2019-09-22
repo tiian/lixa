@@ -883,14 +883,18 @@ void status_record_display_chains(const status_record_t *sr)
 int status_record_insert(struct thread_status_s *ts,
                          uint32_t *slot)
 {
-    enum Exception { OPEN_ERROR
-                     , FSTAT_ERROR
-                     , MUNMAP_ERROR
-                     , CONTAINER_FULL
-                     , WRITE_ERROR
-                     , MMAP_ERROR
-                     , CLOSE_ERROR
-                     , NONE } excp;
+    enum Exception {
+        OPEN_ERROR,
+        FSTAT_ERROR,
+        MUNMAP_ERROR,
+        CONTAINER_FULL,
+        WRITE_ERROR,
+        MMAP_ERROR,
+        THREAD_STATUS_MARK_BLOCK_ERROR1,
+        THREAD_STATUS_MARK_BLOCK_ERROR2,
+        CLOSE_ERROR,
+        NONE
+    } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     int fd = LIXA_NULL_FD;
     status_record_t *tmp_sra = NULL;
@@ -946,14 +950,16 @@ int status_record_insert(struct thread_status_s *ts,
                 new_size = UINT32_MAX;
                 delta_size = new_size - curr_size;
                 if (delta_size == 0)
-                    THROW(CONTAINER_FULL)
-                        }
+                    THROW(CONTAINER_FULL);
+            }
             for (i = 0; i < delta_size; ++i) {
                 struct status_record_s tmp_sr;
 
                 memset(&tmp_sr, 0, sizeof(tmp_sr));
+                /* @@@@
                 status_record_update(&tmp_sr, curr_size + i,
                                      ts->updated_records);
+                */
                 if (i == delta_size - 1)
                     tmp_sr.sr.data.next_block = 0;
                 else
@@ -973,13 +979,25 @@ int status_record_insert(struct thread_status_s *ts,
                 THROW(MMAP_ERROR);
 
             /* update free block list */
+            /* @@@@
             status_record_update(tmp_sra, 0, ts->updated_records);
+            */
             tmp_sra[0].sr.ctrl.first_free_block = curr_size;
             tmp_sra[0].sr.ctrl.number_of_blocks = new_size;
             LIXA_TRACE(("status_record_insert: status file '%s' mapped at "
                         "address %p\n", ts->status1_filename, tmp_sra));
             *status_is = ts->curr_status = csr = tmp_sra;
-            
+
+            /* mark the first record for change */
+            if (LIXA_RC_OK != (ret_cod = thread_status_mark_block(ts, 0)))
+                THROW(THREAD_STATUS_MARK_BLOCK_ERROR1);
+            /* mark all the new blocks for change */
+            for (i=0; i<delta_size; ++i) {
+                if (LIXA_RC_OK != (ret_cod = thread_status_mark_block(
+                                       ts, curr_size+i)))
+                    THROW(THREAD_STATUS_MARK_BLOCK_ERROR2);
+            } /* for (i=0; i<delta_size; ++i) */
+             
             if (0 != close(fd))
                 THROW(CLOSE_ERROR);
             fd = LIXA_NULL_FD;            
@@ -1026,6 +1044,9 @@ int status_record_insert(struct thread_status_s *ts,
             case MMAP_ERROR:
                 ret_cod = LIXA_RC_MMAP_ERROR;
                 break;
+            case THREAD_STATUS_MARK_BLOCK_ERROR1:
+            case THREAD_STATUS_MARK_BLOCK_ERROR2:
+                break;
             case CLOSE_ERROR:
                 ret_cod = LIXA_RC_CLOSE_ERROR;
                 break;
@@ -1060,6 +1081,13 @@ int status_record_delete(struct thread_status_s *ts,
     enum Exception {
         USED_BLOCK_NOT_FOUND,
         OBJ_CORRUPTED,
+        THREAD_STATUS_MARK_BLOCK_ERROR1,
+        THREAD_STATUS_MARK_BLOCK_ERROR2,
+        THREAD_STATUS_MARK_BLOCK_ERROR3,
+        THREAD_STATUS_MARK_BLOCK_ERROR4,
+        THREAD_STATUS_MARK_BLOCK_ERROR5,
+        THREAD_STATUS_MARK_BLOCK_ERROR6,
+        THREAD_STATUS_MARK_BLOCK_ERROR7,
         NONE
     } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
@@ -1109,14 +1137,26 @@ int status_record_delete(struct thread_status_s *ts,
         /* remove block from used block list */
         if (ul == 0) {
             /* first block in used block list */
+            /* @@@@
             status_record_update(csr, 0, ts->updated_records);
+            */
+            if (LIXA_RC_OK != (ret_cod = thread_status_mark_block(ts, 0)))
+                THROW(THREAD_STATUS_MARK_BLOCK_ERROR1);
             csr[0].sr.ctrl.first_used_block = csr[ur].sr.data.next_block;
         } else {
             /* central or last block in used block list */
+            /* @@@@
             status_record_update(csr + ul, ul, ts->updated_records);
+            */
+            if (LIXA_RC_OK != (ret_cod = thread_status_mark_block(ts, ul)))
+                THROW(THREAD_STATUS_MARK_BLOCK_ERROR2);
             csr[ul].sr.data.next_block = csr[ur].sr.data.next_block;
         }
+        /* @@@@
         status_record_update(csr + ur, ur, ts->updated_records);
+        */
+        if (LIXA_RC_OK != (ret_cod = thread_status_mark_block(ts, ur)))
+            THROW(THREAD_STATUS_MARK_BLOCK_ERROR3);
         csr[ur].sr.data.next_block = 0;
 
         /* insert block in free block list */
@@ -1124,16 +1164,32 @@ int status_record_delete(struct thread_status_s *ts,
             /* insertion happens at list head or list is empty */
             if (fr != 0) {
                 /* list is not empty */
+                /* @@@@
                 status_record_update(csr + ur, ur, ts->updated_records);
+                */
+                if (LIXA_RC_OK != (ret_cod = thread_status_mark_block(ts, ur)))
+                    THROW(THREAD_STATUS_MARK_BLOCK_ERROR4);
                 csr[ur].sr.data.next_block = fr;
             }
+            /* @@@@
             status_record_update(csr, 0, ts->updated_records);
+            */
+            if (LIXA_RC_OK != (ret_cod = thread_status_mark_block(ts, 0)))
+                THROW(THREAD_STATUS_MARK_BLOCK_ERROR5);
             csr[0].sr.ctrl.first_free_block = ur;
         } else {
             /* insertion happens in the middle or at list tail */
+            /* @@@@
             status_record_update(csr + ur, ur, ts->updated_records);
+            */
+            if (LIXA_RC_OK != (ret_cod = thread_status_mark_block(ts, ur)))
+                THROW(THREAD_STATUS_MARK_BLOCK_ERROR6);
             csr[ur].sr.data.next_block = fr;
+            /* @@@@
             status_record_update(csr + fl, fl, ts->updated_records);
+            */
+            if (LIXA_RC_OK != (ret_cod = thread_status_mark_block(ts, fl)))
+                THROW(THREAD_STATUS_MARK_BLOCK_ERROR7);
             csr[fl].sr.data.next_block = ur;
         }
 
@@ -1145,6 +1201,14 @@ int status_record_delete(struct thread_status_s *ts,
                 break;
             case OBJ_CORRUPTED:
                 ret_cod = LIXA_RC_OBJ_CORRUPTED;
+                break;
+            case THREAD_STATUS_MARK_BLOCK_ERROR1:
+            case THREAD_STATUS_MARK_BLOCK_ERROR2:
+            case THREAD_STATUS_MARK_BLOCK_ERROR3:
+            case THREAD_STATUS_MARK_BLOCK_ERROR4:
+            case THREAD_STATUS_MARK_BLOCK_ERROR5:
+            case THREAD_STATUS_MARK_BLOCK_ERROR6:
+            case THREAD_STATUS_MARK_BLOCK_ERROR7:
                 break;
             case NONE:
                 ret_cod = LIXA_RC_OK;

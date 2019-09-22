@@ -316,9 +316,10 @@ int server_xa_commit_8(struct thread_status_s *ts,
     enum Exception {
         INVALID_BLOCK_ID,
         NUMBER_OF_RSRMGRS_MISMATCH,
-        THREAD_STATUS_MARK_BLOCK_ERROR,
+        THREAD_STATUS_MARK_BLOCK_ERROR1,
         XID_SERIALIZE_ERROR,
         TRANS_TABLE_REMOVE_ERROR,
+        THREAD_STATUS_MARK_BLOCK_ERROR2,
         FSM_WANT_MESSAGE,
         NONE
     } excp;
@@ -346,7 +347,7 @@ int server_xa_commit_8(struct thread_status_s *ts,
         */
         if (LIXA_RC_OK != (ret_cod = thread_status_mark_block(
                                ts, block_id)))
-            THROW(THREAD_STATUS_MARK_BLOCK_ERROR);
+            THROW(THREAD_STATUS_MARK_BLOCK_ERROR1);
         ts->curr_status[block_id].sr.data.pld.ph.state.finished =
             lmi->body.commit_8.conthr.finished;
         /* remove XID from the global transaction table */
@@ -373,8 +374,13 @@ int server_xa_commit_8(struct thread_status_s *ts,
                 xa_commit_execs->rmid];
             sr = ts->curr_status + slot;
             /* update the block */
+            /* @@@@
             status_record_update(ts->curr_status + slot, slot,
                                  ts->updated_records);
+            */
+            if (LIXA_RC_OK != (ret_cod = thread_status_mark_block(
+                                   ts, slot)))
+                THROW(THREAD_STATUS_MARK_BLOCK_ERROR2);
             sr->sr.data.pld.rm.state.xa_r_state = xa_commit_execs->r_state;
             sr->sr.data.pld.rm.state.xa_s_state = xa_commit_execs->s_state;
             sr->sr.data.pld.rm.state.next_verb = LIXA_MSG_VERB_NULL;
@@ -396,13 +402,13 @@ int server_xa_commit_8(struct thread_status_s *ts,
             case NUMBER_OF_RSRMGRS_MISMATCH:
                 ret_cod = LIXA_RC_OUT_OF_RANGE;
                 break;
-            case THREAD_STATUS_MARK_BLOCK_ERROR:
+            case THREAD_STATUS_MARK_BLOCK_ERROR1:
                 break;
             case XID_SERIALIZE_ERROR:
                 ret_cod = LIXA_RC_MALFORMED_XID;
                 break;
             case TRANS_TABLE_REMOVE_ERROR:
-                break;
+            case THREAD_STATUS_MARK_BLOCK_ERROR2:
             case FSM_WANT_MESSAGE:
                 break;
             case NONE:
@@ -484,6 +490,7 @@ int server_xa_end_8(struct thread_status_s *ts,
         NUMBER_OF_RSRMGRS_MISMATCH,
         THREAD_STATUS_MARK_BLOCK_ERROR1,
         THREAD_STATUS_MARK_BLOCK_ERROR2,
+        THREAD_STATUS_MARK_BLOCK_ERROR3,
         FSM_SEND_MESSAGE_AND_WAIT,
         NONE
     } excp;
@@ -558,8 +565,13 @@ int server_xa_end_8(struct thread_status_s *ts,
                 xa_end_execs->rmid];
             sr = ts->curr_status + slot;
             /* update the block */
+            /* @@@@
             status_record_update(ts->curr_status + slot, slot,
                                  ts->updated_records);
+            */
+            if (LIXA_RC_OK != (ret_cod = thread_status_mark_block(
+                                   ts, slot)))
+                THROW(THREAD_STATUS_MARK_BLOCK_ERROR3);
             sr->sr.data.pld.rm.state.xa_s_state = xa_end_execs->s_state;
             sr->sr.data.pld.rm.state.xa_td_state = xa_end_execs->td_state;
             sr->sr.data.pld.rm.state.next_verb = LIXA_MSG_VERB_NULL;
@@ -603,6 +615,7 @@ int server_xa_end_8(struct thread_status_s *ts,
                 break;
             case THREAD_STATUS_MARK_BLOCK_ERROR1:
             case THREAD_STATUS_MARK_BLOCK_ERROR2:
+            case THREAD_STATUS_MARK_BLOCK_ERROR3:
             case FSM_SEND_MESSAGE_AND_WAIT:
                 break;
             case NONE:

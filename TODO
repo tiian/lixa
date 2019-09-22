@@ -1,5 +1,5 @@
-Replace status_record_update with thread_status_mark_block in these functions:
- status_record_delete(), status_record_insert(), thread_status_set_global_recovery(), and thread_status_sync_files().
+Move thread_status_mark_block() after the block update, not before at it has
+been till now.
 
 rename status_record_update with something else to check no function but
 thread_status_mark_block 
