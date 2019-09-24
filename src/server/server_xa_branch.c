@@ -127,23 +127,23 @@ int server_xa_branch_chain(struct thread_status_s *ts,
                                          record->block_id,
                                          ts->updated_records);
                     */
-                    if (LIXA_RC_OK != (ret_cod = thread_status_mark_block(
-                                           ts, record->block_id)))
-                        THROW(THREAD_STATUS_MARK_BLOCK_ERROR1);
                     ts->curr_status[record->block_id
                                     ].sr.data.pld.ph.next_branch_block =
                         block_id;
+                    if (LIXA_RC_OK != (ret_cod = thread_status_mark_block(
+                                           ts, record->block_id)))
+                        THROW(THREAD_STATUS_MARK_BLOCK_ERROR1);
                     /* this is the block to connect */
                     /* @@@@
                     status_record_update(ts->curr_status + block_id,
                                          block_id, ts->updated_records);
                     */
-                    if (LIXA_RC_OK != (ret_cod = thread_status_mark_block(
-                                           ts, block_id)))
-                        THROW(THREAD_STATUS_MARK_BLOCK_ERROR2);
                     ts->curr_status[block_id
                                     ].sr.data.pld.ph.prev_branch_block =
                         record->block_id;
+                    if (LIXA_RC_OK != (ret_cod = thread_status_mark_block(
+                                           ts, block_id)))
+                        THROW(THREAD_STATUS_MARK_BLOCK_ERROR2);
                     chained = TRUE;
                     LIXA_TRACE(("server_xa_branch_chain: chained to "
                                 "block_id=%u\n", block_id));
@@ -215,12 +215,12 @@ int server_xa_branch_unchain(struct thread_status_s *ts,
             status_record_update(ts->curr_status + prev_branch_block,
                                  prev_branch_block, ts->updated_records);
             */
-            if (LIXA_RC_OK != (ret_cod = thread_status_mark_block(
-                                   ts, prev_branch_block)))
-                THROW(THREAD_STATUS_MARK_BLOCK_ERROR1);
             ts->curr_status[prev_branch_block
                             ].sr.data.pld.ph.next_branch_block =
                 next_branch_block;
+            if (LIXA_RC_OK != (ret_cod = thread_status_mark_block(
+                                   ts, prev_branch_block)))
+                THROW(THREAD_STATUS_MARK_BLOCK_ERROR1);
         } /* if (0 != prev_branch_block) */
         if (0 != next_branch_block) {
             LIXA_TRACE(("server_xa_branch_unchain: unchaining next "
@@ -230,12 +230,12 @@ int server_xa_branch_unchain(struct thread_status_s *ts,
             status_record_update(ts->curr_status + next_branch_block,
                                  next_branch_block, ts->updated_records);
             */
-            if (LIXA_RC_OK != (ret_cod = thread_status_mark_block(
-                                   ts, next_branch_block)))
-                THROW(THREAD_STATUS_MARK_BLOCK_ERROR2);
             ts->curr_status[next_branch_block
                             ].sr.data.pld.ph.prev_branch_block =
                 prev_branch_block;
+            if (LIXA_RC_OK != (ret_cod = thread_status_mark_block(
+                                   ts, next_branch_block)))
+                THROW(THREAD_STATUS_MARK_BLOCK_ERROR2);
         } /* if (0 != prev_branch_block) */
         /* resetting current block_id */
         ts->curr_status[block_id].sr.data.pld.ph.next_branch_block = 0;

@@ -917,9 +917,9 @@ int thread_status_set_global_recovery(struct thread_status_s *ts,
         status_record_update(ts->curr_status + block_id, block_id,
                              ts->updated_records);
         */
+        data->pld.ph.state.global_recovery = global_recovery;
         if (LIXA_RC_OK != (ret_cod = thread_status_mark_block(ts, block_id)))
             THROW(THREAD_STATUS_MARK_BLOCK_ERROR);
-        data->pld.ph.state.global_recovery = global_recovery;
         
         THROW(NONE);
     } CATCH {
