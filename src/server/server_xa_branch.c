@@ -191,6 +191,7 @@ int server_xa_branch_unchain(struct thread_status_s *ts,
         BYPASSED_OPERATION,
         THREAD_STATUS_MARK_BLOCK_ERROR1,
         THREAD_STATUS_MARK_BLOCK_ERROR2,
+        THREAD_STATUS_MARK_BLOCK_ERROR3,
         NONE
     } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
@@ -240,8 +241,12 @@ int server_xa_branch_unchain(struct thread_status_s *ts,
         /* resetting current block_id */
         ts->curr_status[block_id].sr.data.pld.ph.next_branch_block = 0;
         ts->curr_status[block_id].sr.data.pld.ph.prev_branch_block = 0;
+        /* @@@@
         status_record_update(ts->curr_status + block_id,
                              block_id, ts->updated_records);
+        */
+        if (LIXA_RC_OK != (ret_cod = thread_status_mark_block(ts, block_id)))
+            THROW(THREAD_STATUS_MARK_BLOCK_ERROR3);
         
         THROW(NONE);
     } CATCH {
@@ -251,6 +256,7 @@ int server_xa_branch_unchain(struct thread_status_s *ts,
                 break;
             case THREAD_STATUS_MARK_BLOCK_ERROR1:
             case THREAD_STATUS_MARK_BLOCK_ERROR2:
+            case THREAD_STATUS_MARK_BLOCK_ERROR3:
                 break;
             case NONE:
                 ret_cod = LIXA_RC_OK;

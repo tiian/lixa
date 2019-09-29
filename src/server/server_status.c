@@ -1012,23 +1012,19 @@ int status_record_insert(struct thread_status_s *ts,
                     csr[0].sr.ctrl.first_free_block,
                     csr[0].sr.ctrl.first_used_block));
         *slot = csr[0].sr.ctrl.first_free_block;
-        /* @@@@ */
+        /* @@@@ 
         status_record_update(csr, 0, ts->updated_records);
+        */
         csr[0].sr.ctrl.first_free_block = csr[*slot].sr.data.next_block;
-        /* @@@@ */
+        /* @@@@
         status_record_update(csr + *slot, *slot, ts->updated_records);
+        */
         csr[*slot].sr.data.next_block = csr[0].sr.ctrl.first_used_block;
-        csr[0].sr.ctrl.first_used_block = *slot;
-        /* mark the first record for change, again */
-        /* @@@@ this seems to be bugged
-        if (LIXA_RC_OK != (ret_cod = thread_status_mark_block(ts, 0)))
-            THROW(THREAD_STATUS_MARK_BLOCK_ERROR3);
-        */
-        /* mark the new slot for change */
-        /* @@@@ this seems to be bugged
         if (LIXA_RC_OK != (ret_cod = thread_status_mark_block(ts, *slot)))
+            THROW(THREAD_STATUS_MARK_BLOCK_ERROR3);
+        csr[0].sr.ctrl.first_used_block = *slot;
+        if (LIXA_RC_OK != (ret_cod = thread_status_mark_block(ts, 0)))
             THROW(THREAD_STATUS_MARK_BLOCK_ERROR4);
-        */
         LIXA_TRACE(("status_record_insert: first_free_block = "
                     UINT32_T_FORMAT ", first_used_block = "
                     UINT32_T_FORMAT ", last inserted next block = "

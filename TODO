@@ -1,9 +1,3 @@
-Move thread_status_mark_block() after the block update, not before at it has
-been till now.
-
-Changes at rows 1015-1030 of server_status.c introduce a bug: understand what's
-the root cause. status_record_insert does not tolerate the inversion
-
 rename status_record_update with something else to check no function but
 thread_status_mark_block 
 requires it
