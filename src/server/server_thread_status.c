@@ -94,6 +94,7 @@ void thread_status_init(struct thread_status_s *ts, int id,
         ts->updated_records = g_tree_new(size_t_compare_func);
     else /* listener does not need this structure */
         ts->updated_records = NULL;
+    ts->number_of_updated_records = 0;
     ts->recovery_table = NULL;
     ts->trans_table = NULL;
     ts->mmode = mmode;
@@ -495,7 +496,8 @@ int thread_status_load_files(struct thread_status_s *ts,
         if (LIXA_RC_OK != (ret_cod = status_record_load(
                                &(ts->status1),
                                (const char *)ts->status1_filename,
-                               &(ts->updated_records), tsds->dump)))
+                               &(ts->updated_records),
+                               &(ts->number_of_updated_records), tsds->dump)))
             THROW(STATUS_RECORD_LOAD_1_ERROR);
         if (LIXA_RC_OK != (ret_cod = status_record_check_integrity(
                                ts->status1))) {
@@ -512,7 +514,8 @@ int thread_status_load_files(struct thread_status_s *ts,
         if (LIXA_RC_OK != (ret_cod = status_record_load(
                                &(ts->status2),
                                (const char *)ts->status2_filename,
-                               &(ts->updated_records), tsds->dump)))
+                               &(ts->updated_records),
+                               &(ts->number_of_updated_records), tsds->dump)))
             THROW(STATUS_RECORD_LOAD_2_ERROR);
         if (LIXA_RC_OK != (ret_cod = status_record_check_integrity(
                                ts->status2))) {
@@ -948,12 +951,14 @@ int thread_status_mark_block(struct thread_status_s *ts,
     } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
 
+    LIXA_TRACE(("thread_status_mark_block\n"));
+    
     /* legacy way to do it, remove it when the new way is ok */
     status_record_update(ts->curr_status + block_id, block_id,
-                         ts->updated_records);
+                         ts->updated_records,
+                         &(ts->number_of_updated_records));
     /* new way to keep track with state logs */
     
-    LIXA_TRACE(("thread_status_mark_block\n"));
     TRY {
         
         THROW(NONE);
@@ -1094,6 +1099,7 @@ int thread_status_sync_files(struct thread_status_s *ts)
         /* clean updated records set */
         g_tree_destroy(ts->updated_records);
         ts->updated_records = g_tree_new(size_t_compare_func);
+        ts->number_of_updated_records = 0;
         /* recover the pointer in thread status structure... */
         *status_is = alt_status;
         /* switch to alternate status mapped file */

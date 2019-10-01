@@ -416,6 +416,7 @@ int payload_chain_allocate(struct thread_status_s *ts, uint32_t block_id,
 int status_record_load(status_record_t **sr,
                        const char *status_file,
                        GTree **updated_records,
+                       int *number_of_updated_records,
                        int readonly)
 {
     enum Exception {
@@ -454,6 +455,7 @@ int status_record_load(status_record_t **sr,
         /* clean updated records set */
         g_tree_destroy(*updated_records);
         *updated_records = g_tree_new(size_t_compare_func);
+        *number_of_updated_records = 0;
         
         /* retrieve size */
         if (0 != fstat(fd, &fd_stat))
@@ -1239,11 +1241,13 @@ int status_record_delete(struct thread_status_s *ts,
 
 void status_record_update(status_record_t *sr,
                           uintptr_t index,
-                          GTree *updated_records)
+                          GTree *updated_records,
+                          int *number_of_updated_records)
 {
     if (!(sr->counter & 0x1)) {
         sr->counter++;
         g_tree_insert(updated_records, (gpointer) index, NULL);
+        (*number_of_updated_records)++;
         LIXA_TRACE(("status_record_update: inserted "
                     "index "
                     UINTPTR_T_FORMAT
@@ -1252,7 +1256,7 @@ void status_record_update(status_record_t *sr,
                     ", address=%p) in updated records tree "
                     "(number of nodes now is %d)\n",
                     index, sr->counter, sr,
-                    g_tree_nnodes(updated_records)));
+                    *number_of_updated_records));
     }
 }
 
