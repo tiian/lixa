@@ -947,23 +947,45 @@ int thread_status_mark_block(struct thread_status_s *ts,
                              uint32_t block_id)
 {
     enum Exception {
+        NULL_OBJECT,
         NONE
     } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
 
     LIXA_TRACE(("thread_status_mark_block\n"));
-    
-    /* legacy way to do it, remove it when the new way is ok */
+    TRY {
+        status_record_t *sr = NULL;
+
+        if (NULL == ts)
+            THROW(NULL_OBJECT);
+        /* legacy way to do it, remove it when the new way is ok */
+        sr = ts->curr_status + block_id;
+        if (!(sr->counter & 0x1)) {
+            uintptr_t index = block_id;
+            sr->counter++;
+            g_tree_insert(ts->updated_records, (gpointer)index, NULL);
+            ts->number_of_updated_records++;
+            LIXA_TRACE(("thread_status_mark_block: inserted index "
+                        UINTPTR_T_FORMAT " (counter=" UINT32_T_FORMAT
+                        ") in updated records tree "
+                        "(number of nodes now is %d)\n",
+                        index, sr->counter,
+                        ts->number_of_updated_records));
+    }
+    /*
     status_record_update(ts->curr_status + block_id, block_id,
                          ts->updated_records,
                          &(ts->number_of_updated_records));
+    */
     /* new way to keep track with state logs */
     
-    TRY {
         
         THROW(NONE);
     } CATCH {
         switch (excp) {
+            case NULL_OBJECT:
+                ret_cod = LIXA_RC_NULL_OBJECT;
+                break;
             case NONE:
                 ret_cod = LIXA_RC_OK;
                 break;

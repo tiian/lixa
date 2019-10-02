@@ -1238,7 +1238,7 @@ int status_record_delete(struct thread_status_s *ts,
 }
 
 
-
+/* @@@@
 void status_record_update(status_record_t *sr,
                           uintptr_t index,
                           GTree *updated_records,
@@ -1259,7 +1259,7 @@ void status_record_update(status_record_t *sr,
                     *number_of_updated_records));
     }
 }
-
+*/
 
 
 int status_record_sync(status_record_t *sr)
