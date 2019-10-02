@@ -107,7 +107,7 @@ void thread_status_init(struct thread_status_s *ts, int id,
     
     /* @@@ FIX ME, JUST FOR DEBUGGING lixa_state 20190904 */
     snprintf(file_name, sizeof(file_name), "/tmp/lixad_state%d", id);
-    assert(lixa_state_init(&ts->state, file_name) == LIXA_RC_OK);
+    assert(lixa_state_init(&ts->state, file_name, 3) == LIXA_RC_OK);
     assert(lixa_state_clean(&ts->state) == LIXA_RC_OK);
     /* @@@ end of FIX ME SECTION */
         
@@ -944,6 +944,7 @@ int thread_status_mark_block(struct thread_status_s *ts,
 {
     enum Exception {
         NULL_OBJECT,
+        FLUSH_LOG_RECORDS_ERROR,
         NONE
     } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
@@ -968,13 +969,23 @@ int thread_status_mark_block(struct thread_status_s *ts,
                         index, sr->counter,
                         ts->number_of_updated_records));
         }
-        /* @@@ check if state log must be flushed */
+        /* check if state log must be flushed */
+        if (ts->number_of_updated_records >=
+            lixa_state_get_flush_max_log_records(&ts->state)) {
+            LIXA_TRACE(("thread_status_mark_block: flush records\n"));
+            if (LIXA_RC_OK != (ret_cod = lixa_state_flush_log_records(
+                                   &ts->state, ts->curr_status,
+                                   ts->updated_records)))
+                THROW(FLUSH_LOG_RECORDS_ERROR);
+        }
         
         THROW(NONE);
     } CATCH {
         switch (excp) {
             case NULL_OBJECT:
                 ret_cod = LIXA_RC_NULL_OBJECT;
+                break;
+            case FLUSH_LOG_RECORDS_ERROR:
                 break;
             case NONE:
                 ret_cod = LIXA_RC_OK;

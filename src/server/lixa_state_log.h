@@ -23,6 +23,7 @@
 
 #include "lixa_trace.h"
 #include "config.h"
+#include "status_record.h"
 
 
 

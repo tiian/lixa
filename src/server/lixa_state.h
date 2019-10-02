@@ -25,10 +25,15 @@
 
 
 
+#ifdef HAVE_GLIB_H
+# include <glib.h>
+#endif
+
+
+
 #include "lixa_trace.h"
 #include "lixa_state_file.h"
 #include "lixa_state_log.h"
-#include "status_record.h"
 
 
 
@@ -70,6 +75,10 @@ typedef struct lixa_state_s {
      */
     size_t                system_page_size;
     /**
+     * Maximum number of log records before a flush happens; 0 = unlimited
+     */
+    int                   flush_max_log_records;
+    /**
      * Array of state files
      */
     lixa_state_file_t     files[LIXA_STATE_FILES];
@@ -91,9 +100,12 @@ extern "C" {
      * Initialize a State object to manage state server persistence
      * @param[in,out] this object to be initialized
      * @param[in] path_prefix of the state and log files
+     * @param[in] flush_max_log_records is the maximum number of log records
+     *            to be buffered before a flush happens; 0 = unlimited
      * @return a reason code
      */
-    int lixa_state_init(lixa_state_t *this, const char *path_prefix);
+    int lixa_state_init(lixa_state_t *this, const char *path_prefix,
+                        int flush_max_log_records);
 
 
 
@@ -131,11 +143,33 @@ extern "C" {
     int lixa_state_clean(lixa_state_t *this);
 
 
-    /* @@@ 
-    int lixa_state_record_update(status_record_t *sr,
-                                 uintptr_t index,
-                                 GTree *updated_records);
-    */
+
+    
+    /**
+     * Return the maximum number of log records before a flush happens
+     * @param[in] this state object
+     * @return special values: 0 = unlimited, -1 = error
+     */
+    static inline int lixa_state_get_flush_max_log_records(lixa_state_t *this)
+    {
+        return NULL == this ? -1 : this->flush_max_log_records;
+    }
+    
+
+
+    /**
+     * Flush the records to the state log
+     * @param[in,out] this state object
+     * @param[in] status_records @@@ move to lixa_state_file_t?
+     * @param[in] updated_records that must be flushed to state log
+     * @return a reason code
+     */
+    int lixa_state_flush_log_records(lixa_state_t *this,
+                                     status_record_t *status_records,
+                                     GTree *updated_records);
+
+    
+    
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
