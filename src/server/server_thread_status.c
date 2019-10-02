@@ -916,10 +916,6 @@ int thread_status_set_global_recovery(struct thread_status_s *ts,
     TRY {
         struct status_record_data_s *data =
             &(ts->curr_status[block_id].sr.data);
-        /* @@@@
-        status_record_update(ts->curr_status + block_id, block_id,
-                             ts->updated_records);
-        */
         data->pld.ph.state.global_recovery = global_recovery;
         if (LIXA_RC_OK != (ret_cod = thread_status_mark_block(ts, block_id)))
             THROW(THREAD_STATUS_MARK_BLOCK_ERROR);
@@ -958,7 +954,7 @@ int thread_status_mark_block(struct thread_status_s *ts,
 
         if (NULL == ts)
             THROW(NULL_OBJECT);
-        /* legacy way to do it, remove it when the new way is ok */
+        /* mark the changed block */
         sr = ts->curr_status + block_id;
         if (!(sr->counter & 0x1)) {
             uintptr_t index = block_id;
@@ -971,14 +967,8 @@ int thread_status_mark_block(struct thread_status_s *ts,
                         "(number of nodes now is %d)\n",
                         index, sr->counter,
                         ts->number_of_updated_records));
-    }
-    /*
-    status_record_update(ts->curr_status + block_id, block_id,
-                         ts->updated_records,
-                         &(ts->number_of_updated_records));
-    */
-    /* new way to keep track with state logs */
-    
+        }
+        /* @@@ check if state log must be flushed */
         
         THROW(NONE);
     } CATCH {
@@ -1033,9 +1023,6 @@ int thread_status_sync_files(struct thread_status_s *ts)
         if (LIXA_RC_OK != (ret_cod = gettimeofday(
                                &ts->curr_status->sr.ctrl.last_sync, NULL)))
             THROW(GETTIMEOFDAY_ERROR);
-        /* @@@@
-        status_record_update(ts->curr_status, 0, ts->updated_records);
-        */
         if (LIXA_RC_OK != (ret_cod = thread_status_mark_block(ts, 0)))
             THROW(THREAD_STATUS_MARK_BLOCK_ERROR);
         g_tree_foreach(ts->updated_records, traverse_and_sync,

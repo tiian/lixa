@@ -122,11 +122,6 @@ int server_xa_branch_chain(struct thread_status_s *ts,
             if (0 == next_branch_block) {
                 if (!chained) {
                     /* this is the point to connect to */
-                    /* @@@@
-                    status_record_update(ts->curr_status + record->block_id,
-                                         record->block_id,
-                                         ts->updated_records);
-                    */
                     ts->curr_status[record->block_id
                                     ].sr.data.pld.ph.next_branch_block =
                         block_id;
@@ -134,10 +129,6 @@ int server_xa_branch_chain(struct thread_status_s *ts,
                                            ts, record->block_id)))
                         THROW(THREAD_STATUS_MARK_BLOCK_ERROR1);
                     /* this is the block to connect */
-                    /* @@@@
-                    status_record_update(ts->curr_status + block_id,
-                                         block_id, ts->updated_records);
-                    */
                     ts->curr_status[block_id
                                     ].sr.data.pld.ph.prev_branch_block =
                         record->block_id;
@@ -212,10 +203,6 @@ int server_xa_branch_unchain(struct thread_status_s *ts,
             LIXA_TRACE(("server_xa_branch_unchain: unchaining previous "
                         "block " UINT32_T_FORMAT " from this one ("
                         UINT32_T_FORMAT ")\n", prev_branch_block, block_id));
-            /* @@@@
-            status_record_update(ts->curr_status + prev_branch_block,
-                                 prev_branch_block, ts->updated_records);
-            */
             ts->curr_status[prev_branch_block
                             ].sr.data.pld.ph.next_branch_block =
                 next_branch_block;
@@ -227,10 +214,6 @@ int server_xa_branch_unchain(struct thread_status_s *ts,
             LIXA_TRACE(("server_xa_branch_unchain: unchaining next "
                         "block " UINT32_T_FORMAT " from this one ("
                         UINT32_T_FORMAT ")\n", next_branch_block, block_id));
-            /* @@@@
-            status_record_update(ts->curr_status + next_branch_block,
-                                 next_branch_block, ts->updated_records);
-            */
             ts->curr_status[next_branch_block
                             ].sr.data.pld.ph.prev_branch_block =
                 prev_branch_block;
@@ -241,10 +224,6 @@ int server_xa_branch_unchain(struct thread_status_s *ts,
         /* resetting current block_id */
         ts->curr_status[block_id].sr.data.pld.ph.next_branch_block = 0;
         ts->curr_status[block_id].sr.data.pld.ph.prev_branch_block = 0;
-        /* @@@@
-        status_record_update(ts->curr_status + block_id,
-                             block_id, ts->updated_records);
-        */
         if (LIXA_RC_OK != (ret_cod = thread_status_mark_block(ts, block_id)))
             THROW(THREAD_STATUS_MARK_BLOCK_ERROR3);
         

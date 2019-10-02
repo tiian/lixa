@@ -94,10 +94,6 @@ int server_ax_reg(struct thread_status_s *ts,
         slot = ts->curr_status[block_id].sr.data.pld.ph.block_array[
             ax_reg_exec->rmid];
         /* mark the slot as updated */
-        /* @@@@
-        status_record_update(ts->curr_status + slot, slot,
-                             ts->updated_records);
-        */
         sr = ts->curr_status + slot;
         sr->sr.data.pld.rm.state.xa_td_state = ax_reg_exec->td_state;
         sr->sr.data.pld.rm.state.xa_s_state = ax_reg_exec->s_state;
@@ -183,10 +179,6 @@ int server_ax_unreg(struct thread_status_s *ts,
         slot = ts->curr_status[block_id].sr.data.pld.ph.block_array[
             ax_unreg_exec->rmid];
         /* mark the slot as updated */
-        /* @@@@
-        status_record_update(ts->curr_status + slot, slot,
-                             ts->updated_records);
-        */
         sr = ts->curr_status + slot;
         sr->sr.data.pld.rm.state.xa_td_state = ax_unreg_exec->td_state;
         sr->sr.data.pld.rm.ax_unreg_flags = ax_unreg_exec->flags;
@@ -340,10 +332,6 @@ int server_xa_commit_8(struct thread_status_s *ts,
             ts->curr_status[block_id].sr.data.pld.ph.n)
             THROW(NUMBER_OF_RSRMGRS_MISMATCH);
         /* store commit/rollback intent after commit phase */
-        /* @@@@
-        status_record_update(ts->curr_status + block_id, block_id,
-                             ts->updated_records);
-        */
         ts->curr_status[block_id].sr.data.pld.ph.state.finished =
             lmi->body.commit_8.conthr.finished;
         if (LIXA_RC_OK != (ret_cod = thread_status_mark_block(ts, block_id)))
@@ -372,10 +360,6 @@ int server_xa_commit_8(struct thread_status_s *ts,
                 xa_commit_execs->rmid];
             sr = ts->curr_status + slot;
             /* update the block */
-            /* @@@@
-            status_record_update(ts->curr_status + slot, slot,
-                                 ts->updated_records);
-            */
             sr->sr.data.pld.rm.state.xa_r_state = xa_commit_execs->r_state;
             sr->sr.data.pld.rm.state.xa_s_state = xa_commit_execs->s_state;
             sr->sr.data.pld.rm.state.next_verb = LIXA_MSG_VERB_NULL;
@@ -515,10 +499,6 @@ int server_xa_end_8(struct thread_status_s *ts,
             multiple_branches = TRUE;
         }
         /* store commit/rollback intent */
-        /* @@@@
-        status_record_update(ts->curr_status + block_id, block_id,
-                             ts->updated_records);
-        */
         if (lmi->body.end_8.conthr.commit) {
             ts->curr_status[block_id].sr.data.pld.ph.state.will_commit = TRUE;
         } else
@@ -539,10 +519,6 @@ int server_xa_end_8(struct thread_status_s *ts,
                         "\n", i, slot));
             sr = ts->curr_status + slot;
             /* update the block */
-            /* @@@@
-            status_record_update(ts->curr_status + slot, slot,
-                                 ts->updated_records);
-            */
             sr->sr.data.pld.rm.state.next_verb = LIXA_MSG_VERB_END;
             if (LIXA_RC_OK != (ret_cod = thread_status_mark_block(ts, slot)))
                 THROW(THREAD_STATUS_MARK_BLOCK_ERROR2);
@@ -560,10 +536,6 @@ int server_xa_end_8(struct thread_status_s *ts,
                 xa_end_execs->rmid];
             sr = ts->curr_status + slot;
             /* update the block */
-            /* @@@@
-            status_record_update(ts->curr_status + slot, slot,
-                                 ts->updated_records);
-            */
             sr->sr.data.pld.rm.state.xa_s_state = xa_end_execs->s_state;
             sr->sr.data.pld.rm.state.xa_td_state = xa_end_execs->td_state;
             sr->sr.data.pld.rm.state.next_verb = LIXA_MSG_VERB_NULL;
@@ -698,10 +670,6 @@ int server_xa_forget_8(struct thread_status_s *ts,
             ts->curr_status[block_id].sr.data.pld.ph.n)
             THROW(NUMBER_OF_RSRMGRS_MISMATCH);
         /* store transaction finished status */
-        /* @@@@
-        status_record_update(ts->curr_status + block_id, block_id,
-                             ts->updated_records);
-        */
         ts->curr_status[block_id].sr.data.pld.ph.state.finished =
             lmi->body.forget_8.conthr.finished;
         if (LIXA_RC_OK != (ret_cod = thread_status_mark_block(ts, block_id)))
@@ -719,10 +687,6 @@ int server_xa_forget_8(struct thread_status_s *ts,
                 xa_forget_execs->rmid];
             sr = ts->curr_status + slot;
             /* update the block */
-            /* @@@@
-            status_record_update(ts->curr_status + slot, slot,
-                                 ts->updated_records);
-            */
             sr->sr.data.pld.rm.state.xa_s_state = xa_forget_execs->s_state;
             sr->sr.data.pld.rm.state.next_verb = LIXA_MSG_VERB_NULL;
             sr->sr.data.pld.rm.xa_forget_flags = xa_forget_execs->flags;
@@ -992,10 +956,6 @@ int server_xa_open_24(struct thread_status_s *ts,
             if (sr->sr.data.pld.rm.rmid != xa_open_execs->rmid)
                 THROW(INVALID_RMID);
             /* update the block */
-            /* @@@@
-            status_record_update(ts->curr_status + slot, slot,
-                                 ts->updated_records);
-            */
             sr->sr.data.pld.rm.state.xa_r_state = xa_open_execs->r_state;
             sr->sr.data.pld.rm.state.next_verb = LIXA_MSG_VERB_NULL;
             strncpy(sr->sr.data.pld.rm.xa_open_info,
@@ -1146,10 +1106,6 @@ int server_xa_prepare_8(struct thread_status_s *ts,
                 THROW(BRANCH_LIST);
         }
         /* store commit/rollback intent after prepare phase */
-        /* @@@@
-        status_record_update(ts->curr_status + block_id, block_id,
-                             ts->updated_records);
-        */
         if (lmi->body.prepare_8.conthr.commit) {
             ts->curr_status[block_id].sr.data.pld.ph.state.will_commit = TRUE;
             ts->curr_status[block_id].sr.data.pld.ph.state.will_rollback =
@@ -1174,10 +1130,6 @@ int server_xa_prepare_8(struct thread_status_s *ts,
                 xa_prepare_execs->rmid];
             sr = ts->curr_status + slot;
             /* update the block */
-            /* @@@@
-            status_record_update(ts->curr_status + slot, slot,
-                                 ts->updated_records);
-            */
             sr->sr.data.pld.rm.state.xa_s_state = xa_prepare_execs->s_state;
             sr->sr.data.pld.rm.state.xa_td_state = xa_prepare_execs->td_state;
             sr->sr.data.pld.rm.state.next_verb = LIXA_MSG_VERB_NULL;
@@ -1482,10 +1434,6 @@ int server_xa_rollback_8(struct thread_status_s *ts,
             ts->curr_status[block_id].sr.data.pld.ph.n)
             THROW(NUMBER_OF_RSRMGRS_MISMATCH);
         /* store rollback intent */
-        /* @@@@
-        status_record_update(ts->curr_status + block_id, block_id,
-                             ts->updated_records);
-        */
         ts->curr_status[block_id].sr.data.pld.ph.state.finished =
             lmi->body.rollback_8.conthr.finished;
         if (LIXA_RC_OK != (ret_cod = thread_status_mark_block(ts, block_id)))
@@ -1518,10 +1466,6 @@ int server_xa_rollback_8(struct thread_status_s *ts,
                 xa_rollback_execs->rmid];
             sr = ts->curr_status + slot;
             /* update the block */
-            /* @@@@
-            status_record_update(ts->curr_status + slot, slot,
-                                 ts->updated_records);
-            */
             sr->sr.data.pld.rm.state.xa_r_state = xa_rollback_execs->r_state;
             sr->sr.data.pld.rm.state.xa_s_state = xa_rollback_execs->s_state;
             sr->sr.data.pld.rm.state.next_verb = LIXA_MSG_VERB_NULL;
@@ -1738,10 +1682,6 @@ int server_xa_start_8(struct thread_status_s *ts,
         } /* if (lmi->body.start_8.conthr.sub_branch) */
         
         /* store XID in the header block */
-        /* @@@@
-        status_record_update(ts->curr_status + block_id, block_id,
-                             ts->updated_records);
-        */
         ts->curr_status[block_id].sr.data.pld.ph.state.xid =
             lmi->body.start_8.conthr.xid;
         if (LIXA_RC_OK != (ret_cod = thread_status_mark_block(ts, block_id)))
@@ -1773,10 +1713,6 @@ int server_xa_start_8(struct thread_status_s *ts,
                         "manager # " UINT32_T_FORMAT "\n", rsrmgrs->rmid));
             sr = ts->curr_status + slot;
             /* update the block */
-            /* @@@@
-            status_record_update(ts->curr_status + slot, slot,
-                                 ts->updated_records);
-            */
             sr->sr.data.pld.rm.state.next_verb = LIXA_MSG_VERB_START;
             if (LIXA_RC_OK != (ret_cod = thread_status_mark_block(ts, slot)))
                 THROW(THREAD_STATUS_MARK_BLOCK_ERROR2);
@@ -1875,10 +1811,6 @@ int server_xa_start_24(struct thread_status_s *ts,
             ts->curr_status[block_id].sr.data.pld.ph.n)
             THROW(NUMBER_OF_RSRMGRS_MISMATCH);
         /* retrieve and save control thread status */
-        /* @@@@
-        status_record_update(ts->curr_status + block_id, block_id,
-                             ts->updated_records);
-        */
         ts->curr_status[block_id].sr.data.pld.ph.state.txstate =
             lmi->body.start_24.conthr.txstate;
         if (LIXA_RC_OK != (ret_cod = thread_status_mark_block(ts, block_id)))
@@ -1895,10 +1827,6 @@ int server_xa_start_24(struct thread_status_s *ts,
                 xa_start_execs->rmid];
             sr = ts->curr_status + slot;
             /* update the block */
-            /* @@@@
-            status_record_update(ts->curr_status + slot, slot,
-                                 ts->updated_records);
-            */
             sr->sr.data.pld.rm.state.xa_td_state = xa_start_execs->td_state;
             sr->sr.data.pld.rm.state.xa_s_state = xa_start_execs->s_state;
             sr->sr.data.pld.rm.state.next_verb = LIXA_MSG_VERB_NULL;

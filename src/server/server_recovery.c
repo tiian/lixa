@@ -261,10 +261,6 @@ int server_recovery_24(struct thread_status_s *ts,
                         " and its chain\n", recovering_block_id));
             ph->recovery_failed = TRUE;
             ph->recovery_commit = lmi->body.qrcvr_24.recovery.commit;
-            /* @@@@
-            status_record_update(ts->curr_status + recovering_block_id,
-                                 recovering_block_id, ts->updated_records);
-            */
             if (LIXA_RC_OK != (ret_cod = thread_status_mark_block(
                                    ts, recovering_block_id)))
                 THROW(THREAD_STATUS_MARK_BLOCK_ERROR1);
@@ -280,12 +276,6 @@ int server_recovery_24(struct thread_status_s *ts,
                                         i);
                 sr = ts->curr_status + ph->block_array[rsrmgr->rmid];
                 sr->sr.data.pld.rm.recovery_rc = rsrmgr->rc;
-                /* @@@@
-                status_record_update(ts->curr_status +
-                                     ph->block_array[rsrmgr->rmid],
-                                     ph->block_array[rsrmgr->rmid],
-                                     ts->updated_records);
-                */
                 if (LIXA_RC_OK != (ret_cod = thread_status_mark_block(
                                        ts, ph->block_array[rsrmgr->rmid])))
                     THROW(THREAD_STATUS_MARK_BLOCK_ERROR2);
@@ -354,10 +344,6 @@ int server_recovery_result(struct thread_status_s *ts,
         /* register the block is in recovery phase */
         ts->curr_status[client_block_id].sr.data.pld.ph.recovering_block_id =
             block_id;
-        /* @@@@
-        status_record_update(ts->curr_status + client_block_id,
-                             client_block_id, ts->updated_records);
-        */
         if (LIXA_RC_OK != (ret_cod = thread_status_mark_block(
                                ts, client_block_id)))
             THROW(THREAD_STATUS_MARK_BLOCK_ERROR);

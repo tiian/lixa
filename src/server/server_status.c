@@ -227,10 +227,6 @@ int payload_header_store_verb_step(struct thread_status_s *ts,
                     vs->verb, vs->step));
         pld->ph.last_verb_step[0] = *vs;
         /* update the record */
-        /* @@@@
-        status_record_update(ts->curr_status + block_id, block_id,
-                             ts->updated_records);
-        */
         if (LIXA_RC_OK != (ret_cod = thread_status_mark_block(
                                ts, block_id)))
             THROW(THREAD_STATUS_MARK_BLOCK_ERROR);
@@ -366,10 +362,6 @@ int payload_chain_allocate(struct thread_status_s *ts, uint32_t block_id,
             ts->curr_status[new_slot].sr.data.pld.type =
                 DATA_PAYLOAD_TYPE_RSRMGR;
             /* point the new block from chain */
-            /* @@@@
-            status_record_update(ts->curr_status + block_id, block_id,
-                                 ts->updated_records);
-            */
             ts->curr_status[block_id].sr.data.pld.ph.block_array[i] = new_slot;
             ts->curr_status[block_id].sr.data.pld.ph.n++;
             LIXA_TRACE(("payload_chain_allocate: number of children is now "
@@ -960,10 +952,6 @@ int status_record_insert(struct thread_status_s *ts,
                 struct status_record_s tmp_sr;
 
                 memset(&tmp_sr, 0, sizeof(tmp_sr));
-                /* @@@@
-                status_record_update(&tmp_sr, curr_size + i,
-                                     ts->updated_records);
-                */
                 if (i == delta_size - 1)
                     tmp_sr.sr.data.next_block = 0;
                 else
@@ -983,9 +971,6 @@ int status_record_insert(struct thread_status_s *ts,
                 THROW(MMAP_ERROR);
 
             /* update free block list */
-            /* @@@@
-            status_record_update(tmp_sra, 0, ts->updated_records);
-            */
             tmp_sra[0].sr.ctrl.first_free_block = curr_size;
             tmp_sra[0].sr.ctrl.number_of_blocks = new_size;
             LIXA_TRACE(("status_record_insert: status file '%s' mapped at "
@@ -1014,13 +999,7 @@ int status_record_insert(struct thread_status_s *ts,
                     csr[0].sr.ctrl.first_free_block,
                     csr[0].sr.ctrl.first_used_block));
         *slot = csr[0].sr.ctrl.first_free_block;
-        /* @@@@ 
-        status_record_update(csr, 0, ts->updated_records);
-        */
         csr[0].sr.ctrl.first_free_block = csr[*slot].sr.data.next_block;
-        /* @@@@
-        status_record_update(csr + *slot, *slot, ts->updated_records);
-        */
         csr[*slot].sr.data.next_block = csr[0].sr.ctrl.first_used_block;
         if (LIXA_RC_OK != (ret_cod = thread_status_mark_block(ts, *slot)))
             THROW(THREAD_STATUS_MARK_BLOCK_ERROR3);
@@ -1152,24 +1131,15 @@ int status_record_delete(struct thread_status_s *ts,
         /* remove block from used block list */
         if (ul == 0) {
             /* first block in used block list */
-            /* @@@@
-            status_record_update(csr, 0, ts->updated_records);
-            */
             csr[0].sr.ctrl.first_used_block = csr[ur].sr.data.next_block;
             if (LIXA_RC_OK != (ret_cod = thread_status_mark_block(ts, 0)))
                 THROW(THREAD_STATUS_MARK_BLOCK_ERROR1);
         } else {
             /* central or last block in used block list */
-            /* @@@@
-            status_record_update(csr + ul, ul, ts->updated_records);
-            */
             csr[ul].sr.data.next_block = csr[ur].sr.data.next_block;
             if (LIXA_RC_OK != (ret_cod = thread_status_mark_block(ts, ul)))
                 THROW(THREAD_STATUS_MARK_BLOCK_ERROR2);
         }
-        /* @@@@
-        status_record_update(csr + ur, ur, ts->updated_records);
-        */
         csr[ur].sr.data.next_block = 0;
         if (LIXA_RC_OK != (ret_cod = thread_status_mark_block(ts, ur)))
             THROW(THREAD_STATUS_MARK_BLOCK_ERROR3);
@@ -1179,30 +1149,18 @@ int status_record_delete(struct thread_status_s *ts,
             /* insertion happens at list head or list is empty */
             if (fr != 0) {
                 /* list is not empty */
-                /* @@@@
-                status_record_update(csr + ur, ur, ts->updated_records);
-                */
                 csr[ur].sr.data.next_block = fr;
                 if (LIXA_RC_OK != (ret_cod = thread_status_mark_block(ts, ur)))
                     THROW(THREAD_STATUS_MARK_BLOCK_ERROR4);
             }
-            /* @@@@
-            status_record_update(csr, 0, ts->updated_records);
-            */
             csr[0].sr.ctrl.first_free_block = ur;
             if (LIXA_RC_OK != (ret_cod = thread_status_mark_block(ts, 0)))
                 THROW(THREAD_STATUS_MARK_BLOCK_ERROR5);
         } else {
             /* insertion happens in the middle or at list tail */
-            /* @@@@
-            status_record_update(csr + ur, ur, ts->updated_records);
-            */
             csr[ur].sr.data.next_block = fr;
             if (LIXA_RC_OK != (ret_cod = thread_status_mark_block(ts, ur)))
                 THROW(THREAD_STATUS_MARK_BLOCK_ERROR6);
-            /* @@@@
-            status_record_update(csr + fl, fl, ts->updated_records);
-            */
             csr[fl].sr.data.next_block = ur;
             if (LIXA_RC_OK != (ret_cod = thread_status_mark_block(ts, fl)))
                 THROW(THREAD_STATUS_MARK_BLOCK_ERROR7);
@@ -1237,29 +1195,6 @@ int status_record_delete(struct thread_status_s *ts,
     return ret_cod;
 }
 
-
-/* @@@@
-void status_record_update(status_record_t *sr,
-                          uintptr_t index,
-                          GTree *updated_records,
-                          int *number_of_updated_records)
-{
-    if (!(sr->counter & 0x1)) {
-        sr->counter++;
-        g_tree_insert(updated_records, (gpointer) index, NULL);
-        (*number_of_updated_records)++;
-        LIXA_TRACE(("status_record_update: inserted "
-                    "index "
-                    UINTPTR_T_FORMAT
-                    " (counter="
-                    UINT32_T_FORMAT
-                    ", address=%p) in updated records tree "
-                    "(number of nodes now is %d)\n",
-                    index, sr->counter, sr,
-                    *number_of_updated_records));
-    }
-}
-*/
 
 
 int status_record_sync(status_record_t *sr)

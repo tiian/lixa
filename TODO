@@ -1,6 +1,4 @@
-rename status_record_update with something else to check no function but
-thread_status_mark_block 
-requires it
+Restart from thread_status_mark_block
 
 Create case test for different scenario restart:
 - verify lixa_state_analyze takes the right decision for all possible cases

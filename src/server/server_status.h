@@ -619,21 +619,6 @@ extern "C" {
 
 
     
-    /* @@@@
-     * Mark a record for update
-     * @param[in,out] sr reference to the record must be marked for update
-     * @param[in] index position of the record in the status file (first = 0)
-     * @param[in,out] updated_records is the tree containing all the modified
-     *                records (blocks) since last synch
-     * @param[in,out] number_of_updated_records is equal to the tree size
-    void status_record_update(status_record_t *sr,
-                              uintptr_t index,
-                              GTree *updated_records,
-                              int *number_of_updated_records);
-     */
-
-
-    
     /**
      * Prepare a record for synchronization: counter is changed from odd to
      * even, digest is computed
