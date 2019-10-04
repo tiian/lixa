@@ -79,6 +79,10 @@ typedef struct lixa_state_s {
      */
     int                   flush_max_log_records;
     /**
+     * Points to the state file (and state log) currently in use
+     */
+    int                   used_state_file;
+    /**
      * Array of state files
      */
     lixa_state_file_t     files[LIXA_STATE_FILES];
@@ -162,11 +166,14 @@ extern "C" {
      * @param[in,out] this state object
      * @param[in] status_records @@@ move to lixa_state_file_t?
      * @param[in] updated_records that must be flushed to state log
+     * @param[in] number_of_updated_records that must be flushed to state log
+     *            file
      * @return a reason code
      */
     int lixa_state_flush_log_records(lixa_state_t *this,
                                      status_record_t *status_records,
-                                     GTree *updated_records);
+                                     GTree *updated_records,
+                                     int number_of_updated_records);
 
     
     

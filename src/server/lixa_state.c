@@ -81,7 +81,8 @@ int lixa_state_init(lixa_state_t *this, const char *path_prefix,
         if (0 == (pathname_len = strlen(path_prefix)))
             THROW(INVALID_OPTION);
         LIXA_TRACE(("lixa_state_init: path_prefix='%s', "
-                    "flush_max_log_records=%d\n"));
+                    "flush_max_log_records=%d\n",
+                    path_prefix, flush_max_log_records));
         /* clean-up the object memory, maybe not necessary, but safer */
         memset(this, 0, sizeof(lixa_state_t));
         /* retrieve system page size */
@@ -371,6 +372,8 @@ int lixa_state_cold_start(lixa_state_t *this)
                      lixa_state_file_get_pathname(&(this->files[0])),
                      lixa_state_file_get_pathname(&(this->files[1])),
                      lixa_state_log_get_pathname(&(this->logs[1]))));
+        /* set current state file */
+        this->used_state_file = 1;
         
         THROW(NONE);
     } CATCH {
@@ -453,19 +456,36 @@ int lixa_state_clean(lixa_state_t *this)
 
 int lixa_state_flush_log_records(lixa_state_t *this,
                                  status_record_t *status_records,
-                                 GTree *updated_records)
+                                 GTree *updated_records,
+                                 int number_of_updated_records)
 {
     enum Exception {
+        NULL_OBJECT,
+        STATE_LOG_FLUSH_ERROR,
         NONE
     } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     
     LIXA_TRACE(("lixa_state_flush_log_records\n"));
     TRY {
+        if (NULL == this)
+            THROW(NULL_OBJECT);
+        LIXA_TRACE(("lixa_state_flush_log_records: used_state_file=%d\n",
+                    this->used_state_file));
+        if (LIXA_RC_OK != (ret_cod = lixa_state_log_flush(
+                               &this->logs[this->used_state_file],
+                               status_records, updated_records,
+                               number_of_updated_records)))
+            THROW(STATE_LOG_FLUSH_ERROR);
         
         THROW(NONE);
     } CATCH {
         switch (excp) {
+            case NULL_OBJECT:
+                ret_cod = LIXA_RC_NULL_OBJECT;
+                break;
+            case STATE_LOG_FLUSH_ERROR:
+                break;
             case NONE:
                 ret_cod = LIXA_RC_OK;
                 break;

@@ -100,6 +100,26 @@ typedef struct lixa_state_log_s {
 
 
 
+/**
+ * Struct used to access records in the state log file
+ */
+struct lixa_state_log_record_s {
+    /**
+     * Unique identifier of the record
+     */
+    lixa_word_t                      id;
+    /**
+     * The record that must be transferred
+     */
+    union status_record_u            record;
+    /**
+     * Digest to check record integrity
+     */
+    md5_digest_t                     digest;
+};
+
+
+
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
@@ -160,6 +180,22 @@ extern "C" {
         const lixa_state_log_t *this) {
         return this->pathname;
     }
+
+    
+    
+    /**
+     * Flush the records to the underlying file
+     * @param[in,out] this state log object
+     * @param[in] status_records @@@ move to lixa_state_file_t?
+     * @param[in] updated_records that must be flushed to state log file
+     * @param[in] number_of_updated_records that must be flushed to state log
+     *            file
+     * @return a reason code
+     */
+    int lixa_state_log_flush(lixa_state_log_t *this,
+                             status_record_t *status_records,
+                             GTree *updated_records,
+                             int number_of_updated_records);
 
     
     

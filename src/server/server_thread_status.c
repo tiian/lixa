@@ -77,6 +77,7 @@ void thread_status_init(struct thread_status_s *ts, int id,
                         long *crash_count)
 {
     char file_name[1000]; /* @@@ fix me */
+
     LIXA_TRACE(("thread_status_init: initializing thread status (id = %d)\n",
                 id));
     ts->id = id;
@@ -108,7 +109,10 @@ void thread_status_init(struct thread_status_s *ts, int id,
     /* @@@ FIX ME, JUST FOR DEBUGGING lixa_state 20190904 */
     snprintf(file_name, sizeof(file_name), "/tmp/lixad_state%d", id);
     assert(lixa_state_init(&ts->state, file_name, 3) == LIXA_RC_OK);
+    /* @@@ put me in some different place... 
     assert(lixa_state_clean(&ts->state) == LIXA_RC_OK);
+    */
+
     /* @@@ end of FIX ME SECTION */
         
 #ifdef _CRASH
@@ -975,7 +979,8 @@ int thread_status_mark_block(struct thread_status_s *ts,
             LIXA_TRACE(("thread_status_mark_block: flush records\n"));
             if (LIXA_RC_OK != (ret_cod = lixa_state_flush_log_records(
                                    &ts->state, ts->curr_status,
-                                   ts->updated_records)))
+                                   ts->updated_records,
+                                   ts->number_of_updated_records)))
                 THROW(FLUSH_LOG_RECORDS_ERROR);
         }
         

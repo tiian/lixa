@@ -67,6 +67,7 @@ int lixa_state_log_init(lixa_state_log_t *this,
         NULL_OBJECT1,
         NULL_OBJECT2,
         INVALID_STATUS,
+        BUFFER_OVERFLOW,
         POSIX_MEMALIGN_ERROR1,
         POSIX_MEMALIGN_ERROR2,
         STRDUP_ERROR,
@@ -91,6 +92,9 @@ int lixa_state_log_init(lixa_state_log_t *this,
         /* check the state log has not been already used */
         if (STATE_LOG_UNDEFINED != this->status)
             THROW(INVALID_STATUS);
+        /* check the system page is not too small... */
+        if (0 == (system_page_size / sizeof(struct lixa_state_log_record_s)))
+            THROW(BUFFER_OVERFLOW);
         /* clean-up the object memory, maybe not necessary, but safer */
         memset(this, 0, sizeof(lixa_state_log_t));
         /* save a copy of the (constant) value in the object */
@@ -102,7 +106,7 @@ int lixa_state_log_init(lixa_state_log_t *this,
                         error));
             THROW(POSIX_MEMALIGN_ERROR1);
         }
-        memset(this->buffer, 0, this->buffer_size);
+        memset(this->single_page, 0, system_page_size);
         /* allocate the buffer for I/O */
         this->buffer_size = system_page_size *
             LIXA_STATE_LOG_BUFFER_SIZE_DEFAULT;
@@ -133,6 +137,9 @@ int lixa_state_log_init(lixa_state_log_t *this,
                 break;
             case INVALID_STATUS:
                 ret_cod = LIXA_RC_INVALID_STATUS;
+                break;
+            case BUFFER_OVERFLOW:
+                ret_cod = LIXA_RC_BUFFER_OVERFLOW;
                 break;
             case POSIX_MEMALIGN_ERROR1:
             case POSIX_MEMALIGN_ERROR2:
@@ -303,6 +310,65 @@ int lixa_state_log_clean(lixa_state_log_t *this)
         } /* switch (excp) */
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_state_log_clean/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
+
+int lixa_state_log_flush(lixa_state_log_t *this,
+                         status_record_t *status_records,
+                         GTree *updated_records,
+                         int number_of_updated_records)
+{
+    enum Exception {
+        NONE
+    } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    
+    LIXA_TRACE(("lixa_state_log_flush\n"));
+    TRY {
+        size_t number_of_records_per_page;
+        size_t number_of_pages;
+        size_t number_of_buffers;
+        size_t number_of_pages_per_buffer;
+        
+        /* compute the number of records per page */
+        number_of_records_per_page = this->system_page_size /
+            sizeof(struct lixa_state_log_record_s);
+        /* compute the number of buffer pages */
+        number_of_pages =
+            number_of_updated_records / number_of_records_per_page +
+            (number_of_updated_records %
+             number_of_records_per_page != 0) ? 1 : 0;
+        /* compute the number of buffers */
+        number_of_pages_per_buffer =
+            this->buffer_size / this->system_page_size;
+        number_of_buffers =
+            number_of_pages / number_of_pages_per_buffer +
+            (number_of_pages % number_of_pages_per_buffer != 0) ? 1 : 0;
+        LIXA_TRACE(("lixa_state_log_flush: "
+                    "number_of_updated_records=%d, "
+                    "number_of_records_per_page=" SIZE_T_FORMAT ", "
+                    "number_of_pages=" SIZE_T_FORMAT ", "
+                    "number_of_pages_per_buffer=" SIZE_T_FORMAT ", "
+                    "number_of_buffers=" SIZE_T_FORMAT "\n",
+                    number_of_updated_records, number_of_records_per_page,
+                    number_of_pages, number_of_pages_per_buffer,
+                    number_of_buffers));
+        /* @@@ */
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("lixa_state_log_flush/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }
