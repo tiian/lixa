@@ -331,22 +331,22 @@ int lixa_state_log_flush(lixa_state_log_t *this,
         size_t number_of_records_per_page;
         size_t number_of_pages;
         size_t number_of_buffers;
-        size_t number_of_pages_per_buffer;
+        size_t number_of_pages_per_buffer, b;
         
         /* compute the number of records per page */
         number_of_records_per_page = this->system_page_size /
             sizeof(struct lixa_state_log_record_s);
         /* compute the number of buffer pages */
         number_of_pages =
-            number_of_updated_records / number_of_records_per_page +
+            (number_of_updated_records / number_of_records_per_page) +
             (number_of_updated_records %
-             number_of_records_per_page != 0) ? 1 : 0;
+             number_of_records_per_page != 0 ? 1 : 0);
         /* compute the number of buffers */
         number_of_pages_per_buffer =
             this->buffer_size / this->system_page_size;
         number_of_buffers =
-            number_of_pages / number_of_pages_per_buffer +
-            (number_of_pages % number_of_pages_per_buffer != 0) ? 1 : 0;
+            (number_of_pages / number_of_pages_per_buffer) +
+            (number_of_pages % number_of_pages_per_buffer != 0 ? 1 : 0);
         LIXA_TRACE(("lixa_state_log_flush: "
                     "number_of_updated_records=%d, "
                     "number_of_records_per_page=" SIZE_T_FORMAT ", "
@@ -356,7 +356,16 @@ int lixa_state_log_flush(lixa_state_log_t *this,
                     number_of_updated_records, number_of_records_per_page,
                     number_of_pages, number_of_pages_per_buffer,
                     number_of_buffers));
-        /* @@@ */
+        /* loop on the number of buffers */
+        for (b=0; b<number_of_buffers; ++b) {
+            int full_buffer = FALSE;
+            /* full or partial buffer will be used in this cycle? */
+            if (number_of_pages >= number_of_pages_per_buffer)
+                full_buffer = TRUE;
+            /* reset the buffer @@@ */
+            
+            
+        } /* for (b=0; b<number_of_buffers; ++b) */
         
         THROW(NONE);
     } CATCH {
