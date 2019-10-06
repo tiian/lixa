@@ -408,7 +408,6 @@ int payload_chain_allocate(struct thread_status_s *ts, uint32_t block_id,
 int status_record_load(status_record_t **sr,
                        const char *status_file,
                        GTree **updated_records,
-                       int *number_of_updated_records,
                        int readonly)
 {
     enum Exception {
@@ -447,7 +446,6 @@ int status_record_load(status_record_t **sr,
         /* clean updated records set */
         g_tree_destroy(*updated_records);
         *updated_records = g_tree_new(size_t_compare_func);
-        *number_of_updated_records = 0;
         
         /* retrieve size */
         if (0 != fstat(fd, &fd_stat))

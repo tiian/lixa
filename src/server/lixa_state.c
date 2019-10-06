@@ -47,7 +47,7 @@ const char *LIXA_STATE_LOG_SUFFIX = ".log";
 
 
 int lixa_state_init(lixa_state_t *this, const char *path_prefix,
-                    int flush_max_log_records)
+                    uint32_t flush_max_log_records)
 {
     enum Exception {
         NULL_OBJECT1,
@@ -101,6 +101,7 @@ int lixa_state_init(lixa_state_t *this, const char *path_prefix,
             if (LIXA_RC_OK != (ret_cod = lixa_state_log_init(
                                    &(this->logs[i]), pathname,
                                    this->system_page_size,
+                                   LIXA_STATE_LOG_BUFFER_SIZE_DEFAULT,
                                    TRUE, FALSE, FALSE, FALSE)))
                 THROW(STATE_LOG_INIT_ERROR);
             snprintf(pathname, pathname_len, "%s_%d%s", path_prefix, i,
@@ -454,10 +455,48 @@ int lixa_state_clean(lixa_state_t *this)
 
 
 
+int lixa_state_buffer_must_be_flushed(lixa_state_t *this)
+{
+    enum Exception {
+        NULL_OBJECT,
+        NONE
+    } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    int ret_val = FALSE;
+    
+    LIXA_TRACE(("lixa_state_buffer_must_be_flushed\n"));
+    TRY {
+        if (NULL == this)
+            THROW(NULL_OBJECT);
+        /* check if flush is requested by the global parameter */
+        if (this->flush_max_log_records >=
+            lixa_state_log_get_number_of_block_ids(
+                &this->logs[this->used_state_file]) ||
+            lixa_state_log_is_buffer_full(&this->logs[this->used_state_file]))
+            ret_val = TRUE;
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case NULL_OBJECT:
+                ret_cod = LIXA_RC_NULL_OBJECT;
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("lixa_state_buffer_must_be_flushed/ret_val=%d/excp=%d/"
+                "ret_cod=%d/errno=%d\n", ret_val, excp, ret_cod, errno));
+    return ret_val;
+}
+
+
+
 int lixa_state_flush_log_records(lixa_state_t *this,
-                                 status_record_t *status_records,
-                                 GTree *updated_records,
-                                 int number_of_updated_records)
+                                 status_record_t *status_records)
 {
     enum Exception {
         NULL_OBJECT,
@@ -474,8 +513,7 @@ int lixa_state_flush_log_records(lixa_state_t *this,
                     this->used_state_file));
         if (LIXA_RC_OK != (ret_cod = lixa_state_log_flush(
                                &this->logs[this->used_state_file],
-                               status_records, updated_records,
-                               number_of_updated_records)))
+                               status_records)))
             THROW(STATE_LOG_FLUSH_ERROR);
         
         THROW(NONE);
@@ -494,6 +532,48 @@ int lixa_state_flush_log_records(lixa_state_t *this,
         } /* switch (excp) */
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_state_flush_log_records/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
+
+int lixa_state_mark_block(lixa_state_t *this, uint32_t block_id)
+{
+    enum Exception {
+        NULL_OBJECT,
+        STATE_LOG_MARK_BLOCK_ERROR,
+        NONE
+    } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    
+    LIXA_TRACE(("lixa_state_mark_block\n"));
+    TRY {
+        if (NULL == this)
+            THROW(NULL_OBJECT);
+        LIXA_TRACE(("lixa_state_mark_block: used_state_file=%d, block_id="
+                    UINT32_T_FORMAT "\n", this->used_state_file, block_id));
+        if (LIXA_RC_OK != (ret_cod = lixa_state_log_mark_block(
+                               &this->logs[this->used_state_file],
+                               block_id)))
+            THROW(STATE_LOG_MARK_BLOCK_ERROR);
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case NULL_OBJECT:
+                ret_cod = LIXA_RC_NULL_OBJECT;
+                break;
+            case STATE_LOG_MARK_BLOCK_ERROR:
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("lixa_state_mark_block/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }

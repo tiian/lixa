@@ -95,7 +95,6 @@ void thread_status_init(struct thread_status_s *ts, int id,
         ts->updated_records = g_tree_new(size_t_compare_func);
     else /* listener does not need this structure */
         ts->updated_records = NULL;
-    ts->number_of_updated_records = 0;
     ts->recovery_table = NULL;
     ts->trans_table = NULL;
     ts->mmode = mmode;
@@ -501,7 +500,7 @@ int thread_status_load_files(struct thread_status_s *ts,
                                &(ts->status1),
                                (const char *)ts->status1_filename,
                                &(ts->updated_records),
-                               &(ts->number_of_updated_records), tsds->dump)))
+                               tsds->dump)))
             THROW(STATUS_RECORD_LOAD_1_ERROR);
         if (LIXA_RC_OK != (ret_cod = status_record_check_integrity(
                                ts->status1))) {
@@ -519,7 +518,7 @@ int thread_status_load_files(struct thread_status_s *ts,
                                &(ts->status2),
                                (const char *)ts->status2_filename,
                                &(ts->updated_records),
-                               &(ts->number_of_updated_records), tsds->dump)))
+                               tsds->dump)))
             THROW(STATUS_RECORD_LOAD_2_ERROR);
         if (LIXA_RC_OK != (ret_cod = status_record_check_integrity(
                                ts->status2))) {
@@ -948,6 +947,7 @@ int thread_status_mark_block(struct thread_status_s *ts,
 {
     enum Exception {
         NULL_OBJECT,
+        STATE_MARK_BLOCK_ERROR,
         FLUSH_LOG_RECORDS_ERROR,
         NONE
     } excp;
@@ -964,23 +964,22 @@ int thread_status_mark_block(struct thread_status_s *ts,
         if (!(sr->counter & 0x1)) {
             uintptr_t index = block_id;
             sr->counter++;
+            /* the old way @@@ */
             g_tree_insert(ts->updated_records, (gpointer)index, NULL);
-            ts->number_of_updated_records++;
+            /* the new way */
+            if (LIXA_RC_OK != (ret_cod = lixa_state_mark_block(
+                                   &ts->state, block_id)))
+                THROW(STATE_MARK_BLOCK_ERROR);
             LIXA_TRACE(("thread_status_mark_block: inserted index "
                         UINTPTR_T_FORMAT " (counter=" UINT32_T_FORMAT
-                        ") in updated records tree "
-                        "(number of nodes now is %d)\n",
-                        index, sr->counter,
-                        ts->number_of_updated_records));
+                        ") in updated records tree\n",
+                        index, sr->counter));
         }
         /* check if state log must be flushed */
-        if (ts->number_of_updated_records >=
-            lixa_state_get_flush_max_log_records(&ts->state)) {
+        if (lixa_state_buffer_must_be_flushed(&ts->state)) {
             LIXA_TRACE(("thread_status_mark_block: flush records\n"));
             if (LIXA_RC_OK != (ret_cod = lixa_state_flush_log_records(
-                                   &ts->state, ts->curr_status,
-                                   ts->updated_records,
-                                   ts->number_of_updated_records)))
+                                   &ts->state, ts->curr_status)))
                 THROW(FLUSH_LOG_RECORDS_ERROR);
         }
         
@@ -990,6 +989,7 @@ int thread_status_mark_block(struct thread_status_s *ts,
             case NULL_OBJECT:
                 ret_cod = LIXA_RC_NULL_OBJECT;
                 break;
+            case STATE_MARK_BLOCK_ERROR:
             case FLUSH_LOG_RECORDS_ERROR:
                 break;
             case NONE:
@@ -1124,7 +1124,6 @@ int thread_status_sync_files(struct thread_status_s *ts)
         /* clean updated records set */
         g_tree_destroy(ts->updated_records);
         ts->updated_records = g_tree_new(size_t_compare_func);
-        ts->number_of_updated_records = 0;
         /* recover the pointer in thread status structure... */
         *status_is = alt_status;
         /* switch to alternate status mapped file */

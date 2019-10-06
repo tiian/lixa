@@ -2,6 +2,6 @@
 
 m4_include([mt_1_0.at])
 m4_include([mt_2_0.at])
-AT_SETUP([Interrupt tests with an error])
-AT_CHECK([/bin/false], [0], [ignore], [ignore])
-AT_CLEANUP
+#AT_SETUP([Interrupt tests with an error])
+#AT_CHECK([/bin/false], [0], [ignore], [ignore])
+#AT_CLEANUP

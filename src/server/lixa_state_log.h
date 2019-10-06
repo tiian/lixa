@@ -21,8 +21,20 @@
 
 
 
-#include "lixa_trace.h"
 #include "config.h"
+
+
+
+#ifdef HAVE_GLIB_H
+# include <glib.h>
+#endif
+#ifdef HAVE_SYS_TIME_H
+# include <sys/time.h>
+#endif
+
+
+
+#include "lixa_trace.h"
 #include "status_record.h"
 
 
@@ -81,21 +93,39 @@ typedef struct lixa_state_log_s {
      */
     char                            *pathname;
     /**
+     * Size of the buffer used to manage I/O; unit is "number of bytes"
+     */
+    size_t                           buffer_size;
+    /**
      * Buffer used to manage I/O
      */
     void                            *buffer;
+    /**
+     * A single memory page used for special purposes like formatting
+     */
+    void                            *single_page;
+    /**
+     * An array used to store the positions of all the changed blocks in the
+     * state file
+     */
+    uint32_t                        *block_ids;
+    /**
+     * The size of the array, the maximum number of block_ids that can be
+     * copied in the buffer
+     */
+    uint32_t                         size_of_block_ids;
+    /**
+     * The number of block_id values in block_ids array
+     */
+    uint32_t                         number_of_block_ids;
     /**
      * System page file
      */
     size_t                           system_page_size;
     /**
-     * Size of the buffer used to manage I/O
+     * Number of records that can be written in a page
      */
-    size_t                           buffer_size;
-    /**
-     * A single memory page used for special purposes like formatting
-     */
-    void                            *single_page;
+    size_t                           number_of_records_per_page;
 } lixa_state_log_t;
 
 
@@ -108,6 +138,11 @@ struct lixa_state_log_record_s {
      * Unique identifier of the record
      */
     lixa_word_t                      id;
+    /**
+     * Time of the record flush operation (many records can have the same
+     * timestamp because flushing can happen inside a batch
+     */
+    struct timeval                   timestamp;
     /**
      * The record that must be transferred
      */
@@ -132,6 +167,8 @@ extern "C" {
      * @param[in] pathname that must be used to open or create the underlying
      *            file
      * @param[in] system_page_size size of a memory page
+     * @param[in] buffer_page_size number of pages to allocate for the I/O
+     *            buffer
      * @param[in] o_direct_bool activates O_DIRECT POSIX flag
      * @param[in] o_dsync_bool activates O_DSYNC POSIX flag
      * @param[in] o_rsync_bool activates O_RSYNC POSIX flag
@@ -141,6 +178,7 @@ extern "C" {
     int lixa_state_log_init(lixa_state_log_t *this,
                             const char *pathname,
                             size_t system_page_size,
+                            size_t buffer_size,
                             int o_direct_bool,
                             int o_dsync_bool,
                             int o_rsync_bool,
@@ -187,17 +225,50 @@ extern "C" {
      * Flush the records to the underlying file
      * @param[in,out] this state log object
      * @param[in] status_records @@@ move to lixa_state_file_t?
-     * @param[in] updated_records that must be flushed to state log file
-     * @param[in] number_of_updated_records that must be flushed to state log
-     *            file
      * @return a reason code
      */
     int lixa_state_log_flush(lixa_state_log_t *this,
-                             status_record_t *status_records,
-                             GTree *updated_records,
-                             int number_of_updated_records);
+                             status_record_t *status_records);
 
-    
+
+
+    /**
+     * Mark a block because it has been updated; the function assumes that
+     * a block has not been marked before, the function does not manage
+     * deduplication by itself
+     * @param[in,out] this state log object
+     * @param[in] block_id of the changed block
+     * @return a reason code
+     */
+    int lixa_state_log_mark_block(lixa_state_log_t *this,
+                                  uint32_t block_id);
+
+
+
+    /**
+     * Returns the number of marked block_ids
+     * @param[in,out] this state log object
+     * @return a value
+     */     
+    static inline uint32_t lixa_state_log_get_number_of_block_ids(
+        lixa_state_log_t *this)
+    {
+        return this->number_of_block_ids;
+    }
+
+
+
+    /**
+     * Returns a boolean related to buffer full condition 
+     * @param[in,out] this state log object
+     * @return a boolean value
+     */     
+    static inline int lixa_state_log_is_buffer_full(lixa_state_log_t *this)
+    {
+        return this->number_of_block_ids == this->size_of_block_ids;
+    }
+
+
     
 #ifdef __cplusplus
 }

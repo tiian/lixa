@@ -369,7 +369,6 @@ struct thread_status_s
      * The number of the updated records; the field avoids the usage of
      * g_tree_nnode that requires complete tree traversal
      */
-    int              number_of_updated_records;
     /**
      * Object used to manage the state and its persistence on the disks
      */
@@ -550,7 +549,6 @@ extern "C" {
      * @param[in] status_file the name of the status file to be loaded
      * @param[in] updated_records set of record has been updated since last
      *                           synchronization
-     * @param[out] number_of_updated_records is reset to 0 by this function
      * @param[in] readonly boolean value, must the state file be opened in
      *            read-only mode to avoid file updates
      * @return a standardized return code
@@ -558,7 +556,6 @@ extern "C" {
     int status_record_load(status_record_t **sr,
                            const char *status_file,
                            GTree **updated_records,
-                           int *number_of_updated_records,
                            int readonly);
 
 

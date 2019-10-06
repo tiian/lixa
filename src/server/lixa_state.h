@@ -77,7 +77,7 @@ typedef struct lixa_state_s {
     /**
      * Maximum number of log records before a flush happens; 0 = unlimited
      */
-    int                   flush_max_log_records;
+    uint32_t              flush_max_log_records;
     /**
      * Points to the state file (and state log) currently in use
      */
@@ -109,7 +109,7 @@ extern "C" {
      * @return a reason code
      */
     int lixa_state_init(lixa_state_t *this, const char *path_prefix,
-                        int flush_max_log_records);
+                        uint32_t flush_max_log_records);
 
 
 
@@ -150,14 +150,12 @@ extern "C" {
 
     
     /**
-     * Return the maximum number of log records before a flush happens
+     * Return a boolean value that is true when the buffer of the state log
+     * must be flushed
      * @param[in] this state object
-     * @return special values: 0 = unlimited, -1 = error
+     * @return a boolean value
      */
-    static inline int lixa_state_get_flush_max_log_records(lixa_state_t *this)
-    {
-        return NULL == this ? -1 : this->flush_max_log_records;
-    }
+    int lixa_state_buffer_must_be_flushed(lixa_state_t *this);
     
 
 
@@ -165,17 +163,22 @@ extern "C" {
      * Flush the records to the state log
      * @param[in,out] this state object
      * @param[in] status_records @@@ move to lixa_state_file_t?
-     * @param[in] updated_records that must be flushed to state log
-     * @param[in] number_of_updated_records that must be flushed to state log
-     *            file
      * @return a reason code
      */
     int lixa_state_flush_log_records(lixa_state_t *this,
-                                     status_record_t *status_records,
-                                     GTree *updated_records,
-                                     int number_of_updated_records);
+                                     status_record_t *status_records);
 
     
+
+    /**
+     * Mark a block because it has been updated
+     * @param[in,out] this state object
+     * @param[in] block_id of the changed block
+     * @return a reason code
+     */
+    int lixa_state_mark_block(lixa_state_t *this, uint32_t block_id);
+
+
     
 #ifdef __cplusplus
 }
