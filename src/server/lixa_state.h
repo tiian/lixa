@@ -75,7 +75,7 @@ typedef struct lixa_state_s {
      */
     size_t                system_page_size;
     /**
-     * Maximum number of log records before a flush happens; 0 = unlimited
+     * Maximum number of log records before a flush happens; it must be > 0
      */
     uint32_t              flush_max_log_records;
     /**

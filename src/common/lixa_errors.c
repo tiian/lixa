@@ -280,6 +280,8 @@ const char *lixa_strerror(int ret_cod)
             return "ERROR: 'pread' function returned an error condition";
         case LIXA_RC_PWRITE_ERROR:
             return "ERROR: 'pwrite' function returned an error condition";
+        case LIXA_RC_LSEEK_ERROR:
+            return "ERROR: 'lseek' function returned an error condition";
         case LIXA_RC_XML_READ_FILE_ERROR:
             return "ERROR: 'xmlReadFile' function returned an error condition";
         case LIXA_RC_XML_READ_DOC_ERROR:

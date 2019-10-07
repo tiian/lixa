@@ -58,7 +58,7 @@
 int lixa_state_log_init(lixa_state_log_t *this,
                         const char *pathname,
                         size_t system_page_size,
-                        size_t buffer_page_size,
+                        size_t max_records_in_buffer,
                         int o_direct_bool,
                         int o_dsync_bool,
                         int o_rsync_bool,
@@ -113,8 +113,7 @@ int lixa_state_log_init(lixa_state_log_t *this,
         }
         memset(this->single_page, 0, system_page_size);
         /* max number of records in the buffer */
-        this->size_of_block_ids =
-            this->number_of_records_per_page * buffer_page_size;
+        this->size_of_block_ids = max_records_in_buffer;
         this->number_of_block_ids = 0;
         /* allocate the array for block_ids */
         if (NULL == (this->block_ids = (uint32_t *)malloc(
@@ -122,12 +121,23 @@ int lixa_state_log_init(lixa_state_log_t *this,
             THROW(MALLOC_ERROR);
         memset(this->block_ids, 0, sizeof(uint32_t) * this->size_of_block_ids);
         /* allocate the buffer for I/O */
-        this->buffer_size = system_page_size * buffer_page_size;
+        this->buffer_size = (
+            (max_records_in_buffer / this->number_of_records_per_page) +
+            (max_records_in_buffer % this->number_of_records_per_page ? 1 : 0))
+            * system_page_size;
         if (0 != (error = posix_memalign(&this->buffer, system_page_size,
                                          this->buffer_size))) {
             LIXA_TRACE(("lixa_state_log_init/posix_memalign: error=%d\n",
                         error));
             THROW(POSIX_MEMALIGN_ERROR2);
+        } else {
+            LIXA_TRACE(("lixa_state_log_init: max_records_in_buffer="
+                        SIZE_T_FORMAT ", "
+                        "number_of_records_per_page= " SIZE_T_FORMAT ", "
+                        "buffer_size= " SIZE_T_FORMAT "\n",
+                        max_records_in_buffer,
+                        this->number_of_records_per_page,
+                        this->buffer_size));
         }
         memset(this->buffer, 0, this->buffer_size);
         /* keep a local copy of the pathname */
@@ -231,6 +241,8 @@ int lixa_state_log_create_new_file(lixa_state_log_t *this)
                     this->system_page_size, offset))
                 THROW(PWRITE_ERROR);
         }
+        /* move the file pointer at the beginning */
+        this->file_offset = 0;
         
         THROW(NONE);
     } CATCH {
@@ -488,5 +500,37 @@ int lixa_state_log_mark_block(lixa_state_log_t *this,
     LIXA_TRACE(("lixa_state_log_mark_block/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
+}
+
+
+
+int lixa_state_log_is_buffer_full(lixa_state_log_t *this)
+{
+    int ret_val = FALSE;
+    
+    /* first full condition: all the slots in the buffer have been used */
+    if (this->number_of_block_ids == this->size_of_block_ids)
+        ret_val = TRUE;
+    else {
+        /* second condition: the current buffer content fills up the
+           underlying file
+           @@@@ design this check accurately, the following one if wrong!!!
+           use file_total_size, file_offset, the current number of necessary
+           pages, the number of necessary pages with one more (future)
+           record
+        if ((this->number_of_block_ids/this->number_of_records_per_page) ==
+            ((this->number_of_block_ids+1)/
+             this->number_of_records_per_page))
+            ret_val = TRUE;
+        */
+    }
+    LIXA_TRACE(("lixa_state_log_is_buffer_full: "
+                "number_of_block_ids=" UINT32_T_FORMAT ", "
+                "size_of_block_ids= " UINT32_T_FORMAT ", "
+                "number_of_records_per_page=" SIZE_T_FORMAT ", "
+                "ret_val=%d\n",
+                this->number_of_block_ids, this->size_of_block_ids,
+                this->number_of_records_per_page, ret_val));
+    return ret_val;
 }
 

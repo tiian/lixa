@@ -101,7 +101,9 @@ int lixa_state_init(lixa_state_t *this, const char *path_prefix,
             if (LIXA_RC_OK != (ret_cod = lixa_state_log_init(
                                    &(this->logs[i]), pathname,
                                    this->system_page_size,
-                                   LIXA_STATE_LOG_BUFFER_SIZE_DEFAULT,
+                                   /* @@@ get from config, this is a tuning
+                                      parameter */
+                                   100,
                                    TRUE, FALSE, FALSE, FALSE)))
                 THROW(STATE_LOG_INIT_ERROR);
             snprintf(pathname, pathname_len, "%s_%d%s", path_prefix, i,
@@ -469,10 +471,7 @@ int lixa_state_buffer_must_be_flushed(lixa_state_t *this)
         if (NULL == this)
             THROW(NULL_OBJECT);
         /* check if flush is requested by the global parameter */
-        if (this->flush_max_log_records >=
-            lixa_state_log_get_number_of_block_ids(
-                &this->logs[this->used_state_file]) ||
-            lixa_state_log_is_buffer_full(&this->logs[this->used_state_file]))
+        if (lixa_state_log_is_buffer_full(&this->logs[this->used_state_file]))
             ret_val = TRUE;
         
         THROW(NONE);

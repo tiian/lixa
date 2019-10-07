@@ -43,359 +43,351 @@
 /**
  * Object not found
  */
-#define LIXA_RC_OBJ_NOT_FOUND                   +1
+#define LIXA_RC_OBJ_NOT_FOUND                    +1
 /**
  * The container is empty
  */
-#define LIXA_RC_EMPTY_CONTAINER                 +2
+#define LIXA_RC_EMPTY_CONTAINER                  +2
 /**
  * An operation that can not be performed and can safely bypassed has been
  * requested: the program can go on as no operation was requested
  */
-#define LIXA_RC_BYPASSED_OPERATION              +3
+#define LIXA_RC_BYPASSED_OPERATION               +3
 /**
  * Peer has closed TCP/IP connection
  */
-#define LIXA_RC_CONNECTION_CLOSED               +4
+#define LIXA_RC_CONNECTION_CLOSED                +4
 /**
  * A truncation occurred because the destination is smaller then the source
  */
-#define LIXA_RC_TRUNCATION_OCCURRED             +5
+#define LIXA_RC_TRUNCATION_OCCURRED              +5
 /**
  * This thread of control should recover some recovery pending transactions
  */
-#define LIXA_RC_RECOVERY_PENDING_TX             +6
+#define LIXA_RC_RECOVERY_PENDING_TX              +6
 /**
  * The digest of the lixac config file changed -> the client config file
  * changed
  */
-#define LIXA_RC_LIXAC_CONF_CHANGED              +7
+#define LIXA_RC_LIXAC_CONF_CHANGED               +7
 /**
  * The thread is serving the client must be switched to a different one
  */
-#define LIXA_RC_THREAD_SWITCH                   +8
+#define LIXA_RC_THREAD_SWITCH                    +8
 /**
  * Shutdown must be performed
  */
-#define LIXA_RC_ASKED_SHUTDOWN                  +9
+#define LIXA_RC_ASKED_SHUTDOWN                   +9
 /**
  * Only maintenance mode is allowed
  */
-#define LIXA_RC_MAINTENANCE_MODE               +10
+#define LIXA_RC_MAINTENANCE_MODE                +10
 /**
  * The Application Program wants to branch an existing superior branch, but
  * it does not exist. The transaction can go on as a standard one.
  */
-#define LIXA_RC_NO_SUPERIOR_BRANCH             +11
+#define LIXA_RC_NO_SUPERIOR_BRANCH              +11
 /**
  * The Application Program wants to branch an existing superior branch, but
  * the superior branch has already started to prepare the global transacation
  */
-#define LIXA_RC_NOT_CHAINABLE_BRANCH           +12
+#define LIXA_RC_NOT_CHAINABLE_BRANCH            +12
 /**
  * An operation must be postponed because not all conditions are met
  */
-#define LIXA_RC_OPERATION_POSTPONED            +13
+#define LIXA_RC_OPERATION_POSTPONED             +13
 /**
  * The operation would block the client, but "NON BLOCK" option has been
  * specified
  */
-#define LIXA_RC_WOULD_BLOCK                    +14
+#define LIXA_RC_WOULD_BLOCK                     +14
 /**
  * The operation can not be completed due to an error happened in a different
  * branch that's part of the same global transaction
  */
-#define LIXA_RC_OTHER_BRANCH_ERROR             +15
+#define LIXA_RC_OTHER_BRANCH_ERROR              +15
 
 
 
 /**
  * Successfully completion
  */
-#define LIXA_RC_OK                               0
+#define LIXA_RC_OK                                0
 
 
 
 /**
  * Internal error: unrecoverable status!
  */
-#define LIXA_RC_INTERNAL_ERROR                  -1
+#define LIXA_RC_INTERNAL_ERROR                   -1
 /**
  * A parameter passed to a function is OUT OF RANGE
  */
-#define LIXA_RC_OUT_OF_RANGE                    -2
+#define LIXA_RC_OUT_OF_RANGE                     -2
 /**
  * Configuration file is broken
  */
-#define LIXA_RC_CONFIG_ERROR                    -3
+#define LIXA_RC_CONFIG_ERROR                     -3
 /**
  * Unespected network event
  */
-#define LIXA_RC_NETWORK_EVENT_ERROR             -4
+#define LIXA_RC_NETWORK_EVENT_ERROR              -4
 /**
  * A passed or returned object/option/arg is NULL and it can NOT be inferred
  * from a default value
  */
-#define LIXA_RC_NULL_OBJECT                     -5
+#define LIXA_RC_NULL_OBJECT                      -5
 /**
  * The container is full and can NOT store more elements
  */
-#define LIXA_RC_CONTAINER_FULL                  -6
+#define LIXA_RC_CONTAINER_FULL                   -6
 /**
  * The process has been stopped to avoid a buffer overflow
  */
-#define LIXA_RC_BUFFER_OVERFLOW                 -7
+#define LIXA_RC_BUFFER_OVERFLOW                  -7
 /**
  * A NOT initialized object has been passed to a method/function
  */
-#define LIXA_RC_OBJ_NOT_INITIALIZED             -8
+#define LIXA_RC_OBJ_NOT_INITIALIZED              -8
 /**
  * A corrupted object has been passed to a function
  */
-#define LIXA_RC_OBJ_CORRUPTED                   -9
+#define LIXA_RC_OBJ_CORRUPTED                    -9
 /**
  * Status files are corrupted and the server can not start-up
  */
-#define LIXA_RC_CORRUPTED_STATUS_FILE          -10
+#define LIXA_RC_CORRUPTED_STATUS_FILE           -10
 /**
  * A specified option is not valid for method and/or object status
  */
-#define LIXA_RC_INVALID_OPTION                 -11
+#define LIXA_RC_INVALID_OPTION                  -11
 /**
  * A routine has been invoked in an improper context
  */
-#define LIXA_RC_PROTOCOL_ERROR                 -12
+#define LIXA_RC_PROTOCOL_ERROR                  -12
 /**
  * The status (value of any properties) of an object is invalid due to a bug
  * located elsewhere (a complex "internal error" condition)
  */
-#define LIXA_RC_INVALID_STATUS                 -13
+#define LIXA_RC_INVALID_STATUS                  -13
 /**
  * Too many resource managers
  */
-#define LIXA_RC_TOO_MANY_RSRMGRS               -14
+#define LIXA_RC_TOO_MANY_RSRMGRS                -14
 /**
  * The number of chars of the prefix of the XML message 
  */
-#define LIXA_RC_INVALID_PREFIX_SIZE            -15
+#define LIXA_RC_INVALID_PREFIX_SIZE             -15
 /**
  * The XML message is empty and can not be processed
  */
-#define LIXA_RC_EMPTY_XML_MSG                  -16
+#define LIXA_RC_EMPTY_XML_MSG                   -16
 /**
  * The XML message is malformed and can not be processed
  */
-#define LIXA_RC_MALFORMED_XML_MSG              -17
+#define LIXA_RC_MALFORMED_XML_MSG               -17
 /**
  * The length of the XML message differs from prefix 
  */
-#define LIXA_RC_INVALID_LENGTH_XML_MSG         -18
+#define LIXA_RC_INVALID_LENGTH_XML_MSG          -18
 /**
  * The XML message is malformed and can not be processed
  */
-#define LIXA_RC_PROPERTY_INVALID_VALUE         -19
+#define LIXA_RC_PROPERTY_INVALID_VALUE          -19
 /**
  * The XML contains a tag is not known or is in the wrong place
  */
-#define LIXA_RC_XML_UNRECOGNIZED_TAG           -20
+#define LIXA_RC_XML_UNRECOGNIZED_TAG            -20
 /**
  * An operation is referring to asynchronous mode that is not yet implemented
  */
-#define LIXA_RC_ASYNC_NOT_IMPLEMENTED          -21
+#define LIXA_RC_ASYNC_NOT_IMPLEMENTED           -21
 /**
  * The specified option might be valid, but it's not (yet) supported by LIXA
  */
-#define LIXA_RC_UNSUPPORTED_OPTION             -22
+#define LIXA_RC_UNSUPPORTED_OPTION              -22
 /**
  * A specified file can not be opened because it does not exist
  */
-#define LIXA_RC_FILE_NOT_EXISTS                -23
+#define LIXA_RC_FILE_NOT_EXISTS                 -23
 /**
  * A transaction can not be recovered
  */
-#define LIXA_RC_ABORTED_RECOVERY               -24
+#define LIXA_RC_ABORTED_RECOVERY                -24
 /**
  * Client/server recovery configuration do not match 
  */
-#define LIXA_RC_RECOVERY_INFO_MISMATCH         -25
+#define LIXA_RC_RECOVERY_INFO_MISMATCH          -25
 /**
  * A malformed XID has been discovered
  */
-#define LIXA_RC_MALFORMED_XID                  -26
+#define LIXA_RC_MALFORMED_XID                   -26
 /**
  * A message with a wrong level has been detected
  */
-#define LIXA_RC_MESSAGE_LEVEL_MISMATCH         -27
+#define LIXA_RC_MESSAGE_LEVEL_MISMATCH          -27
 /**
  * Branches of the same global transaction are managed by multiple threads
  */
-#define LIXA_RC_BRANCHES_ON_MULTIPLE_THREADS   -28
+#define LIXA_RC_BRANCHES_ON_MULTIPLE_THREADS    -28
 /**
  * Multiple branches prepare has been failed due to one or more branches
  */
-#define LIXA_RC_MULTIBRANCH_PREPARE_FAILED     -29
+#define LIXA_RC_MULTIBRANCH_PREPARE_FAILED      -29
 /**
  * Last step for the verb has been already reached
  */
-#define LIXA_RC_LAST_STEP_EXCEEDED             -30
+#define LIXA_RC_LAST_STEP_EXCEEDED              -30
 /**
  * An invalid state transtion has been requested to a Finite State Machine
  */
-#define LIXA_RC_INVALID_STATE_TRANSITION       -31
+#define LIXA_RC_INVALID_STATE_TRANSITION        -31
 /**
  * A message has not been received before timeout expiration and the TCP
  * socket has been closed
  */
-#define LIXA_RC_MSG_TIMEOUT_SOCKET_CLOSED      -32
+#define LIXA_RC_MSG_TIMEOUT_SOCKET_CLOSED       -32
 
 
 
 /**
  * Generic error for a Resource Manager operation
  */
-#define LIXA_RC_RM_ERROR                       -96
+#define LIXA_RC_RM_ERROR                        -96
 /**
  * The client status is unknown due to a previous TX_FAIL
  */
-#define LIXA_RC_TX_FAIL                        -97
+#define LIXA_RC_TX_FAIL                         -97
 /**
  * Generic error for an TX error (an TX return code not equal TX_OK)
  */
-#define LIXA_RC_TX_ERROR                       -98
+#define LIXA_RC_TX_ERROR                        -98
 /**
  * Generic error for an XA error (an XA return code not equal XA_OK)
  */
-#define LIXA_RC_XA_ERROR                       -99
+#define LIXA_RC_XA_ERROR                        -99
 
 /**
  * "malloc"/"g_malloc" function error
  */
-#define LIXA_RC_MALLOC_ERROR                  -100
+#define LIXA_RC_MALLOC_ERROR                   -100
 /**
  * "realloc" function error
  */
-#define LIXA_RC_REALLOC_ERROR                 -101
+#define LIXA_RC_REALLOC_ERROR                  -101
 /**
  * "strdup" function error
  */
-#define LIXA_RC_STRDUP_ERROR                  -102
+#define LIXA_RC_STRDUP_ERROR                   -102
 /**
  * "fork" function error
  */
-#define LIXA_RC_FORK_ERROR                    -103
+#define LIXA_RC_FORK_ERROR                     -103
 /**
  * "kill" function error
  */
-#define LIXA_RC_KILL_ERROR                    -104
+#define LIXA_RC_KILL_ERROR                     -104
 /**
  * "poll" function error
  */
-#define LIXA_RC_POLL_ERROR                    -108
+#define LIXA_RC_POLL_ERROR                     -108
 /**
  * "pipe" function error
  */
-#define LIXA_RC_PIPE_ERROR                    -109
+#define LIXA_RC_PIPE_ERROR                     -109
 /**
  * "open" function error
  */
-#define LIXA_RC_OPEN_ERROR                    -110
+#define LIXA_RC_OPEN_ERROR                     -110
 /**
  * "close" function error
  */
-#define LIXA_RC_CLOSE_ERROR                   -111
+#define LIXA_RC_CLOSE_ERROR                    -111
 /**
  * "truncate" function error
  */
-#define LIXA_RC_TRUNCATE_ERROR                -112
+#define LIXA_RC_TRUNCATE_ERROR                 -112
 /**
  * "write" function error
  */
-#define LIXA_RC_WRITE_ERROR                   -113
+#define LIXA_RC_WRITE_ERROR                    -113
 /**
  * "fread" function error
  */
-#define LIXA_RC_READ_ERROR                    -114
+#define LIXA_RC_READ_ERROR                     -114
 /**
  * "pathconf" function error
  */
-#define LIXA_RC_PATHCONF_ERROR                -115
+#define LIXA_RC_PATHCONF_ERROR                 -115
 /**
  * "realpath" function error
  */
-#define LIXA_RC_REALPATH_ERROR                -116
+#define LIXA_RC_REALPATH_ERROR                 -116
 /**
  * "fopen" function error
  */
-#define LIXA_RC_FOPEN_ERROR                   -117
+#define LIXA_RC_FOPEN_ERROR                    -117
 /**
  * "fclose" function error
  */
-#define LIXA_RC_FCLOSE_ERROR                  -118
+#define LIXA_RC_FCLOSE_ERROR                   -118
 /**
  * "fgets" function/macro error
  */
-#define LIXA_RC_FGETS_ERROR                   -119
+#define LIXA_RC_FGETS_ERROR                    -119
 /**
  * "waitpit" function error
  */
-#define LIXA_RC_WAITPID_ERROR                 -120
+#define LIXA_RC_WAITPID_ERROR                  -120
 /**
  * "posix_memalign" function error
  */
-#define LIXA_RC_POSIX_MEMALIGN_ERROR          -121
+#define LIXA_RC_POSIX_MEMALIGN_ERROR           -121
 /**
  * "stat" function error
  */
-#define LIXA_RC_STAT_ERROR                    -122
+#define LIXA_RC_STAT_ERROR                     -122
 /**
  * "fstat" function error
  */
-#define LIXA_RC_FSTAT_ERROR                   -123
+#define LIXA_RC_FSTAT_ERROR                    -123
 /**
  * "mmap" function error
  */
-#define LIXA_RC_MMAP_ERROR                    -124
+#define LIXA_RC_MMAP_ERROR                     -124
 /**
  * "munmap" function error
  */
-#define LIXA_RC_MUNMAP_ERROR                  -125
+#define LIXA_RC_MUNMAP_ERROR                   -125
 /**
  * "msync" function error
  */
-#define LIXA_RC_MSYNC_ERROR                   -126
+#define LIXA_RC_MSYNC_ERROR                    -126
 
-/**
- * "vsnprintf" function error
-define LIXA_RC_VSNPRINTF_ERROR               -125
- */
-/**
- * "times" function error
-define LIXA_RC_TIMES_ERROR                   -126
- */
 /**
  * "uuid_parse" function error
  */
-#define LIXA_RC_UUID_PARSE_ERROR              -127
+#define LIXA_RC_UUID_PARSE_ERROR               -127
 /**
  * "localtime/localtime_r" function error
  */
-#define LIXA_RC_LOCALTIME_ERROR               -128
+#define LIXA_RC_LOCALTIME_ERROR                -128
 /**
  * "gettimeofday" function error
  */
-#define LIXA_RC_GETTIMEOFDAY_ERROR            -129
+#define LIXA_RC_GETTIMEOFDAY_ERROR             -129
 /**
  * "socket" function error
  */
-#define LIXA_RC_SOCKET_ERROR                  -130
+#define LIXA_RC_SOCKET_ERROR                   -130
 /**
  * "setsockopt" function error
  */
-#define LIXA_RC_SETSOCKOPT_ERROR              -131
+#define LIXA_RC_SETSOCKOPT_ERROR               -131
 /**
  * "getsockopt" function error
  */
-#define LIXA_RC_GETSOCKOPT_ERROR              -132
+#define LIXA_RC_GETSOCKOPT_ERROR               -132
 /**
  * "bind" function error
  */
@@ -472,6 +464,10 @@ define LIXA_RC_TIMES_ERROR                   -126
  * "pwrite" function error
  */
 #define LIXA_RC_PWRITE_ERROR                   -157
+/**
+ * "lseek" function error
+ */
+#define LIXA_RC_LSEEK_ERROR                    -158
 /**
  * "xmlReadFile" function error
  */

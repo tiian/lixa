@@ -52,8 +52,6 @@
 
 /** Initial file size (unit = pages) */
 #define LIXA_STATE_LOG_FILE_SIZE_DEFAULT    250
-/** Initial buffer size (unit = pages) */
-#define LIXA_STATE_LOG_BUFFER_SIZE_DEFAULT   10
 
 
 
@@ -126,6 +124,14 @@ typedef struct lixa_state_log_s {
      * Number of records that can be written in a page
      */
     size_t                           number_of_records_per_page;
+    /**
+     * Total size of the underlying file in bytes
+     */
+    off_t                            file_total_size;
+    /**
+     * Offset of the first writable page in the file
+     */
+    off_t                            file_offset;
 } lixa_state_log_t;
 
 
@@ -167,8 +173,8 @@ extern "C" {
      * @param[in] pathname that must be used to open or create the underlying
      *            file
      * @param[in] system_page_size size of a memory page
-     * @param[in] buffer_page_size number of pages to allocate for the I/O
-     *            buffer
+     * @param[in] max_records_in_buffer number of records that can be kept in
+     *            the I/O buffer
      * @param[in] o_direct_bool activates O_DIRECT POSIX flag
      * @param[in] o_dsync_bool activates O_DSYNC POSIX flag
      * @param[in] o_rsync_bool activates O_RSYNC POSIX flag
@@ -263,10 +269,7 @@ extern "C" {
      * @param[in,out] this state log object
      * @return a boolean value
      */     
-    static inline int lixa_state_log_is_buffer_full(lixa_state_log_t *this)
-    {
-        return this->number_of_block_ids == this->size_of_block_ids;
-    }
+    int lixa_state_log_is_buffer_full(lixa_state_log_t *this);
 
 
     
