@@ -150,12 +150,14 @@ extern "C" {
 
     
     /**
-     * Return a boolean value that is true when the buffer of the state log
-     * must be flushed
+     * Check if the current log requires some actions
      * @param[in] this state object
-     * @return a boolean value
+     * @param[out] must_flush if the buffer is full
+     * @param[out] must_switch if the log is full
+     * @return a reason code
      */
-    int lixa_state_buffer_must_be_flushed(lixa_state_t *this);
+    int lixa_state_check_log_actions(lixa_state_t *this, int *must_flush,
+                                     int *must_switch);
     
 
 

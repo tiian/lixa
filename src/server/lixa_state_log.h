@@ -117,7 +117,7 @@ typedef struct lixa_state_log_s {
      */
     uint32_t                         number_of_block_ids;
     /**
-     * System page file
+     * Size of a memory page
      */
     size_t                           system_page_size;
     /**
@@ -265,11 +265,30 @@ extern "C" {
 
 
     /**
-     * Returns a boolean related to buffer full condition 
+     * Check if the state log require some actions
      * @param[in,out] this state log object
+     * @param[out] must_flush if the buffer is full and it must be flushed
+     * @param[out] must_switch if the log is full and it must be switched (or
+     *             expanded)
      * @return a boolean value
      */     
-    int lixa_state_log_is_buffer_full(lixa_state_log_t *this);
+    int lixa_state_log_check_actions(lixa_state_log_t *this,
+                                     int *must_flush, int *must_switch);
+
+
+
+    /**
+     * Compute the number of pages necessary to store a number of records
+     * @param[in] this state log object
+     * @param[in] number_of_records that must be computed
+     * @return the number of pages necessary to store the number of records
+     */
+    static inline uint32_t lixa_state_log_needed_pages(
+        lixa_state_log_t *this, uint32_t number_of_records)
+    {
+        return (number_of_records / this->number_of_records_per_page) +
+            (number_of_records % this->number_of_records_per_page ? 1 : 0);
+    }
 
 
     

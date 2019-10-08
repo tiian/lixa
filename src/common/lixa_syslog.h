@@ -239,6 +239,11 @@
 #define LIXA_SYSLOG_LXD048E "LXD048E unable to create state log ('%s')"
 #define LIXA_SYSLOG_LXD049I "LXD049I cold start was successful for new " \
     "files '%s', '%s', and '%s'"
+#define LIXA_SYSLOG_LXD050N "LXD050N state log buffer is full and it must " \
+    "be flushed, current buffer size is " UINT32_T_FORMAT " bytes, " \
+    "a larger one might perform better"
+#define LIXA_SYSLOG_LXD051I "LXD051I state log '%s' is full and it " \
+    "must be switched"
 
 
 

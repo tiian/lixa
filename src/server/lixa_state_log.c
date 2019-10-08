@@ -44,6 +44,7 @@
 #include "lixa_errors.h"
 #include "lixa_trace.h"
 #include "lixa_state_log.h"
+#include "lixa_syslog.h"
 
 
 
@@ -234,12 +235,14 @@ int lixa_state_log_create_new_file(lixa_state_log_t *this)
             THROW(OPEN_ERROR);
         /* format the file, review me later @@@ */
         memset(this->single_page, 0, this->system_page_size);
+        this->file_total_size = 0;
         for (i=0; i<LIXA_STATE_LOG_FILE_SIZE_DEFAULT; ++i) {
             off_t offset = i * this->system_page_size;
             if (this->system_page_size != pwrite(
                     this->fd, this->single_page,
                     this->system_page_size, offset))
                 THROW(PWRITE_ERROR);
+            this->file_total_size += this->system_page_size;
         }
         /* move the file pointer at the beginning */
         this->file_offset = 0;
@@ -504,33 +507,71 @@ int lixa_state_log_mark_block(lixa_state_log_t *this,
 
 
 
-int lixa_state_log_is_buffer_full(lixa_state_log_t *this)
+int lixa_state_log_check_actions(lixa_state_log_t *this, int *must_flush,
+                                 int *must_switch)
 {
-    int ret_val = FALSE;
+    enum Exception {
+        NULL_OBJECT,
+        BUFFER_OVERFLOW,
+        NONE
+    } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    *must_flush = FALSE;
+    *must_switch = FALSE;
     
-    /* first full condition: all the slots in the buffer have been used */
-    if (this->number_of_block_ids == this->size_of_block_ids)
-        ret_val = TRUE;
-    else {
-        /* second condition: the current buffer content fills up the
-           underlying file
-           @@@@ design this check accurately, the following one if wrong!!!
-           use file_total_size, file_offset, the current number of necessary
-           pages, the number of necessary pages with one more (future)
-           record
-        if ((this->number_of_block_ids/this->number_of_records_per_page) ==
-            ((this->number_of_block_ids+1)/
-             this->number_of_records_per_page))
-            ret_val = TRUE;
-        */
-    }
-    LIXA_TRACE(("lixa_state_log_is_buffer_full: "
-                "number_of_block_ids=" UINT32_T_FORMAT ", "
-                "size_of_block_ids= " UINT32_T_FORMAT ", "
-                "number_of_records_per_page=" SIZE_T_FORMAT ", "
-                "ret_val=%d\n",
-                this->number_of_block_ids, this->size_of_block_ids,
-                this->number_of_records_per_page, ret_val));
-    return ret_val;
+    LIXA_TRACE(("lixa_state_log_check_actions\n"));
+    TRY {
+        if (NULL == this)
+            THROW(NULL_OBJECT);
+        /* first full condition: all the slots in the buffer have been used */
+        if (this->number_of_block_ids == this->size_of_block_ids) {
+            *must_flush = TRUE;
+            LIXA_SYSLOG((LOG_NOTICE, LIXA_SYSLOG_LXD050N,
+                         this->size_of_block_ids));
+        } else {
+            uint32_t current_needed_pages = lixa_state_log_needed_pages(
+                this, this->number_of_block_ids);
+            uint32_t future_needed_pages = lixa_state_log_needed_pages(
+                this, this->number_of_block_ids+1);
+            size_t available_pages =
+                (this->file_total_size - this->file_offset) /
+                this->system_page_size;
+            LIXA_TRACE(("lixa_state_log_check_actions: "
+                        "number_of_block_ids=" UINT32_T_FORMAT ", "
+                        "current_needed_pages= " UINT32_T_FORMAT ", "
+                        "future_needed_pages=" UINT32_T_FORMAT ", "
+                        "available_pages=" SIZE_T_FORMAT "\n",
+                        this->number_of_block_ids,
+                        current_needed_pages, future_needed_pages,
+                        available_pages));
+            if (current_needed_pages > available_pages)
+                /* this is a severe internal error, a bug */
+                THROW(BUFFER_OVERFLOW);
+            if (current_needed_pages == available_pages &&
+                future_needed_pages > available_pages) {
+                *must_flush = TRUE;
+                *must_switch = TRUE;
+                LIXA_SYSLOG((LOG_INFO, LIXA_SYSLOG_LXD051I, this->pathname));
+            }
+        }
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case NULL_OBJECT:
+                ret_cod = LIXA_RC_NULL_OBJECT;
+                break;
+            case BUFFER_OVERFLOW:
+                ret_cod = LIXA_RC_BUFFER_OVERFLOW;
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("lixa_state_log_check_actions/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
 }
-

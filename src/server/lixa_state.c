@@ -457,28 +457,33 @@ int lixa_state_clean(lixa_state_t *this)
 
 
 
-int lixa_state_buffer_must_be_flushed(lixa_state_t *this)
+int lixa_state_check_log_actions(lixa_state_t *this, int *must_flush,
+                                 int *must_switch)
 {
     enum Exception {
         NULL_OBJECT,
+        LOG_CHECK_BUFFER_FULL,
         NONE
     } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
-    int ret_val = FALSE;
     
-    LIXA_TRACE(("lixa_state_buffer_must_be_flushed\n"));
+    LIXA_TRACE(("lixa_state_check_log_actions\n"));
     TRY {
         if (NULL == this)
             THROW(NULL_OBJECT);
         /* check if flush is requested by the global parameter */
-        if (lixa_state_log_is_buffer_full(&this->logs[this->used_state_file]))
-            ret_val = TRUE;
+        if (LIXA_RC_OK != (ret_cod = lixa_state_log_check_actions(
+                               &this->logs[this->used_state_file],
+                               must_flush, must_switch)))
+            THROW(LOG_CHECK_BUFFER_FULL);
         
         THROW(NONE);
     } CATCH {
         switch (excp) {
             case NULL_OBJECT:
                 ret_cod = LIXA_RC_NULL_OBJECT;
+                break;
+            case LOG_CHECK_BUFFER_FULL:
                 break;
             case NONE:
                 ret_cod = LIXA_RC_OK;
@@ -487,9 +492,9 @@ int lixa_state_buffer_must_be_flushed(lixa_state_t *this)
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
         } /* switch (excp) */
     } /* TRY-CATCH */
-    LIXA_TRACE(("lixa_state_buffer_must_be_flushed/ret_val=%d/excp=%d/"
-                "ret_cod=%d/errno=%d\n", ret_val, excp, ret_cod, errno));
-    return ret_val;
+    LIXA_TRACE(("lixa_state_check_log_actions/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
 }
 
 
