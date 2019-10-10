@@ -75,9 +75,9 @@ typedef struct lixa_state_s {
      */
     size_t                system_page_size;
     /**
-     * Maximum number of log records before a flush happens; it must be > 0
+     * Maximum size of the log buffer, typically retrieved from configuration
      */
-    uint32_t              flush_max_log_records;
+    size_t                max_buffer_log_size;
     /**
      * Points to the state file (and state log) currently in use
      */
@@ -104,12 +104,12 @@ extern "C" {
      * Initialize a State object to manage state server persistence
      * @param[in,out] this object to be initialized
      * @param[in] path_prefix of the state and log files
-     * @param[in] flush_max_log_records is the maximum number of log records
-     *            to be buffered before a flush happens; 0 = unlimited
+     * @param[in] max_buffer_log_size maximum number of bytes that can be used
+     *            for the log I/O buffer
      * @return a reason code
      */
     int lixa_state_init(lixa_state_t *this, const char *path_prefix,
-                        uint32_t flush_max_log_records);
+                        size_t max_buffer_log_size);
 
 
 

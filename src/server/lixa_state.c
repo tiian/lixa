@@ -47,7 +47,7 @@ const char *LIXA_STATE_LOG_SUFFIX = ".log";
 
 
 int lixa_state_init(lixa_state_t *this, const char *path_prefix,
-                    uint32_t flush_max_log_records)
+                    size_t max_buffer_log_size)
 {
     enum Exception {
         NULL_OBJECT1,
@@ -81,14 +81,14 @@ int lixa_state_init(lixa_state_t *this, const char *path_prefix,
         if (0 == (pathname_len = strlen(path_prefix)))
             THROW(INVALID_OPTION);
         LIXA_TRACE(("lixa_state_init: path_prefix='%s', "
-                    "flush_max_log_records=%d\n",
-                    path_prefix, flush_max_log_records));
+                    "max_buffer_log_size=" SIZE_T_FORMAT "\n",
+                    path_prefix, max_buffer_log_size));
         /* clean-up the object memory, maybe not necessary, but safer */
         memset(this, 0, sizeof(lixa_state_t));
         /* retrieve system page size */
         if (-1 == (this->system_page_size = (size_t)sysconf(_SC_PAGESIZE)))
             THROW(INTERNAL_ERROR);
-        this->flush_max_log_records = flush_max_log_records;
+        this->max_buffer_log_size = max_buffer_log_size;
         /* allocate a buffer for the file names */
         pathname_len += strlen(LIXA_STATE_FILE_SUFFIX) +
             strlen(LIXA_STATE_LOG_SUFFIX) + 100;
@@ -101,9 +101,7 @@ int lixa_state_init(lixa_state_t *this, const char *path_prefix,
             if (LIXA_RC_OK != (ret_cod = lixa_state_log_init(
                                    &(this->logs[i]), pathname,
                                    this->system_page_size,
-                                   /* @@@ get from config, this is a tuning
-                                      parameter */
-                                   100,
+                                   max_buffer_log_size,
                                    TRUE, FALSE, FALSE, FALSE)))
                 THROW(STATE_LOG_INIT_ERROR);
             snprintf(pathname, pathname_len, "%s_%d%s", path_prefix, i,

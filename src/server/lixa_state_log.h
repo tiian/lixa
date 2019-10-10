@@ -50,8 +50,10 @@
 
 
 
-/** Initial file size (unit = pages) */
-#define LIXA_STATE_LOG_FILE_SIZE_DEFAULT    250
+/** Initial file size (unit = byte) */
+#define LIXA_STATE_LOG_FILE_SIZE_DEFAULT     (1024*1024)
+/** Initial buffer size (unit = byte) */
+#define LIXA_STATE_LOG_BUFFER_SIZE_DEFAULT   (8*1024)
 
 
 
@@ -108,14 +110,18 @@ typedef struct lixa_state_log_s {
      */
     uint32_t                        *block_ids;
     /**
-     * The size of the array, the maximum number of block_ids that can be
-     * copied in the buffer
+     * The size of the array, the number of block_ids that can be currently
+     * managed by the buffer
      */
-    uint32_t                         size_of_block_ids;
+    size_t                           size_of_block_ids;
     /**
      * The number of block_id values in block_ids array
      */
-    uint32_t                         number_of_block_ids;
+    size_t                           number_of_block_ids;
+    /**
+     * Maximum size of the array, upper limit to cap memory consumption
+     */
+    size_t                           max_number_of_block_ids;
     /**
      * Size of a memory page
      */
@@ -173,7 +179,7 @@ extern "C" {
      * @param[in] pathname that must be used to open or create the underlying
      *            file
      * @param[in] system_page_size size of a memory page
-     * @param[in] max_records_in_buffer number of records that can be kept in
+     * @param[in] max_buffer_size maximum number of bytes that can be used for
      *            the I/O buffer
      * @param[in] o_direct_bool activates O_DIRECT POSIX flag
      * @param[in] o_dsync_bool activates O_DSYNC POSIX flag
@@ -184,7 +190,7 @@ extern "C" {
     int lixa_state_log_init(lixa_state_log_t *this,
                             const char *pathname,
                             size_t system_page_size,
-                            size_t buffer_size,
+                            size_t max_buffer_size,
                             int o_direct_bool,
                             int o_dsync_bool,
                             int o_rsync_bool,

@@ -1,5 +1,4 @@
-Fix the arithmetic related to number_of_pages and number_of_buffers in
-function lixa_state_log_flush
+Go on with lixa_state_log, expand file 
 
 Create case test for different scenario restart:
 - verify lixa_state_analyze takes the right decision for all possible cases

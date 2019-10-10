@@ -59,7 +59,7 @@
 int lixa_state_log_init(lixa_state_log_t *this,
                         const char *pathname,
                         size_t system_page_size,
-                        size_t max_records_in_buffer,
+                        size_t max_buffer_size,
                         int o_direct_bool,
                         int o_dsync_bool,
                         int o_rsync_bool,
@@ -113,8 +113,24 @@ int lixa_state_log_init(lixa_state_log_t *this,
             THROW(POSIX_MEMALIGN_ERROR1);
         }
         memset(this->single_page, 0, system_page_size);
-        /* max number of records in the buffer */
-        this->size_of_block_ids = max_records_in_buffer;
+        if (max_buffer_size < LIXA_STATE_LOG_BUFFER_SIZE_DEFAULT) {
+            LIXA_TRACE(("lixa_state_log_init: max_buffer_size ("
+                        SIZE_T_FORMAT ") is less then "
+                        "default (" SIZE_T_FORMAT "), using default\n",
+                        max_buffer_size, LIXA_STATE_LOG_BUFFER_SIZE_DEFAULT));
+            max_buffer_size = LIXA_STATE_LOG_BUFFER_SIZE_DEFAULT;
+        }
+        /* max number of records in buffer, config limit */
+        this->max_number_of_block_ids =
+            ((max_buffer_size / system_page_size) +
+             (max_buffer_size / system_page_size ? 1 : 0)) *
+            this->number_of_records_per_page;
+        /* initial size of the buffer */
+        this->size_of_block_ids =
+            ((LIXA_STATE_LOG_BUFFER_SIZE_DEFAULT / system_page_size) +
+             (LIXA_STATE_LOG_BUFFER_SIZE_DEFAULT % system_page_size ? 1 : 0)) *
+            this->number_of_records_per_page;
+        /* buffer is empty */
         this->number_of_block_ids = 0;
         /* allocate the array for block_ids */
         if (NULL == (this->block_ids = (uint32_t *)malloc(
@@ -122,21 +138,19 @@ int lixa_state_log_init(lixa_state_log_t *this,
             THROW(MALLOC_ERROR);
         memset(this->block_ids, 0, sizeof(uint32_t) * this->size_of_block_ids);
         /* allocate the buffer for I/O */
-        this->buffer_size = (
-            (max_records_in_buffer / this->number_of_records_per_page) +
-            (max_records_in_buffer % this->number_of_records_per_page ? 1 : 0))
-            * system_page_size;
+        this->buffer_size = this->size_of_block_ids /
+            this->number_of_records_per_page * system_page_size;
         if (0 != (error = posix_memalign(&this->buffer, system_page_size,
                                          this->buffer_size))) {
             LIXA_TRACE(("lixa_state_log_init/posix_memalign: error=%d\n",
                         error));
             THROW(POSIX_MEMALIGN_ERROR2);
         } else {
-            LIXA_TRACE(("lixa_state_log_init: max_records_in_buffer="
+            LIXA_TRACE(("lixa_state_log_init: size_of_block_ids="
                         SIZE_T_FORMAT ", "
                         "number_of_records_per_page= " SIZE_T_FORMAT ", "
                         "buffer_size= " SIZE_T_FORMAT "\n",
-                        max_records_in_buffer,
+                        this->size_of_block_ids,
                         this->number_of_records_per_page,
                         this->buffer_size));
         }
@@ -223,6 +237,7 @@ int lixa_state_log_create_new_file(lixa_state_log_t *this)
     TRY {
         mode_t mode;
         size_t i;
+        size_t number_of_pages;
         
         /* check the object is not null */
         if (NULL == this)
@@ -236,7 +251,11 @@ int lixa_state_log_create_new_file(lixa_state_log_t *this)
         /* format the file, review me later @@@ */
         memset(this->single_page, 0, this->system_page_size);
         this->file_total_size = 0;
-        for (i=0; i<LIXA_STATE_LOG_FILE_SIZE_DEFAULT; ++i) {
+        number_of_pages =
+            (LIXA_STATE_LOG_FILE_SIZE_DEFAULT / this->system_page_size) +
+            (LIXA_STATE_LOG_FILE_SIZE_DEFAULT % this->system_page_size ?
+             1 : 0);
+        for (i=0; i<number_of_pages; ++i) {
             off_t offset = i * this->system_page_size;
             if (this->system_page_size != pwrite(
                     this->fd, this->single_page,
@@ -523,12 +542,87 @@ int lixa_state_log_check_actions(lixa_state_log_t *this, int *must_flush,
     TRY {
         if (NULL == this)
             THROW(NULL_OBJECT);
-        /* first full condition: all the slots in the buffer have been used */
+        /* check buffer size and space availability */
         if (this->number_of_block_ids == this->size_of_block_ids) {
-            *must_flush = TRUE;
-            LIXA_SYSLOG((LOG_NOTICE, LIXA_SYSLOG_LXD050N,
-                         this->size_of_block_ids));
-        } else {
+            /* all the slots of the current buffer have been used */
+            if (this->size_of_block_ids >= this->max_number_of_block_ids) {
+                /* upper limit reached, it can not be expanded */
+                *must_flush = TRUE;
+                LIXA_SYSLOG((LOG_NOTICE, LIXA_SYSLOG_LXD050N,
+                             this->buffer_size));
+            } else {
+                /* upper limit not reached, trying to extend it */
+                size_t new_buffer_size;
+                size_t new_number_of_block_ids;
+                void *new_buffer = NULL;
+                uint32_t *new_block_ids = NULL;
+                int error;
+                new_buffer_size = this->buffer_size * 120 / 100;
+                new_buffer_size =
+                    ((new_buffer_size / this->system_page_size) +
+                     (new_buffer_size % this->system_page_size ? 1 : 0)) *
+                     this->system_page_size;
+                if (new_buffer_size == this->buffer_size)
+                    new_buffer_size++;
+                new_number_of_block_ids = new_buffer_size /
+                    this->system_page_size * this->number_of_records_per_page;
+                error = posix_memalign(&new_buffer, this->system_page_size,
+                                       new_buffer_size);
+                new_block_ids = (uint32_t *)malloc(
+                    sizeof(uint32_t) * new_number_of_block_ids);
+                /* check both allocation together */
+                if (error != 0 || new_block_ids == NULL) {
+                    if (NULL == new_block_ids) {
+                        LIXA_TRACE(("lixa_state_log_check_actions/"
+                                    "malloc: returned null!\n"));
+                        free(new_buffer);
+                        new_buffer = NULL;
+                    }
+                    if (error != 0) {
+                        LIXA_TRACE(("lixa_state_log_check_actions/"
+                                    "posix_memalign: error=%d\n", error));
+                        if (NULL != new_block_ids) {
+                            free(new_block_ids);
+                            new_block_ids = NULL;
+                        }
+                        if (NULL != new_buffer) { /* it should never happen */
+                            free(new_buffer);
+                            new_buffer = NULL;
+                        }
+                    }
+                    /* unable to expand the buffer, it can not be expanded */
+                    *must_flush = TRUE;
+                    LIXA_SYSLOG((LOG_WARNING, LIXA_SYSLOG_LXD052W));
+                } else {
+                    /* buffer has been expanded, swtching to the new buffer
+                       and array */
+                    LIXA_TRACE(("lixa_state_log_check_actions: "
+                                "buffer expanded from " SIZE_T_FORMAT
+                                " to " SIZE_T_FORMAT " bytes, "
+                                "size_of_block_ids expanded from "
+                                SIZE_T_FORMAT " to " SIZE_T_FORMAT
+                                " records\n",
+                                this->buffer_size, new_buffer_size,
+                                this->size_of_block_ids,
+                                new_number_of_block_ids));
+                    memset(new_block_ids, 0,
+                           sizeof(uint32_t) * new_number_of_block_ids);
+                    memcpy(new_block_ids, this->block_ids,
+                           this->number_of_block_ids * sizeof(uint32_t));
+                    free(this->block_ids);
+                    this->block_ids = new_block_ids;
+                    this->size_of_block_ids = new_number_of_block_ids;
+                    memset(new_buffer, 0, new_buffer_size);
+                    free(this->buffer);
+                    this->buffer = new_buffer;
+                    this->buffer_size = new_buffer_size;
+                } /* if (error != 0 || new_block_ids == NULL) */
+            } /* if (this->size_of_block_ids == this->max_number_of_ ... */
+        } /* if (this->number_of_block_ids == this->size_of_block_ids) */
+        /* check again size because it could have been expanded in the
+           previous step*/
+        if (this->number_of_block_ids != this->size_of_block_ids) {
+            /* there are free slots in the current buffer */
             uint32_t current_needed_pages = lixa_state_log_needed_pages(
                 this, this->number_of_block_ids);
             uint32_t future_needed_pages = lixa_state_log_needed_pages(
@@ -553,7 +647,7 @@ int lixa_state_log_check_actions(lixa_state_log_t *this, int *must_flush,
                 *must_switch = TRUE;
                 LIXA_SYSLOG((LOG_INFO, LIXA_SYSLOG_LXD051I, this->pathname));
             }
-        }
+        } /* if (this->number_of_block_ids != this->size_of_block_ids) */
         
         THROW(NONE);
     } CATCH {
