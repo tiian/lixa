@@ -65,6 +65,13 @@
 
 
 /**
+ * Size of a memory page in bytes
+ */
+extern size_t LIXA_SYSTEM_PAGE_SIZE;
+
+
+
+/**
  * Basic structure for object @ref lixa_timer_t
  */
 struct lixa_timer_s {

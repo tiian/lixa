@@ -65,6 +65,12 @@
 
 
 
+/* Even if it's no protected by a mutex, it's save to have it static because
+   the system page size is immutable by itself */
+size_t LIXA_SYSTEM_PAGE_SIZE;
+
+
+
 void lixa_print_version(FILE *stream)
 {
     fprintf(stream, "LIXA: a LIbre XA implementation\n"

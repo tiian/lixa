@@ -27,9 +27,10 @@
 
 
 #include "lixa_errors.h"
-#include "lixa_trace.h"
 #include "lixa_state.h"
 #include "lixa_syslog.h"
+#include "lixa_trace.h"
+#include "lixa_utils.h"
 
 
 
@@ -86,7 +87,7 @@ int lixa_state_init(lixa_state_t *this, const char *path_prefix,
         /* clean-up the object memory, maybe not necessary, but safer */
         memset(this, 0, sizeof(lixa_state_t));
         /* retrieve system page size */
-        if (-1 == (this->system_page_size = (size_t)sysconf(_SC_PAGESIZE)))
+        if (-1 == (LIXA_SYSTEM_PAGE_SIZE = (size_t)sysconf(_SC_PAGESIZE)))
             THROW(INTERNAL_ERROR);
         this->max_buffer_log_size = max_buffer_log_size;
         /* allocate a buffer for the file names */
@@ -100,7 +101,6 @@ int lixa_state_init(lixa_state_t *this, const char *path_prefix,
                      LIXA_STATE_LOG_SUFFIX);
             if (LIXA_RC_OK != (ret_cod = lixa_state_log_init(
                                    &(this->logs[i]), pathname,
-                                   this->system_page_size,
                                    max_buffer_log_size,
                                    TRUE, FALSE, FALSE, FALSE)))
                 THROW(STATE_LOG_INIT_ERROR);

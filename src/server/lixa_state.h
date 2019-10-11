@@ -71,10 +71,6 @@ extern const char *LIXA_STATE_LOG_SUFFIX;
  */
 typedef struct lixa_state_s {
     /**
-     * System page file
-     */
-    size_t                system_page_size;
-    /**
      * Maximum size of the log buffer, typically retrieved from configuration
      */
     size_t                max_buffer_log_size;

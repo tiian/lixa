@@ -58,6 +58,13 @@
 
 
 /**
+ * Number of record that can be stored in a memory page
+ */
+extern size_t LIXA_STATE_LOG_RECORDS_PER_PAGE;
+
+
+
+/**
  * Possible statuses of a state log
  */
 enum lixa_state_log_status_e {
@@ -123,14 +130,6 @@ typedef struct lixa_state_log_s {
      */
     size_t                           max_number_of_block_ids;
     /**
-     * Size of a memory page
-     */
-    size_t                           system_page_size;
-    /**
-     * Number of records that can be written in a page
-     */
-    size_t                           number_of_records_per_page;
-    /**
      * Total size of the underlying file in bytes
      */
     off_t                            file_total_size;
@@ -178,7 +177,6 @@ extern "C" {
      * @param[in,out] this object to be initialized
      * @param[in] pathname that must be used to open or create the underlying
      *            file
-     * @param[in] system_page_size size of a memory page
      * @param[in] max_buffer_size maximum number of bytes that can be used for
      *            the I/O buffer
      * @param[in] o_direct_bool activates O_DIRECT POSIX flag
@@ -189,7 +187,6 @@ extern "C" {
      */
     int lixa_state_log_init(lixa_state_log_t *this,
                             const char *pathname,
-                            size_t system_page_size,
                             size_t max_buffer_size,
                             int o_direct_bool,
                             int o_dsync_bool,
@@ -292,8 +289,35 @@ extern "C" {
     static inline uint32_t lixa_state_log_needed_pages(
         lixa_state_log_t *this, uint32_t number_of_records)
     {
-        return (number_of_records / this->number_of_records_per_page) +
-            (number_of_records % this->number_of_records_per_page ? 1 : 0);
+        return (number_of_records / LIXA_STATE_LOG_RECORDS_PER_PAGE) +
+            (number_of_records % LIXA_STATE_LOG_RECORDS_PER_PAGE ? 1 : 0);
+    }
+
+
+
+    /**
+     * Conversion from buffer size to number of blocks
+     * @param[in] buffer_size in bytes
+     * @return number of blocks
+     */
+    static inline size_t lixa_state_log_buffer2blocks(size_t buffer_size)
+    {
+        return buffer_size / LIXA_SYSTEM_PAGE_SIZE *
+            LIXA_STATE_LOG_RECORDS_PER_PAGE;
+    }
+
+    
+
+    /**
+     * Conversion from number of blocks to buffer size (page aligned)
+     * @param[in] number_of_blocks
+     * @return size of the page aligned buffer in bytes
+     */
+    static inline size_t lixa_state_log_blocks2buffer(size_t number_of_blocks)
+    {
+        return ((number_of_blocks / LIXA_STATE_LOG_RECORDS_PER_PAGE) +
+                (number_of_blocks % LIXA_STATE_LOG_RECORDS_PER_PAGE ? 1 : 0)) *
+                LIXA_SYSTEM_PAGE_SIZE;
     }
 
 
