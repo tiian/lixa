@@ -1,4 +1,3 @@
-Continue with the clean up of algebra in lixa_state_log and possibly in lixa_state
 
 Create case test for different scenario restart:
 - verify lixa_state_analyze takes the right decision for all possible cases

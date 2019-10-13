@@ -35,6 +35,7 @@
 
 
 #include "lixa_trace.h"
+#include "lixa_utils.h"
 #include "status_record.h"
 
 
@@ -51,9 +52,9 @@
 
 
 /** Initial file size (unit = byte) */
-#define LIXA_STATE_LOG_FILE_SIZE_DEFAULT     (1024*1024)
+#define LIXA_STATE_LOG_FILE_SIZE_DEFAULT     (256*LIXA_SYSTEM_PAGE_SIZE)
 /** Initial buffer size (unit = byte) */
-#define LIXA_STATE_LOG_BUFFER_SIZE_DEFAULT   (8*1024)
+#define LIXA_STATE_LOG_BUFFER_SIZE_DEFAULT   (2*LIXA_SYSTEM_PAGE_SIZE)
 
 
 
@@ -321,6 +322,32 @@ extern "C" {
     }
 
 
+
+    /**
+     * Conversion from number of blocks to number of pages
+     * @param[in] number_of_blocks
+     * @return number of pages
+     */
+    static inline size_t lixa_state_log_blocks2pages(size_t number_of_blocks)
+    {
+        return (number_of_blocks / LIXA_STATE_LOG_RECORDS_PER_PAGE) +
+            (number_of_blocks % LIXA_STATE_LOG_RECORDS_PER_PAGE ? 1 : 0);
+    }
+
+
+
+    /**
+     * Conversion from buffer size to number of pages
+     * @param[in] buffer_size in bytes
+     * @return number of pages
+     */
+    static inline size_t lixa_state_log_buffer2pages(size_t buffer_size)
+    {
+        return (buffer_size / LIXA_SYSTEM_PAGE_SIZE) +
+            (buffer_size % LIXA_SYSTEM_PAGE_SIZE ? 1 : 0);
+    }
+
+    
     
 #ifdef __cplusplus
 }

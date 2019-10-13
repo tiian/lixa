@@ -126,11 +126,8 @@ int lixa_state_log_init(lixa_state_log_t *this,
         this->max_number_of_block_ids = lixa_state_log_buffer2blocks(
             max_buffer_size);
         /* initial size of the buffer */
-        this->size_of_block_ids =
-            ((LIXA_STATE_LOG_BUFFER_SIZE_DEFAULT / LIXA_SYSTEM_PAGE_SIZE) +
-             (LIXA_STATE_LOG_BUFFER_SIZE_DEFAULT % LIXA_SYSTEM_PAGE_SIZE ?
-              1 : 0)) *
-            LIXA_STATE_LOG_RECORDS_PER_PAGE;
+        this->size_of_block_ids = lixa_state_log_buffer2blocks(
+            LIXA_STATE_LOG_BUFFER_SIZE_DEFAULT);
         /* buffer is empty */
         this->number_of_block_ids = 0;
         /* allocate the array for block_ids */
@@ -139,8 +136,8 @@ int lixa_state_log_init(lixa_state_log_t *this,
             THROW(MALLOC_ERROR);
         memset(this->block_ids, 0, sizeof(uint32_t) * this->size_of_block_ids);
         /* allocate the buffer for I/O */
-        this->buffer_size = this->size_of_block_ids /
-            LIXA_STATE_LOG_RECORDS_PER_PAGE * LIXA_SYSTEM_PAGE_SIZE;
+        this->buffer_size = lixa_state_log_blocks2buffer(
+            this->size_of_block_ids);
         if (0 != (error = posix_memalign(&this->buffer, LIXA_SYSTEM_PAGE_SIZE,
                                          this->buffer_size))) {
             LIXA_TRACE(("lixa_state_log_init/posix_memalign: error=%d\n",
@@ -252,10 +249,8 @@ int lixa_state_log_create_new_file(lixa_state_log_t *this)
         /* format the file, review me later @@@ */
         memset(this->single_page, 0, LIXA_SYSTEM_PAGE_SIZE);
         this->file_total_size = 0;
-        number_of_pages =
-            (LIXA_STATE_LOG_FILE_SIZE_DEFAULT / LIXA_SYSTEM_PAGE_SIZE) +
-            (LIXA_STATE_LOG_FILE_SIZE_DEFAULT % LIXA_SYSTEM_PAGE_SIZE ?
-             1 : 0);
+        number_of_pages = lixa_state_log_buffer2pages(
+            LIXA_STATE_LOG_FILE_SIZE_DEFAULT);
         for (i=0; i<number_of_pages; ++i) {
             off_t offset = i * LIXA_SYSTEM_PAGE_SIZE;
             if (LIXA_SYSTEM_PAGE_SIZE != pwrite(
@@ -401,16 +396,14 @@ int lixa_state_log_flush(lixa_state_log_t *this,
         struct timeval timestamp;
         
         /* compute the number of buffer pages */
-        number_of_pages =
-            (this->number_of_block_ids / LIXA_STATE_LOG_RECORDS_PER_PAGE) +
-            (this->number_of_block_ids %
-             LIXA_STATE_LOG_RECORDS_PER_PAGE != 0 ? 1 : 0);
+        number_of_pages = lixa_state_log_blocks2pages(
+            this->number_of_block_ids);
         /* compute the number of buffers */
         number_of_pages_per_buffer =
             this->buffer_size / LIXA_SYSTEM_PAGE_SIZE;
         number_of_buffers =
             (number_of_pages / number_of_pages_per_buffer) +
-            (number_of_pages % number_of_pages_per_buffer != 0 ? 1 : 0);
+            (number_of_pages % number_of_pages_per_buffer ? 1 : 0);
         LIXA_TRACE(("lixa_state_log_flush: "
                     "number_of_block_ids=" UINT32_T_FORMAT ", "
                     "number_of_records_per_page=" SIZE_T_FORMAT ", "
