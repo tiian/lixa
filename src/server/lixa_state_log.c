@@ -383,69 +383,94 @@ int lixa_state_log_flush(lixa_state_log_t *this,
                          status_record_t *status_records)
 {
     enum Exception {
+        BUFFER_OVERFLOW,
         GETTIMEOFDAY_ERROR,
+        G_CHECKSUM_NEW_ERROR,
+        DIGEST_SIZE_ERROR,
         NONE
     } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    GChecksum *checksum = NULL;
     
     LIXA_TRACE(("lixa_state_log_flush\n"));
     TRY {
         size_t number_of_pages;
-        size_t number_of_buffers;
-        size_t number_of_pages_per_buffer, b;
+        size_t number_of_pages_in_buffer;
+        size_t pos_in_page, filled_pages, r;
         struct timeval timestamp;
         
         /* compute the number of buffer pages */
         number_of_pages = lixa_state_log_blocks2pages(
             this->number_of_block_ids);
-        /* compute the number of buffers */
-        number_of_pages_per_buffer =
+        /* compute the number of page in the buffer */
+        number_of_pages_in_buffer =
             this->buffer_size / LIXA_SYSTEM_PAGE_SIZE;
-        number_of_buffers =
-            (number_of_pages / number_of_pages_per_buffer) +
-            (number_of_pages % number_of_pages_per_buffer ? 1 : 0);
+        /* this should never be true */
+        if (number_of_pages > number_of_pages_in_buffer)
+            THROW(BUFFER_OVERFLOW);
         LIXA_TRACE(("lixa_state_log_flush: "
                     "number_of_block_ids=" UINT32_T_FORMAT ", "
                     "number_of_records_per_page=" SIZE_T_FORMAT ", "
                     "number_of_pages=" SIZE_T_FORMAT ", "
-                    "number_of_pages_per_buffer=" SIZE_T_FORMAT ", "
-                    "number_of_buffers=" SIZE_T_FORMAT "\n",
+                    "number_of_pages_in_buffer=" SIZE_T_FORMAT "\n",
                     this->number_of_block_ids,
                     LIXA_STATE_LOG_RECORDS_PER_PAGE,
-                    number_of_pages, number_of_pages_per_buffer,
-                    number_of_buffers));
+                    number_of_pages, number_of_pages_in_buffer));
         /* retrieve the timestamp associated to this flush operation */
         if (0 != gettimeofday(&timestamp, NULL))
             THROW(GETTIMEOFDAY_ERROR);
-        /* loop on the number of buffers */
-        for (b=0; b<number_of_buffers; ++b) {
-            size_t p;
-            size_t number_of_pages_to_be_flushed;
-            /* full or partial buffer will be used in this cycle? */
-            if (number_of_pages >= number_of_pages_per_buffer)
-                number_of_pages_to_be_flushed = number_of_pages_per_buffer;
-            else
-                number_of_pages_to_be_flushed = number_of_pages;
-            /* reset the buffer */
-            memset(this->buffer, 0, number_of_pages_to_be_flushed *
-                   LIXA_SYSTEM_PAGE_SIZE);
-            /* loop on the number of pages */
-            for (p=0; p<number_of_pages_to_be_flushed; ++p) {
-                size_t r;
-                size_t number_of_records_to_be_flushed;
-                if (this->number_of_block_ids >=
-                    LIXA_STATE_LOG_RECORDS_PER_PAGE)
-                    number_of_records_to_be_flushed =
-                        LIXA_STATE_LOG_RECORDS_PER_PAGE;
-                else
-                    number_of_records_to_be_flushed =
-                        this->number_of_block_ids;
-                /* loop on the number of records */
-                for (r=0; r<number_of_records_to_be_flushed; ++r) {
-                    /* @@@ do something */
-                } /* for (r=0; r<number_of_records_to_be_flushed; ++r) */
-            } /* for (p=0; p<number_of_pages_to_be_flushed; ++p) */
-        } /* for (b=0; b<number_of_buffers; ++b) */
+        /* reset the buffer */
+        memset(this->buffer, 0, number_of_pages * LIXA_SYSTEM_PAGE_SIZE);
+        /* loop on the number of records */
+        pos_in_page = 0;
+        filled_pages = 0;
+        for (r=0; r<this->number_of_block_ids; ++r) {
+            struct lixa_state_log_record_s *log_record =
+                (struct lixa_state_log_record_s *)
+                (this->buffer + filled_pages * LIXA_SYSTEM_PAGE_SIZE +
+                 pos_in_page * sizeof(struct lixa_state_log_record_s));
+            union status_record_u *record =
+                (union status_record_u *)
+                &((status_records + this->block_ids[r])->sr);
+            gsize digest_len = MD5_DIGEST_LENGTH;
+            
+            if (NULL == (checksum = g_checksum_new(G_CHECKSUM_MD5)))
+                THROW(G_CHECKSUM_NEW_ERROR);            
+            log_record->id = ++(this->last_record_id);
+            if (0 == log_record->id) /* again, 0 is reserved for null */
+                log_record->id = ++(this->last_record_id);
+            LIXA_TRACE(("lixa_state_log_flush: filled_page = " SIZE_T_FORMAT
+                        ", pos_in_page = " SIZE_T_FORMAT
+                        ", log_record->id = " UINT32_T_FORMAT "\n",
+                        filled_pages, pos_in_page, log_record->id));
+            log_record->timestamp = timestamp;
+            memcpy(&(log_record->record), record,
+                   sizeof(union status_record_u));
+            /* compute the digest */
+            g_checksum_update(checksum, (const guchar *)log_record,
+                              (gssize)(sizeof(struct lixa_state_log_record_s) -
+                                       sizeof(md5_digest_t)));
+            g_checksum_get_digest(checksum, log_record->digest, &digest_len);
+#ifdef LIXA_DEBUG
+            if (digest_len != MD5_DIGEST_LENGTH) {
+                LIXA_TRACE(("lixa_state_log_flush: internal error in "
+                            "digest size expected=" SIZE_T_FORMAT ", returned="
+                            SIZE_T_FORMAT "\n", MD5_DIGEST_LENGTH,
+                            digest_len));
+                THROW(DIGEST_SIZE_ERROR);
+            }
+#endif /* LIXA_DEBUG */
+            LIXA_TRACE_HEX_DATA("lixa_state_log_flush: "
+                                "block digest is: ",
+                                log_record->digest, digest_len);
+            g_checksum_free(checksum);
+            checksum = NULL;
+            pos_in_page++;
+            if (pos_in_page % LIXA_STATE_LOG_RECORDS_PER_PAGE == 0) {
+                pos_in_page = 0;
+                filled_pages++;
+            }
+        } /* for (r=0; r<number_of_records_to_be_flushed; ++r) */
         /* reset block_ids */
         this->number_of_block_ids = 0;
         memset(this->block_ids, 0,
@@ -454,15 +479,31 @@ int lixa_state_log_flush(lixa_state_log_t *this,
         THROW(NONE);
     } CATCH {
         switch (excp) {
+            case BUFFER_OVERFLOW:
+                ret_cod = LIXA_RC_BUFFER_OVERFLOW;
+                break;
             case GETTIMEOFDAY_ERROR:
                 ret_cod = LIXA_RC_GETTIMEOFDAY_ERROR;
                 break;
+            case G_CHECKSUM_NEW_ERROR:
+                ret_cod = LIXA_RC_G_CHECKSUM_NEW_ERROR;
+                break;
+#ifdef LIXA_DEBUG
+            case DIGEST_SIZE_ERROR:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+                break;
+#endif /* LIXA_DEBUG */
             case NONE:
                 ret_cod = LIXA_RC_OK;
                 break;
             default:
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
         } /* switch (excp) */
+        /* free memory */
+        if (NULL != checksum) {
+            g_checksum_free(checksum);
+            checksum = NULL;
+        }
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_state_log_flush/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
@@ -564,6 +605,11 @@ int lixa_state_log_check_actions(lixa_state_log_t *this, int *must_flush,
                 /* compute the buffer size */
                 new_buffer_size = lixa_state_log_blocks2buffer(
                     new_number_of_block_ids);
+                /* re-compute the number of blocks to avoid buffer unused
+                   space */
+                new_number_of_block_ids = lixa_state_log_buffer2blocks(
+                    new_buffer_size);
+                /* allocate the new areas */
                 error = posix_memalign(&new_buffer, LIXA_SYSTEM_PAGE_SIZE,
                                        new_buffer_size);
                 new_block_ids = (uint32_t *)malloc(

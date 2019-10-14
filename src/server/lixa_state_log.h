@@ -138,6 +138,11 @@ typedef struct lixa_state_log_s {
      * Offset of the first writable page in the file
      */
     off_t                            file_offset;
+    /**
+     * Last record id used in the state log; 0 has special meaning of resetted
+     * record, unused record
+     */
+    lixa_word_t                      last_record_id;
 } lixa_state_log_t;
 
 
