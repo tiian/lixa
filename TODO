@@ -1,3 +1,6 @@
+Implement file flushing using a background thread, use a mutex and a cond
+look at pthread_cond_wait like at this URL:
+https://docs.oracle.com/cd/E19455-01/806-5257/6je9h032r/index.html
 lixa_state_log_flush restart with file writing
 
 Create case test for different scenario restart:

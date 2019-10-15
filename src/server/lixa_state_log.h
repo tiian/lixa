@@ -352,6 +352,18 @@ extern "C" {
             (buffer_size % LIXA_SYSTEM_PAGE_SIZE ? 1 : 0);
     }
 
+
+
+    /**
+     * Conversion from number of pages to buffer size in bytes
+     * @param[in] number_of_pages
+     * @return the buffer size in bytes
+     */
+    static inline size_t lixa_state_log_pages2buffer(size_t number_of_pages)
+    {
+        return number_of_pages * LIXA_SYSTEM_PAGE_SIZE;
+    }
+
     
     
 #ifdef __cplusplus

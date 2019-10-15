@@ -383,10 +383,12 @@ int lixa_state_log_flush(lixa_state_log_t *this,
                          status_record_t *status_records)
 {
     enum Exception {
-        BUFFER_OVERFLOW,
+        BUFFER_OVERFLOW1,
+        BUFFER_OVERFLOW2,
         GETTIMEOFDAY_ERROR,
         G_CHECKSUM_NEW_ERROR,
         DIGEST_SIZE_ERROR,
+        PWRITE_ERROR,
         NONE
     } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
@@ -397,6 +399,8 @@ int lixa_state_log_flush(lixa_state_log_t *this,
         size_t number_of_pages;
         size_t number_of_pages_in_buffer;
         size_t pos_in_page, filled_pages, r;
+        size_t log_free_pages;
+        ssize_t written_bytes;
         struct timeval timestamp;
         
         /* compute the number of buffer pages */
@@ -407,15 +411,23 @@ int lixa_state_log_flush(lixa_state_log_t *this,
             this->buffer_size / LIXA_SYSTEM_PAGE_SIZE;
         /* this should never be true */
         if (number_of_pages > number_of_pages_in_buffer)
-            THROW(BUFFER_OVERFLOW);
+            THROW(BUFFER_OVERFLOW1);
+        /* check the amount of free space in the log */
+        log_free_pages = lixa_state_log_buffer2pages(
+            this->file_total_size - this->file_offset);
+        /* this should never be true */
+        if (number_of_pages > log_free_pages)
+            THROW(BUFFER_OVERFLOW2);
         LIXA_TRACE(("lixa_state_log_flush: "
                     "number_of_block_ids=" UINT32_T_FORMAT ", "
                     "number_of_records_per_page=" SIZE_T_FORMAT ", "
                     "number_of_pages=" SIZE_T_FORMAT ", "
-                    "number_of_pages_in_buffer=" SIZE_T_FORMAT "\n",
+                    "number_of_pages_in_buffer=" SIZE_T_FORMAT ", "
+                    "log_free_pages=" SIZE_T_FORMAT "\n",
                     this->number_of_block_ids,
                     LIXA_STATE_LOG_RECORDS_PER_PAGE,
-                    number_of_pages, number_of_pages_in_buffer));
+                    number_of_pages, number_of_pages_in_buffer,
+                    log_free_pages));
         /* retrieve the timestamp associated to this flush operation */
         if (0 != gettimeofday(&timestamp, NULL))
             THROW(GETTIMEOFDAY_ERROR);
@@ -471,6 +483,22 @@ int lixa_state_log_flush(lixa_state_log_t *this,
                 filled_pages++;
             }
         } /* for (r=0; r<number_of_records_to_be_flushed; ++r) */
+        /* write the buffer to the disk */
+        written_bytes = pwrite(this->fd, this->buffer,
+                               lixa_state_log_pages2buffer(number_of_pages),
+                               this->file_offset);
+        if (lixa_state_log_pages2buffer(number_of_pages) != written_bytes) {
+            LIXA_TRACE(("lixa_state_log_flush: pwrite has written "
+                        SSIZE_T_FORMAT " bytes instead of " SIZE_T_FORMAT "\n",
+                        written_bytes,
+                        lixa_state_log_pages2buffer(number_of_pages)));
+            THROW(PWRITE_ERROR);
+        } else {
+            LIXA_TRACE(("lixa_state_log_flush: written " SIZE_T_FORMAT
+                        " pages, " SSIZE_T_FORMAT " bytes to log\n",
+                        number_of_pages, written_bytes));
+            this->file_offset += written_bytes;
+        }
         /* reset block_ids */
         this->number_of_block_ids = 0;
         memset(this->block_ids, 0,
@@ -479,7 +507,8 @@ int lixa_state_log_flush(lixa_state_log_t *this,
         THROW(NONE);
     } CATCH {
         switch (excp) {
-            case BUFFER_OVERFLOW:
+            case BUFFER_OVERFLOW1:
+            case BUFFER_OVERFLOW2:
                 ret_cod = LIXA_RC_BUFFER_OVERFLOW;
                 break;
             case GETTIMEOFDAY_ERROR:
@@ -493,6 +522,9 @@ int lixa_state_log_flush(lixa_state_log_t *this,
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
                 break;
 #endif /* LIXA_DEBUG */
+            case PWRITE_ERROR:
+                ret_cod = LIXA_RC_PWRITE_ERROR;
+                break;
             case NONE:
                 ret_cod = LIXA_RC_OK;
                 break;
