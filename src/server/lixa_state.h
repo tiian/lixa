@@ -32,7 +32,7 @@
 
 
 #include "lixa_trace.h"
-#include "lixa_state_file.h"
+#include "lixa_state_table.h"
 #include "lixa_state_log.h"
 
 
@@ -49,16 +49,16 @@
 
 
 /**
- * Number of state files and log files; can NOT be less than 3
+ * Number of state tables and log files; can NOT be less than 3
  */
-#define LIXA_STATE_FILES   3
+#define LIXA_STATE_TABLES   3
 
 
 
 /**
- * Suffix appended when a new state file is created
+ * Suffix appended when a new state table is created
  */
-extern const char *LIXA_STATE_FILE_SUFFIX;
+extern const char *LIXA_STATE_TABLE_SUFFIX;
 /**
  * Suffix appended when a new log file is created
  */
@@ -75,17 +75,17 @@ typedef struct lixa_state_s {
      */
     size_t                max_buffer_log_size;
     /**
-     * Points to the state file (and state log) currently in use
+     * Points to the state table (and state log) currently in use
      */
-    int                   used_state_file;
+    int                   used_state_table;
     /**
-     * Array of state files
+     * Array of state tables
      */
-    lixa_state_file_t     files[LIXA_STATE_FILES];
+    lixa_state_table_t     tables[LIXA_STATE_TABLES];
     /**
      * Array of state logs
      */
-    lixa_state_log_t      logs[LIXA_STATE_FILES];
+    lixa_state_log_t      logs[LIXA_STATE_TABLES];
 } lixa_state_t;
 
 
@@ -113,8 +113,8 @@ extern "C" {
      * Analyze the available state and log files: establish if a warm restart
      * or a cold start must be performed
      * @param[in,out] this state object
-     * @param[in] state_exists specifies which state files are available
-     * @param[in] log_exists specifies which log files are available
+     * @param[in] state_exists specifies which state tables are available
+     * @param[in] log_exists specifies which log tables are available
      * @param[out] cold_start returns TRUE if a cold start must be performed
      * @return a reason code
      */     
@@ -160,7 +160,7 @@ extern "C" {
     /**
      * Flush the records to the state log
      * @param[in,out] this state object
-     * @param[in] status_records @@@ move to lixa_state_file_t?
+     * @param[in] status_records @@@ move to lixa_state_table_t?
      * @return a reason code
      */
     int lixa_state_flush_log_records(lixa_state_t *this,

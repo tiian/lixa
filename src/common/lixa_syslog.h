@@ -214,27 +214,27 @@
 #define LIXA_SYSLOG_LXD034I "LXD034I state log '%s' exists and can be opened"
 #define LIXA_SYSLOG_LXD035N "LXD035N state log '%s' does not exist or can " \
     "not be opened"
-#define LIXA_SYSLOG_LXD036I "LXD036I state file '%s' exists and can be opened"
-#define LIXA_SYSLOG_LXD037N "LXD037N state file '%s' does not exist or can " \
+#define LIXA_SYSLOG_LXD036I "LXD036I state table '%s' exists and can be opened"
+#define LIXA_SYSLOG_LXD037N "LXD037N state table '%s' does not exist or can " \
     "not be opened"
-#define LIXA_SYSLOG_LXD038N "LXD038D neither state files nor log files are " \
+#define LIXA_SYSLOG_LXD038N "LXD038D neither table files nor log files are " \
     "available: new ones will be created; a cold start will be performed"
-#define LIXA_SYSLOG_LXD039W "LXD039W only the first state file '%s' is " \
+#define LIXA_SYSLOG_LXD039W "LXD039W only the first state table '%s' is " \
     "available: probably a previous bootstrap failed prematurely; a cold " \
     "start will be attempted"
-#define LIXA_SYSLOG_LXD040W "LXD040W only the first two state files '%s' " \
+#define LIXA_SYSLOG_LXD040W "LXD040W only the first two state tables '%s' " \
     "and '%s' are " \
     "available: probably a previous bootstrap failed prematurely; a cold " \
     "start will be attempted"
-#define LIXA_SYSLOG_LXD041N "LXD041N %d state files and %d log files are " \
+#define LIXA_SYSLOG_LXD041N "LXD041N %d state tables and %d log files are " \
     "available: a warm restart will be attempted"
-#define LIXA_SYSLOG_LXD042E "LXD042E the available state files and log " \
+#define LIXA_SYSLOG_LXD042E "LXD042E the available state tables and log " \
     "files are not consistent: recover the missing ones to attempt a warm " \
     "restart or delete all to attempt a cold start"
-#define LIXA_SYSLOG_LXD043E "LXD043E unable to create state file ('%s')"
-#define LIXA_SYSLOG_LXD044I "LXD044I creating a new state file ('%s')"
-#define LIXA_SYSLOG_LXD045E "LXD045E unable to synchronize state file ('%s')"
-#define LIXA_SYSLOG_LXD046E "LXD046E unable to close state file ('%s')"
+#define LIXA_SYSLOG_LXD043E "LXD043E unable to create state table ('%s')"
+#define LIXA_SYSLOG_LXD044I "LXD044I creating a new state table ('%s')"
+#define LIXA_SYSLOG_LXD045E "LXD045E unable to synchronize state table ('%s')"
+#define LIXA_SYSLOG_LXD046E "LXD046E unable to close state table ('%s')"
 #define LIXA_SYSLOG_LXD047I "LXD047I creating a new state log ('%s')"
 #define LIXA_SYSLOG_LXD048E "LXD048E unable to create state log ('%s')"
 #define LIXA_SYSLOG_LXD049I "LXD049I cold start was successful for new " \

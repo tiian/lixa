@@ -165,9 +165,9 @@ struct lixa_state_log_record_s {
      */
     union status_record_u            record;
     /**
-     * Digest to check record integrity
+     * CRC to check record integrity
      */
-    md5_digest_t                     digest;
+    uint32_t                         crc32;
 };
 
 

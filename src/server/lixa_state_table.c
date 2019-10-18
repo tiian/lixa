@@ -37,7 +37,7 @@
 
 #include "lixa_errors.h"
 #include "lixa_trace.h"
-#include "lixa_state_file.h"
+#include "lixa_state_table.h"
 #include "server_status.h"
 
 
@@ -50,7 +50,7 @@
 
 
 
-int lixa_state_file_init(lixa_state_file_t *this,
+int lixa_state_table_init(lixa_state_table_t *this,
                          const char *pathname)
 {
     enum Exception {
@@ -58,12 +58,11 @@ int lixa_state_file_init(lixa_state_file_t *this,
         NULL_OBJECT2,
         INVALID_STATUS,
         STRDUP_ERROR,
-        CREATE_NEW_FILE_ERROR,
         NONE
     } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     
-    LIXA_TRACE(("lixa_state_file_init: pathname='%s'\n", pathname));
+    LIXA_TRACE(("lixa_state_table_init: pathname='%s'\n", pathname));
     TRY {
         /* check the object is not null */
         if (NULL == this)
@@ -71,10 +70,10 @@ int lixa_state_file_init(lixa_state_file_t *this,
         if (NULL == pathname)
             THROW(NULL_OBJECT2);
         /* check the state log has not been already used */
-        if (STATE_FILE_UNDEFINED != this->status)
+        if (STATE_TABLE_UNDEFINED != this->status)
             THROW(INVALID_STATUS);
         /* clean-up the object memory, maybe not necessary, but safer */
-        memset(this, 0, sizeof(lixa_state_file_t));
+        memset(this, 0, sizeof(lixa_state_table_t));
         /* keep a local copy of the pathname */
         if (NULL == (this->pathname = strdup(pathname)))
             THROW(STRDUP_ERROR);
@@ -93,8 +92,6 @@ int lixa_state_file_init(lixa_state_file_t *this,
             case STRDUP_ERROR:
                 ret_cod = LIXA_RC_STRDUP_ERROR;
                 break;
-            case CREATE_NEW_FILE_ERROR:
-                break;
             case NONE:
                 ret_cod = LIXA_RC_OK;
                 break;
@@ -102,14 +99,14 @@ int lixa_state_file_init(lixa_state_file_t *this,
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
         } /* switch (excp) */
     } /* TRY-CATCH */
-    LIXA_TRACE(("lixa_state_file_init/excp=%d/"
+    LIXA_TRACE(("lixa_state_table_init/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }
 
 
 
-int lixa_state_file_create_new_file(lixa_state_file_t *this)
+int lixa_state_table_create_new_file(lixa_state_table_t *this)
 {
     enum Exception {
         NULL_OBJECT,
@@ -118,7 +115,7 @@ int lixa_state_file_create_new_file(lixa_state_file_t *this)
     } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     
-    LIXA_TRACE(("lixa_state_file_create_new_file\n"));
+    LIXA_TRACE(("lixa_state_table_create_new_file\n"));
     TRY {
         /* check the object is not null */
         if (NULL == this)
@@ -143,21 +140,21 @@ int lixa_state_file_create_new_file(lixa_state_file_t *this)
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
         } /* switch (excp) */
     } /* TRY-CATCH */
-    LIXA_TRACE(("lixa_state_file_create_new_file/excp=%d/"
+    LIXA_TRACE(("lixa_state_table_create_new_file/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }
 
 
 
-int lixa_state_file_synchronize(lixa_state_file_t *this)
+int lixa_state_table_synchronize(lixa_state_table_t *this)
 {
     enum Exception {
         NONE
     } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     
-    LIXA_TRACE(("lixa_state_file_synchronize\n"));
+    LIXA_TRACE(("lixa_state_table_synchronize\n"));
     TRY {
         /* @@@ Implement this function, probably some other parameter is
            necessary */
@@ -171,14 +168,14 @@ int lixa_state_file_synchronize(lixa_state_file_t *this)
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
         } /* switch (excp) */
     } /* TRY-CATCH */
-    LIXA_TRACE(("lixa_state_file_synchronize/excp=%d/"
+    LIXA_TRACE(("lixa_state_table_synchronize/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }
 
 
 
-int lixa_state_file_close(lixa_state_file_t *this)
+int lixa_state_table_close(lixa_state_table_t *this)
 {
     enum Exception {
         CLOSE_ERROR,
@@ -186,7 +183,7 @@ int lixa_state_file_close(lixa_state_file_t *this)
     } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     
-    LIXA_TRACE(("lixa_state_file_close\n"));
+    LIXA_TRACE(("lixa_state_table_close\n"));
     TRY {
         if (-1 == close(this->fd)) {
             THROW(CLOSE_ERROR);
@@ -207,14 +204,14 @@ int lixa_state_file_close(lixa_state_file_t *this)
         /* anyway, set the file descriptor to null */
         this->fd = LIXA_NULL_FD;
     } /* TRY-CATCH */
-    LIXA_TRACE(("lixa_state_file_close/excp=%d/"
+    LIXA_TRACE(("lixa_state_table_close/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }
 
 
 
-int lixa_state_file_exist_file(lixa_state_file_t *this)
+int lixa_state_table_exist_file(lixa_state_table_t *this)
 {
     enum Exception {
         NULL_OBJECT,
@@ -223,7 +220,7 @@ int lixa_state_file_exist_file(lixa_state_file_t *this)
     } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     
-    LIXA_TRACE(("lixa_state_file_exist_file\n"));
+    LIXA_TRACE(("lixa_state_table_exist_file\n"));
     TRY {
         int fd;
         
@@ -251,14 +248,14 @@ int lixa_state_file_exist_file(lixa_state_file_t *this)
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
         } /* switch (excp) */
     } /* TRY-CATCH */
-    LIXA_TRACE(("lixa_state_file_exist_file/excp=%d/"
+    LIXA_TRACE(("lixa_state_table_exist_file/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }
 
 
 
-int lixa_state_file_clean(lixa_state_file_t *this)
+int lixa_state_table_clean(lixa_state_table_t *this)
 {
     enum Exception {
         NULL_OBJECT,
@@ -266,16 +263,16 @@ int lixa_state_file_clean(lixa_state_file_t *this)
     } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     
-    LIXA_TRACE(("lixa_state_file_clean\n"));
+    LIXA_TRACE(("lixa_state_table_clean\n"));
     TRY {
         if (NULL == this)
             THROW(NULL_OBJECT);
-        if (STATE_FILE_UNDEFINED == this->status) {
-            LIXA_TRACE(("lixa_state_file_clean: WARNING, status is "
+        if (STATE_TABLE_UNDEFINED == this->status) {
+            LIXA_TRACE(("lixa_state_table_clean: WARNING, status is "
                         "UNDEFINED!\n"));
         }
         /* reset everything, bye bye... */
-        memset(this, 0, sizeof(lixa_state_file_t));
+        memset(this, 0, sizeof(lixa_state_table_t));
         
         THROW(NONE);
     } CATCH {

@@ -265,6 +265,17 @@ extern "C" {
 
 
 
+    /**
+     * Credit: https://wiki.osdev.org/CRC32
+     * Compute a CRC32
+     * @param[in] buffer that must be computed
+     * @param[in] buffer_len length of the buffer
+     * @return the CRC32 code associated to the buffer
+     */
+    uint32_t lixa_crc32(const uint8_t *buffer, size_t buffer_len);
+
+
+    
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

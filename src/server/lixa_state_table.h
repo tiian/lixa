@@ -16,8 +16,8 @@
  * You should have received a copy of the GNU General Public License
  * along with LIXA.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIXA_STATE_FILE_H
-# define LIXA_STATE_FILE_H
+#ifndef LIXA_STATE_TABLE_H
+# define LIXA_STATE_TABLE_H
 
 
 
@@ -38,31 +38,31 @@
 
 
 /**
- * Possible statuses of a state file
+ * Possible statuses of a state table
  */
-enum lixa_state_file_status_e {
-    STATE_FILE_UNDEFINED = 0,
-    STATE_FILE_FORMATTED,
-    STATE_FILE_USED,
-    STATE_FILE_FULL,
-    STATE_FILE_EXTENDED,
-    STATE_FILE_COPY_SOURCE,
-    STATE_FILE_COPY_TARGET,
-    STATE_FILE_SYNCH,
-    STATE_FILE_CLOSED,
-    STATE_FILE_DISPOSED
+enum lixa_state_table_status_e {
+    STATE_TABLE_UNDEFINED = 0,
+    STATE_TABLE_FORMATTED,
+    STATE_TABLE_USED,
+    STATE_TABLE_FULL,
+    STATE_TABLE_EXTENDED,
+    STATE_TABLE_COPY_SOURCE,
+    STATE_TABLE_COPY_TARGET,
+    STATE_TABLE_SYNCH,
+    STATE_TABLE_CLOSED,
+    STATE_TABLE_DISPOSED
 };
 
 
 
 /**
- * LIXA State File data type ("class")
+ * LIXA State Table data type ("class")
  */
-typedef struct lixa_state_file_s {
+typedef struct lixa_state_table_s {
     /**
-     * Current status of the state file
+     * Current status of the state table
      */
-    enum lixa_state_file_status_e    status;
+    enum lixa_state_table_status_e    status;
     /**
      * File descriptor associated to the underlying file
      */
@@ -75,7 +75,7 @@ typedef struct lixa_state_file_s {
      * Name of the associated underlying file
      */
     char                            *pathname;
-} lixa_state_file_t;
+} lixa_state_table_t;
 
 
 
@@ -86,65 +86,65 @@ extern "C" {
 
 
     /**
-     * Initialize a StateFile object to manage a state file
+     * Initialize a StateTable object to manage a state table
      * @param[in,out] this object to be initialized
      * @param[in] pathname that must be used to open or create the underlying
      *            file
      * @return a reason code
      */
-    int lixa_state_file_init(lixa_state_file_t *this,
+    int lixa_state_table_init(lixa_state_table_t *this,
                              const char *pathname);
 
     
 
     /**
-     * Create a new underlying file for the state file object
-     * @param[in,out] this state file object
+     * Create a new underlying file for the state table object
+     * @param[in,out] this state table object
      * @return a reason code
      */
-    int lixa_state_file_create_new_file(lixa_state_file_t *this);
+    int lixa_state_table_create_new_file(lixa_state_table_t *this);
 
     
 
     /**
      * Synchronize the underlying state file
-     * @param[in,out] this state file object
+     * @param[in,out] this state table object
      * @return a reason code
      */
-    int lixa_state_file_synchronize(lixa_state_file_t *this);
+    int lixa_state_table_synchronize(lixa_state_table_t *this);
 
 
     
     /**
      * Close the underlying state file
-     * @param[in,out] this state file object
+     * @param[in,out] this state table object
      * @return a reason code
      */
-    int lixa_state_file_close(lixa_state_file_t *this);
+    int lixa_state_table_close(lixa_state_table_t *this);
 
 
     
     /**
      * Check if the underlying file exists and can be opened
-     * @param[in] this state file object
+     * @param[in] this state table object
      * @return a reason code, LIXA_RC_OK if the file exists and can be opened
      */
-    int lixa_state_file_exist_file(lixa_state_file_t *this);
+    int lixa_state_table_exist_file(lixa_state_table_t *this);
 
     
     
     /**
-     * Cleanup a StateFile object
+     * Cleanup a StateTable object
      */
-    int lixa_state_file_clean(lixa_state_file_t *this);
+    int lixa_state_table_clean(lixa_state_table_t *this);
 
 
     
     /**
-     * Return the pathname of the file associated to the state file object
+     * Return the pathname of the file associated to the state table object
      */
-    static inline const char* lixa_state_file_get_pathname(
-        const lixa_state_file_t *this) {
+    static inline const char* lixa_state_table_get_pathname(
+        const lixa_state_table_t *this) {
         return this->pathname;
     }
 
@@ -165,4 +165,4 @@ extern "C" {
 
 
 
-#endif /* LIXA_STATE_FILE_H */
+#endif /* LIXA_STATE_TABLE_H */

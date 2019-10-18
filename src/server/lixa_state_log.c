@@ -386,13 +386,10 @@ int lixa_state_log_flush(lixa_state_log_t *this,
         BUFFER_OVERFLOW1,
         BUFFER_OVERFLOW2,
         GETTIMEOFDAY_ERROR,
-        G_CHECKSUM_NEW_ERROR,
-        DIGEST_SIZE_ERROR,
         PWRITE_ERROR,
         NONE
     } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
-    GChecksum *checksum = NULL;
     
     LIXA_TRACE(("lixa_state_log_flush\n"));
     TRY {
@@ -444,39 +441,23 @@ int lixa_state_log_flush(lixa_state_log_t *this,
             union status_record_u *record =
                 (union status_record_u *)
                 &((status_records + this->block_ids[r])->sr);
-            gsize digest_len = MD5_DIGEST_LENGTH;
             
-            if (NULL == (checksum = g_checksum_new(G_CHECKSUM_MD5)))
-                THROW(G_CHECKSUM_NEW_ERROR);            
             log_record->id = ++(this->last_record_id);
             if (0 == log_record->id) /* again, 0 is reserved for null */
                 log_record->id = ++(this->last_record_id);
-            LIXA_TRACE(("lixa_state_log_flush: filled_page = " SIZE_T_FORMAT
-                        ", pos_in_page = " SIZE_T_FORMAT
-                        ", log_record->id = " UINT32_T_FORMAT "\n",
-                        filled_pages, pos_in_page, log_record->id));
             log_record->timestamp = timestamp;
             memcpy(&(log_record->record), record,
                    sizeof(union status_record_u));
-            /* compute the digest */
-            g_checksum_update(checksum, (const guchar *)log_record,
-                              (gssize)(sizeof(struct lixa_state_log_record_s) -
-                                       sizeof(md5_digest_t)));
-            g_checksum_get_digest(checksum, log_record->digest, &digest_len);
-#ifdef LIXA_DEBUG
-            if (digest_len != MD5_DIGEST_LENGTH) {
-                LIXA_TRACE(("lixa_state_log_flush: internal error in "
-                            "digest size expected=" SIZE_T_FORMAT ", returned="
-                            SIZE_T_FORMAT "\n", MD5_DIGEST_LENGTH,
-                            digest_len));
-                THROW(DIGEST_SIZE_ERROR);
-            }
-#endif /* LIXA_DEBUG */
-            LIXA_TRACE_HEX_DATA("lixa_state_log_flush: "
-                                "block digest is: ",
-                                log_record->digest, digest_len);
-            g_checksum_free(checksum);
-            checksum = NULL;
+            /* compute the CRC32 code */
+            log_record->crc32 = lixa_crc32(
+                (const uint8_t *)log_record,
+                sizeof(struct lixa_state_log_record_s) - sizeof(uint32_t));
+            LIXA_TRACE(("lixa_state_log_flush: filled_page = " SIZE_T_FORMAT
+                        ", pos_in_page = " SIZE_T_FORMAT
+                        ", log_record->id = " UINT32_T_FORMAT
+                        ", log_record->crc32 = 0x%08x\n",
+                        filled_pages, pos_in_page, log_record->id,
+                        log_record->crc32));
             pos_in_page++;
             if (pos_in_page % LIXA_STATE_LOG_RECORDS_PER_PAGE == 0) {
                 pos_in_page = 0;
@@ -514,14 +495,6 @@ int lixa_state_log_flush(lixa_state_log_t *this,
             case GETTIMEOFDAY_ERROR:
                 ret_cod = LIXA_RC_GETTIMEOFDAY_ERROR;
                 break;
-            case G_CHECKSUM_NEW_ERROR:
-                ret_cod = LIXA_RC_G_CHECKSUM_NEW_ERROR;
-                break;
-#ifdef LIXA_DEBUG
-            case DIGEST_SIZE_ERROR:
-                ret_cod = LIXA_RC_INTERNAL_ERROR;
-                break;
-#endif /* LIXA_DEBUG */
             case PWRITE_ERROR:
                 ret_cod = LIXA_RC_PWRITE_ERROR;
                 break;
@@ -531,11 +504,6 @@ int lixa_state_log_flush(lixa_state_log_t *this,
             default:
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
         } /* switch (excp) */
-        /* free memory */
-        if (NULL != checksum) {
-            g_checksum_free(checksum);
-            checksum = NULL;
-        }
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_state_log_flush/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
