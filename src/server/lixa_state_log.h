@@ -34,8 +34,11 @@
 
 
 
+#include "lixa_errors.h"
 #include "lixa_trace.h"
 #include "lixa_utils.h"
+#include "lixa_state_common.h"
+#include "lixa_state_log_file.h"
 #include "status_record.h"
 
 
@@ -51,8 +54,6 @@
 
 
 
-/** Initial file size (unit = byte) */
-#define LIXA_STATE_LOG_FILE_SIZE_DEFAULT     (256*LIXA_SYSTEM_PAGE_SIZE)
 /** Initial buffer size (unit = byte) */
 #define LIXA_STATE_LOG_BUFFER_SIZE_DEFAULT   (2*LIXA_SYSTEM_PAGE_SIZE)
 
@@ -66,40 +67,17 @@ extern size_t LIXA_STATE_LOG_RECORDS_PER_PAGE;
 
 
 /**
- * Possible statuses of a state log
- */
-enum lixa_state_log_status_e {
-    STATE_LOG_UNDEFINED = 0,
-    STATE_LOG_FORMATTED,
-    STATE_LOG_USED,
-    STATE_LOG_FULL,
-    STATE_LOG_EXTENDED,
-    STATE_LOG_CLOSED,
-    STATE_LOG_DISPOSED
-};
-
-
-
-/**
  * LIXA State Log data type ("class")
  */
 typedef struct lixa_state_log_s {
     /**
-     * Current status of the state log
+     * Files used to persist the log
      */
-    enum lixa_state_log_status_e     status;
+    lixa_state_log_file_t            files[LIXA_STATE_TABLES];
     /**
-     * File descriptor associated to the underlying file
+     * Points to the currently used file, @ref files array
      */
-    int                              fd;
-    /**
-     * Persistency flags associated to the underlying file
-     */
-    int                              pers_flags;
-    /**
-     * Name of the associated underlying file
-     */
-    char                            *pathname;
+    size_t                           used_file;
     /**
      * Size of the buffer used to manage I/O; unit is "number of bytes"
      */
@@ -130,14 +108,6 @@ typedef struct lixa_state_log_s {
      * Maximum size of the array, upper limit to cap memory consumption
      */
     size_t                           max_number_of_block_ids;
-    /**
-     * Total size of the underlying file in bytes
-     */
-    off_t                            file_total_size;
-    /**
-     * Offset of the first writable page in the file
-     */
-    off_t                            file_offset;
     /**
      * Last record id used in the state log; 0 has special meaning of resetted
      * record, unused record
@@ -181,8 +151,8 @@ extern "C" {
     /**
      * Initialize a StateLog object to manage a state log
      * @param[in,out] this object to be initialized
-     * @param[in] pathname that must be used to open or create the underlying
-     *            file
+     * @param[in] path_prefix that must be used to open or create the
+     *            underlying files
      * @param[in] max_buffer_size maximum number of bytes that can be used for
      *            the I/O buffer
      * @param[in] o_direct_bool activates O_DIRECT POSIX flag
@@ -192,7 +162,7 @@ extern "C" {
      * @return a reason code
      */
     int lixa_state_log_init(lixa_state_log_t *this,
-                            const char *pathname,
+                            const char *path_prefix,
                             size_t max_buffer_size,
                             int o_direct_bool,
                             int o_dsync_bool,
@@ -204,21 +174,35 @@ extern "C" {
     /**
      * Create a new underlying file for the state log object
      * @param[in,out] this current state file object
+     * @param[in] pos postion of the file to be created in the array
      * @return a reason code
      */
-    int lixa_state_log_create_new_file(lixa_state_log_t *this);
+    static inline int lixa_state_log_create_new_file(
+        lixa_state_log_t *this, size_t pos)
+    {
+        return LIXA_STATE_TABLES > pos ?
+            lixa_state_log_file_create_new(
+                &this->files[pos], this->single_page) : LIXA_RC_OUT_OF_RANGE;
+    }
 
 
 
     /**
-     * Check if the underlying file exists and can be opened
+     * Check if an underlying file exists and can be opened
      * @param[in] this current state log object
+     * @param[in] pos position of the file to be checked in the array
      * @return a reason code, LIXA_RC_OK if the file exists and can be opened
      */
-    int lixa_state_log_exist_file(lixa_state_log_t *this);
+    static inline int lixa_state_log_exist_file(lixa_state_log_t *this,
+                                                size_t pos)
+    {
+        return LIXA_STATE_TABLES > pos ?
+            lixa_state_log_file_exists(&this->files[pos]) :
+            LIXA_RC_OUT_OF_RANGE;
+    }
 
-    
-    
+
+
     /**
      * Cleanup a StateLog object
      */
@@ -227,11 +211,30 @@ extern "C" {
 
 
     /**
-     * Return the pathname of the file associated to the state log object
+     * Set the file to be used for logging
+     */
+    static inline void lixa_state_log_set_used_file(
+        lixa_state_log_t *this, size_t used_file) {
+        if (LIXA_STATE_TABLES > used_file)
+            this->used_file = used_file;
+        else {
+            LIXA_TRACE(("lixa_state_log_set_used_file: used_file="
+                        SIZE_T_FORMAT"!!!\n", used_file));
+        }
+    }
+
+    
+
+    /**
+     * Return the pathname of one of the files associated to the state log
+     * @param[in] this current state log object
+     * @param[in] pos position of the file to be checked in the array
+     * @return a pathname
      */
     static inline const char* lixa_state_log_get_pathname(
-        const lixa_state_log_t *this) {
-        return this->pathname;
+        const lixa_state_log_t *this, size_t pos) {
+        return LIXA_STATE_TABLES > pos ?
+            lixa_state_log_file_get_pathname(&this->files[pos]) : NULL;
     }
 
     
@@ -341,31 +344,6 @@ extern "C" {
 
 
 
-    /**
-     * Conversion from buffer size to number of pages
-     * @param[in] buffer_size in bytes
-     * @return number of pages
-     */
-    static inline size_t lixa_state_log_buffer2pages(size_t buffer_size)
-    {
-        return (buffer_size / LIXA_SYSTEM_PAGE_SIZE) +
-            (buffer_size % LIXA_SYSTEM_PAGE_SIZE ? 1 : 0);
-    }
-
-
-
-    /**
-     * Conversion from number of pages to buffer size in bytes
-     * @param[in] number_of_pages
-     * @return the buffer size in bytes
-     */
-    static inline size_t lixa_state_log_pages2buffer(size_t number_of_pages)
-    {
-        return number_of_pages * LIXA_SYSTEM_PAGE_SIZE;
-    }
-
-    
-    
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

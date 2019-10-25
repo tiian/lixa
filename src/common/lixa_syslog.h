@@ -188,7 +188,7 @@
 #define LIXA_SYSLOG_LXD015W "LXD015W unable to open pid file '%s' (errno=%d '%s')"
 #define LIXA_SYSLOG_LXD016E "LXD016E config file error: unable to find property '%s' in tag '%s'"
 #define LIXA_SYSLOG_LXD017E "LXD017E intercommunication pipes initialization error"
-#define LIXA_SYSLOG_LXD018C "LXD018C internal thread id=%d raised unexpected expection (server_manager_thread: excp=%d,ret_cod=%d,errno=%d); immediate shutdown will terminate the server"
+#define LIXA_SYSLOG_LXD018C "LXD018C internal thread id=%d raised unexpected exception (server_manager_thread: excp=%d,ret_cod=%d,errno=%d); immediate shutdown will terminate the server"
 #define LIXA_SYSLOG_LXD019N "LXD019N received signal %d, server %s shutdown in progress..."
 #define LIXA_SYSLOG_LXD020N "LXD020N the server is operating in MAINTENANCE MODE ONLY"
 #define LIXA_SYSLOG_LXD021I "LXD021I transaction '%s' is in recovery failed status; removing it from status file"

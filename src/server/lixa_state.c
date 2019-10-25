@@ -42,8 +42,7 @@
 
 
 
-const char *LIXA_STATE_TABLE_SUFFIX = ".state";
-const char *LIXA_STATE_LOG_SUFFIX = ".log";
+const char *LIXA_STATE_TABLE_SUFFIX = ".table";
 
 
 
@@ -91,22 +90,21 @@ int lixa_state_init(lixa_state_t *this, const char *path_prefix,
             THROW(INTERNAL_ERROR);
         this->max_buffer_log_size = max_buffer_log_size;
         /* allocate a buffer for the file names */
-        pathname_len += strlen(LIXA_STATE_TABLE_SUFFIX) +
-            strlen(LIXA_STATE_LOG_SUFFIX) + 100;
+        pathname_len += strlen(LIXA_STATE_TABLE_SUFFIX) + 100;
         if (NULL == (pathname = (char *)malloc(pathname_len)))
-            THROW(MALLOC_ERROR);        
+            THROW(MALLOC_ERROR);
+        /* initialize state log object */
+        if (LIXA_RC_OK != (ret_cod = lixa_state_log_init(
+                               &this->log, path_prefix,
+                               max_buffer_log_size,
+                               TRUE, FALSE, FALSE, FALSE)))
+            THROW(STATE_LOG_INIT_ERROR);
         /* initialize state log objects */
         for (i=0; i<LIXA_STATE_TABLES; ++i) {
-            snprintf(pathname, pathname_len, "%s_%d%s", path_prefix, i,
-                     LIXA_STATE_LOG_SUFFIX);
-            if (LIXA_RC_OK != (ret_cod = lixa_state_log_init(
-                                   &(this->logs[i]), pathname,
-                                   max_buffer_log_size,
-                                   TRUE, FALSE, FALSE, FALSE)))
-                THROW(STATE_LOG_INIT_ERROR);
+            /* initialize the first state file */
             snprintf(pathname, pathname_len, "%s_%d%s", path_prefix, i,
                      LIXA_STATE_TABLE_SUFFIX);
-            /* initialize the first state file */
+            
             if (LIXA_RC_OK != (ret_cod = lixa_state_table_init(
                                    &(this->tables[i]), pathname)))
                 THROW(STATE_TABLE_INIT_ERROR);
@@ -117,22 +115,24 @@ int lixa_state_init(lixa_state_t *this, const char *path_prefix,
             if (LIXA_RC_OK == (ret_cod = lixa_state_table_exist_file(
                                    &(this->tables[i])))) {
                 LIXA_SYSLOG((LOG_INFO, LIXA_SYSLOG_LXD036I,
-                             lixa_state_table_get_pathname(&(this->tables[i]))));
+                             lixa_state_table_get_pathname(
+                                 &(this->tables[i]))));
                 state_exists[i] = TRUE;
             } else {
                 LIXA_SYSLOG((LOG_NOTICE, LIXA_SYSLOG_LXD037N,
-                             lixa_state_table_get_pathname(&(this->tables[i]))));
+                             lixa_state_table_get_pathname(
+                                 &(this->tables[i]))));
                 state_exists[i] = FALSE;
             }
             /* check log files */
             if (LIXA_RC_OK == (ret_cod = lixa_state_log_exist_file(
-                                   &(this->logs[i])))) {
+                                   &this->log, i))) {
                 LIXA_SYSLOG((LOG_INFO, LIXA_SYSLOG_LXD034I,
-                             lixa_state_log_get_pathname(&(this->logs[i]))));
+                             lixa_state_log_get_pathname(&this->log,i)));
                 log_exists[i] = TRUE;
             } else {
                 LIXA_SYSLOG((LOG_NOTICE, LIXA_SYSLOG_LXD035N,
-                             lixa_state_log_get_pathname(&(this->logs[i]))));
+                             lixa_state_log_get_pathname(&this->log,i)));
                 log_exists[i] = FALSE;
             }
         }
@@ -357,13 +357,13 @@ int lixa_state_cold_start(lixa_state_t *this)
         }
         /* create second state log */
         LIXA_SYSLOG((LOG_INFO, LIXA_SYSLOG_LXD047I,
-                     lixa_state_log_get_pathname(&(this->logs[1]))));
+                     lixa_state_log_get_pathname(&this->log,1)));
         /* remove the old table if it exists */
-        if (-1 == unlink(lixa_state_log_get_pathname(&(this->logs[1]))) &&
+        if (-1 == unlink(lixa_state_log_get_pathname(&this->log,1)) &&
             errno != ENOENT)
             THROW(UNLINK_ERROR3);
         if (LIXA_RC_OK != (ret_cod = (lixa_state_log_create_new_file(
-                                          &(this->logs[1]))))) {
+                                          &this->log,1)))) {
             LIXA_SYSLOG((LOG_ERR, LIXA_SYSLOG_LXD048E,
                          lixa_state_table_get_pathname(&(this->tables[1]))));
             THROW(LOG_CREATE_NEW_FILE);
@@ -372,9 +372,10 @@ int lixa_state_cold_start(lixa_state_t *this)
         LIXA_SYSLOG((LOG_INFO, LIXA_SYSLOG_LXD049I,
                      lixa_state_table_get_pathname(&(this->tables[0])),
                      lixa_state_table_get_pathname(&(this->tables[1])),
-                     lixa_state_log_get_pathname(&(this->logs[1]))));
-        /* set current state table */
+                     lixa_state_log_get_pathname(&this->log,1)));
+        /* set current files */
         this->used_state_table = 1;
+        lixa_state_log_set_used_file(&this->log, 1);
         
         THROW(NONE);
     } CATCH {
@@ -425,7 +426,7 @@ int lixa_state_clean(lixa_state_t *this)
 
         for (i=0; i<LIXA_STATE_TABLES; ++i) {
             if (LIXA_RC_OK != (ret_cod = lixa_state_log_clean(
-                                   &(this->logs[i]))))
+                                   &this->log)))
                 THROW(STATE_LOG_CLEAN_ERROR);
             if (LIXA_RC_OK != (ret_cod = lixa_state_table_clean(
                                    &(this->tables[i]))))
@@ -471,8 +472,7 @@ int lixa_state_check_log_actions(lixa_state_t *this, int *must_flush,
             THROW(NULL_OBJECT);
         /* check if flush is requested by the global parameter */
         if (LIXA_RC_OK != (ret_cod = lixa_state_log_check_actions(
-                               &this->logs[this->used_state_table],
-                               must_flush, must_switch)))
+                               &this->log, must_flush, must_switch)))
             THROW(LOG_CHECK_BUFFER_FULL);
         
         THROW(NONE);
@@ -514,8 +514,7 @@ int lixa_state_flush_log_records(lixa_state_t *this,
         LIXA_TRACE(("lixa_state_flush_log_records: used_state_table=%d\n",
                     this->used_state_table));
         if (LIXA_RC_OK != (ret_cod = lixa_state_log_flush(
-                               &this->logs[this->used_state_table],
-                               status_records)))
+                               &this->log, status_records)))
             THROW(STATE_LOG_FLUSH_ERROR);
         
         THROW(NONE);
@@ -556,8 +555,7 @@ int lixa_state_mark_block(lixa_state_t *this, uint32_t block_id)
         LIXA_TRACE(("lixa_state_mark_block: used_state_table=%d, block_id="
                     UINT32_T_FORMAT "\n", this->used_state_table, block_id));
         if (LIXA_RC_OK != (ret_cod = lixa_state_log_mark_block(
-                               &this->logs[this->used_state_table],
-                               block_id)))
+                               &this->log, block_id)))
             THROW(STATE_LOG_MARK_BLOCK_ERROR);
         
         THROW(NONE);

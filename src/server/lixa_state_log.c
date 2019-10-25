@@ -61,7 +61,7 @@ size_t LIXA_STATE_LOG_RECORDS_PER_PAGE;
 
 
 int lixa_state_log_init(lixa_state_log_t *this,
-                        const char *pathname,
+                        const char *path_prefix,
                         size_t max_buffer_size,
                         int o_direct_bool,
                         int o_dsync_bool,
@@ -71,35 +71,56 @@ int lixa_state_log_init(lixa_state_log_t *this,
     enum Exception {
         NULL_OBJECT1,
         NULL_OBJECT2,
-        INVALID_STATUS,
+        INVALID_OPTION,
+        MALLOC_ERROR1,
+        STATE_LOG_FILE_INIT_ERROR,
         BUFFER_OVERFLOW,
         POSIX_MEMALIGN_ERROR1,
-        MALLOC_ERROR,
+        MALLOC_ERROR2,
         POSIX_MEMALIGN_ERROR2,
-        STRDUP_ERROR,
         OPEN_ERROR,
         CREATE_NEW_FILE_ERROR,
         NONE
     } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    char *pathname = NULL;
     
-    LIXA_TRACE(("lixa_state_log_init: pathname='%s', o_direct_bool=%d, "
+    LIXA_TRACE(("lixa_state_log_init: path_prefix='%s', o_direct_bool=%d, "
                 "o_dsync_bool=%d, orsync_bool=%d, osync_bool=%d\n",
-                pathname, o_direct_bool, o_dsync_bool, o_rsync_bool,
+                path_prefix, o_direct_bool, o_dsync_bool, o_rsync_bool,
                 o_sync_bool));
     TRY {
-        int error;
+        int error, i;
+        int pers_flags;
+        size_t pathname_len;
         
         /* check the object is not null */
         if (NULL == this)
             THROW(NULL_OBJECT1);
-        if (NULL == pathname)
+        if (NULL == path_prefix)
             THROW(NULL_OBJECT2);
-        /* check the state log has not been already used */
-        if (STATE_LOG_UNDEFINED != this->status)
-            THROW(INVALID_STATUS);
+        if (0 == (pathname_len = strlen(path_prefix)))
+            THROW(INVALID_OPTION);
         /* clean-up the object memory, maybe not necessary, but safer */
         memset(this, 0, sizeof(lixa_state_log_t));
+        /* try to open the already existent files */
+        pers_flags = O_RDWR;
+        if (o_direct_bool) pers_flags |= O_DIRECT;
+        if (o_dsync_bool)  pers_flags |= O_DSYNC;
+        if (o_rsync_bool)  pers_flags |= O_RSYNC;
+        if (o_sync_bool)   pers_flags |= O_SYNC;
+        /* allocate a buffer for the file names */
+        pathname_len += strlen(LIXA_STATE_LOG_FILE_SUFFIX) + 100;
+        if (NULL == (pathname = (char *)malloc(pathname_len)))
+            THROW(MALLOC_ERROR1);
+        /* initialize the file objects */
+        for (i=0; i<LIXA_STATE_TABLES; ++i) {
+            snprintf(pathname, pathname_len, "%s_%d%s", path_prefix, i,
+                     LIXA_STATE_LOG_FILE_SUFFIX);
+            if (LIXA_RC_OK != (ret_cod = lixa_state_log_file_init(
+                                   &(this->files[i]), pathname, pers_flags)))
+                THROW(STATE_LOG_FILE_INIT_ERROR);
+        } /* for (i=0; i<LIXA_STATE_TABLES; ++i) */
         /* compute the number of records per page */
         LIXA_STATE_LOG_RECORDS_PER_PAGE = LIXA_SYSTEM_PAGE_SIZE /
             sizeof(struct lixa_state_log_record_s);
@@ -133,7 +154,7 @@ int lixa_state_log_init(lixa_state_log_t *this,
         /* allocate the array for block_ids */
         if (NULL == (this->block_ids = (uint32_t *)malloc(
                          sizeof(uint32_t) * this->size_of_block_ids)))
-            THROW(MALLOC_ERROR);
+            THROW(MALLOC_ERROR2);
         memset(this->block_ids, 0, sizeof(uint32_t) * this->size_of_block_ids);
         /* allocate the buffer for I/O */
         this->buffer_size = lixa_state_log_blocks2buffer(
@@ -152,17 +173,7 @@ int lixa_state_log_init(lixa_state_log_t *this,
                         LIXA_STATE_LOG_RECORDS_PER_PAGE,
                         this->buffer_size));
         }
-        memset(this->buffer, 0, this->buffer_size);
-        /* keep a local copy of the pathname */
-        if (NULL == (this->pathname = strdup(pathname)))
-            THROW(STRDUP_ERROR);
-        
-        /* try to open the already existent file */
-        this->pers_flags = O_RDWR;
-        if (o_direct_bool) this->pers_flags |= O_DIRECT;
-        if (o_dsync_bool)  this->pers_flags |= O_DSYNC;
-        if (o_rsync_bool)  this->pers_flags |= O_RSYNC;
-        if (o_sync_bool)   this->pers_flags |= O_SYNC;
+        memset(this->buffer, 0, this->buffer_size);        
         
         THROW(NONE);
     } CATCH {
@@ -171,8 +182,10 @@ int lixa_state_log_init(lixa_state_log_t *this,
             case NULL_OBJECT2:
                 ret_cod = LIXA_RC_NULL_OBJECT;
                 break;
-            case INVALID_STATUS:
-                ret_cod = LIXA_RC_INVALID_STATUS;
+            case INVALID_OPTION:
+                ret_cod = LIXA_RC_INVALID_OPTION;
+                break;
+            case STATE_LOG_FILE_INIT_ERROR:
                 break;
             case BUFFER_OVERFLOW:
                 ret_cod = LIXA_RC_BUFFER_OVERFLOW;
@@ -181,11 +194,9 @@ int lixa_state_log_init(lixa_state_log_t *this,
             case POSIX_MEMALIGN_ERROR2:
                 ret_cod = LIXA_RC_POSIX_MEMALIGN_ERROR;
                 break;
-            case MALLOC_ERROR:
+            case MALLOC_ERROR1:
+            case MALLOC_ERROR2:
                 ret_cod = LIXA_RC_MALLOC_ERROR;
-                break;
-            case STRDUP_ERROR:
-                ret_cod = LIXA_RC_STRDUP_ERROR;
                 break;
             case OPEN_ERROR:
                 ret_cod = LIXA_RC_OPEN_ERROR;
@@ -199,12 +210,14 @@ int lixa_state_log_init(lixa_state_log_t *this,
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
         } /* switch (excp) */
         /* recover memory in the event of error */
+        if (NULL != pathname)
+            free(pathname);
         if (NONE != excp) { 
             if (excp > POSIX_MEMALIGN_ERROR1 && NULL != this->single_page) {
                 free(this->single_page);
                 this->single_page = NULL;
             }
-            if (excp > MALLOC_ERROR && NULL != this->block_ids) {
+            if (excp > MALLOC_ERROR2 && NULL != this->block_ids) {
                 free(this->block_ids);
                 this->block_ids = NULL;
             }
@@ -221,141 +234,32 @@ int lixa_state_log_init(lixa_state_log_t *this,
 
 
 
-int lixa_state_log_create_new_file(lixa_state_log_t *this)
-{
-    enum Exception {
-        NULL_OBJECT,
-        OPEN_ERROR,
-        PWRITE_ERROR,
-        NONE
-    } excp;
-    int ret_cod = LIXA_RC_INTERNAL_ERROR;
-    
-    LIXA_TRACE(("lixa_state_log_create_new_file\n"));
-    TRY {
-        mode_t mode;
-        size_t i;
-        size_t number_of_pages;
-        
-        /* check the object is not null */
-        if (NULL == this)
-            THROW(NULL_OBJECT);
-        /* add O_EXCL and O_CREAT flags and try to open again the file */
-        this->pers_flags |= O_EXCL | O_CREAT;
-        /* mode flags (security) */
-        mode = S_IRUSR | S_IWUSR | S_IRGRP;
-        if (-1 == (this->fd = open(this->pathname, this->pers_flags, mode)))
-            THROW(OPEN_ERROR);
-        /* format the file, review me later @@@ */
-        memset(this->single_page, 0, LIXA_SYSTEM_PAGE_SIZE);
-        this->file_total_size = 0;
-        number_of_pages = lixa_state_log_buffer2pages(
-            LIXA_STATE_LOG_FILE_SIZE_DEFAULT);
-        for (i=0; i<number_of_pages; ++i) {
-            off_t offset = i * LIXA_SYSTEM_PAGE_SIZE;
-            if (LIXA_SYSTEM_PAGE_SIZE != pwrite(
-                    this->fd, this->single_page,
-                    LIXA_SYSTEM_PAGE_SIZE, offset))
-                THROW(PWRITE_ERROR);
-            this->file_total_size += LIXA_SYSTEM_PAGE_SIZE;
-        }
-        /* move the file pointer at the beginning */
-        this->file_offset = 0;
-        
-        THROW(NONE);
-    } CATCH {
-        switch (excp) {
-            case NULL_OBJECT:
-                ret_cod = LIXA_RC_NULL_OBJECT;
-                break;
-            case OPEN_ERROR:
-                ret_cod = LIXA_RC_OPEN_ERROR;
-                break;
-            case PWRITE_ERROR:
-                ret_cod = LIXA_RC_PWRITE_ERROR;
-                break;
-            case NONE:
-                ret_cod = LIXA_RC_OK;
-                break;
-            default:
-                ret_cod = LIXA_RC_INTERNAL_ERROR;
-        } /* switch (excp) */
-    } /* TRY-CATCH */
-    LIXA_TRACE(("lixa_state_log_create_new_file/excp=%d/"
-                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
-    return ret_cod;
-}
-
-
-
-int lixa_state_log_exist_file(lixa_state_log_t *this)
-{
-    enum Exception {
-        NULL_OBJECT,
-        OPEN_ERROR,
-        NONE
-    } excp;
-    int ret_cod = LIXA_RC_INTERNAL_ERROR;
-    
-    LIXA_TRACE(("lixa_state_log_exist_file\n"));
-    TRY {
-        int fd;
-        
-        /* check the object is not null */
-        if (NULL == this)
-            THROW(NULL_OBJECT);
-        /* try to open the file with the same flags of a real usage */
-        if (-1 == (fd = open(this->pathname, this->pers_flags)))
-            THROW(OPEN_ERROR);
-        close(fd);
-        
-        THROW(NONE);
-    } CATCH {
-        switch (excp) {
-            case NULL_OBJECT:
-                ret_cod = LIXA_RC_NULL_OBJECT;
-                break;
-            case OPEN_ERROR:
-                ret_cod = LIXA_RC_OPEN_ERROR;
-                break;
-            case NONE:
-                ret_cod = LIXA_RC_OK;
-                break;
-            default:
-                ret_cod = LIXA_RC_INTERNAL_ERROR;
-        } /* switch (excp) */
-    } /* TRY-CATCH */
-    LIXA_TRACE(("lixa_state_log_exist_file/excp=%d/"
-                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
-    return ret_cod;
-}
-
-
-
 int lixa_state_log_clean(lixa_state_log_t *this)
 {
     enum Exception {
         NULL_OBJECT,
+        LOG_FILE_CLEAN_ERROR,
         NONE
     } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     
     LIXA_TRACE(("lixa_state_log_clean\n"));
     TRY {
+        size_t i;
+        
         if (NULL == this)
             THROW(NULL_OBJECT);
-        if (NULL != this->pathname)
-            free(this->pathname);
+        /* clean all the log files objects */
+        for (i=0; i<LIXA_STATE_TABLES; ++i)
+            if (LIXA_RC_OK != (ret_cod = lixa_state_log_file_clean(
+                                   &this->files[i])))
+                THROW(LOG_FILE_CLEAN_ERROR);
         if (NULL != this->buffer)
             free(this->buffer);
         if (NULL != this->single_page)
             free(this->single_page);
         if (NULL != this->block_ids)
             free(this->block_ids);
-        if (STATE_LOG_UNDEFINED == this->status) {
-            LIXA_TRACE(("lixa_state_log_clean: WARNING, status is "
-                        "UNDEFINED!\n"));
-        }
         /* reset everything, bye bye... */
         memset(this, 0, sizeof(lixa_state_log_t));
         
@@ -364,6 +268,8 @@ int lixa_state_log_clean(lixa_state_log_t *this)
         switch (excp) {
             case NULL_OBJECT:
                 ret_cod = LIXA_RC_NULL_OBJECT;
+                break;
+            case LOG_FILE_CLEAN_ERROR:
                 break;
             case NONE:
                 ret_cod = LIXA_RC_OK;
@@ -386,7 +292,7 @@ int lixa_state_log_flush(lixa_state_log_t *this,
         BUFFER_OVERFLOW1,
         BUFFER_OVERFLOW2,
         GETTIMEOFDAY_ERROR,
-        PWRITE_ERROR,
+        LOG_FILE_WRITE_ERROR,
         NONE
     } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
@@ -397,7 +303,6 @@ int lixa_state_log_flush(lixa_state_log_t *this,
         size_t number_of_pages_in_buffer;
         size_t pos_in_page, filled_pages, r;
         size_t log_free_pages;
-        ssize_t written_bytes;
         struct timeval timestamp;
         
         /* compute the number of buffer pages */
@@ -410,8 +315,11 @@ int lixa_state_log_flush(lixa_state_log_t *this,
         if (number_of_pages > number_of_pages_in_buffer)
             THROW(BUFFER_OVERFLOW1);
         /* check the amount of free space in the log */
-        log_free_pages = lixa_state_log_buffer2pages(
-            this->file_total_size - this->file_offset);
+        log_free_pages = lixa_state_common_buffer2pages(
+            lixa_state_log_file_get_total_size(
+                &this->files[this->used_file]) -
+            lixa_state_log_file_get_offset(
+                &this->files[this->used_file]));
         /* this should never be true */
         if (number_of_pages > log_free_pages)
             THROW(BUFFER_OVERFLOW2);
@@ -464,22 +372,10 @@ int lixa_state_log_flush(lixa_state_log_t *this,
                 filled_pages++;
             }
         } /* for (r=0; r<number_of_records_to_be_flushed; ++r) */
-        /* write the buffer to the disk */
-        written_bytes = pwrite(this->fd, this->buffer,
-                               lixa_state_log_pages2buffer(number_of_pages),
-                               this->file_offset);
-        if (lixa_state_log_pages2buffer(number_of_pages) != written_bytes) {
-            LIXA_TRACE(("lixa_state_log_flush: pwrite has written "
-                        SSIZE_T_FORMAT " bytes instead of " SIZE_T_FORMAT "\n",
-                        written_bytes,
-                        lixa_state_log_pages2buffer(number_of_pages)));
-            THROW(PWRITE_ERROR);
-        } else {
-            LIXA_TRACE(("lixa_state_log_flush: written " SIZE_T_FORMAT
-                        " pages, " SSIZE_T_FORMAT " bytes to log\n",
-                        number_of_pages, written_bytes));
-            this->file_offset += written_bytes;
-        }
+        if (LIXA_RC_OK != (ret_cod = lixa_state_log_file_write(
+                               &this->files[this->used_file],
+                               this->buffer, number_of_pages)))
+            THROW(LOG_FILE_WRITE_ERROR);
         /* reset block_ids */
         this->number_of_block_ids = 0;
         memset(this->block_ids, 0,
@@ -495,8 +391,7 @@ int lixa_state_log_flush(lixa_state_log_t *this,
             case GETTIMEOFDAY_ERROR:
                 ret_cod = LIXA_RC_GETTIMEOFDAY_ERROR;
                 break;
-            case PWRITE_ERROR:
-                ret_cod = LIXA_RC_PWRITE_ERROR;
+            case LOG_FILE_WRITE_ERROR:
                 break;
             case NONE:
                 ret_cod = LIXA_RC_OK;
@@ -674,7 +569,10 @@ int lixa_state_log_check_actions(lixa_state_log_t *this, int *must_flush,
             uint32_t future_needed_pages = lixa_state_log_needed_pages(
                 this, this->number_of_block_ids+1);
             size_t available_pages =
-                (this->file_total_size - this->file_offset) /
+                (lixa_state_log_file_get_total_size(
+                    &this->files[this->used_file]) -
+                 lixa_state_log_file_get_offset(
+                    &this->files[this->used_file])) /
                 LIXA_SYSTEM_PAGE_SIZE;
             LIXA_TRACE(("lixa_state_log_check_actions: "
                         "number_of_block_ids=" UINT32_T_FORMAT ", "
@@ -691,7 +589,9 @@ int lixa_state_log_check_actions(lixa_state_log_t *this, int *must_flush,
                 future_needed_pages > available_pages) {
                 *must_flush = TRUE;
                 *must_switch = TRUE;
-                LIXA_SYSLOG((LOG_INFO, LIXA_SYSLOG_LXD051I, this->pathname));
+                LIXA_SYSLOG((LOG_INFO, LIXA_SYSLOG_LXD051I,
+                             lixa_state_log_file_get_pathname(
+                                 &this->files[this->used_file])));
             }
         } /* if (this->number_of_block_ids != this->size_of_block_ids) */
         

@@ -32,6 +32,7 @@
 
 
 #include "lixa_trace.h"
+#include "lixa_state_common.h"
 #include "lixa_state_table.h"
 #include "lixa_state_log.h"
 
@@ -49,20 +50,9 @@
 
 
 /**
- * Number of state tables and log files; can NOT be less than 3
- */
-#define LIXA_STATE_TABLES   3
-
-
-
-/**
  * Suffix appended when a new state table is created
  */
 extern const char *LIXA_STATE_TABLE_SUFFIX;
-/**
- * Suffix appended when a new log file is created
- */
-extern const char *LIXA_STATE_LOG_SUFFIX;
 
 
 
@@ -81,11 +71,11 @@ typedef struct lixa_state_s {
     /**
      * Array of state tables
      */
-    lixa_state_table_t     tables[LIXA_STATE_TABLES];
+    lixa_state_table_t    tables[LIXA_STATE_TABLES];
     /**
      * Array of state logs
      */
-    lixa_state_log_t      logs[LIXA_STATE_TABLES];
+    lixa_state_log_t      log;
 } lixa_state_t;
 
 

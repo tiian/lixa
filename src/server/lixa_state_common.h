@@ -31,6 +31,10 @@
 
 
 
+#include "lixa_utils.h"
+
+
+
 /* save old LIXA_TRACE_MODULE and set a new value */
 #ifdef LIXA_TRACE_MODULE
 # define LIXA_TRACE_MODULE_SAVE LIXA_TRACE_MODULE
@@ -42,12 +46,44 @@
 
 
 
+/**
+ * Number of state tables and log files; can NOT be less than 3
+ */
+#define LIXA_STATE_TABLES   3
+
+
+
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
 
 
 
+    /**
+     * Conversion from buffer size to number of pages
+     * @param[in] buffer_size in bytes
+     * @return number of pages
+     */
+    static inline size_t lixa_state_common_buffer2pages(size_t buffer_size)
+    {
+        return (buffer_size / LIXA_SYSTEM_PAGE_SIZE) +
+            (buffer_size % LIXA_SYSTEM_PAGE_SIZE ? 1 : 0);
+    }
+
+
+
+    /**
+     * Conversion from number of pages to buffer size in bytes
+     * @param[in] number_of_pages
+     * @return the buffer size in bytes
+     */
+    static inline size_t lixa_state_common_pages2buffer(size_t number_of_pages)
+    {
+        return number_of_pages * LIXA_SYSTEM_PAGE_SIZE;
+    }
+
+    
+    
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
