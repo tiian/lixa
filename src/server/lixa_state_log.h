@@ -28,6 +28,9 @@
 #ifdef HAVE_GLIB_H
 # include <glib.h>
 #endif
+#ifdef HAVE_PTHREAD_H
+# include <pthread.h>
+#endif
 #ifdef HAVE_SYS_TIME_H
 # include <sys/time.h>
 #endif
@@ -67,52 +70,104 @@ extern size_t LIXA_STATE_LOG_RECORDS_PER_PAGE;
 
 
 /**
+ * Operations that can be sent from the main thread to the flusher thread
+ */
+enum lixa_state_log_flusher_ops_e {
+    /** nothing to do, just wait on condition */
+    STATE_LOG_FLUSHER_WAIT = 0,
+    /** flush the buffer to the current used file */
+    STATE_LOG_FLUSHER_FLUSH,
+    /** thread termination */
+    STATE_LOG_FLUSHER_EXIT
+};
+
+
+
+/**
  * LIXA State Log data type ("class")
  */
 typedef struct lixa_state_log_s {
     /**
      * Files used to persist the log
      */
-    lixa_state_log_file_t            files[LIXA_STATE_TABLES];
+    lixa_state_log_file_t             files[LIXA_STATE_TABLES];
     /**
      * Points to the currently used file, @ref files array
      */
-    size_t                           used_file;
-    /**
-     * Size of the buffer used to manage I/O; unit is "number of bytes"
-     */
-    size_t                           buffer_size;
-    /**
-     * Buffer used to manage I/O
-     */
-    void                            *buffer;
+    size_t                            used_file;
     /**
      * A single memory page used for special purposes like formatting
      */
-    void                            *single_page;
+    void                             *single_page;
     /**
      * An array used to store the positions of all the changed blocks in the
      * state file
      */
-    uint32_t                        *block_ids;
+    uint32_t                         *block_ids;
     /**
      * The size of the array, the number of block_ids that can be currently
      * managed by the buffer
      */
-    size_t                           size_of_block_ids;
+    size_t                            size_of_block_ids;
     /**
      * The number of block_id values in block_ids array
      */
-    size_t                           number_of_block_ids;
+    size_t                            number_of_block_ids;
     /**
      * Maximum size of the array, upper limit to cap memory consumption
      */
-    size_t                           max_number_of_block_ids;
+    size_t                            max_number_of_block_ids;
     /**
      * Last record id used in the state log; 0 has special meaning of resetted
      * record, unused record
      */
-    lixa_word_t                      last_record_id;
+    lixa_word_t                       last_record_id;
+    /**
+     * This internal struct is protected by a mutex and a condition to avoid
+     * race conditions between the main thread and the flusher thread
+     */
+    struct {
+        /**
+         * Mutex used to protect the object when accessed concurrently by the
+         * flusher thread
+         */
+        pthread_mutex_t                   mutex;
+        /**
+         * Condition used to signal events between main thread and flusher
+         * thread
+         */
+        pthread_cond_t                    cond;
+        /**
+         * Operation asked by main thread to flusher thread
+         */
+        enum lixa_state_log_flusher_ops_e operation;
+        /**
+         * File that must be flushed by the flusher thread: it's protected by
+         * flusher_mutex and by flusher_cond
+         */
+        size_t                            file_pos;
+        /**
+         * Boolean flag: master set it to TRUE before flushing, flusher set it
+         * to FALSE after completion
+         */
+        int                               to_be_flushed;
+        /**
+         * Number of pages that must be flushed from buffer to file
+         */
+        size_t                            number_of_pages;
+        /**
+         * Size of the buffer used to manage I/O; unit is "number of bytes"
+         */
+        size_t                            buffer_size;
+        /**
+         * Buffer used to manage I/O
+         */
+        void                             *buffer;
+        /**
+         * Thread used to flush the log files in background (asynchronously)
+         */
+        pthread_t                         thread;
+    } flusher;
 } lixa_state_log_t;
 
 
@@ -344,6 +399,14 @@ extern "C" {
 
 
 
+    /**
+     * Entry point of the flusher thread
+     * @param[in,out] data is of type @ref lixa_state_log_t
+     */
+    void *lixa_state_log_flusher(void *data);
+
+
+    
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

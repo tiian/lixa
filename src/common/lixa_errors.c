@@ -261,6 +261,27 @@ const char *lixa_strerror(int ret_cod)
         case LIXA_RC_PTHREAD_CREATE_ERROR:
             return "ERROR: 'pthread_create' function returned an error "
                 "condition";
+        case LIXA_RC_PTHREAD_COND_DESTROY_ERROR:
+            return "ERROR: 'pthread_cond_destroy' function returned an error "
+                "condition";
+        case LIXA_RC_PTHREAD_COND_INIT_ERROR:
+            return "ERROR: 'pthread_cond_init' function returned an error "
+                "condition";
+        case LIXA_RC_PTHREAD_COND_SIGNAL_ERROR:
+            return "ERROR: 'pthread_cond_signal' function returned an error "
+                "condition";
+        case LIXA_RC_PTHREAD_COND_WAIT_ERROR:
+            return "ERROR: 'pthread_cond_wait' function returned an error "
+                "condition";
+        case LIXA_RC_PTHREAD_JOIN_ERROR:
+            return "ERROR: 'pthread_join' function returned an error "
+                "condition";
+        case LIXA_RC_PTHREAD_MUTEX_DESTROY_ERROR:
+            return "ERROR: 'pthread_mutex_destroy' function returned an "
+                "error condition";
+        case LIXA_RC_PTHREAD_MUTEX_INIT_ERROR:
+            return "ERROR: 'pthread_mutex_init' function returned an "
+                "error condition";
         case LIXA_RC_PTHREAD_MUTEX_LOCK_ERROR:
             return "ERROR: 'pthread_mutex_lock' function returned an "
                 "error condition";

@@ -437,37 +437,65 @@
  */
 #define LIXA_RC_PTHREAD_CREATE_ERROR           -150
 /**
+ * "pthread_cond_destroy" function error
+ */
+#define LIXA_RC_PTHREAD_COND_DESTROY_ERROR     -151
+/**
+ * "pthread_cond_init" function error
+ */
+#define LIXA_RC_PTHREAD_COND_INIT_ERROR        -152
+/**
+ * "pthread_cond_signal" function error
+ */
+#define LIXA_RC_PTHREAD_COND_SIGNAL_ERROR      -153
+/**
+ * "pthread_cond_wait" function error
+ */
+#define LIXA_RC_PTHREAD_COND_WAIT_ERROR        -154
+/**
+ * "pthread_join" function error
+ */
+#define LIXA_RC_PTHREAD_JOIN_ERROR             -155
+/**
+ * "pthread_mutex_destroy" function error
+ */
+#define LIXA_RC_PTHREAD_MUTEX_DESTROY_ERROR    -156
+/**
+ * "pthread_mutex_init" function error
+ */
+#define LIXA_RC_PTHREAD_MUTEX_INIT_ERROR       -157
+/**
  * "pthread_mutex_lock" function error
  */
-#define LIXA_RC_PTHREAD_MUTEX_LOCK_ERROR       -151
+#define LIXA_RC_PTHREAD_MUTEX_LOCK_ERROR       -158
 /**
  * "pthread_mutex_unlock" function error
  */
-#define LIXA_RC_PTHREAD_MUTEX_UNLOCK_ERROR     -152
+#define LIXA_RC_PTHREAD_MUTEX_UNLOCK_ERROR     -159
 /**
  * "pthread_rwlock_wrlock" function error
  */
-#define LIXA_RC_PTHREAD_RWLOCK_WRLOCK_ERROR    -153
+#define LIXA_RC_PTHREAD_RWLOCK_WRLOCK_ERROR    -160
 /**
  * "pthread_rwlock_rlock" function error
  */
-#define LIXA_RC_PTHREAD_RWLOCK_RDLOCK_ERROR    -154
+#define LIXA_RC_PTHREAD_RWLOCK_RDLOCK_ERROR    -161
 /**
  * "pthread_rwlock_unlock" function error
  */
-#define LIXA_RC_PTHREAD_RWLOCK_UNLOCK_ERROR    -155
+#define LIXA_RC_PTHREAD_RWLOCK_UNLOCK_ERROR    -162
 /**
  * "pread" function error
  */
-#define LIXA_RC_PREAD_ERROR                    -156
+#define LIXA_RC_PREAD_ERROR                    -163
 /**
  * "pwrite" function error
  */
-#define LIXA_RC_PWRITE_ERROR                   -157
+#define LIXA_RC_PWRITE_ERROR                   -164
 /**
  * "lseek" function error
  */
-#define LIXA_RC_LSEEK_ERROR                    -158
+#define LIXA_RC_LSEEK_ERROR                    -165
 /**
  * "xmlReadFile" function error
  */

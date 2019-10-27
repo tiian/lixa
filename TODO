@@ -1,5 +1,16 @@
+It seems the mutex is not initialized (or passed) properly:
+
+2019-10-27 22:57:10.759730 [24422/140318139205376] lixa_state_log_flusher
+2019-10-27 22:57:10.759767 [24422/140318139205376] lixa_state_log_flusher: locki
+ng flusher_mutex...
+2019-10-27 22:57:10.759770 [24422/140318139205376] lixa_state_log_flusher/excp=1/ret_cod=-158/pthreaderror=22/errno=0
+
+
 Implement file flushing using a background thread, use a mutex and a cond
 look at pthread_cond_wait like at this URL:
+
+See $HOME/tmp/flush.c and implement with the array of files
+
 https://docs.oracle.com/cd/E19455-01/806-5257/6je9h032r/index.html
 lixa_state_log_flush restart with file writing
 
