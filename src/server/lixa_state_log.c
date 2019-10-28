@@ -750,7 +750,7 @@ void *lixa_state_log_flusher(void *data)
     } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     int pte = 0; /* pthread_error */
-    lixa_state_log_t *log = (lixa_state_log_t *)&data;
+    lixa_state_log_t *log = (lixa_state_log_t *)data;
     
     LIXA_TRACE(("lixa_state_log_flusher\n"));
     TRY {
@@ -774,9 +774,10 @@ void *lixa_state_log_flusher(void *data)
                             "signaled\n"));
             }
             if (STATE_LOG_FLUSHER_FLUSH == log->flusher.operation) {
-                LIXA_TRACE(("lixa_state_log_flusher: FLUSHING file\n"));
+                LIXA_TRACE(("lixa_state_log_flusher: FLUSHING file #"
+                            SIZE_T_FORMAT "\n", log->flusher.file_pos));
                 /* checking array index to avoid memory crash */
-                if (LIXA_STATE_TABLES > log->flusher.file_pos)
+                if (LIXA_STATE_TABLES <= log->flusher.file_pos)
                     THROW(OUT_OF_RANGE);
                 /* flush the data to file */
                 if (log->flusher.to_be_flushed) {
@@ -797,6 +798,7 @@ void *lixa_state_log_flusher(void *data)
                 }
                 /* reset flushing condition */
                 log->flusher.to_be_flushed = FALSE;
+                log->flusher.operation = STATE_LOG_FLUSHER_WAIT;
                 /* signaling to master thread */
                 if (0 != (pte = pthread_cond_signal(&log->flusher.cond)))
                     THROW(PTHREAD_COND_SIGNAL_ERROR);
@@ -815,6 +817,7 @@ void *lixa_state_log_flusher(void *data)
                 exit = TRUE;
             }
             /* unlock the mutex */
+            LIXA_TRACE(("lixa_state_log_flusher: unlocking flusher_mutex\n"));
             if (0 != (pte = pthread_mutex_unlock(&log->flusher.mutex)))
                 THROW(PTHREAD_MUTEX_UNLOCK_ERROR);
         } /* while (!exit) */
