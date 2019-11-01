@@ -1,4 +1,8 @@
-Implement file flushing using a background thread, use a mutex and a cond
+It seems that lixa_state_extend_log is not called by thread_status_mark_block,
+but pages finished in a previous cycle... why didn't it get fired?
+
+Remove field "single_page" from lixa_state_log_t : it was used only for file
+formatting
 
 lixa_state_log objects are not destroyed when the server stops
 

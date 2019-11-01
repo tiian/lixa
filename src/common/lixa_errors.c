@@ -185,7 +185,8 @@ const char *lixa_strerror(int ret_cod)
         case LIXA_RC_CLOSE_ERROR:
             return "ERROR: 'close' function returned an error condition";
         case LIXA_RC_TRUNCATE_ERROR:
-            return "ERROR: 'truncate' function returned an error condition";
+            return "ERROR: 'truncate'/'ftruncate' function returned an error "
+                "condition";
         case LIXA_RC_WRITE_ERROR:
             return "ERROR: 'write' function returned an error condition";
         case LIXA_RC_READ_ERROR:

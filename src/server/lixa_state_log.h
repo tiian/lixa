@@ -306,6 +306,15 @@ extern "C" {
 
 
     /**
+     * Extend the underlying file
+     * @param[in,out] this state log object
+     * @return a reason code
+     */
+    int lixa_state_log_extend(lixa_state_log_t *this);
+
+
+
+    /**
      * Mark a block because it has been updated; the function assumes that
      * a block has not been marked before, the function does not manage
      * deduplication by itself

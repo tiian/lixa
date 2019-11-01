@@ -159,6 +159,15 @@ extern "C" {
     
 
     /**
+     * Extend the state log
+     * @param[in,out] this state object
+     * @return a reason code
+     */
+    int lixa_state_extend_log(lixa_state_t *this);
+
+    
+
+    /**
      * Mark a block because it has been updated
      * @param[in,out] this state object
      * @param[in] block_id of the changed block

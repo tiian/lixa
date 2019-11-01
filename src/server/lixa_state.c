@@ -539,6 +539,46 @@ int lixa_state_flush_log_records(lixa_state_t *this,
 
 
 
+int lixa_state_extend_log(lixa_state_t *this)
+{
+    enum Exception {
+        NULL_OBJECT,
+        STATE_LOG_FLUSH_ERROR,
+        NONE
+    } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    
+    LIXA_TRACE(("lixa_state_extend_log\n"));
+    TRY {
+        if (NULL == this)
+            THROW(NULL_OBJECT);
+        LIXA_TRACE(("lixa_state_extend_log: used_state_table=%d\n",
+                    this->used_state_table));
+        if (LIXA_RC_OK != (ret_cod = lixa_state_log_extend(&this->log)))
+            THROW(STATE_LOG_FLUSH_ERROR);
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case NULL_OBJECT:
+                ret_cod = LIXA_RC_NULL_OBJECT;
+                break;
+            case STATE_LOG_FLUSH_ERROR:
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("lixa_state_extend_log/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
+
 int lixa_state_mark_block(lixa_state_t *this, uint32_t block_id)
 {
     enum Exception {

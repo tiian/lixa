@@ -304,7 +304,7 @@
  */
 #define LIXA_RC_CLOSE_ERROR                    -111
 /**
- * "truncate" function error
+ * "truncate" or "ftruncate" function error
  */
 #define LIXA_RC_TRUNCATE_ERROR                 -112
 /**

@@ -360,6 +360,7 @@ int lixa_state_log_flush(lixa_state_log_t *this,
                          status_record_t *status_records)
 {
     enum Exception {
+        NULL_OBJECT,
         PTHREAD_MUTEX_LOCK_ERROR,
         BUFFER_OVERFLOW1,
         BUFFER_OVERFLOW2,
@@ -379,6 +380,8 @@ int lixa_state_log_flush(lixa_state_log_t *this,
         size_t log_free_pages;
         struct timeval timestamp;
 
+        if (NULL == this)
+            THROW(NULL_OBJECT);
         /* acquire the lock of the synchronized structure */
         if (0 != (pte = pthread_mutex_lock(&this->flusher.mutex)))
             THROW(PTHREAD_MUTEX_LOCK_ERROR);
@@ -475,6 +478,9 @@ int lixa_state_log_flush(lixa_state_log_t *this,
         THROW(NONE);
     } CATCH {
         switch (excp) {
+            case NULL_OBJECT:
+                ret_cod = LIXA_RC_NULL_OBJECT;
+                break;
             case PTHREAD_MUTEX_LOCK_ERROR:
                 ret_cod = LIXA_RC_PTHREAD_MUTEX_LOCK_ERROR;
                 break;
@@ -501,6 +507,45 @@ int lixa_state_log_flush(lixa_state_log_t *this,
     LIXA_TRACE(("lixa_state_log_flush/excp=%d/"
                 "ret_cod=%d/pthreaderror=%d/errno=%d\n", excp, ret_cod, pte,
                 errno));
+    return ret_cod;
+}
+
+
+
+int lixa_state_log_extend(lixa_state_log_t *this)
+{
+    enum Exception {
+        NULL_OBJECT,
+        LOG_FILE_EXTEND_ERROR,
+        NONE
+    } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    
+    LIXA_TRACE(("lixa_state_log_extend\n"));
+    TRY {
+        if (NULL == this)
+            THROW(NULL_OBJECT);
+        if (LIXA_RC_OK != (ret_cod = lixa_state_log_file_extend(
+                               &this->files[this->used_file])))
+            THROW(LOG_FILE_EXTEND_ERROR);
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case NULL_OBJECT:
+                ret_cod = LIXA_RC_NULL_OBJECT;
+                break;
+            case LOG_FILE_EXTEND_ERROR:
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("lixa_state_log_extend/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }
 

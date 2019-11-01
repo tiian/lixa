@@ -950,6 +950,7 @@ int thread_status_mark_block(struct thread_status_s *ts,
         STATE_MARK_BLOCK_ERROR,
         CHECK_LOG_ACTIONS_ERROR,
         FLUSH_LOG_RECORDS_ERROR,
+        FLUSH_LOG_EXTEND_ERROR,
         NONE
     } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
@@ -959,7 +960,7 @@ int thread_status_mark_block(struct thread_status_s *ts,
         status_record_t *sr = NULL;
         int must_flush = FALSE;
         int must_switch = FALSE;
-
+        
         if (NULL == ts)
             THROW(NULL_OBJECT);
         /* mark the changed block */
@@ -978,6 +979,9 @@ int thread_status_mark_block(struct thread_status_s *ts,
                         ") in updated records tree\n",
                         index, sr->counter));
         }
+        /* @@@ move this code inside lixa_state_mark_block as soon as
+           lixa_state_table can be used to replace the reference
+           ts->curr_status */
         /* check if state log must be flushed */
         if (LIXA_RC_OK != (ret_cod = lixa_state_check_log_actions(
                                &ts->state, &must_flush, &must_switch)))
@@ -987,6 +991,12 @@ int thread_status_mark_block(struct thread_status_s *ts,
             if (LIXA_RC_OK != (ret_cod = lixa_state_flush_log_records(
                                    &ts->state, ts->curr_status)))
                 THROW(FLUSH_LOG_RECORDS_ERROR);
+        }
+        /* @@@ not automatic, only if the state table can not be switched! */
+        if (must_switch) {
+            LIXA_TRACE(("thread_status_mark_block: extend file\n"));
+            if (LIXA_RC_OK != (ret_cod = lixa_state_extend_log(&ts->state)))
+                THROW(FLUSH_LOG_EXTEND_ERROR);
         }
         
         THROW(NONE);
@@ -998,6 +1008,7 @@ int thread_status_mark_block(struct thread_status_s *ts,
             case STATE_MARK_BLOCK_ERROR:
             case CHECK_LOG_ACTIONS_ERROR:
             case FLUSH_LOG_RECORDS_ERROR:
+            case FLUSH_LOG_EXTEND_ERROR:
                 break;
             case NONE:
                 ret_cod = LIXA_RC_OK;

@@ -207,7 +207,10 @@ int lixa_state_log_file_create_new(lixa_state_log_file_t *this,
     enum Exception {
         NULL_OBJECT,
         OPEN_ERROR,
+        /* @@@ pleonastic code
         PWRITE_ERROR,
+        */
+        TRUNCATE_ERROR,
         NONE
     } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
@@ -215,19 +218,21 @@ int lixa_state_log_file_create_new(lixa_state_log_file_t *this,
     LIXA_TRACE(("lixa_state_log_file_create_new\n"));
     TRY {
         mode_t mode;
+        /* @@@ pleonastic code
         size_t i;
         size_t number_of_pages;
-        
+        */
         /* check the object is not null */
         if (NULL == this)
             THROW(NULL_OBJECT);
-        /* add O_EXCL and O_CREAT flags and try to open again the file */
+        /* add O_EXCL and O_CREAT flags: file must not exist */
         this->pers_flags |= O_EXCL | O_CREAT;
         /* mode flags (security) */
         mode = S_IRUSR | S_IWUSR | S_IRGRP;
         if (-1 == (this->fd = open(this->pathname, this->pers_flags, mode)))
             THROW(OPEN_ERROR);
-        /* format the file, review me later @@@ */
+        /* format the file, review me later */
+        /* @@@ it seems pleonastic...
         memset(single_page, 0, LIXA_SYSTEM_PAGE_SIZE);
         this->total_size = 0;
         number_of_pages = lixa_state_common_buffer2pages(
@@ -240,6 +245,11 @@ int lixa_state_log_file_create_new(lixa_state_log_file_t *this,
                 THROW(PWRITE_ERROR);
             this->total_size += LIXA_SYSTEM_PAGE_SIZE;
         }
+        */
+        if (0 == ftruncate(this->fd, LIXA_STATE_LOG_FILE_SIZE_DEFAULT))
+            this->total_size = LIXA_STATE_LOG_FILE_SIZE_DEFAULT;
+        else
+            THROW(TRUNCATE_ERROR);
         /* move the file pointer at the beginning */
         this->offset = 0;
         
@@ -252,8 +262,13 @@ int lixa_state_log_file_create_new(lixa_state_log_file_t *this,
             case OPEN_ERROR:
                 ret_cod = LIXA_RC_OPEN_ERROR;
                 break;
+                /* @@@ pleonastic code
             case PWRITE_ERROR:
                 ret_cod = LIXA_RC_PWRITE_ERROR;
+                break;
+                */
+            case TRUNCATE_ERROR:
+                ret_cod = LIXA_RC_TRUNCATE_ERROR;
                 break;
             case NONE:
                 ret_cod = LIXA_RC_OK;
@@ -263,6 +278,59 @@ int lixa_state_log_file_create_new(lixa_state_log_file_t *this,
         } /* switch (excp) */
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_state_log_file_create_new/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
+
+int lixa_state_log_file_extend(lixa_state_log_file_t *this)
+{
+    enum Exception {
+        NULL_OBJECT,
+        INVALID_STATUS,
+        TRUNCATE_ERROR,
+        NONE
+    } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    
+    LIXA_TRACE(("\n"));
+    TRY {
+        off_t new_total_size;
+        
+        /* check the object is not null */
+        if (NULL == this)
+            THROW(NULL_OBJECT);
+        /* check the file descriptor is valid */
+        if (LIXA_NULL_FD == this->fd)
+            THROW(INVALID_STATUS);
+        /* compute new size and extend the file */
+        new_total_size = this->total_size + LIXA_STATE_LOG_FILE_SIZE_INCREMENT;
+        if (0 != ftruncate(this->fd, new_total_size))
+            THROW(TRUNCATE_ERROR);
+        /* update new size */
+        this->total_size = new_total_size;
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case NULL_OBJECT:
+                ret_cod = LIXA_RC_NULL_OBJECT;
+                break;
+            case INVALID_STATUS:
+                ret_cod = LIXA_RC_INVALID_STATUS;
+                break;
+            case TRUNCATE_ERROR:
+                ret_cod = LIXA_RC_TRUNCATE_ERROR;
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }

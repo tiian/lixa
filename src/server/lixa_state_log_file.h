@@ -38,8 +38,8 @@
 
 /** Initial file size (unit = byte) */
 #define LIXA_STATE_LOG_FILE_SIZE_DEFAULT     (256*LIXA_SYSTEM_PAGE_SIZE)
-
-
+/** Incremental file size (unit = byte) */
+#define LIXA_STATE_LOG_FILE_SIZE_INCREMENT   (25*LIXA_SYSTEM_PAGE_SIZE)
 
 /**
  * Suffix appended when a new log file is created
@@ -140,6 +140,15 @@ extern "C" {
                                        void *single_page);
 
 
+
+    /**
+     * Extend a state log file
+     * @param[in,out] this state log file object
+     * @return a reason code
+     */
+    int lixa_state_log_file_extend(lixa_state_log_file_t *this);
+
+    
 
     /**
      * Write a buffer to the log file
