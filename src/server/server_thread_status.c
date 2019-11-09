@@ -978,25 +978,27 @@ int thread_status_mark_block(struct thread_status_s *ts,
                         UINTPTR_T_FORMAT " (counter=" UINT32_T_FORMAT
                         ") in updated records tree\n",
                         index, sr->counter));
-        }
-        /* @@@ move this code inside lixa_state_mark_block as soon as
-           lixa_state_table can be used to replace the reference
-           ts->curr_status */
-        /* check if state log must be flushed */
-        if (LIXA_RC_OK != (ret_cod = lixa_state_check_log_actions(
-                               &ts->state, &must_flush, &must_switch)))
-            THROW(CHECK_LOG_ACTIONS_ERROR);
-        if (must_flush) {
-            LIXA_TRACE(("thread_status_mark_block: flush records\n"));
-            if (LIXA_RC_OK != (ret_cod = lixa_state_flush_log_records(
-                                   &ts->state, ts->curr_status)))
-                THROW(FLUSH_LOG_RECORDS_ERROR);
-        }
-        /* @@@ not automatic, only if the state table can not be switched! */
-        if (must_switch) {
-            LIXA_TRACE(("thread_status_mark_block: extend file\n"));
-            if (LIXA_RC_OK != (ret_cod = lixa_state_extend_log(&ts->state)))
-                THROW(FLUSH_LOG_EXTEND_ERROR);
+            /* @@@ move this code inside lixa_state_mark_block as soon as
+               lixa_state_table can be used to replace the reference
+               ts->curr_status */
+            /* check if state log must be flushed */
+            if (LIXA_RC_OK != (ret_cod = lixa_state_check_log_actions(
+                                   &ts->state, &must_flush, &must_switch)))
+                THROW(CHECK_LOG_ACTIONS_ERROR);
+            if (must_flush) {
+                LIXA_TRACE(("thread_status_mark_block: flush records\n"));
+                if (LIXA_RC_OK != (ret_cod = lixa_state_flush_log_records(
+                                       &ts->state, ts->curr_status)))
+                    THROW(FLUSH_LOG_RECORDS_ERROR);
+            }
+            /* @@@ not automatic, only if the state table can not be
+               switched! */
+            if (must_switch) {
+                LIXA_TRACE(("thread_status_mark_block: extend file\n"));
+                if (LIXA_RC_OK != (ret_cod = lixa_state_extend_log(
+                                       &ts->state)))
+                    THROW(FLUSH_LOG_EXTEND_ERROR);
+            }
         }
         
         THROW(NONE);

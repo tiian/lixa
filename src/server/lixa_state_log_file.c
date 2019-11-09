@@ -63,9 +63,11 @@ int lixa_state_log_file_init(lixa_state_log_file_t *this,
         NULL_OBJECT2,
         INVALID_STATUS,
         STRDUP_ERROR,
+        PTHREAD_MUTEX_INIT_ERROR,
         NONE
     } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    int pte = 0;
     
     LIXA_TRACE(("lixa_state_log_file_init\n"));
     TRY {
@@ -84,6 +86,9 @@ int lixa_state_log_file_init(lixa_state_log_file_t *this,
         if (NULL == (this->pathname = strdup(pathname)))
             THROW(STRDUP_ERROR);
         this->pers_flags = pers_flags;
+        /* initialize the mutex used to protect the synchronized area */
+        if (0 != (pte = pthread_mutex_init(&this->synch.mutex, NULL)))
+            THROW(PTHREAD_MUTEX_INIT_ERROR);
         
         THROW(NONE);
     } CATCH {
@@ -98,6 +103,9 @@ int lixa_state_log_file_init(lixa_state_log_file_t *this,
             case STRDUP_ERROR:
                 ret_cod = LIXA_RC_STRDUP_ERROR;
                 break;
+            case PTHREAD_MUTEX_INIT_ERROR:
+                ret_cod = LIXA_RC_PTHREAD_MUTEX_INIT_ERROR;
+                break;
             case NONE:
                 ret_cod = LIXA_RC_OK;
                 break;
@@ -106,7 +114,8 @@ int lixa_state_log_file_init(lixa_state_log_file_t *this,
         } /* switch (excp) */
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_state_log_file_init/excp=%d/"
-                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+                "ret_cod=%d/pthreaderror=%d/errno=%d\n", excp, ret_cod, pte,
+                errno));
     return ret_cod;
 }
 
@@ -116,9 +125,11 @@ int lixa_state_log_file_clean(lixa_state_log_file_t *this)
 {
     enum Exception {
         NULL_OBJECT,
+        PTHREAD_MUTEX_DESTROY_ERROR,
         NONE
     } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    int pte = 0;
     
     LIXA_TRACE(("lixa_state_log_file_clean\n"));
     TRY {
@@ -136,12 +147,17 @@ int lixa_state_log_file_clean(lixa_state_log_file_t *this)
             LIXA_TRACE(("lixa_state_log_file_clean: WARNING, status is "
                         "UNDEFINED!\n"));
         }
+        if (0 != (pte = pthread_mutex_destroy(&this->synch.mutex)))
+            THROW(PTHREAD_MUTEX_DESTROY_ERROR);
             
         THROW(NONE);
     } CATCH {
         switch (excp) {
             case NULL_OBJECT:
                 ret_cod = LIXA_RC_NULL_OBJECT;
+                break;
+            case PTHREAD_MUTEX_DESTROY_ERROR:
+                ret_cod = LIXA_RC_PTHREAD_MUTEX_DESTROY_ERROR;
                 break;
             case NONE:
                 ret_cod = LIXA_RC_OK;
@@ -151,7 +167,8 @@ int lixa_state_log_file_clean(lixa_state_log_file_t *this)
         } /* switch (excp) */
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_state_log_file_clean/excp=%d/"
-                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+                "ret_cod=%d/pthreaderror=%d/errno=%d\n", excp, ret_cod, pte,
+                errno));
     return ret_cod;
 }
 
@@ -207,21 +224,18 @@ int lixa_state_log_file_create_new(lixa_state_log_file_t *this,
     enum Exception {
         NULL_OBJECT,
         OPEN_ERROR,
-        /* @@@ pleonastic code
-        PWRITE_ERROR,
-        */
+        PTHREAD_MUTEX_LOCK_ERROR,
         TRUNCATE_ERROR,
+        PTHREAD_MUTEX_UNLOCK_ERROR,
         NONE
     } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    int pte = 0;
+    int mutex_locked = FALSE;
     
     LIXA_TRACE(("lixa_state_log_file_create_new\n"));
     TRY {
         mode_t mode;
-        /* @@@ pleonastic code
-        size_t i;
-        size_t number_of_pages;
-        */
         /* check the object is not null */
         if (NULL == this)
             THROW(NULL_OBJECT);
@@ -231,27 +245,22 @@ int lixa_state_log_file_create_new(lixa_state_log_file_t *this,
         mode = S_IRUSR | S_IWUSR | S_IRGRP;
         if (-1 == (this->fd = open(this->pathname, this->pers_flags, mode)))
             THROW(OPEN_ERROR);
-        /* format the file, review me later */
-        /* @@@ it seems pleonastic...
-        memset(single_page, 0, LIXA_SYSTEM_PAGE_SIZE);
-        this->total_size = 0;
-        number_of_pages = lixa_state_common_buffer2pages(
-            LIXA_STATE_LOG_FILE_SIZE_DEFAULT);
-        for (i=0; i<number_of_pages; ++i) {
-            off_t offset = i * LIXA_SYSTEM_PAGE_SIZE;
-            if (LIXA_SYSTEM_PAGE_SIZE != pwrite(
-                    this->fd, single_page,
-                    LIXA_SYSTEM_PAGE_SIZE, offset))
-                THROW(PWRITE_ERROR);
-            this->total_size += LIXA_SYSTEM_PAGE_SIZE;
-        }
-        */
+        /* obtain the lock of the synchronized structure */
+        if (0 != (pte = pthread_mutex_lock(&this->synch.mutex))) {
+            THROW(PTHREAD_MUTEX_LOCK_ERROR);
+        } else
+            mutex_locked = TRUE;
         if (0 == ftruncate(this->fd, LIXA_STATE_LOG_FILE_SIZE_DEFAULT))
-            this->total_size = LIXA_STATE_LOG_FILE_SIZE_DEFAULT;
+            this->synch.total_size = LIXA_STATE_LOG_FILE_SIZE_DEFAULT;
         else
             THROW(TRUNCATE_ERROR);
         /* move the file pointer at the beginning */
-        this->offset = 0;
+        this->synch.offset = 0;
+        /* unlock the mutex */
+        if (0 != (pte = pthread_mutex_unlock(&this->synch.mutex))) {
+            THROW(PTHREAD_MUTEX_UNLOCK_ERROR);
+        } else
+            mutex_locked = FALSE;
         
         THROW(NONE);
     } CATCH {
@@ -262,13 +271,14 @@ int lixa_state_log_file_create_new(lixa_state_log_file_t *this,
             case OPEN_ERROR:
                 ret_cod = LIXA_RC_OPEN_ERROR;
                 break;
-                /* @@@ pleonastic code
-            case PWRITE_ERROR:
-                ret_cod = LIXA_RC_PWRITE_ERROR;
+            case PTHREAD_MUTEX_LOCK_ERROR:
+                ret_cod = LIXA_RC_PTHREAD_MUTEX_LOCK_ERROR;
                 break;
-                */
             case TRUNCATE_ERROR:
                 ret_cod = LIXA_RC_TRUNCATE_ERROR;
+                break;
+            case PTHREAD_MUTEX_UNLOCK_ERROR:
+                ret_cod = LIXA_RC_PTHREAD_MUTEX_UNLOCK_ERROR;
                 break;
             case NONE:
                 ret_cod = LIXA_RC_OK;
@@ -276,9 +286,13 @@ int lixa_state_log_file_create_new(lixa_state_log_file_t *this,
             default:
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
         } /* switch (excp) */
+        /* restore mutex in the event of error */
+        if (mutex_locked)
+            pthread_mutex_unlock(&this->synch.mutex);
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_state_log_file_create_new/excp=%d/"
-                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+                "ret_cod=%d/pthreaderror=%d/errno=%d\n", excp, ret_cod, pte,
+                errno));
     return ret_cod;
 }
 
@@ -289,12 +303,16 @@ int lixa_state_log_file_extend(lixa_state_log_file_t *this)
     enum Exception {
         NULL_OBJECT,
         INVALID_STATUS,
+        PTHREAD_MUTEX_LOCK_ERROR,
         TRUNCATE_ERROR,
+        PTHREAD_MUTEX_UNLOCK_ERROR,
         NONE
     } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    int pte = 0;
+    int mutex_locked = FALSE;
     
-    LIXA_TRACE(("\n"));
+    LIXA_TRACE(("lixa_state_log_file_extend\n"));
     TRY {
         off_t new_total_size;
         
@@ -304,12 +322,23 @@ int lixa_state_log_file_extend(lixa_state_log_file_t *this)
         /* check the file descriptor is valid */
         if (LIXA_NULL_FD == this->fd)
             THROW(INVALID_STATUS);
+        /* obtain the lock of the synchronized structure */
+        if (0 != (pte = pthread_mutex_lock(&this->synch.mutex))) {
+            THROW(PTHREAD_MUTEX_LOCK_ERROR);
+        } else
+            mutex_locked = TRUE;
         /* compute new size and extend the file */
-        new_total_size = this->total_size + LIXA_STATE_LOG_FILE_SIZE_INCREMENT;
+        new_total_size = this->synch.total_size +
+            LIXA_STATE_LOG_FILE_SIZE_INCREMENT;
         if (0 != ftruncate(this->fd, new_total_size))
             THROW(TRUNCATE_ERROR);
         /* update new size */
-        this->total_size = new_total_size;
+        this->synch.total_size = new_total_size;
+        /* unlock the mutex */
+        if (0 != (pte = pthread_mutex_unlock(&this->synch.mutex))) {
+            THROW(PTHREAD_MUTEX_UNLOCK_ERROR);
+        } else
+            mutex_locked = FALSE;
         
         THROW(NONE);
     } CATCH {
@@ -320,8 +349,14 @@ int lixa_state_log_file_extend(lixa_state_log_file_t *this)
             case INVALID_STATUS:
                 ret_cod = LIXA_RC_INVALID_STATUS;
                 break;
+            case PTHREAD_MUTEX_LOCK_ERROR:
+                ret_cod = LIXA_RC_PTHREAD_MUTEX_LOCK_ERROR;
+                break;
             case TRUNCATE_ERROR:
                 ret_cod = LIXA_RC_TRUNCATE_ERROR;
+                break;
+            case PTHREAD_MUTEX_UNLOCK_ERROR:
+                ret_cod = LIXA_RC_PTHREAD_MUTEX_UNLOCK_ERROR;
                 break;
             case NONE:
                 ret_cod = LIXA_RC_OK;
@@ -329,9 +364,13 @@ int lixa_state_log_file_extend(lixa_state_log_file_t *this)
             default:
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
         } /* switch (excp) */
+        /* restore mutex in the event of error */
+        if (mutex_locked)
+            pthread_mutex_unlock(&this->synch.mutex);
     } /* TRY-CATCH */
-    LIXA_TRACE(("/excp=%d/"
-                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE(("lixa_state_log_file_extend/excp=%d/"
+                "ret_cod=%d/pthreaderror=%d/errno=%d\n", excp, ret_cod, pte,
+                errno));
     return ret_cod;
 }
 
@@ -342,18 +381,28 @@ int lixa_state_log_file_write(lixa_state_log_file_t *this,
                               size_t number_of_pages)
 {
     enum Exception {
+        NULL_OBJECT,
         PWRITE_ERROR,
+        PTHREAD_MUTEX_LOCK_ERROR,
+        PTHREAD_MUTEX_UNLOCK_ERROR,
         NONE
     } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    int pte = 0;
+    int mutex_locked = FALSE;
     
     LIXA_TRACE(("lixa_state_log_file_write\n"));
     TRY {
         ssize_t written_bytes;
         size_t count = lixa_state_common_pages2buffer(number_of_pages);
-        
-        /* write the buffer to the disk */
-        written_bytes = pwrite(this->fd, buffer, count, this->offset);
+        off_t offset;
+
+        /* check the object is not null */
+        if (NULL == this)
+            THROW(NULL_OBJECT);
+        /* use the method to get a synchronized value */
+        offset = lixa_state_log_file_get_offset(this);
+        written_bytes = pwrite(this->fd, buffer, count, offset);
         if (count != written_bytes) {
             LIXA_TRACE(("lixa_state_log_flush: pwrite has written "
                         SSIZE_T_FORMAT " bytes instead of " SIZE_T_FORMAT "\n",
@@ -363,14 +412,35 @@ int lixa_state_log_file_write(lixa_state_log_file_t *this,
             LIXA_TRACE(("lixa_state_log_flush: written " SIZE_T_FORMAT
                         " pages, " SSIZE_T_FORMAT " bytes to log\n",
                         number_of_pages, written_bytes));
-            this->offset += written_bytes;
+            /* maybe unnecessary, but on some CPU the following operation
+             * might be no atomic */
+            /* obtain the lock of the synchronized structure */
+            if (0 != (pte = pthread_mutex_lock(&this->synch.mutex))) {
+                THROW(PTHREAD_MUTEX_LOCK_ERROR);
+            } else
+                mutex_locked = TRUE;
+            this->synch.offset += written_bytes;
+            /* unlock the mutex */
+            if (0 != (pte = pthread_mutex_unlock(&this->synch.mutex))) {
+                THROW(PTHREAD_MUTEX_UNLOCK_ERROR);
+            } else
+                mutex_locked = FALSE;
         }
         
         THROW(NONE);
     } CATCH {
         switch (excp) {
+            case NULL_OBJECT:
+                ret_cod = LIXA_RC_NULL_OBJECT;
+                break;
             case PWRITE_ERROR:
                 ret_cod = LIXA_RC_PWRITE_ERROR;
+                break;
+            case PTHREAD_MUTEX_LOCK_ERROR:
+                ret_cod = LIXA_RC_PTHREAD_MUTEX_LOCK_ERROR;
+                break;
+            case PTHREAD_MUTEX_UNLOCK_ERROR:
+                ret_cod = LIXA_RC_PTHREAD_MUTEX_UNLOCK_ERROR;
                 break;
             case NONE:
                 ret_cod = LIXA_RC_OK;
@@ -378,9 +448,81 @@ int lixa_state_log_file_write(lixa_state_log_file_t *this,
             default:
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
         } /* switch (excp) */
+        /* restore mutex in the event of error */
+        if (mutex_locked)
+            pthread_mutex_unlock(&this->synch.mutex);
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_state_log_file_write/excp=%d/"
-                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+                "ret_cod=%d/pthreaderror=%d/errno=%d\n", excp, ret_cod, pte,
+                errno));
+    return ret_cod;
+}
+
+
+
+int lixa_state_log_file_set_reserved(lixa_state_log_file_t *this,
+                                     off_t reserved)
+{
+    enum Exception {
+        NULL_OBJECT,
+        PTHREAD_MUTEX_LOCK_ERROR,
+        OUT_OF_RANGE,
+        PTHREAD_MUTEX_UNLOCK_ERROR,
+        NONE
+    } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    int pte = 0;
+    int mutex_locked = FALSE;
+    
+    LIXA_TRACE(("lixa_state_log_file_set_reserved\n"));
+    TRY {
+        /* check the object is not null */
+        if (NULL == this)
+            THROW(NULL_OBJECT);
+        /* synchronize on mutex */
+        if (0 != (pte = pthread_mutex_lock(&this->synch.mutex))) {
+            THROW(PTHREAD_MUTEX_LOCK_ERROR);
+        } else
+            mutex_locked = TRUE;
+        /* check consistency */
+        if (this->synch.offset + reserved <= this->synch.total_size)
+            this->synch.reserved = reserved;
+        else
+            THROW(OUT_OF_RANGE);
+        /* unlock the mutex */
+        if (0 != (pte = pthread_mutex_unlock(&this->synch.mutex))) {
+            THROW(PTHREAD_MUTEX_UNLOCK_ERROR);
+        } else
+            mutex_locked = FALSE;
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case NULL_OBJECT:
+                ret_cod = LIXA_RC_NULL_OBJECT;
+                break;
+            case PTHREAD_MUTEX_LOCK_ERROR:
+                ret_cod = LIXA_RC_PTHREAD_MUTEX_LOCK_ERROR;
+                break;
+            case OUT_OF_RANGE:
+                ret_cod = LIXA_RC_OUT_OF_RANGE;
+                break;
+            case PTHREAD_MUTEX_UNLOCK_ERROR:
+                ret_cod = LIXA_RC_PTHREAD_MUTEX_UNLOCK_ERROR;
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+        /* restore mutex in the event of error */
+        if (mutex_locked)
+            pthread_mutex_unlock(&this->synch.mutex);
+    } /* TRY-CATCH */
+    LIXA_TRACE(("lixa_state_log_file_set_reserved/excp=%d/"
+                "ret_cod=%d/pthreaderror=%d/errno=%d\n", excp, ret_cod, pte,
+                errno));
     return ret_cod;
 }
 

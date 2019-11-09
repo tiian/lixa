@@ -123,8 +123,8 @@ typedef struct lixa_state_log_s {
      */
     lixa_word_t                       last_record_id;
     /**
-     * This internal struct is protected by a mutex and a condition to avoid
-     * race conditions between the main thread and the flusher thread
+     * This internal struct is synchronized with a mutex and a condition to
+     * avoid race conditions between the main thread and the flusher thread
      */
     struct {
         /**
@@ -167,7 +167,7 @@ typedef struct lixa_state_log_s {
          * Thread used to flush the log files in background (asynchronously)
          */
         pthread_t                         thread;
-    } flusher;
+    } synch;
 } lixa_state_log_t;
 
 

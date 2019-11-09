@@ -160,20 +160,20 @@ int lixa_state_log_init(lixa_state_log_t *this,
         memset(this->block_ids, 0, sizeof(uint32_t) * this->size_of_block_ids);
         /* initialize the synchronized internal structure shared with the
            flusher thread */
-        if (0 != (pte = pthread_mutex_init(&this->flusher.mutex, NULL)))
+        if (0 != (pte = pthread_mutex_init(&this->synch.mutex, NULL)))
             THROW(PTHREAD_MUTEX_INIT_ERROR);
-        if (0 != (pte = pthread_cond_init(&this->flusher.cond, NULL)))
+        if (0 != (pte = pthread_cond_init(&this->synch.cond, NULL)))
             THROW(PTHREAD_COND_INIT_ERROR);
-        this->flusher.operation = STATE_LOG_FLUSHER_WAIT;
-        this->flusher.file_pos = 0;
-        this->flusher.to_be_flushed = FALSE;
-        this->flusher.number_of_pages = 0;
+        this->synch.operation = STATE_LOG_FLUSHER_WAIT;
+        this->synch.file_pos = 0;
+        this->synch.to_be_flushed = FALSE;
+        this->synch.number_of_pages = 0;
         /* allocate the buffer for I/O */
-        this->flusher.buffer_size = lixa_state_log_blocks2buffer(
+        this->synch.buffer_size = lixa_state_log_blocks2buffer(
             this->size_of_block_ids);
-        if (0 != (error = posix_memalign(&this->flusher.buffer,
+        if (0 != (error = posix_memalign(&this->synch.buffer,
                                          LIXA_SYSTEM_PAGE_SIZE,
-                                         this->flusher.buffer_size))) {
+                                         this->synch.buffer_size))) {
             LIXA_TRACE(("lixa_state_log_init/posix_memalign: error=%d\n",
                         error));
             THROW(POSIX_MEMALIGN_ERROR2);
@@ -184,11 +184,11 @@ int lixa_state_log_init(lixa_state_log_t *this,
                         "buffer_size= " SIZE_T_FORMAT "\n",
                         this->size_of_block_ids,
                         LIXA_STATE_LOG_RECORDS_PER_PAGE,
-                        this->flusher.buffer_size));
+                        this->synch.buffer_size));
         }
-        memset(this->flusher.buffer, 0, this->flusher.buffer_size);
+        memset(this->synch.buffer, 0, this->synch.buffer_size);
         /* activate flusher thread */
-        if (0 != (pte = pthread_create(&this->flusher.thread, NULL,
+        if (0 != (pte = pthread_create(&this->synch.thread, NULL,
                                        lixa_state_log_flusher,
                                        (void *)this)))
             THROW(PTHREAD_CREATE_ERROR);
@@ -243,9 +243,9 @@ int lixa_state_log_init(lixa_state_log_t *this,
                 free(this->block_ids);
                 this->block_ids = NULL;
             }
-            if (excp > POSIX_MEMALIGN_ERROR2 && NULL != this->flusher.buffer) {
-                free(this->flusher.buffer);
-                this->flusher.buffer = NULL;
+            if (excp > POSIX_MEMALIGN_ERROR2 && NULL != this->synch.buffer) {
+                free(this->synch.buffer);
+                this->synch.buffer = NULL;
             }
         } /* if (NONE != excp) */
     } /* TRY-CATCH */
@@ -272,6 +272,7 @@ int lixa_state_log_clean(lixa_state_log_t *this)
     } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     int pte = 0;
+    int mutex_locked = FALSE;
     
     LIXA_TRACE(("lixa_state_log_clean\n"));
     TRY {
@@ -280,34 +281,38 @@ int lixa_state_log_clean(lixa_state_log_t *this)
         if (NULL == this)
             THROW(NULL_OBJECT);
         /* obtain the lock of the synchronized structure */
-        if (0 != (pte = pthread_mutex_lock(&this->flusher.mutex)))
+        if (0 != (pte = pthread_mutex_lock(&this->synch.mutex))) {
             THROW(PTHREAD_MUTEX_LOCK_ERROR);
+        } else
+            mutex_locked = TRUE;
         /* ask flusher termination */
         LIXA_TRACE(("lixa_state_log_clean: sending to flusher thread "
                     "exit request...\n"));
-        this->flusher.operation = STATE_LOG_FLUSHER_EXIT;
-        if (0 != (pte = pthread_cond_signal(&this->flusher.cond)))
+        this->synch.operation = STATE_LOG_FLUSHER_EXIT;
+        if (0 != (pte = pthread_cond_signal(&this->synch.cond)))
             THROW(PTHREAD_COND_SIGNAL_ERROR);
         /* unlock the mutex */
-        if (0 != (pte = pthread_mutex_unlock(&this->flusher.mutex)))
+        if (0 != (pte = pthread_mutex_unlock(&this->synch.mutex))) {
             THROW(PTHREAD_MUTEX_UNLOCK_ERROR);
+        } else
+            mutex_locked = FALSE;
         /* wait flusher termination */
         LIXA_TRACE(("lixa_state_log_clean: waiting flusher thread "
                     "termination...\n"));
-        if (0 != (pte = pthread_join(this->flusher.thread, NULL)))
+        if (0 != (pte = pthread_join(this->synch.thread, NULL)))
             THROW(PTHREAD_JOIN_ERROR);
         /* mutex and condition are no more necessary */
-        if (0 != (pte = pthread_cond_destroy(&this->flusher.cond)))
+        if (0 != (pte = pthread_cond_destroy(&this->synch.cond)))
             THROW(PTHREAD_COND_DESTROY_ERROR);
-        if (0 != (pte = pthread_mutex_destroy(&this->flusher.mutex)))
+        if (0 != (pte = pthread_mutex_destroy(&this->synch.mutex)))
             THROW(PTHREAD_MUTEX_DESTROY_ERROR);
         /* clean all the log files objects */
         for (i=0; i<LIXA_STATE_TABLES; ++i)
             if (LIXA_RC_OK != (ret_cod = lixa_state_log_file_clean(
                                    &this->files[i])))
                 THROW(LOG_FILE_CLEAN_ERROR);
-        if (NULL != this->flusher.buffer)
-            free(this->flusher.buffer);
+        if (NULL != this->synch.buffer)
+            free(this->synch.buffer);
         if (NULL != this->single_page)
             free(this->single_page);
         if (NULL != this->block_ids)
@@ -347,6 +352,9 @@ int lixa_state_log_clean(lixa_state_log_t *this)
             default:
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
         } /* switch (excp) */
+        /* restore mutex in the event of error */
+        if (mutex_locked)
+            pthread_mutex_unlock(&this->synch.mutex);
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_state_log_clean/excp=%d/"
                 "ret_cod=%d/pthreaderror=%d/errno=%d\n", excp, ret_cod, pte,
@@ -371,6 +379,7 @@ int lixa_state_log_flush(lixa_state_log_t *this,
     } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     int pte = 0;
+    int mutex_locked = FALSE;
     
     LIXA_TRACE(("lixa_state_log_flush\n"));
     TRY {
@@ -383,14 +392,16 @@ int lixa_state_log_flush(lixa_state_log_t *this,
         if (NULL == this)
             THROW(NULL_OBJECT);
         /* acquire the lock of the synchronized structure */
-        if (0 != (pte = pthread_mutex_lock(&this->flusher.mutex)))
+        if (0 != (pte = pthread_mutex_lock(&this->synch.mutex))) {
             THROW(PTHREAD_MUTEX_LOCK_ERROR);
+        } else
+            mutex_locked = TRUE;
         /* compute the number of buffer pages */
         number_of_pages = lixa_state_log_blocks2pages(
             this->number_of_block_ids);
         /* compute the number of page in the buffer */
         number_of_pages_in_buffer =
-            this->flusher.buffer_size / LIXA_SYSTEM_PAGE_SIZE;
+            this->synch.buffer_size / LIXA_SYSTEM_PAGE_SIZE;
         /* this should never be true */
         if (number_of_pages > number_of_pages_in_buffer)
             THROW(BUFFER_OVERFLOW1);
@@ -417,7 +428,7 @@ int lixa_state_log_flush(lixa_state_log_t *this,
         if (0 != gettimeofday(&timestamp, NULL))
             THROW(GETTIMEOFDAY_ERROR);
         /* reset the buffer */
-        memset(this->flusher.buffer, 0,
+        memset(this->synch.buffer, 0,
                number_of_pages * LIXA_SYSTEM_PAGE_SIZE);
         /* loop on the number of records */
         pos_in_page = 0;
@@ -425,7 +436,7 @@ int lixa_state_log_flush(lixa_state_log_t *this,
         for (r=0; r<this->number_of_block_ids; ++r) {
             struct lixa_state_log_record_s *log_record =
                 (struct lixa_state_log_record_s *)
-                (this->flusher.buffer + filled_pages * LIXA_SYSTEM_PAGE_SIZE +
+                (this->synch.buffer + filled_pages * LIXA_SYSTEM_PAGE_SIZE +
                  pos_in_page * sizeof(struct lixa_state_log_record_s));
             union status_record_u *record =
                 (union status_record_u *)
@@ -453,23 +464,21 @@ int lixa_state_log_flush(lixa_state_log_t *this,
                 filled_pages++;
             }
         } /* for (r=0; r<number_of_records_to_be_flushed; ++r) */
-        /*
-        if (LIXA_RC_OK != (ret_cod = lixa_state_log_file_write(
-                               &this->files[this->used_file],
-                               this->flusher.buffer, number_of_pages)))
-            THROW(LOG_FILE_WRITE_ERROR);
-        */
         /* ask to flusher thread to perform the flushing */
         LIXA_TRACE(("lixa_state_log_flush: asking flusher thread to flush "
                     "the buffer to file\n"));
-        this->flusher.operation = STATE_LOG_FLUSHER_FLUSH;
-        this->flusher.file_pos = this->used_file;
-        this->flusher.to_be_flushed = TRUE;
-        this->flusher.number_of_pages = number_of_pages;
-        if (0 != (pte = pthread_cond_signal(&this->flusher.cond)))
+        this->synch.operation = STATE_LOG_FLUSHER_FLUSH;
+        this->synch.file_pos = this->used_file;
+        this->synch.to_be_flushed = TRUE;
+        this->synch.number_of_pages = number_of_pages;
+        /* reserve space in the file */
+        /* @@@@ */
+        if (0 != (pte = pthread_cond_signal(&this->synch.cond)))
             THROW(PTHREAD_COND_SIGNAL_ERROR);
-        if (0 != (pte = pthread_mutex_unlock(&this->flusher.mutex)))
+        if (0 != (pte = pthread_mutex_unlock(&this->synch.mutex))) {
             THROW(PTHREAD_MUTEX_UNLOCK_ERROR);
+        } else
+            mutex_locked = FALSE;
         /* reset block_ids */
         this->number_of_block_ids = 0;
         memset(this->block_ids, 0,
@@ -503,6 +512,9 @@ int lixa_state_log_flush(lixa_state_log_t *this,
             default:
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
         } /* switch (excp) */
+        /* restore mutex in the event of error */
+        if (mutex_locked)
+            pthread_mutex_unlock(&this->synch.mutex);
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_state_log_flush/excp=%d/"
                 "ret_cod=%d/pthreaderror=%d/errno=%d\n", excp, ret_cod, pte,
@@ -612,6 +624,7 @@ int lixa_state_log_check_actions(lixa_state_log_t *this, int *must_flush,
     } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     int pte = 0;
+    int mutex_locked = FALSE;
     *must_flush = FALSE;
     *must_switch = FALSE;
     
@@ -629,7 +642,7 @@ int lixa_state_log_check_actions(lixa_state_log_t *this, int *must_flush,
                    safe because buffer_size is not modified by the flusher
                    thread */
                 LIXA_SYSLOG((LOG_NOTICE, LIXA_SYSLOG_LXD050N,
-                             this->flusher.buffer_size));
+                             this->synch.buffer_size));
             } else {
                 /* upper limit not reached, trying to extend it */
                 size_t new_buffer_size;
@@ -685,8 +698,10 @@ int lixa_state_log_check_actions(lixa_state_log_t *this, int *must_flush,
                 } else {
                     /* buffer has been expanded, swtching to the new buffer
                        and array, access to buffer is protected by the mutex */
-                    if (0 != (pte = pthread_mutex_lock(&this->flusher.mutex)))
+                    if (0 != (pte = pthread_mutex_lock(&this->synch.mutex))) {
                         THROW(PTHREAD_MUTEX_LOCK_ERROR);
+                    } else
+                        mutex_locked = TRUE;
                     LIXA_TRACE(("lixa_state_log_check_actions: "
                                 "buffer expanded from " SIZE_T_FORMAT
                                 " to " SIZE_T_FORMAT " bytes, "
@@ -694,7 +709,7 @@ int lixa_state_log_check_actions(lixa_state_log_t *this, int *must_flush,
                                 SIZE_T_FORMAT " to " SIZE_T_FORMAT
                                 " records (max_number_of_block_ids = "
                                 SIZE_T_FORMAT ")\n",
-                                this->flusher.buffer_size, new_buffer_size,
+                                this->synch.buffer_size, new_buffer_size,
                                 this->size_of_block_ids,
                                 new_number_of_block_ids,
                                 this->max_number_of_block_ids));
@@ -706,12 +721,14 @@ int lixa_state_log_check_actions(lixa_state_log_t *this, int *must_flush,
                     this->block_ids = new_block_ids;
                     this->size_of_block_ids = new_number_of_block_ids;
                     memset(new_buffer, 0, new_buffer_size);
-                    free(this->flusher.buffer);
-                    this->flusher.buffer = new_buffer;
-                    this->flusher.buffer_size = new_buffer_size;
+                    free(this->synch.buffer);
+                    this->synch.buffer = new_buffer;
+                    this->synch.buffer_size = new_buffer_size;
                     if (0 != (pte = pthread_mutex_unlock(
-                                  &this->flusher.mutex)))
+                                  &this->synch.mutex))) {
                         THROW(PTHREAD_MUTEX_UNLOCK_ERROR);
+                    } else
+                        mutex_locked = FALSE;
                 } /* if (error != 0 || new_block_ids == NULL) */
             } /* if (this->size_of_block_ids == this->max_number_of_ ... */
         } /* if (this->number_of_block_ids == this->size_of_block_ids) */
@@ -733,10 +750,17 @@ int lixa_state_log_check_actions(lixa_state_log_t *this, int *must_flush,
                         "number_of_block_ids=" UINT32_T_FORMAT ", "
                         "current_needed_pages= " UINT32_T_FORMAT ", "
                         "future_needed_pages=" UINT32_T_FORMAT ", "
-                        "available_pages=" SIZE_T_FORMAT "\n",
+                        "available_pages=" SIZE_T_FORMAT ", "
+                        "used_file=" SIZE_T_FORMAT ", "
+                        "total_size=" OFF_T_FORMAT ", "
+                        "offset=" OFF_T_FORMAT "\n",
                         this->number_of_block_ids,
                         current_needed_pages, future_needed_pages,
-                        available_pages));
+                        available_pages, this->used_file,
+                        lixa_state_log_file_get_total_size(
+                            &this->files[this->used_file]),
+                        lixa_state_log_file_get_offset(
+                            &this->files[this->used_file]) ));
             if (current_needed_pages > available_pages)
                 /* this is a severe internal error, a bug */
                 THROW(BUFFER_OVERFLOW);
@@ -749,6 +773,9 @@ int lixa_state_log_check_actions(lixa_state_log_t *this, int *must_flush,
                                  &this->files[this->used_file])));
             }
         } /* if (this->number_of_block_ids != this->size_of_block_ids) */
+        
+        LIXA_TRACE(("lixa_state_log_check_actions: must_flush=%d, "
+                    "must_switch=%d\n", *must_flush, *must_switch));
         
         THROW(NONE);
     } CATCH {
@@ -771,6 +798,9 @@ int lixa_state_log_check_actions(lixa_state_log_t *this, int *must_flush,
             default:
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
         } /* switch (excp) */
+        /* restore mutex in the event of error */
+        if (mutex_locked)
+            pthread_mutex_unlock(&this->synch.mutex);
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_state_log_check_actions/excp=%d/"
                 "ret_cod=%d/pthreaderror=%d/errno=%d\n", excp, ret_cod, pte,
@@ -795,6 +825,7 @@ void *lixa_state_log_flusher(void *data)
     } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     int pte = 0; /* pthread_error */
+    int mutex_locked = FALSE;
     lixa_state_log_t *log = (lixa_state_log_t *)data;
     
     LIXA_TRACE(("lixa_state_log_flusher\n"));
@@ -806,65 +837,69 @@ void *lixa_state_log_flusher(void *data)
         
         while (!exit) {
             LIXA_TRACE(("lixa_state_log_flusher: locking flusher_mutex...\n"));
-            if (0 != (pte = pthread_mutex_lock(&log->flusher.mutex)))
+            if (0 != (pte = pthread_mutex_lock(&log->synch.mutex))) {
                 THROW(PTHREAD_MUTEX_LOCK_ERROR);
+            } else
+                mutex_locked = TRUE;
             /* check the operation asked by the main thread */
-            if (STATE_LOG_FLUSHER_WAIT == log->flusher.operation) {
+            if (STATE_LOG_FLUSHER_WAIT == log->synch.operation) {
                 LIXA_TRACE(("lixa_state_log_flusher: WAITING on condition"
                             "...\n"));
                 if (0 != (pte = pthread_cond_wait(
-                              &log->flusher.cond, &log->flusher.mutex)))
+                              &log->synch.cond, &log->synch.mutex)))
                     THROW(PTHREAD_COND_WAIT_ERROR);
                 LIXA_TRACE(("lixa_state_log_flusher: condition has been "
                             "signaled\n"));
             }
-            if (STATE_LOG_FLUSHER_FLUSH == log->flusher.operation) {
+            if (STATE_LOG_FLUSHER_FLUSH == log->synch.operation) {
                 LIXA_TRACE(("lixa_state_log_flusher: FLUSHING file #"
-                            SIZE_T_FORMAT "\n", log->flusher.file_pos));
+                            SIZE_T_FORMAT "\n", log->synch.file_pos));
                 /* checking array index to avoid memory crash */
-                if (LIXA_STATE_TABLES <= log->flusher.file_pos)
+                if (LIXA_STATE_TABLES <= log->synch.file_pos)
                     THROW(OUT_OF_RANGE);
                 /* flush the data to file */
-                if (log->flusher.to_be_flushed) {
+                if (log->synch.to_be_flushed) {
                     if (LIXA_RC_OK != (ret_cod = lixa_state_log_file_write(
                                            &log->files[
-                                               log->flusher.file_pos],
-                                           log->flusher.buffer,
-                                           log->flusher.number_of_pages)))
+                                               log->synch.file_pos],
+                                           log->synch.buffer,
+                                           log->synch.number_of_pages)))
                         THROW(LOG_FILE_WRITE_ERROR);
                 } else {
                     /* this is an internal error, it should never happen */
                     LIXA_TRACE(("lixa_state_log_flusher: internal error, "
                                 "flusher.operation=%d and "
                                 "flusher.to_be_flushed=%d\n",
-                                log->flusher.operation,
-                                log->flusher.to_be_flushed));
+                                log->synch.operation,
+                                log->synch.to_be_flushed));
                     THROW(INTERNAL_ERROR);
                 }
                 /* reset flushing condition */
-                log->flusher.to_be_flushed = FALSE;
-                log->flusher.operation = STATE_LOG_FLUSHER_WAIT;
+                log->synch.to_be_flushed = FALSE;
+                log->synch.operation = STATE_LOG_FLUSHER_WAIT;
                 /* signaling to master thread */
-                if (0 != (pte = pthread_cond_signal(&log->flusher.cond)))
+                if (0 != (pte = pthread_cond_signal(&log->synch.cond)))
                     THROW(PTHREAD_COND_SIGNAL_ERROR);
             }
-            if (STATE_LOG_FLUSHER_EXIT == log->flusher.operation) {
+            if (STATE_LOG_FLUSHER_EXIT == log->synch.operation) {
                 LIXA_TRACE(("lixa_state_log_flusher: EXITING\n"));
                 exit = TRUE;
             }
             /* this should never happen */
-            if (STATE_LOG_FLUSHER_WAIT != log->flusher.operation &&
-                STATE_LOG_FLUSHER_FLUSH != log->flusher.operation &&
-                STATE_LOG_FLUSHER_EXIT != log->flusher.operation) {
+            if (STATE_LOG_FLUSHER_WAIT != log->synch.operation &&
+                STATE_LOG_FLUSHER_FLUSH != log->synch.operation &&
+                STATE_LOG_FLUSHER_EXIT != log->synch.operation) {
                 LIXA_TRACE(("lixa_state_log_flusher: internal error "
                             "flusher_operation=%d\n",
-                            log->flusher.operation));
+                            log->synch.operation));
                 exit = TRUE;
             }
             /* unlock the mutex */
             LIXA_TRACE(("lixa_state_log_flusher: unlocking flusher_mutex\n"));
-            if (0 != (pte = pthread_mutex_unlock(&log->flusher.mutex)))
+            if (0 != (pte = pthread_mutex_unlock(&log->synch.mutex))) {
                 THROW(PTHREAD_MUTEX_UNLOCK_ERROR);
+            } else
+                mutex_locked = FALSE;
         } /* while (!exit) */
         
         THROW(NONE);
@@ -899,12 +934,9 @@ void *lixa_state_log_flusher(void *data)
             default:
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
         } /* switch (excp) */
-        if (excp > PTHREAD_MUTEX_LOCK_ERROR &&
-            excp < PTHREAD_MUTEX_UNLOCK_ERROR) {
-            int pte2 = pthread_mutex_unlock(&log->flusher.mutex);
-            LIXA_TRACE(("lixa_state_log_flusher: unlocked mutex after "
-                        "error, pthread_mutex_unlock returned %d\n", pte2));
-        }
+        /* restore mutex in the event of error */
+        if (mutex_locked)
+            pthread_mutex_unlock(&log->synch.mutex);
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_state_log_flusher/excp=%d/"
                 "ret_cod=%d/pthreaderror=%d/errno=%d\n", excp, ret_cod, pte,

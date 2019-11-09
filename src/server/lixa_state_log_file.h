@@ -85,13 +85,29 @@ typedef struct lixa_state_log_file_s {
      */
     char                                *pathname;
     /**
-     * Total size of the underlying file in bytes
+     * This internal struct is synchronized with a mutex to avoid inconsistent
+     * states between the main thread and the flusher thread
      */
-    off_t                                total_size;
-    /**
-     * Offset of the first writable page in the file
-     */
-    off_t                                offset;
+    struct {
+        /**
+         * Mutex used to protect the object when accessed concurrently by the
+         * flusher thread
+         */
+        pthread_mutex_t                   mutex;
+        /**
+         * Total size of the underlying file in bytes
+         */
+        off_t                             total_size;
+        /**
+         * Offset of the first writable page in the file
+         */
+        off_t                             offset;
+        /**
+         * Number of bytes reserved after offset due to an in progress
+         * asynchronous flushing or generic file operation
+         */
+        off_t                             reserved;
+    } synch;
 } lixa_state_log_file_t;
 
 
@@ -188,9 +204,13 @@ extern "C" {
      * Return the total size of the file in bytes
      */
     static inline off_t lixa_state_log_file_get_total_size(
-    lixa_state_log_file_t *this)
+        lixa_state_log_file_t *this)
     {
-        return this->total_size;
+        off_t total_size;
+        pthread_mutex_lock(&this->synch.mutex);
+        total_size = this->synch.total_size;
+        pthread_mutex_unlock(&this->synch.mutex);
+        return total_size;
     }
 
 
@@ -199,10 +219,41 @@ extern "C" {
      * Return the offset of the first writable page in the file
      */
     static inline off_t lixa_state_log_file_get_offset(
-    lixa_state_log_file_t *this)
+        lixa_state_log_file_t *this)
     {
-        return this->offset;
+        off_t offset;
+        pthread_mutex_lock(&this->synch.mutex);
+        offset = this->synch.offset;
+        pthread_mutex_unlock(&this->synch.mutex);
+        return offset;
     }
+
+
+    /**
+     * Return the free space really available in the file, taking into
+     * consideration even reserved space in the event of a
+     * scheduled/in progress write operation
+     */
+    static inline off_t lixa_state_log_file_get_free_space(
+        lixa_state_log_file_t *this)
+    {
+        off_t free_space;
+        pthread_mutex_lock(&this->synch.mutex);
+        free_space = this->synch.total_size - this->synch.offset -
+            this->synch.reserved;
+        pthread_mutex_unlock(&this->synch.mutex);
+        return free_space;
+    }
+
+    /**
+     * Set a reserved space in the file, at the right of offset
+     * @param[in,out] this state log file object
+     * @param[in] reserved space in byte that must be reserved
+     * @return a reason code
+     */
+    int lixa_state_log_file_set_reserved(lixa_state_log_file_t *this,
+                                         off_t reserved);
+
 
 
     
