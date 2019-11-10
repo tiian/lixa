@@ -37,7 +37,7 @@
 
 
 /** Initial file size (unit = byte) */
-#define LIXA_STATE_LOG_FILE_SIZE_DEFAULT     (256*LIXA_SYSTEM_PAGE_SIZE)
+#define LIXA_STATE_LOG_FILE_SIZE_DEFAULT     (50*LIXA_SYSTEM_PAGE_SIZE)
 /** Incremental file size (unit = byte) */
 #define LIXA_STATE_LOG_FILE_SIZE_INCREMENT   (25*LIXA_SYSTEM_PAGE_SIZE)
 
@@ -216,6 +216,21 @@ extern "C" {
 
     
     /**
+     * Return the reserved size of the file in bytes
+     */
+    static inline off_t lixa_state_log_file_get_reserved(
+        lixa_state_log_file_t *this)
+    {
+        off_t reserved;
+        pthread_mutex_lock(&this->synch.mutex);
+        reserved = this->synch.reserved;
+        pthread_mutex_unlock(&this->synch.mutex);
+        return reserved;
+    }
+
+
+    
+    /**
      * Return the offset of the first writable page in the file
      */
     static inline off_t lixa_state_log_file_get_offset(
@@ -245,6 +260,8 @@ extern "C" {
         return free_space;
     }
 
+
+    
     /**
      * Set a reserved space in the file, at the right of offset
      * @param[in,out] this state log file object

@@ -106,8 +106,11 @@ void thread_status_init(struct thread_status_s *ts, int id,
     ts->shutdown_type = SHUTDOWN_NULL;
     
     /* @@@ FIX ME, JUST FOR DEBUGGING lixa_state 20190904 */
-    snprintf(file_name, sizeof(file_name), "/tmp/lixad_state%d", id);
-    assert(lixa_state_init(&ts->state, file_name, 32*1024) == LIXA_RC_OK);
+    if (id) {
+        /* skip id=0, the listener thread */
+        snprintf(file_name, sizeof(file_name), "/tmp/lixad_state%d", id);
+        assert(lixa_state_init(&ts->state, file_name, 32*1024) == LIXA_RC_OK);
+    }
     /* @@@ put me in some different place... 
     assert(lixa_state_clean(&ts->state) == LIXA_RC_OK);
     */

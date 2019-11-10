@@ -373,6 +373,8 @@ int lixa_state_log_flush(lixa_state_log_t *this,
         BUFFER_OVERFLOW1,
         BUFFER_OVERFLOW2,
         GETTIMEOFDAY_ERROR,
+        INTERNAL_ERROR,
+        FILE_SET_RESERVED,
         PTHREAD_COND_SIGNAL_ERROR,
         PTHREAD_MUTEX_UNLOCK_ERROR,
         NONE
@@ -387,6 +389,7 @@ int lixa_state_log_flush(lixa_state_log_t *this,
         size_t number_of_pages_in_buffer;
         size_t pos_in_page, filled_pages, r;
         size_t log_free_pages;
+        off_t reserved;
         struct timeval timestamp;
 
         if (NULL == this)
@@ -471,8 +474,19 @@ int lixa_state_log_flush(lixa_state_log_t *this,
         this->synch.file_pos = this->used_file;
         this->synch.to_be_flushed = TRUE;
         this->synch.number_of_pages = number_of_pages;
-        /* reserve space in the file */
-        /* @@@@ */
+        /* check there are no reservation in place */
+        if (0 != (reserved = lixa_state_log_file_get_reserved(
+                      &this->files[this->used_file]))) {
+            LIXA_TRACE(("lixa_state_log_flush: internal error, reserved="
+                        OFF_T_FORMAT "\n", reserved));
+            THROW(INTERNAL_ERROR);
+        }
+        /* set a reservation before waiking up the flusher thread */
+        if (LIXA_RC_OK != (ret_cod = lixa_state_log_file_set_reserved(
+                               &this->files[this->used_file],
+                               lixa_state_common_pages2buffer(
+                                   this->synch.number_of_pages))))
+            THROW(FILE_SET_RESERVED);
         if (0 != (pte = pthread_cond_signal(&this->synch.cond)))
             THROW(PTHREAD_COND_SIGNAL_ERROR);
         if (0 != (pte = pthread_mutex_unlock(&this->synch.mutex))) {
@@ -499,6 +513,11 @@ int lixa_state_log_flush(lixa_state_log_t *this,
                 break;
             case GETTIMEOFDAY_ERROR:
                 ret_cod = LIXA_RC_GETTIMEOFDAY_ERROR;
+                break;
+            case INTERNAL_ERROR:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+                break;
+            case FILE_SET_RESERVED:
                 break;
             case PTHREAD_COND_SIGNAL_ERROR:
                 ret_cod = LIXA_RC_PTHREAD_COND_SIGNAL_ERROR;
@@ -741,11 +760,9 @@ int lixa_state_log_check_actions(lixa_state_log_t *this, int *must_flush,
             uint32_t future_needed_pages = lixa_state_log_needed_pages(
                 this, this->number_of_block_ids+1);
             size_t available_pages =
-                (lixa_state_log_file_get_total_size(
-                    &this->files[this->used_file]) -
-                 lixa_state_log_file_get_offset(
-                    &this->files[this->used_file])) /
-                LIXA_SYSTEM_PAGE_SIZE;
+                lixa_state_common_buffer2pages(
+                    lixa_state_log_file_get_free_space(
+                        &this->files[this->used_file]));
             LIXA_TRACE(("lixa_state_log_check_actions: "
                         "number_of_block_ids=" UINT32_T_FORMAT ", "
                         "current_needed_pages= " UINT32_T_FORMAT ", "
@@ -753,11 +770,14 @@ int lixa_state_log_check_actions(lixa_state_log_t *this, int *must_flush,
                         "available_pages=" SIZE_T_FORMAT ", "
                         "used_file=" SIZE_T_FORMAT ", "
                         "total_size=" OFF_T_FORMAT ", "
+                        "reserved=" OFF_T_FORMAT ", "
                         "offset=" OFF_T_FORMAT "\n",
                         this->number_of_block_ids,
                         current_needed_pages, future_needed_pages,
                         available_pages, this->used_file,
                         lixa_state_log_file_get_total_size(
+                            &this->files[this->used_file]),
+                        lixa_state_log_file_get_reserved(
                             &this->files[this->used_file]),
                         lixa_state_log_file_get_offset(
                             &this->files[this->used_file]) ));

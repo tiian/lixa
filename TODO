@@ -1,18 +1,13 @@
-put file reservation in lixa_state_log_flush and release reservation after flushed (flusher thread)
+Sometimes this unexpted condition happens:
 
+2019-11-10 22:16:56.376378 [16249/47510471808768] lixa_state_log_flush: internal
+ error, reserved=32768
+2019-11-10 22:16:56.376379 [16249/47510471808768] lixa_state_log_flush/excp=5/ret_cod=-1/pthreaderror=0/errno=0
+2019-11-10 22:16:56.376379 [16249/47510471808768] lixa_state_flush_log_records/excp=1/ret_cod=-1/errno=0
 
-During last execution of lixa_state_log_check_actions , the execution that
-fills the file, it logs:
+Verify if a previous flusher has not yet started and the father thread is
+entering the critical zone without staying out and waiting.
 
-2019-11-02 22:35:53.521708 [11284/47423461488384] lixa_state_log_check_actions
-2019-11-02 22:35:53.521730 [11284/47423461488384] lixa_state_log_check_actions: 
-must_flush=1, must_switch=0
-2019-11-02 22:35:53.521733 [11284/47423461488384] lixa_state_log_check_actions/e
-xcp=4/ret_cod=0/pthreaderror=0/errno=0
-
-flush starts, but at the end the file must be switched because it's full ...
-The check for must_switch must be re-designed and must take into account the
-background flush
 
 Remove field "single_page" from lixa_state_log_t : it was used only for file
 formatting

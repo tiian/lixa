@@ -420,6 +420,7 @@ int lixa_state_log_file_write(lixa_state_log_file_t *this,
             } else
                 mutex_locked = TRUE;
             this->synch.offset += written_bytes;
+            this->synch.reserved -= written_bytes;
             /* unlock the mutex */
             if (0 != (pte = pthread_mutex_unlock(&this->synch.mutex))) {
                 THROW(PTHREAD_MUTEX_UNLOCK_ERROR);
