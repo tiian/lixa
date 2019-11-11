@@ -370,6 +370,7 @@ int lixa_state_log_flush(lixa_state_log_t *this,
     enum Exception {
         NULL_OBJECT,
         PTHREAD_MUTEX_LOCK_ERROR,
+        PTHREAD_COND_WAIT_ERROR,
         BUFFER_OVERFLOW1,
         BUFFER_OVERFLOW2,
         GETTIMEOFDAY_ERROR,
@@ -399,6 +400,23 @@ int lixa_state_log_flush(lixa_state_log_t *this,
             THROW(PTHREAD_MUTEX_LOCK_ERROR);
         } else
             mutex_locked = TRUE;
+        /* this synchronization is necessary to overlap a previous flusher
+           execution, under normal condition it must be very fast */
+        if (this->synch.to_be_flushed) {
+            lixa_timer_t timer;
+            long duration;
+            
+            LIXA_TRACE(("lixa_state_log_flush: WAITING on condition...\n"));
+            lixa_timer_start(&timer);
+            if (0 != (pte = pthread_cond_wait(
+                          &this->synch.cond, &this->synch.mutex)))
+                THROW(PTHREAD_COND_WAIT_ERROR);
+            lixa_timer_stop(&timer);
+            duration = lixa_timer_get_diff(&timer);
+            LIXA_SYSLOG((LOG_NOTICE, LIXA_SYSLOG_LXD053N, duration));
+            LIXA_TRACE(("lixa_state_log_flush: condition has been "
+                        "signaled, total wait time is %ld ms\n", duration));
+        }
         /* compute the number of buffer pages */
         number_of_pages = lixa_state_log_blocks2pages(
             this->number_of_block_ids);
@@ -506,6 +524,9 @@ int lixa_state_log_flush(lixa_state_log_t *this,
                 break;
             case PTHREAD_MUTEX_LOCK_ERROR:
                 ret_cod = LIXA_RC_PTHREAD_MUTEX_LOCK_ERROR;
+                break;
+            case PTHREAD_COND_WAIT_ERROR:
+                ret_cod = LIXA_RC_PTHREAD_COND_WAIT_ERROR;
                 break;
             case BUFFER_OVERFLOW1:
             case BUFFER_OVERFLOW2:

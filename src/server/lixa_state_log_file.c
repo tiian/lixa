@@ -38,6 +38,7 @@
 #include "lixa_errors.h"
 #include "lixa_state_common.h"
 #include "lixa_state_log_file.h"
+#include "lixa_syslog.h"
 #include "lixa_trace.h"
 #include "lixa_utils.h"
 
@@ -396,13 +397,18 @@ int lixa_state_log_file_write(lixa_state_log_file_t *this,
         ssize_t written_bytes;
         size_t count = lixa_state_common_pages2buffer(number_of_pages);
         off_t offset;
+        lixa_timer_t timer;
+        long duration;
 
         /* check the object is not null */
         if (NULL == this)
             THROW(NULL_OBJECT);
         /* use the method to get a synchronized value */
         offset = lixa_state_log_file_get_offset(this);
+        lixa_timer_start(&timer);
         written_bytes = pwrite(this->fd, buffer, count, offset);
+        lixa_timer_stop(&timer);
+        duration = lixa_timer_get_diff(&timer);
         if (count != written_bytes) {
             LIXA_TRACE(("lixa_state_log_flush: pwrite has written "
                         SSIZE_T_FORMAT " bytes instead of " SIZE_T_FORMAT "\n",
@@ -410,8 +416,15 @@ int lixa_state_log_file_write(lixa_state_log_file_t *this,
             THROW(PWRITE_ERROR);
         } else {
             LIXA_TRACE(("lixa_state_log_flush: written " SIZE_T_FORMAT
-                        " pages, " SSIZE_T_FORMAT " bytes to log\n",
-                        number_of_pages, written_bytes));
+                        " pages, " SSIZE_T_FORMAT " bytes in %ld ms to log\n",
+                        number_of_pages, written_bytes, duration));
+            if (duration > 1000) {
+                LIXA_SYSLOG((LOG_WARNING, LIXA_SYSLOG_LXD054W, duration));
+            } else if (duration > 100) {
+                LIXA_SYSLOG((LOG_NOTICE, LIXA_SYSLOG_LXD055N, duration));
+            } else if (duration > 10) {
+                LIXA_SYSLOG((LOG_INFO, LIXA_SYSLOG_LXD056I, duration));
+            }
             /* maybe unnecessary, but on some CPU the following operation
              * might be no atomic */
             /* obtain the lock of the synchronized structure */

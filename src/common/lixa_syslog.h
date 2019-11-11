@@ -247,6 +247,15 @@
     "must be switched"
 #define LIXA_SYSLOG_LXD052W "LXD052W state log buffer can not be extended " \
     "due to lack of RAM, a larger one might perform better"
+#define LIXA_SYSLOG_LXD053N "LXD053N father thread waited flusher thread " \
+    "for %ld ms; log buffer configuration and/or storage are not properly " \
+    "tuned for the real workload"
+#define LIXA_SYSLOG_LXD054W "LXD054W pwrite operation to log file required " \
+    "%ld ms: this must be considered an unacceptable performance"
+#define LIXA_SYSLOG_LXD055N "LXD055N pwrite operation to log file required " \
+    "%ld ms: this must be considered a slow performance"
+#define LIXA_SYSLOG_LXD056I "LXD056I pwrite operation to log file required " \
+    "%ld ms: this must be considered a non optimal performance"
 
 
 
