@@ -1,3 +1,23 @@
+Rename curr_status to kurr_status in server_status.h  struct thread_status_s
+Create some functions equivalent to thread_status_mark_block in
+server_thread_status.c to access the data; create underlying functions
+lixa_state_ for reading and updating the new state tables.
+Could be a couple of functions:
+- read, returns const pointer
+- write, returns pointer, calls automatically thread_status_mark_block
+To clean up the code, a pointer to sr (union status_record_u) must be returned
+because counter and digest are internal fields. The type might be renamed in
+the future to lixa_state_table_record:
+union status_record_u --> lixa_state_table_record functional point of view, it contains the relevant data
+struct status_recourd_s --> lixa_state_table_slot physical point of view, it contains the relevant data and some control data
+
+Turn on again log file management in function thread_status_mark_block in file
+server_thread_status.c, look at @@@@ (4)
+
+Implement auto-migration from old state files to new state tables:
+- if cold start & state files exists => migrate and switch
+- if cold start & state files does not exist => cold start new state tables
+- if warm start => ignore old state files
 
 Remove field "single_page" from lixa_state_log_t : it was used only for file
 formatting

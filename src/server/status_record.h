@@ -330,8 +330,9 @@ struct status_record_data_s
 
 /**
  * This union is used to store and retrieve a record from the status file
+ * @@@ Move in a more appropriate file a the end of Superfast changes
  */
-union status_record_u
+typedef union status_record_u
 {
     /**
      * This type of record applies to first record only: it's the control
@@ -342,7 +343,7 @@ union status_record_u
      * This type of record applies to all but first record: it's the data block
      */
     struct status_record_data_s data;
-};
+} lixa_state_table_record_t;
 
 
 

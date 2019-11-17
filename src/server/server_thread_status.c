@@ -973,18 +973,21 @@ int thread_status_mark_block(struct thread_status_s *ts,
             sr->counter++;
             /* the old way @@@ */
             g_tree_insert(ts->updated_records, (gpointer)index, NULL);
-            /* the new way */
-            if (LIXA_RC_OK != (ret_cod = lixa_state_mark_block(
-                                   &ts->state, block_id)))
-                THROW(STATE_MARK_BLOCK_ERROR);
             LIXA_TRACE(("thread_status_mark_block: inserted index "
                         UINTPTR_T_FORMAT " (counter=" UINT32_T_FORMAT
                         ") in updated records tree\n",
                         index, sr->counter));
+            /* the new way */
+            /* @@@@ turn me on for new logs 
+            if (LIXA_RC_OK != (ret_cod = lixa_state_mark_block(
+                                   &ts->state, block_id)))
+                THROW(STATE_MARK_BLOCK_ERROR);
+            */
             /* @@@ move this code inside lixa_state_mark_block as soon as
                lixa_state_table can be used to replace the reference
                ts->curr_status */
             /* check if state log must be flushed */
+            /* @@@@ turn me on for new logs 
             if (LIXA_RC_OK != (ret_cod = lixa_state_check_log_actions(
                                    &ts->state, &must_flush, &must_switch)))
                 THROW(CHECK_LOG_ACTIONS_ERROR);
@@ -994,14 +997,17 @@ int thread_status_mark_block(struct thread_status_s *ts,
                                        &ts->state, ts->curr_status)))
                     THROW(FLUSH_LOG_RECORDS_ERROR);
             }
+            */
             /* @@@ not automatic, only if the state table can not be
                switched! */
+            /* @@@@ turn me on for new logs 
             if (must_switch) {
                 LIXA_TRACE(("thread_status_mark_block: extend file\n"));
                 if (LIXA_RC_OK != (ret_cod = lixa_state_extend_log(
                                        &ts->state)))
                     THROW(FLUSH_LOG_EXTEND_ERROR);
             }
+            */
         }
         
         THROW(NONE);

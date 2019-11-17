@@ -79,35 +79,35 @@ struct srv_msg_body_switch_req_s {
     /**
      * source thread identifier
      */
-    int                       source;
+    int                             source;
     /**
      * file descriptor of the socket connected to the client
      */    
-    int                       fd;
+    int                             fd;
     /**
      * block id of the header block in the source status file
      */
-    uint32_t                  block_id;
+    uint32_t                        block_id;
     /**
      * slot id of the switching client in the polling array
      */
-    size_t                    slot_id;
+    size_t                          slot_id;
     /**
      * buffer received from the client
      */
-    char                     *buffer;
+    char                           *buffer;
     /**
      * number of significative bytes in buffer
      */
-    size_t                    buffer_size;
+    size_t                          buffer_size;
     /**
      * pointer to the source header block
      */
-    struct payload_header_s  *header;
+    const struct payload_header_s  *header;
     /**
      * pointers to the source rsrmgr blocks
      */
-    struct payload_rsrmgr_s  *rsrmgr[CHAIN_MAX_SIZE];
+    const struct payload_rsrmgr_s  *rsrmgr[CHAIN_MAX_SIZE];
 };
 
 

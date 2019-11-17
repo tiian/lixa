@@ -234,12 +234,12 @@ int server_recovery_24(struct thread_status_s *ts,
 
     LIXA_TRACE(("server_recovery_24\n"));
     TRY {
-        uint32_t recovering_block_id = ts->curr_status[block_id].
-            sr.data.pld.ph.recovering_block_id;
-
+        uint32_t recovering_block_id =
+            thread_status_get_record4update(
+                ts, block_id)->data.pld.ph.recovering_block_id;
         if (!lmi->body.qrcvr_24.recovery.failed) {
-            struct payload_header_s *ph = &(
-                ts->curr_status[block_id].sr.data.pld.ph);
+            struct payload_header_s *ph =
+                &thread_status_get_record4update(ts, block_id)->data.pld.ph;
             /* avoid this transaction might be kept in recovery pending table
                if the client crashed */
             ph->state.finished = TRUE;
@@ -251,8 +251,9 @@ int server_recovery_24(struct thread_status_s *ts,
                                    ts, recovering_block_id)))
                 THROW(PAYLOAD_CHAIN_RELEASE);
         } else {
-            struct payload_header_s *ph = &(
-                ts->curr_status[recovering_block_id].sr.data.pld.ph);
+            struct payload_header_s *ph =
+                &thread_status_get_record4update(
+                    ts, recovering_block_id)->data.pld.ph;
             int i;
 
             LIXA_TRACE(("server_recovery_24: client did not complete the "
@@ -270,12 +271,12 @@ int server_recovery_24(struct thread_status_s *ts,
                 THROW(INVALID_STATUS);
             for (i = 0; i < ph->n; ++i) {
                 struct lixa_msg_body_qrcvr_24_rsrmgr_s *rsrmgr;
-                status_record_t *sr;
                 rsrmgr = &g_array_index(lmi->body.qrcvr_24.rsrmgrs,
                                         struct lixa_msg_body_qrcvr_24_rsrmgr_s,
                                         i);
-                sr = ts->curr_status + ph->block_array[rsrmgr->rmid];
-                sr->sr.data.pld.rm.recovery_rc = rsrmgr->rc;
+                thread_status_get_record4update(
+                    ts, ph->block_array[
+                        rsrmgr->rmid])->data.pld.rm.recovery_rc = rsrmgr->rc;
                 if (LIXA_RC_OK != (ret_cod = thread_status_mark_block(
                                        ts, ph->block_array[rsrmgr->rmid])))
                     THROW(THREAD_STATUS_MARK_BLOCK_ERROR2);
@@ -338,12 +339,12 @@ int server_recovery_result(struct thread_status_s *ts,
     TRY {
         guint i;
         uint32_t block_id = record->block_id;
-        struct status_record_data_payload_s *pld =
-            &(ts->curr_status[block_id].sr.data.pld);
+        const struct status_record_data_payload_s *pld =
+            &(thread_status_get_record4read(ts, block_id)->data.pld);
 
         /* register the block is in recovery phase */
-        ts->curr_status[client_block_id].sr.data.pld.ph.recovering_block_id =
-            block_id;
+        thread_status_get_record4update(
+            ts, client_block_id)->data.pld.ph.recovering_block_id = block_id;
         if (LIXA_RC_OK != (ret_cod = thread_status_mark_block(
                                ts, client_block_id)))
             THROW(THREAD_STATUS_MARK_BLOCK_ERROR);
@@ -410,13 +411,17 @@ int server_recovery_result(struct thread_status_s *ts,
             pld->ph.n);
         for (i = 0; i < pld->ph.n; ++i) {
             struct lixa_msg_body_qrcvr_16_rsrmgr_s rsrmgr;
-            status_record_t *sr = ts->curr_status +
-                ts->curr_status[block_id].sr.data.pld.ph.block_array[i];
-            rsrmgr.rmid = sr->sr.data.pld.rm.rmid;
-            rsrmgr.next_verb = sr->sr.data.pld.rm.state.next_verb;
-            rsrmgr.r_state = sr->sr.data.pld.rm.state.xa_r_state;
-            rsrmgr.s_state = sr->sr.data.pld.rm.state.xa_s_state;
-            rsrmgr.td_state = sr->sr.data.pld.rm.state.xa_td_state;
+            const struct payload_rsrmgr_s *rm =
+                &(thread_status_get_record4read(
+                      ts,
+                      thread_status_get_record4read(
+                          ts, block_id)->data.pld.ph.block_array[i]
+                                                )->data.pld.rm);
+            rsrmgr.rmid = rm->rmid;
+            rsrmgr.next_verb = rm->state.next_verb;
+            rsrmgr.r_state = rm->state.xa_r_state;
+            rsrmgr.s_state = rm->state.xa_s_state;
+            rsrmgr.td_state = rm->state.xa_td_state;
             g_array_append_val(lmo->body.qrcvr_16.rsrmgrs, rsrmgr);
         }
 

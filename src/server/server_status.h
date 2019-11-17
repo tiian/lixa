@@ -362,13 +362,9 @@ struct thread_status_s
     status_record_t *curr_status;
     /**
      * A (sorted) tree containing all the updated records: these are the
-     * records must be copied from one status file to the other one
+     * records that must be copied from one status file to the other one
      */
     GTree           *updated_records;
-    /**
-     * The number of the updated records; the field avoids the usage of
-     * g_tree_nnode that requires complete tree traversal
-     */
     /**
      * Object used to manage the state and its persistence on the disks
      */

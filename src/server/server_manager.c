@@ -744,7 +744,7 @@ int server_manager_drop_client(struct thread_status_s *ts, size_t slot_id)
         int branch_rec_pend = FALSE;
         int global_rec_pend = XTA_GLOBAL_RECOV_NULL;
         uint32_t block_id = ts->client_array[slot_id].pers_status_slot_id;
-        struct status_record_data_s *data = NULL;
+        const struct status_record_data_s *data = NULL;
         uint32_t number_of_branches = 0;
 
         /* is the client part of a chain of branches? */
@@ -776,24 +776,27 @@ int server_manager_drop_client(struct thread_status_s *ts, size_t slot_id)
         } /* if (server_xa_branch_is_chained(ts, block_id)) */
         /* remove XID from the global transaction table */
         sttq.gtrid = lixa_xid_get_gtrid_ascii(
-            &(ts->curr_status[block_id].sr.data.pld.ph.state.xid));
+            &(thread_status_get_record4read(
+                  ts, block_id)->data.pld.ph.state.xid));
         if (!lixa_xid_serialize(
-                &(ts->curr_status[block_id].sr.data.pld.ph.state.xid),
-                sttq.xid))
+                &(thread_status_get_record4read(
+                      ts, block_id)->data.pld.ph.state.xid), sttq.xid))
             THROW(XID_SERIALIZE_ERROR);
         sttq.tsid = ts->id;
         if (LIXA_RC_OK != (ret_cod = server_trans_tbl_remove(
                                ts->trans_table, &sttq)))
             THROW(TRANS_TABLE_REMOVE_ERROR);
         /* check recovery pending state */
-        data = &(ts->curr_status[block_id].sr.data);
+        data = &(thread_status_get_record4read(ts, block_id)->data);
         if (LIXA_RC_OK != (ret_cod = thread_status_check_recovery_pending(
                                ts, data, &branch_rec_pend, &global_rec_pend)))
             THROW(BLOCK_STATUS_ERROR);
         if (branch_rec_pend || global_rec_pend) {
             struct srvr_rcvr_tbl_rec_s srtr;
+            lixa_job_t job;
             /* insert a new record in the recovery pending table */
-            srtr.job = &data->pld.ph.job;
+            memcpy(&job, &data->pld.ph.job, sizeof(lixa_job_t));
+            srtr.job = &job;
             srtr.tsid = ts->id;
             srtr.block_id = block_id;
             if (LIXA_RC_OK != (ret_cod = srvr_rcvr_tbl_insert(
@@ -891,11 +894,12 @@ int server_manager_switch_1(struct thread_status_s *ts,
         msg.body.sr.slot_id = slot_id;
         msg.body.sr.buffer = tss->buffer;
         msg.body.sr.buffer_size = tss->buffer_size;
-        msg.body.sr.header = &(ts->curr_status[block_id].sr.data.pld.ph);
+        msg.body.sr.header = &(thread_status_get_record4read(
+                                   ts, block_id)->data.pld.ph);
         for (i = 0; i < msg.body.sr.header->n; ++i) {
-            msg.body.sr.rsrmgr[i] = &(ts->curr_status[
-                                          msg.body.sr.header->block_array[i]
-                                                      ].sr.data.pld.rm);
+            msg.body.sr.rsrmgr[i] =
+                &(thread_status_get_record4read(
+                      ts, msg.body.sr.header->block_array[i])->data.pld.rm);
         }
 
         /* update the FSM accordingly to the switch request */
@@ -967,23 +971,27 @@ int server_manager_switch_2(struct thread_status_s *ts,
         /* copy header block */
         /* save the chain block array */
         memcpy(tmp_block_array,
-               &ts->curr_status[block_id].sr.data.pld.ph.block_array,
+               &(thread_status_get_record4read(
+                     ts, block_id)->data.pld.ph.block_array),
                sizeof(tmp_block_array));
         /* copy header block */
-        memcpy(&ts->curr_status[block_id].sr.data.pld.ph,
+        memcpy(&(thread_status_get_record4update(
+                     ts, block_id)->data.pld.ph),
                msg->body.sr.header, sizeof(struct payload_header_s));
         /* restore the chain block array */
-        memcpy(&ts->curr_status[block_id].sr.data.pld.ph.block_array,
-               tmp_block_array,
-               sizeof(tmp_block_array));
+        memcpy(&(thread_status_get_record4update(
+                     ts, block_id)->data.pld.ph.block_array),
+               tmp_block_array, sizeof(tmp_block_array));
         if (LIXA_RC_OK != (ret_cod = thread_status_mark_block(
                                ts, block_id)))
             THROW(THREAD_STATUS_MARK_BLOCK_ERROR1);
         /* copy rsrmgr blocks */
         for (i = 0; i < msg->body.sr.header->n; ++i) {
             uint32_t child_block_id =
-                ts->curr_status[block_id].sr.data.pld.ph.block_array[i];
-            memcpy(&ts->curr_status[child_block_id].sr.data.pld.rm,
+                thread_status_get_record4update(
+                    ts, block_id)->data.pld.ph.block_array[i];
+            memcpy(&(thread_status_get_record4update(
+                         ts, child_block_id)->data.pld.rm),
                    msg->body.sr.rsrmgr[i], sizeof(struct payload_rsrmgr_s));
             if (LIXA_RC_OK != (ret_cod = thread_status_mark_block(
                                    ts, child_block_id)))
@@ -1658,7 +1666,8 @@ int server_manager_outmsg_prep(struct thread_status_s *ts, size_t slot_id,
                 /* copy from lmo (lixa message out of the current client to
                    out_msg, lixa message of all the clients that are chained */
                 tmp_msg.header.pvs =
-                    ts->curr_status[block_id].sr.data.pld.ph.last_verb_step[0];
+                    thread_status_get_record4update(
+                        ts, block_id)->data.pld.ph.last_verb_step[0];
                 /* increment the step */
                 tmp_msg.header.pvs.step += LIXA_MSG_STEP_INCR;
                 out_msg = &tmp_msg;
@@ -1968,7 +1977,8 @@ int server_manager_new_client(struct thread_status_s *ts, int fd, nfds_t place)
 
         /* create the header and reset it */
         if (LIXA_RC_OK != (ret_cod = payload_header_init(
-                               &ts->curr_status[slot].sr.data, fd)))
+                               &(thread_status_get_record4update(
+                                     ts, slot)->data), fd)))
             THROW(PAYLOAD_HEADER_INIT);
 
         /* save a reference to the slot */

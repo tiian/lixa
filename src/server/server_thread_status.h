@@ -210,7 +210,38 @@ extern "C" {
     int thread_status_mark_block(struct thread_status_s *ts,
                                  uint32_t block_id);
 
-    
+
+
+    /**
+     * Return a const pointer to a state table record for read only purpose
+     * @param[in] ts thread status reference
+     * @param[in] block_id of the record that must be marked as changed
+     * @return a valid pointer or NULL if ts is NULL
+     */
+    static inline const lixa_state_table_record_t *
+    thread_status_get_record4read(
+        const struct thread_status_s *ts, uint32_t block_id) {
+        return NULL == ts ? NULL : &(ts->curr_status[block_id].sr);
+    }
+
+
+
+    /**
+     * Return a mutable pointer to a state table record for update purpose.
+     * Note: method @ref thread_status_mark_block should be typically called
+     * after this one to guarantee the consistency in state tables and state
+     * logs.
+     * @param[in,out] ts thread status reference
+     * @param[in] block_id of the record that must be marked as changed
+     * @return a valid pointer or NULL if ts is NULL
+     */
+    static inline lixa_state_table_record_t *
+    thread_status_get_record4update(
+        struct thread_status_s *ts, uint32_t block_id) {
+        return NULL == ts ? NULL : &(ts->curr_status[block_id].sr);
+    }
+
+
     
     /**
      * Synchronize status files: this is the atomic operation necessary to
