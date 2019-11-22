@@ -1,3 +1,8 @@
+Work on file server_status.c
+apply differences available in .bkp
+understand what breaks the code, maybe the last function in .bkp that's
+different!
+
 Rename curr_status to kurr_status in server_status.h  struct thread_status_s
 Create some functions equivalent to thread_status_mark_block in
 server_thread_status.c to access the data; create underlying functions

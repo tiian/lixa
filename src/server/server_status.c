@@ -196,7 +196,7 @@ int payload_header_store_verb_step(struct thread_status_s *ts,
     TRY {
         int i;
         struct status_record_data_payload_s *pld =
-            &(ts->curr_status[block_id].sr.data.pld);
+            &(thread_status_get_record4update(ts, block_id)->data.pld);
 
         /* check the record is a payload header */
         if (pld->type != DATA_PAYLOAD_TYPE_HEADER) {
