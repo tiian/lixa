@@ -371,8 +371,11 @@ int payload_chain_allocate(struct thread_status_s *ts, uint32_t block_id,
                    sizeof(struct status_record_data_payload_s));
             */
             memset(pld2, 0, sizeof(struct status_record_data_payload_s));
+            /*
             ts->curr_status[new_slot].sr.data.pld.type =
                 DATA_PAYLOAD_TYPE_RSRMGR;
+            */
+            pld2->type = DATA_PAYLOAD_TYPE_RSRMGR;
             /* point the new block from chain */
             ts->curr_status[block_id].sr.data.pld.ph.block_array[i] = new_slot;
             ts->curr_status[block_id].sr.data.pld.ph.n++;
