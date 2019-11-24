@@ -265,20 +265,22 @@ int payload_chain_release(struct thread_status_s *ts, uint32_t block_id)
     LIXA_TRACE(("payload_chain_release\n"));
     TRY {
         int i;
-        status_record_t *csr = ts->curr_status;
+        const struct status_record_data_payload_s *pld;
         
         if (block_id == 0)
             THROW(BLOCK_ID_IS_ZERO);
-        if (csr[block_id].sr.data.pld.type != DATA_PAYLOAD_TYPE_HEADER)
+        
+        pld = &(thread_status_get_record4read(ts, block_id)->data.pld);
+        if (pld->type != DATA_PAYLOAD_TYPE_HEADER)
             THROW(INVALID_BLOCK_TYPE);
         /* release chained blocks */
-        for (i = 0; i < csr[block_id].sr.data.pld.ph.n; ++i) {
+        for (i = 0; i < pld->ph.n; ++i) {
             LIXA_TRACE(("payload_chain_release: child # %d, releasing chained "
-                        "block " UINT32_T_FORMAT "\n",
-                        i, csr[block_id].sr.data.pld.ph.block_array[i]));
+                        "block " UINT32_T_FORMAT "\n", i,
+                        pld->ph.block_array[i]));
             if (LIXA_RC_OK != (
                     ret_cod = status_record_delete(
-                        ts, csr[block_id].sr.data.pld.ph.block_array[i])))
+                        ts, pld->ph.block_array[i])))
                 THROW(STATUS_RECORD_DELETE1);
         }
         /* release current block */
