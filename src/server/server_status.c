@@ -336,6 +336,7 @@ int payload_chain_allocate(struct thread_status_s *ts, uint32_t block_id,
     LIXA_TRACE(("payload_chain_allocate\n"));
     TRY {
         int i;
+        struct status_record_data_payload_s *pld;
         
         /* check the request can be feasible */
         if (size > CHAIN_MAX_SIZE) {
@@ -345,13 +346,18 @@ int payload_chain_allocate(struct thread_status_s *ts, uint32_t block_id,
         }
 
         /* check this is a payload header */
+        pld = &(thread_status_get_record4update(ts, block_id)->data.pld);
+        /*
         if (ts->curr_status[block_id].sr.data.pld.type !=
             DATA_PAYLOAD_TYPE_HEADER)
+        */
+        if (pld->type != DATA_PAYLOAD_TYPE_HEADER)
             THROW(INVALID_BLOCK_TYPE);
         
         /* allocate the blocks */
         for (i=0; i<size; ++i) {
-            uint32_t new_slot;;
+            uint32_t new_slot;
+            struct status_record_data_payload_s *pld2;
             if (LIXA_RC_OK != (ret_cod = status_record_insert(
                                    ts, &new_slot))) {
                 LIXA_TRACE(("payload_chain_allocate: error while allocating "
@@ -359,6 +365,7 @@ int payload_chain_allocate(struct thread_status_s *ts, uint32_t block_id,
                 THROW(STATUS_RECORD_INSERT_ERROR);
             }
             /* reset block payload content */
+            pld2 = &(thread_status_get_record4update(ts, new_slot)->data.pld);
             memset(&(ts->curr_status[new_slot].sr.data.pld), 0,
                    sizeof(struct status_record_data_payload_s));
             ts->curr_status[new_slot].sr.data.pld.type =
