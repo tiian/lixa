@@ -79,20 +79,31 @@ int server_ax_reg(struct thread_status_s *ts,
             THROW(INVALID_STEP);
 
         /* check block_id is a valid block */
-        if (ts->curr_status[block_id].sr.data.pld.type !=
+        if (thread_status_get_record4read(ts, block_id)->data.pld.type !=
             DATA_PAYLOAD_TYPE_HEADER)
             THROW(INVALID_BLOCK_ID);
         /* check rmid */
         if (ax_reg_exec->rmid < 0 ||
             ax_reg_exec->rmid >=
+            thread_status_get_record4read(ts, block_id)->data.pld.ph.n)
+            /*
             ts->curr_status[block_id].sr.data.pld.ph.n)
+            */
             THROW(RMID_OUT_OF_RANGE);
 
         /* reset finished state */
+        /*
         ts->curr_status[block_id].sr.data.pld.ph.state.finished = FALSE;
-
+        */
+        thread_status_get_record4update(ts, block_id
+                                        )->data.pld.ph.state.finished = FALSE;
+        /*
         slot = ts->curr_status[block_id].sr.data.pld.ph.block_array[
             ax_reg_exec->rmid];
+        */
+        slot = thread_status_get_record4read(ts, block_id
+                                             )->data.pld.ph.block_array[
+                                                 ax_reg_exec->rmid];
         /* mark the slot as updated */
         sr = ts->curr_status + slot;
         sr->sr.data.pld.rm.state.xa_td_state = ax_reg_exec->td_state;

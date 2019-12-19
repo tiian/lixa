@@ -210,7 +210,7 @@ int thread_status_dump(const struct thread_status_s *ts,
 
         if (tsds->seq) {
             for (i=1; i<first_record->number_of_blocks; ++i) {
-                struct status_record_data_s *record =
+                const struct status_record_data_s *record =
                     &(ts->curr_status[i].sr.data);
                 printf("------------------------------------"
                        "------------------------------------\n");

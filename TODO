@@ -1,7 +1,4 @@
-Work on file server_status.c
-apply differences available in .bkp
-understand what breaks the code, maybe the last function in .bkp that's
-different!
+Restart from server_xa.c
 
 Rename curr_status to kurr_status in server_status.h  struct thread_status_s
 Create some functions equivalent to thread_status_mark_block in
@@ -15,6 +12,8 @@ because counter and digest are internal fields. The type might be renamed in
 the future to lixa_state_table_record:
 union status_record_u --> lixa_state_table_record functional point of view, it contains the relevant data
 struct status_recourd_s --> lixa_state_table_slot physical point of view, it contains the relevant data and some control data
+
+Rework status_record_insert and status_record_delete
 
 Turn on again log file management in function thread_status_mark_block in file
 server_thread_status.c, look at @@@@ (4)

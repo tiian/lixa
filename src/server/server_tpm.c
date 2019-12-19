@@ -42,6 +42,7 @@
 #include "lixa_xid.h"
 #include "lixa_xml_msg.h"
 #include "server_tpm.h"
+#include "server_thread_status.h"
 
 
 
@@ -122,7 +123,8 @@ int server_trans_8(struct thread_status_s *ts, size_t slot_id,
 
         /* query all transactions matching gtrid */
         query.gtrid = lixa_xid_get_gtrid_ascii(
-            &(ts->curr_status[block_id].sr.data.pld.ph.state.xid));
+            &(thread_status_get_record4read(ts,
+                                            block_id)->data.pld.ph.state.xid));
         query.tsid = ts->id;
 
         /* allocate a new array to store query results */
@@ -196,8 +198,8 @@ int server_trans_result(struct thread_status_s *ts,
 
     LIXA_TRACE(("server_trans_result\n"));
     TRY {
-        struct status_record_data_payload_s *pld =
-            &(ts->curr_status[block_id].sr.data.pld);
+        const struct status_record_data_payload_s *pld =
+            &(thread_status_get_record4read(ts, block_id)->data.pld);
 
         /* set basic answer information */
         lmo->header.pvs.verb = LIXA_MSG_VERB_TRANS;

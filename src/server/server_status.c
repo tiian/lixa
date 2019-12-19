@@ -347,10 +347,6 @@ int payload_chain_allocate(struct thread_status_s *ts, uint32_t block_id,
 
         /* check this is a payload header */
         pld = &(thread_status_get_record4update(ts, block_id)->data.pld);
-        /*
-        if (ts->curr_status[block_id].sr.data.pld.type !=
-            DATA_PAYLOAD_TYPE_HEADER)
-        */
         if (pld->type != DATA_PAYLOAD_TYPE_HEADER)
             THROW(INVALID_BLOCK_TYPE);
         
@@ -366,24 +362,16 @@ int payload_chain_allocate(struct thread_status_s *ts, uint32_t block_id,
             }
             /* reset block payload content */
             pld2 = &(thread_status_get_record4update(ts, new_slot)->data.pld);
-            /*
-            memset(&(ts->curr_status[new_slot].sr.data.pld), 0,
-                   sizeof(struct status_record_data_payload_s));
-            */
             memset(pld2, 0, sizeof(struct status_record_data_payload_s));
-            /*
-            ts->curr_status[new_slot].sr.data.pld.type =
-                DATA_PAYLOAD_TYPE_RSRMGR;
-            */
             pld2->type = DATA_PAYLOAD_TYPE_RSRMGR;
             /* point the new block from chain */
-            ts->curr_status[block_id].sr.data.pld.ph.block_array[i] = new_slot;
-            ts->curr_status[block_id].sr.data.pld.ph.n++;
+            pld = &(thread_status_get_record4update(ts, block_id)->data.pld);
+            pld->ph.block_array[i] = new_slot;
+            pld->ph.n++;
+            
             LIXA_TRACE(("payload_chain_allocate: number of children is now "
                         "%d, last children is " UINT32_T_FORMAT "\n",
-                        ts->curr_status[block_id].sr.data.pld.ph.n,
-                        ts->curr_status[block_id
-                                        ].sr.data.pld.ph.block_array[i]));
+                        pld->ph.n, pld->ph.block_array[i]));
             if (LIXA_RC_OK != (ret_cod = thread_status_mark_block(
                                    ts, block_id)))
                 THROW(THREAD_STATUS_MARK_BLOCK_ERROR);
