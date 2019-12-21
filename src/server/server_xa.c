@@ -71,8 +71,8 @@ int server_ax_reg(struct thread_status_s *ts,
         uint32_t slot;
         const struct lixa_msg_body_reg_8_ax_reg_exec_s *ax_reg_exec =
             &lmi->body.reg_8.ax_reg_exec;
-        status_record_t *sr;
         struct server_client_status_s *cs = &(ts->client_array[slot_id]);
+        struct status_record_data_payload_s *pld = NULL;
 
         /* check message step */
         if (8 != lmi->header.pvs.step)
@@ -86,30 +86,20 @@ int server_ax_reg(struct thread_status_s *ts,
         if (ax_reg_exec->rmid < 0 ||
             ax_reg_exec->rmid >=
             thread_status_get_record4read(ts, block_id)->data.pld.ph.n)
-            /*
-            ts->curr_status[block_id].sr.data.pld.ph.n)
-            */
             THROW(RMID_OUT_OF_RANGE);
 
         /* reset finished state */
-        /*
-        ts->curr_status[block_id].sr.data.pld.ph.state.finished = FALSE;
-        */
         thread_status_get_record4update(ts, block_id
                                         )->data.pld.ph.state.finished = FALSE;
-        /*
-        slot = ts->curr_status[block_id].sr.data.pld.ph.block_array[
-            ax_reg_exec->rmid];
-        */
         slot = thread_status_get_record4read(ts, block_id
                                              )->data.pld.ph.block_array[
                                                  ax_reg_exec->rmid];
         /* mark the slot as updated */
-        sr = ts->curr_status + slot;
-        sr->sr.data.pld.rm.state.xa_td_state = ax_reg_exec->td_state;
-        sr->sr.data.pld.rm.state.xa_s_state = ax_reg_exec->s_state;
-        sr->sr.data.pld.rm.ax_reg_flags = ax_reg_exec->flags;
-        sr->sr.data.pld.rm.ax_reg_rc = ax_reg_exec->rc;
+        pld = &(thread_status_get_record4update(ts, slot)->data.pld);
+        pld->rm.state.xa_td_state = ax_reg_exec->td_state;
+        pld->rm.state.xa_s_state = ax_reg_exec->s_state;
+        pld->rm.ax_reg_flags = ax_reg_exec->flags;
+        pld->rm.ax_reg_rc = ax_reg_exec->rc;
         if (LIXA_RC_OK != (ret_cod = thread_status_mark_block(ts, slot)))
             THROW(THREAD_STATUS_MARK_BLOCK_ERROR);        
         /* update the Finite State Machine */
@@ -170,30 +160,31 @@ int server_ax_unreg(struct thread_status_s *ts,
         uint32_t slot;
         const struct lixa_msg_body_unreg_8_ax_unreg_exec_s *ax_unreg_exec =
             &lmi->body.unreg_8.ax_unreg_exec;
-        status_record_t *sr;
         struct server_client_status_s *cs = &(ts->client_array[slot_id]);
+        struct status_record_data_payload_s *pld = NULL;
 
         /* check message step */
         if (8 != lmi->header.pvs.step)
             THROW(INVALID_STEP);
 
         /* check block_id is a valid block */
-        if (ts->curr_status[block_id].sr.data.pld.type !=
+        if (thread_status_get_record4read(ts, block_id)->data.pld.type !=
             DATA_PAYLOAD_TYPE_HEADER)
             THROW(INVALID_BLOCK_ID);
         /* check rmid */
         if (ax_unreg_exec->rmid < 0 ||
             ax_unreg_exec->rmid >=
-            ts->curr_status[block_id].sr.data.pld.ph.n)
+            thread_status_get_record4read(ts, block_id)->data.pld.ph.n)
             THROW(RMID_OUT_OF_RANGE);
 
-        slot = ts->curr_status[block_id].sr.data.pld.ph.block_array[
-            ax_unreg_exec->rmid];
+        slot = thread_status_get_record4read(ts, block_id
+                                             )->data.pld.ph.block_array[
+                                                 ax_unreg_exec->rmid];
         /* mark the slot as updated */
-        sr = ts->curr_status + slot;
-        sr->sr.data.pld.rm.state.xa_td_state = ax_unreg_exec->td_state;
-        sr->sr.data.pld.rm.ax_unreg_flags = ax_unreg_exec->flags;
-        sr->sr.data.pld.rm.ax_unreg_rc = ax_unreg_exec->rc;
+        pld = &(thread_status_get_record4update(ts, slot)->data.pld);
+        pld->rm.state.xa_td_state = ax_unreg_exec->td_state;
+        pld->rm.ax_unreg_flags = ax_unreg_exec->flags;
+        pld->rm.ax_unreg_rc = ax_unreg_exec->rc;
         if (LIXA_RC_OK != (ret_cod = thread_status_mark_block(ts, slot)))
             THROW(THREAD_STATUS_MARK_BLOCK_ERROR);
         /* update the Finite State Machine */
@@ -335,23 +326,26 @@ int server_xa_commit_8(struct thread_status_s *ts,
         struct server_client_status_s *cs = &(ts->client_array[slot_id]);
 
         /* check block_id is a valid block */
-        if (ts->curr_status[block_id].sr.data.pld.type !=
+        if (thread_status_get_record4read(ts, block_id)->data.pld.type !=
             DATA_PAYLOAD_TYPE_HEADER)
             THROW(INVALID_BLOCK_ID);
         /* check children blocks match with the arrived update */
         if (lmi->body.commit_8.xa_commit_execs->len >
-            ts->curr_status[block_id].sr.data.pld.ph.n)
+            thread_status_get_record4read(ts, block_id)->data.pld.ph.n)
             THROW(NUMBER_OF_RSRMGRS_MISMATCH);
         /* store commit/rollback intent after commit phase */
-        ts->curr_status[block_id].sr.data.pld.ph.state.finished =
+        thread_status_get_record4update(ts, block_id
+                                        )->data.pld.ph.state.finished =
             lmi->body.commit_8.conthr.finished;
         if (LIXA_RC_OK != (ret_cod = thread_status_mark_block(ts, block_id)))
             THROW(THREAD_STATUS_MARK_BLOCK_ERROR1);
         /* remove XID from the global transaction table */
         sttq.gtrid = lixa_xid_get_gtrid_ascii(
-            &(ts->curr_status[block_id].sr.data.pld.ph.state.xid));
+            &(thread_status_get_record4read(ts, block_id
+                                            )->data.pld.ph.state.xid));
         if (!lixa_xid_serialize(
-                &(ts->curr_status[block_id].sr.data.pld.ph.state.xid),
+                &(thread_status_get_record4read(ts, block_id
+                                                )->data.pld.ph.state.xid),
                 sttq.xid))
             THROW(XID_SERIALIZE_ERROR);
         sttq.tsid = ts->id;
@@ -361,21 +355,21 @@ int server_xa_commit_8(struct thread_status_s *ts,
         
         /* store data in the children blocks... */
         for (i = 0; i < lmi->body.commit_8.xa_commit_execs->len; ++i) {
-            status_record_t *sr;
+            struct status_record_data_payload_s *pld = NULL;
             struct lixa_msg_body_commit_8_xa_commit_execs_s *xa_commit_execs;
             uint32_t slot;
             xa_commit_execs = &g_array_index(
                 lmi->body.commit_8.xa_commit_execs,
                 struct lixa_msg_body_commit_8_xa_commit_execs_s, i);
-            slot = ts->curr_status[block_id].sr.data.pld.ph.block_array[
-                xa_commit_execs->rmid];
-            sr = ts->curr_status + slot;
+            slot = thread_status_get_record4read(
+                ts, block_id)->data.pld.ph.block_array[xa_commit_execs->rmid];
+            pld = &(thread_status_get_record4update(ts, slot)->data.pld);
             /* update the block */
-            sr->sr.data.pld.rm.state.xa_r_state = xa_commit_execs->r_state;
-            sr->sr.data.pld.rm.state.xa_s_state = xa_commit_execs->s_state;
-            sr->sr.data.pld.rm.state.next_verb = LIXA_MSG_VERB_NULL;
-            sr->sr.data.pld.rm.xa_commit_flags = xa_commit_execs->flags;
-            sr->sr.data.pld.rm.xa_commit_rc = xa_commit_execs->rc;
+            pld->rm.state.xa_r_state = xa_commit_execs->r_state;
+            pld->rm.state.xa_s_state = xa_commit_execs->s_state;
+            pld->rm.state.next_verb = LIXA_MSG_VERB_NULL;
+            pld->rm.xa_commit_flags = xa_commit_execs->flags;
+            pld->rm.xa_commit_rc = xa_commit_execs->rc;
             if (LIXA_RC_OK != (ret_cod = thread_status_mark_block(ts, slot)))
                 THROW(THREAD_STATUS_MARK_BLOCK_ERROR2);
         } /* for (i=0; ... */
@@ -496,11 +490,12 @@ int server_xa_end_8(struct thread_status_s *ts,
         struct server_client_status_s *cs = &(ts->client_array[slot_id]);
 
         /* check block_id is a valid block */
-        if (ts->curr_status[block_id].sr.data.pld.type !=
-            DATA_PAYLOAD_TYPE_HEADER) THROW(INVALID_BLOCK_ID);
+        if (thread_status_get_record4read(ts, block_id)->data.pld.type !=
+            DATA_PAYLOAD_TYPE_HEADER)
+            THROW(INVALID_BLOCK_ID);
         /* check children blocks match with the arrived update */
         if (lmi->body.end_8.xa_end_execs->len >
-            ts->curr_status[block_id].sr.data.pld.ph.n)
+            thread_status_get_record4read(ts, block_id)->data.pld.ph.n)
             THROW(NUMBER_OF_RSRMGRS_MISMATCH);
         /* check if the block is a branch inside a multiple branches
            transaction */
@@ -511,47 +506,50 @@ int server_xa_end_8(struct thread_status_s *ts,
         }
         /* store commit/rollback intent */
         if (lmi->body.end_8.conthr.commit) {
-            ts->curr_status[block_id].sr.data.pld.ph.state.will_commit = TRUE;
+            thread_status_get_record4update(
+                ts, block_id)->data.pld.ph.state.will_commit = TRUE;
         } else
-            ts->curr_status[block_id].sr.data.pld.ph.state.will_rollback =
-                TRUE;
+            thread_status_get_record4update(
+                ts, block_id)->data.pld.ph.state.will_rollback = TRUE;
         if (LIXA_RC_OK != (ret_cod = thread_status_mark_block(ts, block_id)))
             THROW(THREAD_STATUS_MARK_BLOCK_ERROR1);
         /* the status file must be synchronized */
         status_sync_ask_sync(&ts->status_sync);
 
         /* store next_verb for all the resource managers */
-        for (i = 0; i < ts->curr_status[block_id].sr.data.pld.ph.n; ++i) {
-            status_record_t *sr;
+        for (i=0; i<thread_status_get_record4read(ts, block_id)->data.pld.ph.n;
+             ++i) {
+            struct status_record_data_payload_s *pld = NULL;
             uint32_t slot;
-            slot = ts->curr_status[block_id].sr.data.pld.ph.block_array[i];
+            slot = thread_status_get_record4read(
+                ts, block_id)->data.pld.ph.block_array[i];
             LIXA_TRACE(("server_xa_end_8: updating next_verb for resource "
                         "manager # " UINT32_T_FORMAT " (" UINT32_T_FORMAT ") "
                         "\n", i, slot));
-            sr = ts->curr_status + slot;
+            pld = &(thread_status_get_record4update(ts, slot)->data.pld);
             /* update the block */
-            sr->sr.data.pld.rm.state.next_verb = LIXA_MSG_VERB_END;
+            pld->rm.state.next_verb = LIXA_MSG_VERB_END;
             if (LIXA_RC_OK != (ret_cod = thread_status_mark_block(ts, slot)))
                 THROW(THREAD_STATUS_MARK_BLOCK_ERROR2);
         } /* for (i=0; ... */
 
         /* store data in the children blocks... */
         for (i = 0; i < lmi->body.end_8.xa_end_execs->len; ++i) {
-            status_record_t *sr;
+            struct status_record_data_payload_s *pld = NULL;
             struct lixa_msg_body_end_8_xa_end_execs_s *xa_end_execs;
             uint32_t slot;
             xa_end_execs = &g_array_index(
                 lmi->body.end_8.xa_end_execs,
                 struct lixa_msg_body_end_8_xa_end_execs_s, i);
-            slot = ts->curr_status[block_id].sr.data.pld.ph.block_array[
-                xa_end_execs->rmid];
-            sr = ts->curr_status + slot;
+            slot = thread_status_get_record4read(
+                ts, block_id)->data.pld.ph.block_array[xa_end_execs->rmid];
+            pld = &(thread_status_get_record4update(ts, slot)->data.pld);
             /* update the block */
-            sr->sr.data.pld.rm.state.xa_s_state = xa_end_execs->s_state;
-            sr->sr.data.pld.rm.state.xa_td_state = xa_end_execs->td_state;
-            sr->sr.data.pld.rm.state.next_verb = LIXA_MSG_VERB_NULL;
-            sr->sr.data.pld.rm.xa_end_flags = xa_end_execs->flags;
-            sr->sr.data.pld.rm.xa_end_rc = xa_end_execs->rc;
+            pld->rm.state.xa_s_state = xa_end_execs->s_state;
+            pld->rm.state.xa_td_state = xa_end_execs->td_state;
+            pld->rm.state.next_verb = LIXA_MSG_VERB_NULL;
+            pld->rm.xa_end_flags = xa_end_execs->flags;
+            pld->rm.xa_end_rc = xa_end_execs->rc;
             if (LIXA_RC_OK != (ret_cod = thread_status_mark_block(ts, slot)))
                 THROW(THREAD_STATUS_MARK_BLOCK_ERROR3);
             /* check return code and flags in the event of XTA multiple branch
@@ -673,35 +671,36 @@ int server_xa_forget_8(struct thread_status_s *ts,
         struct server_client_status_s *cs = &(ts->client_array[slot_id]);
 
         /* check block_id is a valid block */
-        if (ts->curr_status[block_id].sr.data.pld.type !=
+        if (thread_status_get_record4read(ts, block_id)->data.pld.type !=
             DATA_PAYLOAD_TYPE_HEADER)
             THROW(INVALID_BLOCK_ID);
         /* check children blocks match with the arrived update */
         if (lmi->body.forget_8.xa_forget_execs->len >
-            ts->curr_status[block_id].sr.data.pld.ph.n)
+            thread_status_get_record4read(ts, block_id)->data.pld.ph.n)
             THROW(NUMBER_OF_RSRMGRS_MISMATCH);
         /* store transaction finished status */
-        ts->curr_status[block_id].sr.data.pld.ph.state.finished =
+        thread_status_get_record4update(
+            ts, block_id)->data.pld.ph.state.finished =
             lmi->body.forget_8.conthr.finished;
         if (LIXA_RC_OK != (ret_cod = thread_status_mark_block(ts, block_id)))
             THROW(THREAD_STATUS_MARK_BLOCK_ERROR1);
 
         /* store data in the children blocks... */
         for (i = 0; i < lmi->body.forget_8.xa_forget_execs->len; ++i) {
-            status_record_t *sr;
+            struct status_record_data_payload_s *pld = NULL;
             struct lixa_msg_body_forget_8_xa_forget_execs_s *xa_forget_execs;
             uint32_t slot;
             xa_forget_execs = &g_array_index(
                 lmi->body.forget_8.xa_forget_execs,
                 struct lixa_msg_body_forget_8_xa_forget_execs_s, i);
-            slot = ts->curr_status[block_id].sr.data.pld.ph.block_array[
-                xa_forget_execs->rmid];
-            sr = ts->curr_status + slot;
+            slot = thread_status_get_record4read(
+                ts, block_id)->data.pld.ph.block_array[xa_forget_execs->rmid];
+            pld = &(thread_status_get_record4update(ts, slot)->data.pld);
             /* update the block */
-            sr->sr.data.pld.rm.state.xa_s_state = xa_forget_execs->s_state;
-            sr->sr.data.pld.rm.state.next_verb = LIXA_MSG_VERB_NULL;
-            sr->sr.data.pld.rm.xa_forget_flags = xa_forget_execs->flags;
-            sr->sr.data.pld.rm.xa_forget_rc = xa_forget_execs->rc;
+            pld->rm.state.xa_s_state = xa_forget_execs->s_state;
+            pld->rm.state.next_verb = LIXA_MSG_VERB_NULL;
+            pld->rm.xa_forget_flags = xa_forget_execs->flags;
+            pld->rm.xa_forget_rc = xa_forget_execs->rc;
             if (LIXA_RC_OK != (ret_cod = thread_status_mark_block(ts, slot)))
                 THROW(THREAD_STATUS_MARK_BLOCK_ERROR2);
         } /* for (i=0; ... */
@@ -819,11 +818,9 @@ int server_xa_open_8(struct thread_status_s *ts,
         LIXA_TRACE(("server_xa_open_8: force sessid='%s' using client value\n",
                     lixa_session_get_sid(&(cs->session))));
         
-#ifdef LIXA_DEBUG
         /* check the resource manager array is OK */
         if (NULL == lmi->body.open_8.rsrmgrs)
             THROW(RSRMGRS_ARRAY_NULL);
-#endif /* LIXA_DEBUG */
 
         if (ts->mmode && !lmi->body.open_8.client.maint) {
             /* server in maintenance mode, client not in maintenance mode */
@@ -852,30 +849,31 @@ int server_xa_open_8(struct thread_status_s *ts,
                                    PAYLOAD_CHAIN_ALLOCATE_ERROR);
 
         /* retrieve header information */
-        strncpy(ts->curr_status[block_id].sr.data.pld.ph.config_digest,
+        strncpy(thread_status_get_record4update(
+                    ts, block_id)->data.pld.ph.config_digest,
                 lmi->body.open_8.client.config_digest,
                 sizeof(md5_digest_hex_t));
-        lixa_job_set_raw(&(ts->curr_status[block_id].sr.data.pld.ph.job),
+        lixa_job_set_raw(&(thread_status_get_record4update(
+                               ts, block_id)->data.pld.ph.job),
                          (char *) lmi->body.open_8.client.job);
-
         for (i = 0; i < lmi->body.open_8.rsrmgrs->len; ++i) {
-            status_record_t *sr;
+            struct status_record_data_payload_s *pld = NULL;
             struct lixa_msg_body_open_8_rsrmgr_s *rsrmgr;
-            sr = ts->curr_status +
-                ts->curr_status[block_id].sr.data.pld.ph.block_array[i];
+            uint32_t slot;
+            slot = thread_status_get_record4read(
+                ts, block_id)->data.pld.ph.block_array[i];
+            pld = &(thread_status_get_record4update(ts, slot)->data.pld);
             rsrmgr = &g_array_index(lmi->body.open_8.rsrmgrs,
                                     struct lixa_msg_body_open_8_rsrmgr_s,
                                     i);
-            sr->sr.data.pld.rm.rmid = rsrmgr->rmid;
-            strncpy(sr->sr.data.pld.rm.name, (char *) rsrmgr->name,
+            pld->rm.rmid = rsrmgr->rmid;
+            strncpy(pld->rm.name, (char *) rsrmgr->name,
                     PAYLOAD_RSRMGR_NAME_MAX);
-            common_status_rsrmgr_init(&sr->sr.data.pld.rm.state,
-                                      rsrmgr->dynamic);
-            sr->sr.data.pld.rm.name[PAYLOAD_RSRMGR_NAME_MAX - 1] = '\0';
-            strncpy(sr->sr.data.pld.rm.xa_name, (char *) rsrmgr->xa_name,
-                    RMNAMESZ);
-            sr->sr.data.pld.rm.xa_name[RMNAMESZ - 1] = '\0';
-            sr->sr.data.pld.rm.state.next_verb = LIXA_MSG_VERB_OPEN;
+            common_status_rsrmgr_init(&pld->rm.state, rsrmgr->dynamic);
+            pld->rm.name[PAYLOAD_RSRMGR_NAME_MAX - 1] = '\0';
+            strncpy(pld->rm.xa_name, (char *) rsrmgr->xa_name, RMNAMESZ);
+            pld->rm.xa_name[RMNAMESZ - 1] = '\0';
+            pld->rm.state.next_verb = LIXA_MSG_VERB_OPEN;
         }
 
         /* prepare output message */
@@ -892,11 +890,9 @@ int server_xa_open_8(struct thread_status_s *ts,
         THROW(NONE);
     } CATCH {
         switch (excp) {
-#ifdef LIXA_DEBUG
             case RSRMGRS_ARRAY_NULL:
                 ret_cod = LIXA_RC_NULL_OBJECT;
                 break;
-#endif /* LIXA_DEBUG */
             case MAINTENANCE_MODE:
                 ret_cod = LIXA_RC_MAINTENANCE_MODE;
                 break;
@@ -944,36 +940,38 @@ int server_xa_open_24(struct thread_status_s *ts,
         struct server_client_status_s *cs = &(ts->client_array[slot_id]);
 
         /* check block_id is a valid block */
-        if (ts->curr_status[block_id].sr.data.pld.type !=
-            DATA_PAYLOAD_TYPE_HEADER) THROW(INVALID_BLOCK_ID);
+        if (thread_status_get_record4read(ts, block_id)->data.pld.type !=
+            DATA_PAYLOAD_TYPE_HEADER)
+            THROW(INVALID_BLOCK_ID);
         /* check children blocks match with the arrived update */
         if (lmi->body.open_24.xa_open_execs->len >
-            ts->curr_status[block_id].sr.data.pld.ph.n) THROW(
-                NUMBER_OF_RSRMGRS_MISMATCH);
+            thread_status_get_record4read(ts, block_id)->data.pld.ph.n)
+            THROW(NUMBER_OF_RSRMGRS_MISMATCH);
         /* retrieve and save control thread status */
-        ts->curr_status[block_id].sr.data.pld.ph.state.txstate =
+        thread_status_get_record4update(
+            ts, block_id)->data.pld.ph.state.txstate =
             lmi->body.open_24.conthr.txstate;
         /* store data in the children blocks... */
         for (i = 0; i < lmi->body.open_24.xa_open_execs->len; ++i) {
-            status_record_t *sr;
+            struct status_record_data_payload_s *pld = NULL;
             struct lixa_msg_body_open_24_xa_open_execs_s *xa_open_execs;
-            uint32_t slot =
-                ts->curr_status[block_id].sr.data.pld.ph.block_array[i];
-            sr = ts->curr_status + slot;
+            uint32_t slot = thread_status_get_record4read(
+                ts, block_id)->data.pld.ph.block_array[i];
+            pld = &(thread_status_get_record4update(ts, slot)->data.pld);
             xa_open_execs = &g_array_index(
                 lmi->body.open_24.xa_open_execs,
                 struct lixa_msg_body_open_24_xa_open_execs_s, i);
             /* check rmid: this check should be useless... */
-            if (sr->sr.data.pld.rm.rmid != xa_open_execs->rmid)
+            if (pld->rm.rmid != xa_open_execs->rmid)
                 THROW(INVALID_RMID);
             /* update the block */
-            sr->sr.data.pld.rm.state.xa_r_state = xa_open_execs->r_state;
-            sr->sr.data.pld.rm.state.next_verb = LIXA_MSG_VERB_NULL;
-            strncpy(sr->sr.data.pld.rm.xa_open_info,
-                    (char *) xa_open_execs->xa_info, MAXINFOSIZE);
-            sr->sr.data.pld.rm.xa_open_info[MAXINFOSIZE - 1] = '\0';
-            sr->sr.data.pld.rm.xa_open_flags = xa_open_execs->flags;
-            sr->sr.data.pld.rm.xa_open_rc = xa_open_execs->rc;
+            pld->rm.state.xa_r_state = xa_open_execs->r_state;
+            pld->rm.state.next_verb = LIXA_MSG_VERB_NULL;
+            strncpy(pld->rm.xa_open_info, (char *) xa_open_execs->xa_info,
+                    MAXINFOSIZE);
+            pld->rm.xa_open_info[MAXINFOSIZE - 1] = '\0';
+            pld->rm.xa_open_flags = xa_open_execs->flags;
+            pld->rm.xa_open_rc = xa_open_execs->rc;
             if (LIXA_RC_OK != (ret_cod = thread_status_mark_block(ts, slot)))
                 THROW(THREAD_STATUS_MARK_BLOCK_ERROR);
         } /* for (i=0; ... */
@@ -1096,13 +1094,13 @@ int server_xa_prepare_8(struct thread_status_s *ts,
         uint32_t branch_array_size = 0;
         struct server_client_status_s *cs = &(ts->client_array[slot_id]);
         /* check block_id is a valid block */
-        if (ts->curr_status[block_id].sr.data.pld.type !=
+        if (thread_status_get_record4read(ts, block_id)->data.pld.type !=
             DATA_PAYLOAD_TYPE_HEADER)
             THROW(INVALID_BLOCK_ID);
         /* check the number of children blocks matches with the arrived
            update resource manager records */
         if (lmi->body.prepare_8.xa_prepare_execs->len >
-            ts->curr_status[block_id].sr.data.pld.ph.n)
+            thread_status_get_record4read(ts, block_id)->data.pld.ph.n)
             THROW(NUMBER_OF_RSRMGRS_MISMATCH);
         /* check if the block is a branch inside a multiple branches
            transaction */
@@ -1118,34 +1116,36 @@ int server_xa_prepare_8(struct thread_status_s *ts,
         }
         /* store commit/rollback intent after prepare phase */
         if (lmi->body.prepare_8.conthr.commit) {
-            ts->curr_status[block_id].sr.data.pld.ph.state.will_commit = TRUE;
-            ts->curr_status[block_id].sr.data.pld.ph.state.will_rollback =
-                FALSE;
+            thread_status_get_record4update(
+                ts, block_id)->data.pld.ph.state.will_commit = TRUE;
+            thread_status_get_record4update(
+                ts, block_id)->data.pld.ph.state.will_rollback = FALSE;
         } else {
-            ts->curr_status[block_id].sr.data.pld.ph.state.will_commit = FALSE;
-            ts->curr_status[block_id].sr.data.pld.ph.state.will_rollback =
-                TRUE;
+            thread_status_get_record4update(
+                ts, block_id)->data.pld.ph.state.will_commit = FALSE;
+            thread_status_get_record4update(
+                ts, block_id)->data.pld.ph.state.will_rollback = TRUE;
         }
         if (LIXA_RC_OK != (ret_cod = thread_status_mark_block(ts, block_id)))
             THROW(THREAD_STATUS_MARK_BLOCK_ERROR1);
         /* store data in the children blocks... */
         for (i = 0; i < lmi->body.prepare_8.xa_prepare_execs->len; ++i) {
-            status_record_t *sr;
+            struct status_record_data_payload_s *pld = NULL;
             struct lixa_msg_body_prepare_8_xa_prepare_execs_s
                 *xa_prepare_execs;
             uint32_t slot;
             xa_prepare_execs = &g_array_index(
                 lmi->body.prepare_8.xa_prepare_execs,
                 struct lixa_msg_body_prepare_8_xa_prepare_execs_s, i);
-            slot = ts->curr_status[block_id].sr.data.pld.ph.block_array[
-                xa_prepare_execs->rmid];
-            sr = ts->curr_status + slot;
+            slot = thread_status_get_record4read(
+                ts, block_id)->data.pld.ph.block_array[xa_prepare_execs->rmid];
+            pld = &(thread_status_get_record4update(ts, slot)->data.pld);
             /* update the block */
-            sr->sr.data.pld.rm.state.xa_s_state = xa_prepare_execs->s_state;
-            sr->sr.data.pld.rm.state.xa_td_state = xa_prepare_execs->td_state;
-            sr->sr.data.pld.rm.state.next_verb = LIXA_MSG_VERB_NULL;
-            sr->sr.data.pld.rm.xa_prepare_flags = xa_prepare_execs->flags;
-            sr->sr.data.pld.rm.xa_prepare_rc = xa_prepare_execs->rc;
+            pld->rm.state.xa_s_state = xa_prepare_execs->s_state;
+            pld->rm.state.xa_td_state = xa_prepare_execs->td_state;
+            pld->rm.state.next_verb = LIXA_MSG_VERB_NULL;
+            pld->rm.xa_prepare_flags = xa_prepare_execs->flags;
+            pld->rm.xa_prepare_rc = xa_prepare_execs->rc;
             if (LIXA_RC_OK != (ret_cod = thread_status_mark_block(ts, slot)))
                 THROW(THREAD_STATUS_MARK_BLOCK_ERROR2);
         } /* for (i=0; ... */
@@ -1267,7 +1267,7 @@ int server_xa_prepare_24(struct thread_status_s *ts,
         struct server_client_status_s *cs = &(ts->client_array[slot_id]);
         
         /* check block_id is a valid block */
-        if (ts->curr_status[block_id].sr.data.pld.type !=
+        if (thread_status_get_record4read(ts, block_id)->data.pld.type !=
             DATA_PAYLOAD_TYPE_HEADER)
             THROW(INVALID_BLOCK_ID);
         /* check if the block is a branch inside a multiple branches
@@ -1437,51 +1437,52 @@ int server_xa_rollback_8(struct thread_status_s *ts,
         struct server_client_status_s *cs = &(ts->client_array[slot_id]);
 
         /* check block_id is a valid block */
-        if (ts->curr_status[block_id].sr.data.pld.type !=
+        if (thread_status_get_record4read(ts, block_id)->data.pld.type !=
             DATA_PAYLOAD_TYPE_HEADER)
             THROW(INVALID_BLOCK_ID);
         /* check children blocks match with the arrived update */
         if (lmi->body.rollback_8.xa_rollback_execs->len >
-            ts->curr_status[block_id].sr.data.pld.ph.n)
+            thread_status_get_record4read(ts, block_id)->data.pld.ph.n)
             THROW(NUMBER_OF_RSRMGRS_MISMATCH);
         /* store rollback intent */
-        ts->curr_status[block_id].sr.data.pld.ph.state.finished =
+        thread_status_get_record4update(
+            ts, block_id)->data.pld.ph.state.finished =
             lmi->body.rollback_8.conthr.finished;
         if (LIXA_RC_OK != (ret_cod = thread_status_mark_block(ts, block_id)))
             THROW(THREAD_STATUS_MARK_BLOCK_ERROR1);
         /* remove XID from the global transaction table */
         sttq.gtrid = lixa_xid_get_gtrid_ascii(
-            &(ts->curr_status[block_id].sr.data.pld.ph.state.xid));
+            &(thread_status_get_record4read(
+                  ts, block_id)->data.pld.ph.state.xid));
         if (!lixa_xid_serialize(
-                &(ts->curr_status[block_id].sr.data.pld.ph.state.xid),
+                &(thread_status_get_record4read(
+                      ts, block_id)->data.pld.ph.state.xid),
                 sttq.xid))
             THROW(XID_SERIALIZE_ERROR);
         sttq.tsid = ts->id;
-        /*
-        sttr.block_id = block_id;
-        */
         if (LIXA_RC_OK != (ret_cod = server_trans_tbl_remove(
                                ts->trans_table, &sttq)))
             THROW(TRANS_TABLE_REMOVE_ERROR);
 
         /* store data in the children blocks... */
         for (i = 0; i < lmi->body.rollback_8.xa_rollback_execs->len; ++i) {
-            status_record_t *sr;
+            struct status_record_data_payload_s *pld = NULL;
             struct lixa_msg_body_rollback_8_xa_rollback_execs_s
                 *xa_rollback_execs;
             uint32_t slot;
             xa_rollback_execs = &g_array_index(
                 lmi->body.rollback_8.xa_rollback_execs,
                 struct lixa_msg_body_rollback_8_xa_rollback_execs_s, i);
-            slot = ts->curr_status[block_id].sr.data.pld.ph.block_array[
-                xa_rollback_execs->rmid];
-            sr = ts->curr_status + slot;
+            slot = thread_status_get_record4read(
+                ts, block_id)->data.pld.ph.block_array[
+                    xa_rollback_execs->rmid];
+            pld = &(thread_status_get_record4update(ts, slot)->data.pld);
             /* update the block */
-            sr->sr.data.pld.rm.state.xa_r_state = xa_rollback_execs->r_state;
-            sr->sr.data.pld.rm.state.xa_s_state = xa_rollback_execs->s_state;
-            sr->sr.data.pld.rm.state.next_verb = LIXA_MSG_VERB_NULL;
-            sr->sr.data.pld.rm.xa_rollback_flags = xa_rollback_execs->flags;
-            sr->sr.data.pld.rm.xa_rollback_rc = xa_rollback_execs->rc;
+            pld->rm.state.xa_r_state = xa_rollback_execs->r_state;
+            pld->rm.state.xa_s_state = xa_rollback_execs->s_state;
+            pld->rm.state.next_verb = LIXA_MSG_VERB_NULL;
+            pld->rm.xa_rollback_flags = xa_rollback_execs->flags;
+            pld->rm.xa_rollback_rc = xa_rollback_execs->rc;
             if (LIXA_RC_OK != (ret_cod = thread_status_mark_block(ts, slot)))
                 THROW(THREAD_STATUS_MARK_BLOCK_ERROR2);
         } /* for (i=0; ... */
@@ -1693,7 +1694,8 @@ int server_xa_start_8(struct thread_status_s *ts,
         } /* if (lmi->body.start_8.conthr.sub_branch) */
         
         /* store XID in the header block */
-        ts->curr_status[block_id].sr.data.pld.ph.state.xid =
+        thread_status_get_record4update(
+            ts, block_id)->data.pld.ph.state.xid = 
             lmi->body.start_8.conthr.xid;
         if (LIXA_RC_OK != (ret_cod = thread_status_mark_block(ts, block_id)))
             THROW(THREAD_STATUS_MARK_BLOCK_ERROR1);
@@ -1708,23 +1710,25 @@ int server_xa_start_8(struct thread_status_s *ts,
                                ts->trans_table, &sttq)))
             THROW(TRANS_TABLE_INSERT_ERROR);
         /* reset finished state */
-        ts->curr_status[block_id].sr.data.pld.ph.state.finished = FALSE;
-
+        thread_status_get_record4update(
+            ts, block_id)->data.pld.ph.state.finished = FALSE;
+        
         /* store next_verb for not dynamically registering resource managers */
         for (i = 0; i < lmi->body.start_8.rsrmgrs->len; ++i) {
-            status_record_t *sr;
+            struct status_record_data_payload_s *pld = NULL;
             struct lixa_msg_body_start_8_rsrmgr_s *rsrmgrs;
             uint32_t slot;
             rsrmgrs = &g_array_index(
                 lmi->body.start_8.rsrmgrs,
                 struct lixa_msg_body_start_8_rsrmgr_s, i);
-            slot = ts->curr_status[block_id].sr.data.pld.ph.block_array[
-                rsrmgrs->rmid];
+            slot = thread_status_get_record4read(
+                ts, block_id)->data.pld.ph.block_array[rsrmgrs->rmid];
+
             LIXA_TRACE(("server_xa_start_8: updating next_verb for resource "
                         "manager # " UINT32_T_FORMAT "\n", rsrmgrs->rmid));
-            sr = ts->curr_status + slot;
+            pld = &(thread_status_get_record4update(ts, slot)->data.pld);
             /* update the block */
-            sr->sr.data.pld.rm.state.next_verb = LIXA_MSG_VERB_START;
+            pld->rm.state.next_verb = LIXA_MSG_VERB_START;
             if (LIXA_RC_OK != (ret_cod = thread_status_mark_block(ts, slot)))
                 THROW(THREAD_STATUS_MARK_BLOCK_ERROR2);
         } /* for (i=0; ... */
@@ -1814,35 +1818,36 @@ int server_xa_start_24(struct thread_status_s *ts,
         struct server_client_status_s *cs = &(ts->client_array[slot_id]);
 
         /* check block_id is a valid block */
-        if (ts->curr_status[block_id].sr.data.pld.type !=
+        if (thread_status_get_record4read(ts, block_id)->data.pld.type !=
             DATA_PAYLOAD_TYPE_HEADER)
             THROW(INVALID_BLOCK_ID);
         /* check children blocks match with the arrived update */
         if (lmi->body.start_24.xa_start_execs->len >
-            ts->curr_status[block_id].sr.data.pld.ph.n)
+            thread_status_get_record4read(ts, block_id)->data.pld.ph.n)
             THROW(NUMBER_OF_RSRMGRS_MISMATCH);
         /* retrieve and save control thread status */
-        ts->curr_status[block_id].sr.data.pld.ph.state.txstate =
+        thread_status_get_record4update(
+            ts, block_id)->data.pld.ph.state.txstate =
             lmi->body.start_24.conthr.txstate;
         if (LIXA_RC_OK != (ret_cod = thread_status_mark_block(ts, block_id)))
             THROW(THREAD_STATUS_MARK_BLOCK_ERROR1);
         /* store data in the children blocks... */
         for (i = 0; i < lmi->body.start_24.xa_start_execs->len; ++i) {
-            status_record_t *sr;
+            struct status_record_data_payload_s *pld = NULL;
             struct lixa_msg_body_start_24_xa_start_execs_s *xa_start_execs;
             uint32_t slot;
             xa_start_execs = &g_array_index(
                 lmi->body.start_24.xa_start_execs,
                 struct lixa_msg_body_start_24_xa_start_execs_s, i);
-            slot = ts->curr_status[block_id].sr.data.pld.ph.block_array[
-                xa_start_execs->rmid];
-            sr = ts->curr_status + slot;
+            slot = thread_status_get_record4read(
+                ts, block_id)->data.pld.ph.block_array[xa_start_execs->rmid];
+            pld = &(thread_status_get_record4update(ts, slot)->data.pld);
             /* update the block */
-            sr->sr.data.pld.rm.state.xa_td_state = xa_start_execs->td_state;
-            sr->sr.data.pld.rm.state.xa_s_state = xa_start_execs->s_state;
-            sr->sr.data.pld.rm.state.next_verb = LIXA_MSG_VERB_NULL;
-            sr->sr.data.pld.rm.xa_start_flags = xa_start_execs->flags;
-            sr->sr.data.pld.rm.xa_start_rc = xa_start_execs->rc;
+            pld->rm.state.xa_td_state = xa_start_execs->td_state;
+            pld->rm.state.xa_s_state = xa_start_execs->s_state;
+            pld->rm.state.next_verb = LIXA_MSG_VERB_NULL;
+            pld->rm.xa_start_flags = xa_start_execs->flags;
+            pld->rm.xa_start_rc = xa_start_execs->rc;
             if (LIXA_RC_OK != (ret_cod = thread_status_mark_block(ts, slot)))
                 THROW(THREAD_STATUS_MARK_BLOCK_ERROR2);
         } /* for (i=0; ... */
