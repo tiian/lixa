@@ -68,33 +68,30 @@ int server_xa_branch_chain(struct thread_status_s *ts,
             int chainable = TRUE;
             struct server_trans_tbl_qry_s *record =
                 &g_array_index(array, struct server_trans_tbl_qry_s, i);
-            uint32_t next_branch_block =
-                ts->curr_status[record->block_id
-                                ].sr.data.pld.ph.next_branch_block;
-            uint32_t prev_branch_block =
-                ts->curr_status[record->block_id
-                                ].sr.data.pld.ph.prev_branch_block;
+            uint32_t next_branch_block = thread_status_get_record4read(
+                ts, record->block_id)->data.pld.ph.next_branch_block;
+            uint32_t prev_branch_block = thread_status_get_record4read(
+                ts, record->block_id)->data.pld.ph.prev_branch_block;
             LIXA_TRACE(("server_xa_branch_chain: item=%u, block_id=%u, "
                         "next_branch_block=%u, prev_branch_block=%u\n",
                         i, record->block_id, next_branch_block,
                         prev_branch_block));
             /* check if the branch has already called xa_prepare; loop all
                rmids*/
-            for (rmid=0; rmid<ts->curr_status[record->block_id
-                                              ].sr.data.pld.ph.n; ++rmid) {
-                status_record_t *sr;
-                uint32_t slot =
-                    ts->curr_status[record->block_id
-                                    ].sr.data.pld.ph.block_array[rmid];
-                sr = ts->curr_status + slot;
-                if (XA_STATE_S0 != sr->sr.data.pld.rm.state.xa_s_state &&
-                    XA_STATE_S1 != sr->sr.data.pld.rm.state.xa_s_state &&
-                    XA_STATE_S2 != sr->sr.data.pld.rm.state.xa_s_state) {
+            for (rmid=0; rmid<thread_status_get_record4read(
+                     ts, record->block_id)->data.pld.ph.n; ++rmid) {
+                const struct status_record_data_payload_s *pld = NULL;
+                uint32_t slot = thread_status_get_record4read(
+                    ts, record->block_id)->data.pld.ph.block_array[rmid];
+                pld = &(thread_status_get_record4read(ts, slot)->data.pld);
+                if (XA_STATE_S0 != pld->rm.state.xa_s_state &&
+                    XA_STATE_S1 != pld->rm.state.xa_s_state &&
+                    XA_STATE_S2 != pld->rm.state.xa_s_state) {
                     chainable = FALSE;
                 }
                 LIXA_TRACE(("server_xa_branch_chain: rmid=" UINT32_T_FORMAT
                             ", xa_s_state=%d, branch is chainable: %d\n",
-                            rmid, sr->sr.data.pld.rm.state.xa_s_state,
+                            rmid, pld->rm.state.xa_s_state,
                             chainable));
             } /* for (rmid=0; ... */
 
@@ -103,8 +100,8 @@ int server_xa_branch_chain(struct thread_status_s *ts,
             if (!chainable) {
                 lixa_ser_xid_t lsx;
                 if (lixa_xid_serialize(
-                        &ts->curr_status[block_id].sr.data.pld.ph.state.xid,
-                        lsx)) {
+                        &thread_status_get_record4read(
+                            ts, block_id)->data.pld.ph.state.xid, lsx)) {
                     /* 2018-01-21 Ch.F.
                      * Unfortunately, no idea how to create a case test that
                      * can reproduce this behavior in a consistent manner.
@@ -122,15 +119,15 @@ int server_xa_branch_chain(struct thread_status_s *ts,
             if (0 == next_branch_block) {
                 if (!chained) {
                     /* this is the point to connect to */
-                    ts->curr_status[record->block_id
-                                    ].sr.data.pld.ph.next_branch_block =
+                    thread_status_get_record4update(
+                        ts, record->block_id)->data.pld.ph.next_branch_block =
                         block_id;
                     if (LIXA_RC_OK != (ret_cod = thread_status_mark_block(
                                            ts, record->block_id)))
                         THROW(THREAD_STATUS_MARK_BLOCK_ERROR1);
                     /* this is the block to connect */
-                    ts->curr_status[block_id
-                                    ].sr.data.pld.ph.prev_branch_block =
+                    thread_status_get_record4update(
+                        ts, block_id)->data.pld.ph.prev_branch_block =
                         record->block_id;
                     if (LIXA_RC_OK != (ret_cod = thread_status_mark_block(
                                            ts, block_id)))
@@ -189,10 +186,10 @@ int server_xa_branch_unchain(struct thread_status_s *ts,
     
     LIXA_TRACE(("server_xa_branch_unchain\n"));
     TRY {
-        uint32_t next_branch_block =
-            ts->curr_status[block_id].sr.data.pld.ph.next_branch_block;
-        uint32_t prev_branch_block =
-            ts->curr_status[block_id].sr.data.pld.ph.prev_branch_block;
+        uint32_t next_branch_block = thread_status_get_record4read(
+            ts, block_id)->data.pld.ph.next_branch_block;
+        uint32_t prev_branch_block = thread_status_get_record4read(
+            ts, block_id)->data.pld.ph.prev_branch_block;
         if (0 == next_branch_block && 0 == prev_branch_block) {
             LIXA_TRACE(("server_xa_branch_unchain: block_id "
                         UINT32_T_FORMAT " is not chained because prev and "
@@ -203,8 +200,8 @@ int server_xa_branch_unchain(struct thread_status_s *ts,
             LIXA_TRACE(("server_xa_branch_unchain: unchaining previous "
                         "block " UINT32_T_FORMAT " from this one ("
                         UINT32_T_FORMAT ")\n", prev_branch_block, block_id));
-            ts->curr_status[prev_branch_block
-                            ].sr.data.pld.ph.next_branch_block =
+            thread_status_get_record4update(
+                ts, prev_branch_block)->data.pld.ph.next_branch_block =
                 next_branch_block;
             if (LIXA_RC_OK != (ret_cod = thread_status_mark_block(
                                    ts, prev_branch_block)))
@@ -214,16 +211,18 @@ int server_xa_branch_unchain(struct thread_status_s *ts,
             LIXA_TRACE(("server_xa_branch_unchain: unchaining next "
                         "block " UINT32_T_FORMAT " from this one ("
                         UINT32_T_FORMAT ")\n", next_branch_block, block_id));
-            ts->curr_status[next_branch_block
-                            ].sr.data.pld.ph.prev_branch_block =
+            thread_status_get_record4update(
+                ts, next_branch_block)->data.pld.ph.prev_branch_block =
                 prev_branch_block;
             if (LIXA_RC_OK != (ret_cod = thread_status_mark_block(
                                    ts, next_branch_block)))
                 THROW(THREAD_STATUS_MARK_BLOCK_ERROR2);
         } /* if (0 != prev_branch_block) */
         /* resetting current block_id */
-        ts->curr_status[block_id].sr.data.pld.ph.next_branch_block = 0;
-        ts->curr_status[block_id].sr.data.pld.ph.prev_branch_block = 0;
+        thread_status_get_record4update(
+            ts, block_id)->data.pld.ph.next_branch_block = 0;
+        thread_status_get_record4update(
+            ts, block_id)->data.pld.ph.prev_branch_block = 0;
         if (LIXA_RC_OK != (ret_cod = thread_status_mark_block(ts, block_id)))
             THROW(THREAD_STATUS_MARK_BLOCK_ERROR3);
         
@@ -265,7 +264,8 @@ int server_xa_branch_want_replies(const struct thread_status_s *ts,
         /* check it's part of a branch */
         if (!server_xa_branch_is_chained(ts, block_id))
             THROW(NOT_CHAINED);
-        vs = &ts->curr_status[block_id].sr.data.pld.ph.last_verb_step[0];
+        vs = &thread_status_get_record4read(
+            ts, block_id)->data.pld.ph.last_verb_step[0];
         LIXA_TRACE(("server_xa_branch_want_replies: block_id=" UINT32_T_FORMAT
                     " ,last_verb=%d, last_step=%d\n", block_id, vs->verb,
                     vs->step));
@@ -333,13 +333,16 @@ int server_xa_branch_list(const struct thread_status_s *ts,
             THROW(INVALID_STATUS);
         /* move to the first block in the chain */
         first = block_id;
-        while (0 != ts->curr_status[first].sr.data.pld.ph.prev_branch_block)
-            first = ts->curr_status[first].sr.data.pld.ph.prev_branch_block;
+        while (0 != thread_status_get_record4read(
+                   ts, first)->data.pld.ph.prev_branch_block)
+            first = thread_status_get_record4read(
+                ts, first)->data.pld.ph.prev_branch_block;
         /* count all the elements */
         i = first;
         while (i != 0) {
             (*number)++;
-            i = ts->curr_status[i].sr.data.pld.ph.next_branch_block;
+            i = thread_status_get_record4read(
+                ts, i)->data.pld.ph.next_branch_block;
         }
         /* allocate the output array */
         if (NULL == (*items = malloc(*number * sizeof(uint32_t))))
@@ -349,7 +352,8 @@ int server_xa_branch_list(const struct thread_status_s *ts,
         j = 0;
         while (i != 0) {
             (*items)[j++] = i;
-            i = ts->curr_status[i].sr.data.pld.ph.next_branch_block;
+            i = thread_status_get_record4read(
+                ts, i)->data.pld.ph.next_branch_block;            
         }
         LIXA_TRACE(("server_xa_branch_list: number=%u\n", *number));
         for (j=0; j<*number; ++j)
@@ -401,10 +405,11 @@ int server_xa_branch_prepare(struct thread_status_s *ts,
         /* assess all the branches */
         for (i=0; i<branch_array_size; ++i) {
             struct common_status_conthr_s *state =
-                &ts->curr_status[branch_array[i]].sr.data.pld.ph.state;
-            struct lixa_msg_verb_step_s *verb_step =
-                &ts->curr_status[branch_array[i]
-                                 ].sr.data.pld.ph.last_verb_step[0];
+                &thread_status_get_record4update(
+                    ts, branch_array[i])->data.pld.ph.state;
+            const struct lixa_msg_verb_step_s *verb_step =
+                &thread_status_get_record4read(
+                    ts, branch_array[i])->data.pld.ph.last_verb_step[0];
             /* check the branch reached the prepare verb, but not for
                current branch */
             if (LIXA_MSG_VERB_PREPARE != verb_step->verb &&
@@ -536,7 +541,8 @@ int server_xa_branch_check_recovery(const struct thread_status_s *ts,
         *global_recovery = XTA_GLOBAL_RECOV_NULL;
         /* loop on all the branches */
         for (i=0; i<branch_array_size; ++i) {
-            data = &(ts->curr_status[branch_array[i]].sr.data);
+            data = &thread_status_get_record4read(
+                ts, branch_array[i])->data;
             /* check the record is an header (consistency check) */
             if (DATA_PAYLOAD_TYPE_HEADER != data->pld.type) {
                 LIXA_TRACE(("server_xa_branch_check_recovery: "
@@ -590,8 +596,8 @@ int server_xa_branch_check_recovery(const struct thread_status_s *ts,
             prepared_rm = 0;
             /* loop on all the resource managers used by the branch */
             for (j=0; j<data->pld.ph.n; ++j) {
-                rm = &(ts->curr_status[
-                           data->pld.ph.block_array[j]].sr.data.pld.rm);
+                rm = &thread_status_get_record4read(
+                    ts, data->pld.ph.block_array[j])->data.pld.rm;
                 LIXA_TRACE(("server_xa_branch_check_recovery: rmid=%d, "
                             "name='%s', xa_s_state=%d\n",
                             rm->rmid, rm->name, rm->state.xa_s_state));
