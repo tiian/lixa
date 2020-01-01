@@ -1,5 +1,3 @@
-Restart from server_xa.c
-
 Rename curr_status to kurr_status in server_status.h  struct thread_status_s
 Create some functions equivalent to thread_status_mark_block in
 server_thread_status.c to access the data; create underlying functions

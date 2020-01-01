@@ -106,6 +106,33 @@ extern "C" {
 
     
     /**
+     * Insert a new element in the used slot list
+     * @param[in,out] ts reference to thread status: it's used to retrieve the
+     *                  status files and change them when a dynamic resize is
+     *                  necessary
+     * @param[out] slot the index of the found free slot
+     * @return a standardized return code
+     */
+    int thread_status_insert(struct thread_status_s *ts,
+                             uint32_t *slot);
+
+    
+
+    /**
+     * Remove an element from the used slot list
+     * @param[in,out] ts reference to thread status: it's used to retrieve the
+     *                  status files and change them when a dynamic resize is
+     *                  necessary
+     * @param[in] slot the index of the slot must be released
+     * @return a standardized return code
+     *
+     */
+    int thread_status_delete(struct thread_status_s *ts,
+                             uint32_t slot);
+
+
+    
+    /**
      * Dump the content of the thread status files
      * WARNING: THIS FUNCTION IS *** NOT *** THREAD SAFE
      * @param[in] ts thread status reference

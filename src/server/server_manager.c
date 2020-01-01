@@ -1972,7 +1972,7 @@ int server_manager_new_client(struct thread_status_s *ts, int fd, nfds_t place)
         uint32_t slot = 0;
 
         /* get a free block from status file and insert in used list */
-        if (LIXA_RC_OK != (ret_cod = status_record_insert(ts, &slot)))
+        if (LIXA_RC_OK != (ret_cod = thread_status_insert(ts, &slot)))
             THROW(RECORD_INSERT_ERROR);
 
         /* create the header and reset it */
