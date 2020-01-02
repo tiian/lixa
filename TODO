@@ -1,15 +1,13 @@
-Rename curr_status to kurr_status in server_status.h  struct thread_status_s
-Create some functions equivalent to thread_status_mark_block in
-server_thread_status.c to access the data; create underlying functions
-lixa_state_ for reading and updating the new state tables.
-Could be a couple of functions:
-- read, returns const pointer
-- write, returns pointer, calls automatically thread_status_mark_block
+To preserve backward compatibility and to check the two persistency engines in
+parallel use this schema:
+- write: write old and copy to new
+- read: read from new and if possible check if new != old
+
 To clean up the code, a pointer to sr (union status_record_u) must be returned
 because counter and digest are internal fields. The type might be renamed in
 the future to lixa_state_table_record:
-union status_record_u --> lixa_state_table_record functional point of view, it contains the relevant data
-struct status_recourd_s --> lixa_state_table_slot physical point of view, it contains the relevant data and some control data
+union status_record_u --> lixa_state_table_record_t functional point of view, it contains the relevant data
+struct status_record_s --> lixa_state_table_slot_t physical point of view, it contains the relevant data and some control data
 
 Rework status_record_insert and status_record_delete
 

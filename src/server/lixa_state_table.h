@@ -21,8 +21,12 @@
 
 
 
-#include "lixa_trace.h"
 #include "config.h"
+
+
+
+#include "lixa_trace.h"
+#include "status_record.h"
 
 
 
@@ -34,6 +38,10 @@
 # undef LIXA_TRACE_MODULE_SAVE
 #endif /* LIXA_TRACE_MODULE */
 #define LIXA_TRACE_MODULE      LIXA_TRACE_MOD_SERVER_STATUS
+
+
+
+#define LIXA_STATE_TABLE_INIT_SIZE   STATUS_FILE_INIT_SIZE
 
 
 
@@ -52,6 +60,36 @@ enum lixa_state_table_status_e {
     STATE_TABLE_CLOSED,
     STATE_TABLE_DISPOSED
 };
+
+
+
+/**
+ * This struct is the basic type of a status record: it contains two control
+ * fields and one payload field.
+ * THE POSITION OF THE FIELDS MUST NOT BE CHANGED INSIDE THE RECORD.
+ * This type will replace the legacy struct status_record_s.
+ */
+typedef struct lixa_state_table_slot_s {
+    /**
+     * This field is incremented twice between a couple of sync:
+     * if the value is even, the record is synched
+     * if the value is odd, the record is modified
+     * This is the lifetime:
+     * - increment once for first update after synch
+     * - increment before compute the record digest and successive synch
+     */
+    uint32_t                       counter;
+    /**
+     * This field contains a control record or a data record, briefly "sr"
+     * (Status Record)
+     */
+    lixa_state_table_record_t      sr;
+    /**
+     * This field contains the CRC32 signature of the previous fields and is
+     * used to guarantee the record integrity
+     */
+    uint32_t                       crc32;
+} lixa_state_table_slot_t;
 
 
 
@@ -84,6 +122,16 @@ extern "C" {
 #endif /* __cplusplus */
 
 
+    
+    /**
+     * Prepare a slot for synchronization: counter is changed from odd to
+     * even, signature is computed
+     * @param[in,out] slot that must be marked for update
+     * @return a reason code
+     */
+    int lixa_state_table_slot_sync(lixa_state_table_slot_t *slot);
+    
+    
 
     /**
      * Initialize a StateTable object to manage a state table

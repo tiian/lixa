@@ -38,6 +38,7 @@
 #include "lixa_errors.h"
 #include "lixa_trace.h"
 #include "lixa_state_table.h"
+#include "lixa_syslog.h"
 #include "server_status.h"
 
 
@@ -48,6 +49,47 @@
 #endif /* LIXA_TRACE_MODULE */
 #define LIXA_TRACE_MODULE   LIXA_TRACE_MOD_SERVER_STATUS
 
+
+
+extern gboolean run_as_daemon;
+
+
+
+int lixa_state_table_slot_sync(lixa_state_table_slot_t *slot)
+{
+    enum Exception {
+        DIGEST_SIZE_ERROR,
+        NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    
+    LIXA_TRACE(("lixa_state_table_slot_sync\n"));
+    TRY {
+        if (slot->counter%2) {
+            slot->counter++;
+        } else {
+            LIXA_TRACE(("lixa_state_table_slot_sync: WARNING! record %p is "
+                        "already even (it was NOT updated before!)\n", slot));
+        }
+        /* compute the CRC32 signature */
+        slot->crc32 = lixa_crc32(
+            (const uint8_t *)slot,
+            sizeof(lixa_state_table_slot_t) - sizeof(uint32_t));
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("lixa_state_table_slot_sync/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+    
 
 
 int lixa_state_table_init(lixa_state_table_t *this,
@@ -110,20 +152,55 @@ int lixa_state_table_create_new_file(lixa_state_table_t *this)
 {
     enum Exception {
         NULL_OBJECT,
-        STATUS_RECORD_CREATE_FILE_ERROR,
+        OPEN_ERROR,
+        GETTIMEOFDAY_ERROR,
+        STATE_TABLE_SLOT_SYNC_ERROR,
+        WRITE_ERROR,
         NONE
     } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     
     LIXA_TRACE(("lixa_state_table_create_new_file\n"));
     TRY {
+        int i;
+        
         /* check the object is not null */
         if (NULL == this)
             THROW(NULL_OBJECT);
-        /* this is basically a wrapper to legacy code */
-        if (LIXA_RC_OK != (ret_cod = status_record_create_file(
-                               this->pathname, &(this->fd))))
-            THROW(STATUS_RECORD_CREATE_FILE_ERROR);
+        if (-1 == (this->fd = open(this->pathname, O_RDWR | O_CREAT | O_EXCL,
+                              S_IRUSR | S_IWUSR | S_IRGRP)))
+                THROW(OPEN_ERROR);
+        LIXA_TRACE(("lixa_state_table_create_new_file: created new status "
+                    "file '%s' with file descriptor %d\n",
+                    this->pathname, this->fd));
+        for (i = 0; i < LIXA_STATE_TABLE_INIT_SIZE; ++i) {
+            lixa_state_table_slot_t tmp_slot;
+
+            memset(&tmp_slot, 0, sizeof(tmp_slot));
+            tmp_slot.counter = 1;
+            if (!i) {
+                /* write control record */
+                tmp_slot.sr.ctrl.magic_number = STATUS_FILE_MAGIC_NUMBER;
+                tmp_slot.sr.ctrl.level = STATUS_FILE_LEVEL;
+                if (LIXA_RC_OK != (ret_cod = gettimeofday(
+                                       &tmp_slot.sr.ctrl.last_sync, NULL)))
+                    THROW(GETTIMEOFDAY_ERROR);
+                tmp_slot.sr.ctrl.number_of_blocks = STATUS_FILE_INIT_SIZE;
+                tmp_slot.sr.ctrl.first_used_block = 0;
+                tmp_slot.sr.ctrl.first_free_block = 1;
+            } else {
+                if (i == STATUS_FILE_INIT_SIZE - 1)
+                    tmp_slot.sr.data.next_block = 0;
+                else
+                    tmp_slot.sr.data.next_block = i + 1;
+            }
+            if (LIXA_RC_OK != (ret_cod = lixa_state_table_slot_sync(
+                                   &tmp_slot)))
+                THROW(STATE_TABLE_SLOT_SYNC_ERROR);
+            if (sizeof(tmp_slot) != write(
+                    this->fd, &tmp_slot, sizeof(tmp_slot)))
+                THROW(WRITE_ERROR);
+        }
         
         THROW(NONE);
     } CATCH {
@@ -131,8 +208,28 @@ int lixa_state_table_create_new_file(lixa_state_table_t *this)
             case NULL_OBJECT:
                 ret_cod = LIXA_RC_NULL_OBJECT;
                 break;
+            case OPEN_ERROR:
+                if (!run_as_daemon)
+                    fprintf(stderr, "Error while opening file '%s' "
+                            "(errno=%d '%s')\n",
+                            this->pathname, errno, strerror(errno));
+                else
+                    LIXA_SYSLOG((LOG_ERR, LIXA_SYSLOG_LXD025E,
+                                 this->pathname, errno, strerror(errno)));
+                ret_cod = LIXA_RC_OPEN_ERROR;
+                break;
+            case GETTIMEOFDAY_ERROR:
+                ret_cod = LIXA_RC_GETTIMEOFDAY_ERROR;
+                break;
+            case STATE_TABLE_SLOT_SYNC_ERROR:
+                break;
+            case WRITE_ERROR:
+                ret_cod = LIXA_RC_WRITE_ERROR;
+                break;
+                /*
             case STATUS_RECORD_CREATE_FILE_ERROR:
                 break;
+                */
             case NONE:
                 ret_cod = LIXA_RC_OK;
                 break;
