@@ -1,3 +1,7 @@
+Restart from lixa_state_insert_block method
+
+Implement lixa_state_table_extend method
+
 To preserve backward compatibility and to check the two persistency engines in
 parallel use this schema:
 - write: write old and copy to new

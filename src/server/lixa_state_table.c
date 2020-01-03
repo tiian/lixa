@@ -152,10 +152,12 @@ int lixa_state_table_create_new_file(lixa_state_table_t *this)
 {
     enum Exception {
         NULL_OBJECT,
+        INVALID_STATUS,
         OPEN_ERROR,
         GETTIMEOFDAY_ERROR,
         STATE_TABLE_SLOT_SYNC_ERROR,
         WRITE_ERROR,
+        SET_STATUS_ERROR,
         NONE
     } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
@@ -167,6 +169,13 @@ int lixa_state_table_create_new_file(lixa_state_table_t *this)
         /* check the object is not null */
         if (NULL == this)
             THROW(NULL_OBJECT);
+        /* check the status */
+        if (STATE_TABLE_UNDEFINED != this->status) {
+            LIXA_TRACE(("lixa_state_table_create_new_file: status should be "
+                        "%d, but it's %d instead\n", STATE_TABLE_UNDEFINED,
+                        this->status));
+            THROW(INVALID_STATUS);
+        }
         if (-1 == (this->fd = open(this->pathname, O_RDWR | O_CREAT | O_EXCL,
                               S_IRUSR | S_IWUSR | S_IRGRP)))
                 THROW(OPEN_ERROR);
@@ -201,12 +210,19 @@ int lixa_state_table_create_new_file(lixa_state_table_t *this)
                     this->fd, &tmp_slot, sizeof(tmp_slot)))
                 THROW(WRITE_ERROR);
         }
+        /* set new status */
+        if (LIXA_RC_OK != (ret_cod = lixa_state_table_set_status(
+                               this, STATE_TABLE_FORMATTED)))
+            THROW(SET_STATUS_ERROR);
         
         THROW(NONE);
     } CATCH {
         switch (excp) {
             case NULL_OBJECT:
                 ret_cod = LIXA_RC_NULL_OBJECT;
+                break;
+            case INVALID_STATUS:
+                ret_cod = LIXA_RC_INVALID_STATUS;
                 break;
             case OPEN_ERROR:
                 if (!run_as_daemon)
@@ -226,10 +242,8 @@ int lixa_state_table_create_new_file(lixa_state_table_t *this)
             case WRITE_ERROR:
                 ret_cod = LIXA_RC_WRITE_ERROR;
                 break;
-                /*
-            case STATUS_RECORD_CREATE_FILE_ERROR:
+            case SET_STATUS_ERROR:
                 break;
-                */
             case NONE:
                 ret_cod = LIXA_RC_OK;
                 break;
@@ -276,6 +290,7 @@ int lixa_state_table_close(lixa_state_table_t *this)
 {
     enum Exception {
         CLOSE_ERROR,
+        INVALID_STATUS,
         NONE
     } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
@@ -285,12 +300,19 @@ int lixa_state_table_close(lixa_state_table_t *this)
         if (-1 == close(this->fd)) {
             THROW(CLOSE_ERROR);
         }
+        /* set new status */
+        if (LIXA_RC_OK != (ret_cod = lixa_state_table_set_status(
+                               this, STATE_TABLE_CLOSED)))
+            THROW(INVALID_STATUS);
         
         THROW(NONE);
     } CATCH {
         switch (excp) {
             case CLOSE_ERROR:
                 ret_cod = LIXA_RC_CLOSE_ERROR;
+                break;
+            case INVALID_STATUS:
+                ret_cod = LIXA_RC_INVALID_STATUS;
                 break;
             case NONE:
                 ret_cod = LIXA_RC_OK;
@@ -384,7 +406,174 @@ int lixa_state_table_clean(lixa_state_table_t *this)
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
         } /* switch (excp) */
     } /* TRY-CATCH */
-    LIXA_TRACE(("lixa_state_log_clean/excp=%d/"
+    LIXA_TRACE(("lixa_state_table_clean/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
+
+int lixa_state_table_extend(lixa_state_table_t *this)
+{
+    enum Exception {
+        NULL_OBJECT,
+        NONE
+    } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    
+    LIXA_TRACE(("lixa_state_table_extend\n"));
+    TRY {
+        if (NULL == this)
+            THROW(NULL_OBJECT);
+        
+        /* @@@ implement me */
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case NULL_OBJECT:
+                ret_cod = LIXA_RC_NULL_OBJECT;
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("lixa_state_table_extend/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
+
+int lixa_state_table_set_status(lixa_state_table_t *this,
+                                enum lixa_state_table_status_e new_status)
+{
+    enum Exception {
+        NULL_OBJECT,
+        INVALID_STATUS,
+        NONE
+    } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    
+    LIXA_TRACE(("lixa_state_table_set_status\n"));
+    TRY {
+        int valid = TRUE;
+        
+        if (NULL == this)
+            THROW(NULL_OBJECT);
+
+        switch (new_status) {
+            case STATE_TABLE_UNDEFINED:
+                LIXA_TRACE(("lixa_state_table_set_status: transition to "
+                            "UNDEFINED status is never acceptable\n"));
+                valid = FALSE;
+                break;
+            case STATE_TABLE_FORMATTED:
+                if (STATE_TABLE_UNDEFINED != this->status) {
+                    LIXA_TRACE(("lixa_state_table_set_status: transition to "
+                                "FORMATTED is acceptable only from "
+                                "UNDEFINED\n"));
+                    valid = FALSE;
+                }
+                break;
+            case STATE_TABLE_USED:
+                if (STATE_TABLE_COPY_TARGET != this->status &&
+                    STATE_TABLE_FORMATTED != this->status &&
+                    STATE_TABLE_EXTENDED != this->status) {
+                    LIXA_TRACE(("lixa_state_table_set_status: transition to "
+                                "USED is acceptable only from COPY_TARGET, "
+                                "FORMATTED and EXTENDED\n"));
+                    valid = FALSE;
+                }
+                break;
+            case STATE_TABLE_FULL:
+                if (STATE_TABLE_USED != this->status) {
+                    LIXA_TRACE(("lixa_state_table_set_status: transition to "
+                                "FULL is acceptable only from USED\n"));
+                    valid = FALSE;
+                }
+                break;
+            case STATE_TABLE_EXTENDED:
+                if (STATE_TABLE_FULL != this->status) {
+                    LIXA_TRACE(("lixa_state_table_set_status: transition to "
+                                "EXTENDED is acceptable only from FULL\n"));
+                    valid = FALSE;
+                }
+                break;
+            case STATE_TABLE_COPY_SOURCE:
+                if (STATE_TABLE_USED != this->status) {
+                    LIXA_TRACE(("lixa_state_table_set_status: transition to "
+                                "COPY_SOURCE is acceptable only from USED\n"));
+                    valid = FALSE;
+                }
+                break;
+            case STATE_TABLE_COPY_TARGET:
+                if (STATE_TABLE_FORMATTED != this->status) {
+                    LIXA_TRACE(("lixa_state_table_set_status: transition to "
+                                "COPY_TARGET is acceptable only from "
+                                "FORMATTED\n"));
+                    valid = FALSE;
+                }
+                break;
+            case STATE_TABLE_SYNCH:
+                if (STATE_TABLE_COPY_SOURCE != this->status) {
+                    LIXA_TRACE(("lixa_state_table_set_status: transition to "
+                                "SYNCH is acceptable only from "
+                                "COPY_SOURCE\n"));
+                    valid = FALSE;
+                }
+                break;
+            case STATE_TABLE_CLOSED:
+                if (STATE_TABLE_FORMATTED != this->status &&
+                    STATE_TABLE_SYNCH != this->status) {
+                    LIXA_TRACE(("lixa_state_table_set_status: transition to "
+                                "CLOSED is acceptable only from "
+                                "FORMATTED and SYNCH\n"));
+                    valid = FALSE;
+                }
+                break;
+            case STATE_TABLE_DISPOSED:
+                if (STATE_TABLE_CLOSED != this->status) {
+                    LIXA_TRACE(("lixa_state_table_set_status: transition to "
+                                "DISPOSED is acceptable only from "
+                                "CLOSED\n"));
+                    valid = FALSE;
+                }
+                break;
+            default:
+                LIXA_TRACE(("lixa_state_table_set_status: %d is not a valid "
+                            "value for a the new_status\n", new_status));
+                valid = FALSE;
+                break;
+        } /* switch (new_status) */
+        if (!valid) {
+            THROW(INVALID_STATUS);
+        } else {
+            LIXA_TRACE(("lixa_state_table_set_status: %d -> %d\n",
+                        this->status, new_status));
+            this->status = new_status;
+        }
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case NULL_OBJECT:
+                ret_cod = LIXA_RC_NULL_OBJECT;
+                break;
+            case INVALID_STATUS:
+                ret_cod = LIXA_RC_INVALID_STATUS;
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("lixa_state_table_set_status/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }

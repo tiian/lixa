@@ -110,11 +110,18 @@ extern "C" {
      * @param[in,out] ts reference to thread status: it's used to retrieve the
      *                  status files and change them when a dynamic resize is
      *                  necessary
-     * @param[out] slot the index of the found free slot
+     * @param[out] slot index of the requested free slot
      * @return a standardized return code
      */
-    int thread_status_insert(struct thread_status_s *ts,
-                             uint32_t *slot);
+    int thread_status_insert(struct thread_status_s *ts, uint32_t *slot);
+
+
+
+    /**
+     * Legacy logic related to @ref thread_status_insert
+     * @@@ This function will be obsolete when "superfast" is completed
+     */
+    int thread_status_insert_old(struct thread_status_s *ts, uint32_t *slot);
 
     
 

@@ -176,6 +176,16 @@ extern "C" {
     int lixa_state_mark_block(lixa_state_t *this, uint32_t block_id);
 
 
+
+    /**
+     * Insert a new used block in the state
+     * @param[in,out] this state object
+     * @param[out] block_id of the inserted block
+     * @return a reason code
+     */
+    int lixa_state_insert_block(lixa_state_t *this, uint32_t *block_id);
+
+
     
 #ifdef __cplusplus
 }

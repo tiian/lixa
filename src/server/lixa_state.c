@@ -618,3 +618,42 @@ int lixa_state_mark_block(lixa_state_t *this, uint32_t block_id)
     return ret_cod;
 }
 
+
+
+int lixa_state_insert_block(lixa_state_t *this, uint32_t *block_id)
+{
+    enum Exception {
+        STATE_TABLE_EXTEND_ERROR,
+        NONE
+    } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    
+    LIXA_TRACE(("lixa_state_insert_block\n"));
+    TRY {
+        /* check if the current state table is full */
+        if (lixa_state_table_is_full(&this->tables[this->used_state_table])) {
+            LIXA_TRACE(("lixa_state_insert_block: current state table (%d) "
+                        "is full and must be extended...\n"));
+            if (LIXA_RC_OK != (ret_cod = lixa_state_table_extend(
+                                   &this->tables[this->used_state_table])))
+                THROW(STATE_TABLE_EXTEND_ERROR);
+        }
+        /* @@@ restart from here */
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case STATE_TABLE_EXTEND_ERROR:
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("lixa_state_insert_block/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+

@@ -98,9 +98,11 @@ typedef struct lixa_state_table_slot_s {
  */
 typedef struct lixa_state_table_s {
     /**
-     * Current status of the state table
+     * Current status of the state table;
+     * use only @ref lixa_state_table_set_status to change it;
+     * reading is allowed without restriction
      */
-    enum lixa_state_table_status_e    status;
+    enum lixa_state_table_status_e   status;
     /**
      * File descriptor associated to the underlying file
      */
@@ -197,6 +199,38 @@ extern "C" {
     }
 
     
+
+    /**
+     * Return a boolean value: is the state file full?
+     */
+    static inline int lixa_state_table_is_full(const lixa_state_table_t *this)
+    {
+        return this->status == STATE_TABLE_FULL;
+    }
+
+
+    
+    /**
+     * Extend the state table; this method is typically called if the state
+     * table is full
+     * @param[in] this state table object
+     * @return a reason code
+     */
+    int lixa_state_table_extend(lixa_state_table_t *this);
+    
+    
+
+    /**
+     * Set a new status for the state table: before setting, it checks if the
+     * transition is valid or not
+     * @param[in,out] this state table object
+     * @param[in] new_status to be set
+     * @return a reason code
+     */
+    int lixa_state_table_set_status(lixa_state_table_t *this,
+                                    enum lixa_state_table_status_e new_status);
+
+
     
 #ifdef __cplusplus
 }
