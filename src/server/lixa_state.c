@@ -302,6 +302,7 @@ int lixa_state_cold_start(lixa_state_t *this)
         NULL_OBJECT,
         UNLINK_ERROR1,
         TABLE_CREATE_NEW_FILE1,
+        TABLE_MAP,
         TABLE_SYNCHRONIZE,
         TABLE_CLOSE,
         UNLINK_ERROR2,
@@ -355,6 +356,12 @@ int lixa_state_cold_start(lixa_state_t *this)
                          lixa_state_table_get_pathname(&(this->tables[1]))));
             THROW(TABLE_CREATE_NEW_FILE2);
         }
+        if (LIXA_RC_OK != (ret_cod = (lixa_state_table_map(
+                                          &(this->tables[1]), FALSE)))) {
+            LIXA_SYSLOG((LOG_ERR, LIXA_SYSLOG_LXD057E,
+                         lixa_state_table_get_pathname(&(this->tables[1]))));
+            THROW(TABLE_MAP);
+        }
         /* create second state log */
         LIXA_SYSLOG((LOG_INFO, LIXA_SYSLOG_LXD047I,
                      lixa_state_log_get_pathname(&this->log,1)));
@@ -365,7 +372,7 @@ int lixa_state_cold_start(lixa_state_t *this)
         if (LIXA_RC_OK != (ret_cod = (lixa_state_log_create_new_file(
                                           &this->log,1)))) {
             LIXA_SYSLOG((LOG_ERR, LIXA_SYSLOG_LXD048E,
-                         lixa_state_table_get_pathname(&(this->tables[1]))));
+                         lixa_state_log_get_pathname(&this->log,1)));
             THROW(LOG_CREATE_NEW_FILE);
         }
         /* emit a message related to the cold start completion */
@@ -390,6 +397,7 @@ int lixa_state_cold_start(lixa_state_t *this)
                 break;
             case TABLE_CREATE_NEW_FILE1:
             case TABLE_CREATE_NEW_FILE2:
+            case TABLE_MAP:
             case TABLE_SYNCHRONIZE:
             case TABLE_CLOSE:
             case LOG_CREATE_NEW_FILE:
@@ -623,13 +631,17 @@ int lixa_state_mark_block(lixa_state_t *this, uint32_t block_id)
 int lixa_state_insert_block(lixa_state_t *this, uint32_t *block_id)
 {
     enum Exception {
+        NULL_OBJECT,
         STATE_TABLE_EXTEND_ERROR,
+        STATE_TABLE_INSERT_BLOCK_ERROR,
         NONE
     } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     
     LIXA_TRACE(("lixa_state_insert_block\n"));
     TRY {
+        if (NULL == this)
+            THROW(NULL_OBJECT);
         /* check if the current state table is full */
         if (lixa_state_table_is_full(&this->tables[this->used_state_table])) {
             LIXA_TRACE(("lixa_state_insert_block: current state table (%d) "
@@ -638,12 +650,20 @@ int lixa_state_insert_block(lixa_state_t *this, uint32_t *block_id)
                                    &this->tables[this->used_state_table])))
                 THROW(STATE_TABLE_EXTEND_ERROR);
         }
-        /* @@@ restart from here */
+        /* insert the block in the table currently used */
+        if (LIXA_RC_OK != (ret_cod = lixa_state_table_insert_block(
+                               &this->tables[this->used_state_table],
+                               block_id)))
+            THROW(STATE_TABLE_INSERT_BLOCK_ERROR);
         
         THROW(NONE);
     } CATCH {
         switch (excp) {
+            case NULL_OBJECT:
+                ret_cod = LIXA_RC_NULL_OBJECT;
+                break;
             case STATE_TABLE_EXTEND_ERROR:
+            case STATE_TABLE_INSERT_BLOCK_ERROR:
                 break;
             case NONE:
                 ret_cod = LIXA_RC_OK;

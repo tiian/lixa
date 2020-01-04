@@ -159,6 +159,7 @@ int thread_status_insert(struct thread_status_s *ts, uint32_t *slot)
     enum Exception {
         INSERT_OLD_ERROR,
         STATE_INSERT_BLOCK_ERROR,
+        INTERNAL_ERROR,
         NONE
     } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
@@ -166,7 +167,7 @@ int thread_status_insert(struct thread_status_s *ts, uint32_t *slot)
     LIXA_TRACE(("thread_status_insert\n"));
     TRY {
         uint32_t old_slot, new_slot;
-        /* call the legacy code @@@ */
+        /* call the legacy code @@@, remove when superfast is ready */
         if (LIXA_RC_OK != (ret_cod = thread_status_insert_old(ts, &old_slot)))
             THROW(INSERT_OLD_ERROR);
         /* call the new code introduced by "superfast" */
@@ -174,6 +175,11 @@ int thread_status_insert(struct thread_status_s *ts, uint32_t *slot)
                                &ts->state, &new_slot)))
             THROW(STATE_INSERT_BLOCK_ERROR);
         /* @@@ compare the two slots: they must match */
+        LIXA_TRACE(("thread_status_insert: legacy code returned slot="
+                    UINT32_T_FORMAT ", new code returned slot="
+                    UINT32_T_FORMAT "\n", old_slot, new_slot));
+        if (new_slot != old_slot)
+            THROW(INTERNAL_ERROR);
 
         /* return the slot */
         *slot = old_slot;
@@ -184,6 +190,9 @@ int thread_status_insert(struct thread_status_s *ts, uint32_t *slot)
             case INSERT_OLD_ERROR:
                 break;
             case STATE_INSERT_BLOCK_ERROR:
+                break;
+            case INTERNAL_ERROR:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
                 break;
             case NONE:
                 ret_cod = LIXA_RC_OK;

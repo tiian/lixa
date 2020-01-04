@@ -218,7 +218,7 @@
 #define LIXA_SYSLOG_LXD037N "LXD037N state table '%s' does not exist or can " \
     "not be opened"
 #define LIXA_SYSLOG_LXD038N "LXD038D neither table files nor log files are " \
-    "available: new ones will be created; a cold start will be performed"
+    "available: new ones will be created, a cold start will be performed"
 #define LIXA_SYSLOG_LXD039W "LXD039W only the first state table '%s' is " \
     "available: probably a previous bootstrap failed prematurely; a cold " \
     "start will be attempted"
@@ -256,6 +256,7 @@
     "%ld ms: this must be considered a slow performance"
 #define LIXA_SYSLOG_LXD056I "LXD056I pwrite operation to log file required " \
     "%ld ms: this must be considered a non optimal performance"
+#define LIXA_SYSLOG_LXD057E "LXD057E unable to use state table ('%s')"
 
 
 

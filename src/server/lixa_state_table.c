@@ -20,6 +20,9 @@
 
 
 
+#ifdef HAVE_SYS_MMAN_H
+# include <sys/mman.h>
+#endif
 #ifdef HAVE_SYS_TYPES_H
 # include <sys/types.h>
 #endif
@@ -120,6 +123,7 @@ int lixa_state_table_init(lixa_state_table_t *this,
         if (NULL == (this->pathname = strdup(pathname)))
             THROW(STRDUP_ERROR);
         this->flags = O_RDWR;
+        this->fd = LIXA_NULL_FD;
         
         THROW(NONE);
     } CATCH {
@@ -324,6 +328,78 @@ int lixa_state_table_close(lixa_state_table_t *this)
         this->fd = LIXA_NULL_FD;
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_state_table_close/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
+
+int lixa_state_table_map(lixa_state_table_t *this, int read_only)
+{
+    enum Exception {
+        NULL_OBJECT,
+        INVALID_STATUS,
+        FSTAT_ERROR,
+        MMAP_ERROR,
+        SET_STATUS,
+        NONE
+    } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    
+    LIXA_TRACE(("lixa_state_table_map\n"));
+    TRY {
+        struct stat fd_stat;
+        
+        if (NULL == this)
+            THROW(NULL_OBJECT);
+        /* check status */
+        if (STATE_TABLE_FORMATTED != this->status) {
+            LIXA_TRACE(("lixa_state_table_map: status %d does not "
+                        "allow map operation\n", this->status));
+            THROW(INVALID_STATUS);
+        }
+        /* map the file */
+        if (0 != fstat(this->fd, &fd_stat))
+            THROW(FSTAT_ERROR);
+
+        if (NULL == (this->map = mmap(NULL, fd_stat.st_size,
+                                      PROT_READ | PROT_WRITE,
+                                      read_only ? MAP_PRIVATE : MAP_SHARED,
+                                      this->fd, 0)))
+            THROW(MMAP_ERROR);
+        LIXA_TRACE(("lixa_state_table_map: state table file '%s' mapped at "
+                    "address %p\n", this->pathname, this->map));
+
+        /* move status to USED */
+        if (LIXA_RC_OK != (ret_cod = lixa_state_table_set_status(
+                               this, STATE_TABLE_USED)))
+            THROW(SET_STATUS);
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case NULL_OBJECT:
+                ret_cod = LIXA_RC_NULL_OBJECT;
+                break;
+            case INVALID_STATUS:
+                ret_cod = LIXA_RC_INVALID_STATUS;
+                break;
+            case FSTAT_ERROR:
+                ret_cod = LIXA_RC_FSTAT_ERROR;
+                break;
+            case MMAP_ERROR:
+                ret_cod = LIXA_RC_MMAP_ERROR;
+                break;
+            case SET_STATUS:
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("lixa_state_table_map/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }
@@ -574,6 +650,85 @@ int lixa_state_table_set_status(lixa_state_table_t *this,
         } /* switch (excp) */
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_state_table_set_status/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
+
+int lixa_state_table_insert_block(lixa_state_table_t *this,
+                                  uint32_t *block_id)
+{
+    enum Exception {
+        NULL_OBJECT,
+        INVALID_STATUS,
+        SET_STATUS,
+        NONE
+    } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    
+    LIXA_TRACE(("lixa_state_table_insert_block\n"));
+    TRY {
+        if (NULL == this)
+            THROW(NULL_OBJECT);
+        /* check status */
+        if (STATE_TABLE_USED != this->status) {
+            LIXA_TRACE(("lixa_state_table_insert_block: status %d does not "
+                        "allow insert_block operation\n", this->status));
+            THROW(INVALID_STATUS);
+        }
+
+        LIXA_TRACE(("lixa_state_table_insert_block: first_free_block = "
+                    UINT32_T_FORMAT ", first_used_block = "
+                    UINT32_T_FORMAT "\n",
+                    this->map[0].sr.ctrl.first_free_block,
+                    this->map[0].sr.ctrl.first_used_block));
+        *block_id = this->map[0].sr.ctrl.first_free_block;
+        this->map[0].sr.ctrl.first_free_block =
+            this->map[*block_id].sr.data.next_block;
+        this->map[*block_id].sr.data.next_block =
+            this->map[0].sr.ctrl.first_used_block;
+        /* @@@ how can this be solved???
+        if (LIXA_RC_OK != (ret_cod = thread_status_mark_block(ts, *slot)))
+            THROW(THREAD_STATUS_MARK_BLOCK_ERROR3);
+        */
+        this->map[0].sr.ctrl.first_used_block = *block_id;
+        /* @@@ how can this be solved???
+        if (LIXA_RC_OK != (ret_cod = thread_status_mark_block(ts, 0)))
+            THROW(THREAD_STATUS_MARK_BLOCK_ERROR4);
+        */
+        LIXA_TRACE(("lixa_state_table_insert_block: first_free_block = "
+                    UINT32_T_FORMAT ", first_used_block = "
+                    UINT32_T_FORMAT ", last inserted next block = "
+                    UINT32_T_FORMAT "\n",
+                    this->map[0].sr.ctrl.first_free_block,
+                    this->map[0].sr.ctrl.first_used_block,
+                    this->map[*block_id].sr.data.next_block));
+        /* is the state table now full? */
+        if (0 == this->map[0].sr.ctrl.first_free_block)
+            if (LIXA_RC_OK != (ret_cod = lixa_state_table_set_status(
+                                   this, STATE_TABLE_FULL)))
+                THROW(SET_STATUS);
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case NULL_OBJECT:
+                ret_cod = LIXA_RC_NULL_OBJECT;
+                break;
+            case INVALID_STATUS:
+                ret_cod = LIXA_RC_INVALID_STATUS;
+                break;
+            case SET_STATUS:
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("lixa_state_table_insert_block/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }

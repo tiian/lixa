@@ -115,6 +115,10 @@ typedef struct lixa_state_table_s {
      * Name of the associated underlying file
      */
     char                            *pathname;
+    /**
+     * Memory map associated to the underlying file
+     */
+    lixa_state_table_slot_t         *map;    
 } lixa_state_table_t;
 
 
@@ -175,6 +179,17 @@ extern "C" {
 
     
     /**
+     * Use an existent and opened state table file
+     * @param[in,out] this state table object
+     * @param[in] read_only boolean condition that allows to map the file only
+     *                      for reading
+     * @return a reason code
+     */
+    int lixa_state_table_map(lixa_state_table_t *this, int read_only);
+
+
+    
+    /**
      * Check if the underlying file exists and can be opened
      * @param[in] this state table object
      * @return a reason code, LIXA_RC_OK if the file exists and can be opened
@@ -229,6 +244,17 @@ extern "C" {
      */
     int lixa_state_table_set_status(lixa_state_table_t *this,
                                     enum lixa_state_table_status_e new_status);
+
+    
+
+    /**
+     * Insert a new used block in the state table
+     * @param[in,out] this state table object
+     * @param[out] block_id of the inserted block
+     * @return a reason code
+     */
+    int lixa_state_table_insert_block(lixa_state_table_t *this,
+                                      uint32_t *block_id);
 
 
     
