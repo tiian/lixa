@@ -150,11 +150,9 @@ extern "C" {
     /**
      * Flush the records to the state log
      * @param[in,out] this state object
-     * @param[in] status_records @@@ move to lixa_state_table_t?
      * @return a reason code
      */
-    int lixa_state_flush_log_records(lixa_state_t *this,
-                                     status_record_t *status_records);
+    int lixa_state_flush_log_records(lixa_state_t *this);
 
     
 

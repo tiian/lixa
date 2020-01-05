@@ -343,7 +343,7 @@ typedef union status_record_u
      * This type of record applies to all but first record: it's the data block
      */
     struct status_record_data_s data;
-} lixa_state_table_record_t;
+} lixa_state_record_t;
 
 
 

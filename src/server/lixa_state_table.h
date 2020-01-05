@@ -26,7 +26,7 @@
 
 
 #include "lixa_trace.h"
-#include "status_record.h"
+#include "lixa_state_common.h"
 
 
 
@@ -64,36 +64,6 @@ enum lixa_state_table_status_e {
 
 
 /**
- * This struct is the basic type of a status record: it contains two control
- * fields and one payload field.
- * THE POSITION OF THE FIELDS MUST NOT BE CHANGED INSIDE THE RECORD.
- * This type will replace the legacy struct status_record_s.
- */
-typedef struct lixa_state_table_slot_s {
-    /**
-     * This field is incremented twice between a couple of sync:
-     * if the value is even, the record is synched
-     * if the value is odd, the record is modified
-     * This is the lifetime:
-     * - increment once for first update after synch
-     * - increment before compute the record digest and successive synch
-     */
-    uint32_t                       counter;
-    /**
-     * This field contains a control record or a data record, briefly "sr"
-     * (Status Record)
-     */
-    lixa_state_table_record_t      sr;
-    /**
-     * This field contains the CRC32 signature of the previous fields and is
-     * used to guarantee the record integrity
-     */
-    uint32_t                       crc32;
-} lixa_state_table_slot_t;
-
-
-
-/**
  * LIXA State Table data type ("class")
  */
 typedef struct lixa_state_table_s {
@@ -118,7 +88,7 @@ typedef struct lixa_state_table_s {
     /**
      * Memory map associated to the underlying file
      */
-    lixa_state_table_slot_t         *map;    
+    lixa_state_slot_t               *map;    
 } lixa_state_table_t;
 
 
@@ -129,16 +99,6 @@ extern "C" {
 
 
     
-    /**
-     * Prepare a slot for synchronization: counter is changed from odd to
-     * even, signature is computed
-     * @param[in,out] slot that must be marked for update
-     * @return a reason code
-     */
-    int lixa_state_table_slot_sync(lixa_state_table_slot_t *slot);
-    
-    
-
     /**
      * Initialize a StateTable object to manage a state table
      * @param[in,out] this object to be initialized
@@ -255,6 +215,19 @@ extern "C" {
      */
     int lixa_state_table_insert_block(lixa_state_table_t *this,
                                       uint32_t *block_id);
+
+
+
+    /**
+     * Return the reference to a slot of the state table
+     * @param[in] this state table object
+     * @param[in] block_id of the desired block
+     * @return a reference to the desired slot
+     */     
+    static inline const lixa_state_slot_t *lixa_state_table_get_slot(
+        const lixa_state_table_t *this, uint32_t block_id) {
+        return &this->map[block_id];
+    }
 
 
     

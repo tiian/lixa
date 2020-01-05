@@ -252,8 +252,7 @@ extern "C" {
      * @param[in] block_id of the record that must be marked as changed
      * @return a valid pointer or NULL if ts is NULL
      */
-    static inline const lixa_state_table_record_t *
-    thread_status_get_record4read(
+    static inline const lixa_state_record_t *thread_status_get_record4read(
         const struct thread_status_s *ts, uint32_t block_id) {
         return NULL == ts ? NULL : &(ts->curr_status[block_id].sr);
     }
@@ -269,8 +268,7 @@ extern "C" {
      * @param[in] block_id of the record that must be marked as changed
      * @return a valid pointer or NULL if ts is NULL
      */
-    static inline lixa_state_table_record_t *
-    thread_status_get_record4update(
+    static inline lixa_state_record_t *thread_status_get_record4update(
         struct thread_status_s *ts, uint32_t block_id) {
         return NULL == ts ? NULL : &(ts->curr_status[block_id].sr);
     }

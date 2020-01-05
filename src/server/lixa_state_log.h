@@ -69,6 +69,13 @@ extern size_t LIXA_STATE_LOG_RECORDS_PER_PAGE;
 
 
 
+/*
+ * Just a declaration
+ */
+typedef struct lixa_state_table_s lixa_state_table_t;
+
+
+
 /**
  * Operations that can be sent from the main thread to the flusher thread
  */
@@ -297,12 +304,15 @@ extern "C" {
     /**
      * Flush the records to the underlying file
      * @param[in,out] this state log object
-     * @param[in] status_records @@@ move to lixa_state_file_t?
+     * @param[in] state_table
      * @return a reason code
      */
     int lixa_state_log_flush(lixa_state_log_t *this,
+                             const lixa_state_table_t *state_table);
+    /*
                              status_record_t *status_records);
-
+    */
+    
 
 
     /**

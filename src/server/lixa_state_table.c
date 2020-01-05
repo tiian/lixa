@@ -58,43 +58,6 @@ extern gboolean run_as_daemon;
 
 
 
-int lixa_state_table_slot_sync(lixa_state_table_slot_t *slot)
-{
-    enum Exception {
-        DIGEST_SIZE_ERROR,
-        NONE } excp;
-    int ret_cod = LIXA_RC_INTERNAL_ERROR;
-    
-    LIXA_TRACE(("lixa_state_table_slot_sync\n"));
-    TRY {
-        if (slot->counter%2) {
-            slot->counter++;
-        } else {
-            LIXA_TRACE(("lixa_state_table_slot_sync: WARNING! record %p is "
-                        "already even (it was NOT updated before!)\n", slot));
-        }
-        /* compute the CRC32 signature */
-        slot->crc32 = lixa_crc32(
-            (const uint8_t *)slot,
-            sizeof(lixa_state_table_slot_t) - sizeof(uint32_t));
-        
-        THROW(NONE);
-    } CATCH {
-        switch (excp) {
-            case NONE:
-                ret_cod = LIXA_RC_OK;
-                break;
-            default:
-                ret_cod = LIXA_RC_INTERNAL_ERROR;
-        } /* switch (excp) */
-    } /* TRY-CATCH */
-    LIXA_TRACE(("lixa_state_table_slot_sync/excp=%d/"
-                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
-    return ret_cod;
-}
-    
-
-
 int lixa_state_table_init(lixa_state_table_t *this,
                          const char *pathname)
 {
@@ -187,7 +150,7 @@ int lixa_state_table_create_new_file(lixa_state_table_t *this)
                     "file '%s' with file descriptor %d\n",
                     this->pathname, this->fd));
         for (i = 0; i < LIXA_STATE_TABLE_INIT_SIZE; ++i) {
-            lixa_state_table_slot_t tmp_slot;
+            lixa_state_slot_t tmp_slot;
 
             memset(&tmp_slot, 0, sizeof(tmp_slot));
             tmp_slot.counter = 1;
@@ -207,7 +170,7 @@ int lixa_state_table_create_new_file(lixa_state_table_t *this)
                 else
                     tmp_slot.sr.data.next_block = i + 1;
             }
-            if (LIXA_RC_OK != (ret_cod = lixa_state_table_slot_sync(
+            if (LIXA_RC_OK != (ret_cod = lixa_state_slot_sync(
                                    &tmp_slot)))
                 THROW(STATE_TABLE_SLOT_SYNC_ERROR);
             if (sizeof(tmp_slot) != write(

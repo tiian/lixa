@@ -20,6 +20,7 @@
 
 
 
+#include "lixa_errors.h"
 #include "lixa_state_common.h"
 
 
@@ -30,5 +31,42 @@
 #endif /* LIXA_TRACE_MODULE */
 #define LIXA_TRACE_MODULE   LIXA_TRACE_MOD_SERVER_STATUS
 
+
+
+int lixa_state_slot_sync(lixa_state_slot_t *slot)
+{
+    enum Exception {
+        DIGEST_SIZE_ERROR,
+        NONE } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    
+    LIXA_TRACE(("lixa_state_slot_sync\n"));
+    TRY {
+        if (slot->counter%2) {
+            slot->counter++;
+        } else {
+            LIXA_TRACE(("lixa_state_slot_sync: WARNING! record %p is "
+                        "already even (it was NOT updated before!)\n", slot));
+        }
+        /* compute the CRC32 signature */
+        slot->crc32 = lixa_crc32(
+            (const uint8_t *)slot,
+            sizeof(lixa_state_slot_t) - sizeof(uint32_t));
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("lixa_state_slot_sync/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+    
 
 

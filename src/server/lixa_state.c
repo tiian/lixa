@@ -505,8 +505,7 @@ int lixa_state_check_log_actions(lixa_state_t *this, int *must_flush,
 
 
 
-int lixa_state_flush_log_records(lixa_state_t *this,
-                                 status_record_t *status_records)
+int lixa_state_flush_log_records(lixa_state_t *this)
 {
     enum Exception {
         NULL_OBJECT,
@@ -522,7 +521,8 @@ int lixa_state_flush_log_records(lixa_state_t *this,
         LIXA_TRACE(("lixa_state_flush_log_records: used_state_table=%d\n",
                     this->used_state_table));
         if (LIXA_RC_OK != (ret_cod = lixa_state_log_flush(
-                               &this->log, status_records)))
+                               &this->log,
+                               &this->tables[this->used_state_table])))
             THROW(STATE_LOG_FLUSH_ERROR);
         
         THROW(NONE);

@@ -32,6 +32,7 @@
 
 
 #include "lixa_utils.h"
+#include "status_record.h"
 
 
 
@@ -53,12 +54,62 @@
 
 
 
+/**
+ * This struct is the basic type of a status record: it contains two control
+ * fields and one payload field.
+ * THE POSITION OF THE FIELDS MUST NOT BE CHANGED INSIDE THE RECORD.
+ * This type will replace the legacy struct status_record_s.
+ */
+typedef struct lixa_state_slot_s {
+    /**
+     * This field is incremented twice between a couple of sync:
+     * if the value is even, the record is synched
+     * if the value is odd, the record is modified
+     * This is the lifetime:
+     * - increment once for first update after synch
+     * - increment before compute the record digest and successive synch
+     */
+    uint32_t                       counter;
+    /**
+     * This field contains a control record or a data record, briefly "sr"
+     * (Status Record)
+     */
+    lixa_state_record_t            sr;
+    /**
+     * This field contains the CRC32 signature of the previous fields and is
+     * used to guarantee the record integrity
+     */
+    uint32_t                       crc32;
+} lixa_state_slot_t;
+
+
+
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
 
 
 
+    /**
+     * Prepare a slot for synchronization: counter is changed from odd to
+     * even, signature is computed
+     * @param[in,out] slot that must be marked for update
+     * @return a reason code
+     */
+    int lixa_state_slot_sync(lixa_state_slot_t *slot);
+    
+    
+
+    /**
+     * Return the record inside the slot
+     */
+    static inline const lixa_state_record_t *lixa_state_slot_get_record(
+        const lixa_state_slot_t *slot) {
+        return &slot->sr;
+    }
+
+
+    
     /**
      * Conversion from buffer size to number of pages
      * @param[in] buffer_size in bytes

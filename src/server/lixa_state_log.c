@@ -19,6 +19,7 @@
 #include "config.h"
 
 
+
 #define _GNU_SOURCE /* necessary for O_DIRECT extension */
 #ifdef HAVE_ERRNO_H
 # include <errno.h>
@@ -44,6 +45,7 @@
 #include "lixa_errors.h"
 #include "lixa_trace.h"
 #include "lixa_state_log.h"
+#include "lixa_state_table.h"
 #include "lixa_syslog.h"
 
 
@@ -365,7 +367,7 @@ int lixa_state_log_clean(lixa_state_log_t *this)
 
 
 int lixa_state_log_flush(lixa_state_log_t *this,
-                         status_record_t *status_records)
+                         const lixa_state_table_t *state_table)
 {
     enum Exception {
         NULL_OBJECT,
@@ -459,9 +461,16 @@ int lixa_state_log_flush(lixa_state_log_t *this,
                 (struct lixa_state_log_record_s *)
                 (this->synch.buffer + filled_pages * LIXA_SYSTEM_PAGE_SIZE +
                  pos_in_page * sizeof(struct lixa_state_log_record_s));
+            /* @@@ remove me 
             union status_record_u *record =
                 (union status_record_u *)
                 &((status_records + this->block_ids[r])->sr);
+            */
+            const lixa_state_slot_t *s1 =
+                lixa_state_table_get_slot(state_table,
+                                          this->block_ids[r]);
+            const lixa_state_record_t *record =
+                lixa_state_slot_get_record(s1);
             
             log_record->id = ++(this->last_record_id);
             if (0 == log_record->id) /* again, 0 is reserved for null */
