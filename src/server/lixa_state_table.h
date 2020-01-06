@@ -25,6 +25,12 @@
 
 
 
+#ifdef HAVE_GLIB_H
+#include <glib.h>
+#endif
+
+
+
 #include "lixa_trace.h"
 #include "lixa_state_common.h"
 
@@ -211,10 +217,13 @@ extern "C" {
      * Insert a new used block in the state table
      * @param[in,out] this state table object
      * @param[out] block_id of the inserted block
+     * @param[out] changed_block_ids an array with all the blocks that must
+     *             be marked for log
      * @return a reason code
      */
     int lixa_state_table_insert_block(lixa_state_table_t *this,
-                                      uint32_t *block_id);
+                                      uint32_t *block_id,
+                                      GArray *changed_block_ids);
 
 
 

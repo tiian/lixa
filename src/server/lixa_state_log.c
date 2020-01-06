@@ -622,7 +622,8 @@ int lixa_state_log_mark_block(lixa_state_log_t *this,
     } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     
-    LIXA_TRACE(("lixa_state_log_mark_block\n"));
+    LIXA_TRACE(("lixa_state_log_mark_block(block_id=" UINT32_T_FORMAT ")\n",
+                block_id));
     TRY {
         /* check the object */
         if (NULL == this)

@@ -1,7 +1,3 @@
-Restart from lixa_state_table_insert_block method
-
-Complete lixa_state_insert_block method
-
 Implement lixa_state_table_extend method
 
 To preserve backward compatibility and to check the two persistency engines in

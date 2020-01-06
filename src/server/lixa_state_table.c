@@ -620,7 +620,8 @@ int lixa_state_table_set_status(lixa_state_table_t *this,
 
 
 int lixa_state_table_insert_block(lixa_state_table_t *this,
-                                  uint32_t *block_id)
+                                  uint32_t *block_id,
+                                  GArray *changed_block_ids)
 {
     enum Exception {
         NULL_OBJECT,
@@ -632,6 +633,8 @@ int lixa_state_table_insert_block(lixa_state_table_t *this,
     
     LIXA_TRACE(("lixa_state_table_insert_block\n"));
     TRY {
+        uint32_t tmp;
+        
         if (NULL == this)
             THROW(NULL_OBJECT);
         /* check status */
@@ -651,15 +654,11 @@ int lixa_state_table_insert_block(lixa_state_table_t *this,
             this->map[*block_id].sr.data.next_block;
         this->map[*block_id].sr.data.next_block =
             this->map[0].sr.ctrl.first_used_block;
-        /* @@@ how can this be solved???
-        if (LIXA_RC_OK != (ret_cod = thread_status_mark_block(ts, *slot)))
-            THROW(THREAD_STATUS_MARK_BLOCK_ERROR3);
-        */
+        tmp = *block_id;
+        g_array_append_val(changed_block_ids, tmp);
         this->map[0].sr.ctrl.first_used_block = *block_id;
-        /* @@@ how can this be solved???
-        if (LIXA_RC_OK != (ret_cod = thread_status_mark_block(ts, 0)))
-            THROW(THREAD_STATUS_MARK_BLOCK_ERROR4);
-        */
+        tmp = 0;
+        g_array_append_val(changed_block_ids, tmp);
         LIXA_TRACE(("lixa_state_table_insert_block: first_free_block = "
                     UINT32_T_FORMAT ", first_used_block = "
                     UINT32_T_FORMAT ", last inserted next block = "

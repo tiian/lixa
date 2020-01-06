@@ -592,12 +592,19 @@ int lixa_state_mark_block(lixa_state_t *this, uint32_t block_id)
     enum Exception {
         NULL_OBJECT,
         STATE_LOG_MARK_BLOCK_ERROR,
+        CHECK_LOG_ACTIONS_ERROR,
+        FLUSH_LOG_RECORDS_ERROR,
+        FLUSH_LOG_EXTEND_ERROR,
         NONE
     } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     
-    LIXA_TRACE(("lixa_state_mark_block\n"));
+    LIXA_TRACE(("lixa_state_mark_block(block_id=" UINT32_T_FORMAT ")\n",
+                block_id));
     TRY {
+        int must_flush = FALSE;
+        int must_switch = FALSE;
+        
         if (NULL == this)
             THROW(NULL_OBJECT);
         LIXA_TRACE(("lixa_state_mark_block: used_state_table=%d, block_id="
@@ -605,6 +612,22 @@ int lixa_state_mark_block(lixa_state_t *this, uint32_t block_id)
         if (LIXA_RC_OK != (ret_cod = lixa_state_log_mark_block(
                                &this->log, block_id)))
             THROW(STATE_LOG_MARK_BLOCK_ERROR);
+        /* check if state log must be flushed */
+        if (LIXA_RC_OK != (ret_cod = lixa_state_check_log_actions(
+                               this, &must_flush, &must_switch)))
+            THROW(CHECK_LOG_ACTIONS_ERROR);
+        if (must_flush) {
+            LIXA_TRACE(("lixa_state_mark_block: flush records\n"));
+            if (LIXA_RC_OK != (ret_cod = lixa_state_flush_log_records(this)))
+                THROW(FLUSH_LOG_RECORDS_ERROR);
+        }
+        /* @@@ not automatic, only if the state table can not be
+           switched! */
+        if (must_switch) {
+            LIXA_TRACE(("lixa_state_mark_block: extend file\n"));
+            if (LIXA_RC_OK != (ret_cod = lixa_state_extend_log(this)))
+                THROW(FLUSH_LOG_EXTEND_ERROR);
+        }
         
         THROW(NONE);
     } CATCH {
@@ -613,6 +636,9 @@ int lixa_state_mark_block(lixa_state_t *this, uint32_t block_id)
                 ret_cod = LIXA_RC_NULL_OBJECT;
                 break;
             case STATE_LOG_MARK_BLOCK_ERROR:
+            case CHECK_LOG_ACTIONS_ERROR:
+            case FLUSH_LOG_RECORDS_ERROR:
+            case FLUSH_LOG_EXTEND_ERROR:
                 break;
             case NONE:
                 ret_cod = LIXA_RC_OK;
@@ -633,13 +659,18 @@ int lixa_state_insert_block(lixa_state_t *this, uint32_t *block_id)
     enum Exception {
         NULL_OBJECT,
         STATE_TABLE_EXTEND_ERROR,
+        G_ARRAY_NEW_ERROR,
         STATE_TABLE_INSERT_BLOCK_ERROR,
+        MARK_BLOCK_ERROR,
         NONE
     } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    GArray *changed_block_ids = NULL;
     
     LIXA_TRACE(("lixa_state_insert_block\n"));
     TRY {
+        guint i;
+        
         if (NULL == this)
             THROW(NULL_OBJECT);
         /* check if the current state table is full */
@@ -650,11 +681,22 @@ int lixa_state_insert_block(lixa_state_t *this, uint32_t *block_id)
                                    &this->tables[this->used_state_table])))
                 THROW(STATE_TABLE_EXTEND_ERROR);
         }
+        /* allocate an empty array */
+        if (NULL == (changed_block_ids = g_array_new(
+                         FALSE, FALSE, sizeof(uint32_t))))
+            THROW(G_ARRAY_NEW_ERROR);
         /* insert the block in the table currently used */
         if (LIXA_RC_OK != (ret_cod = lixa_state_table_insert_block(
                                &this->tables[this->used_state_table],
-                               block_id)))
+                               block_id, changed_block_ids)))
             THROW(STATE_TABLE_INSERT_BLOCK_ERROR);
+        /* mark the changed blocks */
+        for (i=0; i<changed_block_ids->len; ++i) {
+            if (LIXA_RC_OK != (ret_cod = lixa_state_mark_block(
+                                   this, g_array_index(
+                                       changed_block_ids, uint32_t, i))))
+                THROW(MARK_BLOCK_ERROR);
+        }
         
         THROW(NONE);
     } CATCH {
@@ -663,7 +705,12 @@ int lixa_state_insert_block(lixa_state_t *this, uint32_t *block_id)
                 ret_cod = LIXA_RC_NULL_OBJECT;
                 break;
             case STATE_TABLE_EXTEND_ERROR:
+                break;
+            case G_ARRAY_NEW_ERROR:
+                ret_cod = LIXA_RC_G_ARRAY_NEW_ERROR;
+                break;
             case STATE_TABLE_INSERT_BLOCK_ERROR:
+            case MARK_BLOCK_ERROR:
                 break;
             case NONE:
                 ret_cod = LIXA_RC_OK;
@@ -671,6 +718,11 @@ int lixa_state_insert_block(lixa_state_t *this, uint32_t *block_id)
             default:
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
         } /* switch (excp) */
+        /* recover memory */
+        if (NULL != changed_block_ids) {
+            g_array_free(changed_block_ids, TRUE);
+            changed_block_ids = NULL;
+        }
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_state_insert_block/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
