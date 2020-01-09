@@ -179,7 +179,7 @@ int lixa_state_table_create_new_file(lixa_state_table_t *this)
         }
         /* set new status */
         if (LIXA_RC_OK != (ret_cod = lixa_state_table_set_status(
-                               this, STATE_TABLE_FORMATTED)))
+                               this, STATE_TABLE_FORMATTED, FALSE)))
             THROW(SET_STATUS_ERROR);
         
         THROW(NONE);
@@ -256,21 +256,26 @@ int lixa_state_table_synchronize(lixa_state_table_t *this)
 int lixa_state_table_close(lixa_state_table_t *this)
 {
     enum Exception {
+        INVALID_STATUS1,
         CLOSE_ERROR,
-        INVALID_STATUS,
+        INVALID_STATUS2,
         NONE
     } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     
     LIXA_TRACE(("lixa_state_table_close\n"));
     TRY {
+        /* check status switch */
+        if (LIXA_RC_OK != (ret_cod = lixa_state_table_set_status(
+                               this, STATE_TABLE_CLOSED, TRUE)))
+            THROW(INVALID_STATUS1);
         if (-1 == close(this->fd)) {
             THROW(CLOSE_ERROR);
         }
         /* set new status */
         if (LIXA_RC_OK != (ret_cod = lixa_state_table_set_status(
-                               this, STATE_TABLE_CLOSED)))
-            THROW(INVALID_STATUS);
+                               this, STATE_TABLE_CLOSED, FALSE)))
+            THROW(INVALID_STATUS2);
         
         THROW(NONE);
     } CATCH {
@@ -278,7 +283,8 @@ int lixa_state_table_close(lixa_state_table_t *this)
             case CLOSE_ERROR:
                 ret_cod = LIXA_RC_CLOSE_ERROR;
                 break;
-            case INVALID_STATUS:
+            case INVALID_STATUS1:
+            case INVALID_STATUS2:
                 ret_cod = LIXA_RC_INVALID_STATUS;
                 break;
             case NONE:
@@ -288,7 +294,8 @@ int lixa_state_table_close(lixa_state_table_t *this)
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
         } /* switch (excp) */
         /* anyway, set the file descriptor to null */
-        this->fd = LIXA_NULL_FD;
+        if (excp > CLOSE_ERROR)
+            this->fd = LIXA_NULL_FD;
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_state_table_close/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
@@ -316,7 +323,9 @@ int lixa_state_table_map(lixa_state_table_t *this, int read_only)
         if (NULL == this)
             THROW(NULL_OBJECT);
         /* check status */
-        if (STATE_TABLE_FORMATTED != this->status) {
+        if (STATE_TABLE_FORMATTED != this->status ||
+            LIXA_RC_OK != (ret_cod = lixa_state_table_set_status(
+                               this, STATE_TABLE_USED, TRUE))) {
             LIXA_TRACE(("lixa_state_table_map: status %d does not "
                         "allow map operation\n", this->status));
             THROW(INVALID_STATUS);
@@ -335,7 +344,7 @@ int lixa_state_table_map(lixa_state_table_t *this, int read_only)
 
         /* move status to USED */
         if (LIXA_RC_OK != (ret_cod = lixa_state_table_set_status(
-                               this, STATE_TABLE_USED)))
+                               this, STATE_TABLE_USED, FALSE)))
             THROW(SET_STATUS);
         
         THROW(NONE);
@@ -452,26 +461,159 @@ int lixa_state_table_clean(lixa_state_table_t *this)
 
 
 
-int lixa_state_table_extend(lixa_state_table_t *this)
+int lixa_state_table_extend(lixa_state_table_t *this,
+                            GArray *changed_block_ids)
 {
     enum Exception {
         NULL_OBJECT,
+        INVALID_STATUS,
+        OPEN_ERROR,
+        FSTAT_ERROR,
+        MUNMAP_ERROR,
+        CONTAINER_FULL,
+        TRUNCATE_ERROR,
+        LSEEK_ERROR,
+        WRITE_ERROR,
+        MMAP_ERROR,
+        SET_STATUS1,
+        SET_STATUS2,
         NONE
     } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     
     LIXA_TRACE(("lixa_state_table_extend\n"));
     TRY {
+        struct stat fd_stat;
+        off_t curr_size, new_size, delta_size, i;
+        uint32_t tmp_block_id;
+        
         if (NULL == this)
             THROW(NULL_OBJECT);
-        
-        /* @@@ implement me */
+        /* check status */
+        if (LIXA_RC_OK != (ret_cod = lixa_state_table_set_status(
+                               this, STATE_TABLE_EXTENDED, TRUE)))
+            THROW(INVALID_STATUS);
+        /* re-open the file for append: new records must be added */
+        if (-1 == (this->fd = open(this->pathname, this->flags | O_APPEND))) {
+            LIXA_TRACE(("lixa_state_table_extend: error while opening "
+                        "state table file '%s' (errno=%d)\n",
+                        this->pathname, errno));
+            THROW(OPEN_ERROR);
+        }
+        /* retrieve current size */
+        if (0 != fstat(this->fd, &fd_stat))
+            THROW(FSTAT_ERROR);
+        /* unmap the current mapping */
+        if (0 != munmap(this->map, fd_stat.st_size))
+            THROW(MUNMAP_ERROR);
+        this->map = NULL;
+        /* compute the new size for the state table */
+        curr_size = fd_stat.st_size / sizeof(lixa_state_slot_t);
+        delta_size = fd_stat.st_size / sizeof(lixa_state_slot_t) *
+            LIXA_STATE_TABLE_DELTA_SIZE / 100;
+        new_size = curr_size + delta_size;
+        LIXA_TRACE(("lixa_state_table_extend: curr_size = " OFF_T_FORMAT
+                    ", new_size = " OFF_T_FORMAT "\n",
+                    curr_size, new_size));
+        /* check reached size */
+        if (new_size > UINT32_MAX) {
+            LIXA_TRACE(("lixa_state_table_extend: new size after "
+                        "resizing would exceed " UINT32_T_FORMAT
+                        " max value; "
+                        "resized to max value only\n", UINT32_MAX));
+            new_size = UINT32_MAX;
+            delta_size = new_size - curr_size;
+            if (delta_size == 0)
+                THROW(CONTAINER_FULL);
+        }
+        /* extend the file to new size */
+        if (-1 == ftruncate(this->fd, new_size)) {
+            LIXA_TRACE(("lixa_state_table_extend: error while extending "
+                        "(ftruncate) state table file '%s' (errno=%d)\n",
+                        this->pathname, errno));
+            THROW(TRUNCATE_ERROR);
+        }
+        /* move file pointer to old size */
+        if (curr_size != lseek(this->fd, curr_size, SEEK_SET))
+            THROW(LSEEK_ERROR);
+        /* append the new records */
+        for (i = 0; i < delta_size; ++i) {
+            lixa_state_slot_t tmp_slot;
+
+            memset(&tmp_slot, 0, sizeof(tmp_slot));
+            if (i == delta_size - 1)
+                tmp_slot.sr.data.next_block = 0;
+            else
+                tmp_slot.sr.data.next_block = curr_size + i + 1;
+            LIXA_TRACE(("lixa_state_table_extend: new block "
+                        UINT32_T_FORMAT " (" UINT32_T_FORMAT ") "
+                        "next_block = " UINT32_T_FORMAT "\n",
+                        i, i + curr_size, tmp_slot.sr.data.next_block));
+            if (sizeof(tmp_slot) != write(this->fd, &tmp_slot,
+                                          sizeof(tmp_slot)))
+                THROW(WRITE_ERROR);
+        } /* for (i = 0; i < delta_size; ++i) */
+        /* map the state table file again */
+        if (NULL == (this->map = mmap(
+                         NULL, new_size * sizeof(lixa_state_slot_t),
+                         PROT_READ | PROT_WRITE, MAP_SHARED, this->fd, 0)))
+            THROW(MMAP_ERROR);
+        /* update free block list */
+        this->map[0].sr.ctrl.first_free_block = curr_size;
+        this->map[0].sr.ctrl.number_of_blocks = new_size;
+        LIXA_TRACE(("lixa_state_table_extend: state table file '%s' mapped at "
+                    "address %p\n", this->pathname, this->map));
+        /* first block must be marked for change */
+        tmp_block_id = 0;
+        g_array_append_val(changed_block_ids, tmp_block_id);
+        /* all the added blocks must be marked for change */
+        for (i=0; i<delta_size; ++i) {
+            tmp_block_id = curr_size + i;
+            g_array_append_val(changed_block_ids, tmp_block_id);
+        }
+        /* set the new status */
+        if (LIXA_RC_OK != (ret_cod = lixa_state_table_set_status(
+                               this, STATE_TABLE_EXTENDED, FALSE)))
+            THROW(SET_STATUS1);
+        if (LIXA_RC_OK != (ret_cod = lixa_state_table_set_status(
+                               this, STATE_TABLE_USED, FALSE)))
+            THROW(SET_STATUS2);
         
         THROW(NONE);
     } CATCH {
         switch (excp) {
+            case INVALID_STATUS:
+                ret_cod = LIXA_RC_INVALID_STATUS;
+                break;
             case NULL_OBJECT:
                 ret_cod = LIXA_RC_NULL_OBJECT;
+                break;
+            case OPEN_ERROR:
+                ret_cod = LIXA_RC_OPEN_ERROR;
+                break;
+            case FSTAT_ERROR:
+                ret_cod = LIXA_RC_FSTAT_ERROR;
+                break;
+            case MUNMAP_ERROR:
+                ret_cod = LIXA_RC_MUNMAP_ERROR;
+                break;
+            case CONTAINER_FULL:
+                ret_cod = LIXA_RC_CONTAINER_FULL;
+                break;
+            case TRUNCATE_ERROR:
+                ret_cod = LIXA_RC_TRUNCATE_ERROR;
+                break;
+            case LSEEK_ERROR:
+                ret_cod = LIXA_RC_LSEEK_ERROR;
+                break;
+            case WRITE_ERROR:
+                ret_cod = LIXA_RC_WRITE_ERROR;
+                break;
+            case MMAP_ERROR:
+                ret_cod = LIXA_RC_MMAP_ERROR;
+                break;
+            case SET_STATUS1:
+            case SET_STATUS2:
                 break;
             case NONE:
                 ret_cod = LIXA_RC_OK;
@@ -488,7 +630,8 @@ int lixa_state_table_extend(lixa_state_table_t *this)
 
 
 int lixa_state_table_set_status(lixa_state_table_t *this,
-                                enum lixa_state_table_status_e new_status)
+                                enum lixa_state_table_status_e new_status,
+                                int dry_run)
 {
     enum Exception {
         NULL_OBJECT,
@@ -497,7 +640,8 @@ int lixa_state_table_set_status(lixa_state_table_t *this,
     } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     
-    LIXA_TRACE(("lixa_state_table_set_status\n"));
+    LIXA_TRACE(("lixa_state_table_set_status(new_status=%d, dry_run=%d)\n",
+                new_status, dry_run));
     TRY {
         int valid = TRUE;
         
@@ -590,6 +734,10 @@ int lixa_state_table_set_status(lixa_state_table_t *this,
         } /* switch (new_status) */
         if (!valid) {
             THROW(INVALID_STATUS);
+        } else if (dry_run) {
+            LIXA_TRACE(("lixa_state_table_set_status: dry run, status can be "
+                        "switched from %d to %d\n",
+                        this->status, new_status));
         } else {
             LIXA_TRACE(("lixa_state_table_set_status: %d -> %d\n",
                         this->status, new_status));
@@ -638,7 +786,9 @@ int lixa_state_table_insert_block(lixa_state_table_t *this,
         if (NULL == this)
             THROW(NULL_OBJECT);
         /* check status */
-        if (STATE_TABLE_USED != this->status) {
+        if (STATE_TABLE_USED != this->status ||
+            LIXA_RC_OK != (ret_cod = lixa_state_table_set_status(
+                               this, STATE_TABLE_FULL, TRUE))) {
             LIXA_TRACE(("lixa_state_table_insert_block: status %d does not "
                         "allow insert_block operation\n", this->status));
             THROW(INVALID_STATUS);
@@ -669,7 +819,7 @@ int lixa_state_table_insert_block(lixa_state_table_t *this,
         /* is the state table now full? */
         if (0 == this->map[0].sr.ctrl.first_free_block)
             if (LIXA_RC_OK != (ret_cod = lixa_state_table_set_status(
-                                   this, STATE_TABLE_FULL)))
+                                   this, STATE_TABLE_FULL, FALSE)))
                 THROW(SET_STATUS);
         
         THROW(NONE);

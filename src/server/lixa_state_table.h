@@ -48,7 +48,7 @@
 
 
 #define LIXA_STATE_TABLE_INIT_SIZE   STATUS_FILE_INIT_SIZE
-
+#define LIXA_STATE_TABLE_DELTA_SIZE  STATUS_FILE_DELTA_SIZE
 
 
 /**
@@ -195,9 +195,12 @@ extern "C" {
      * Extend the state table; this method is typically called if the state
      * table is full
      * @param[in] this state table object
+     * @param[out] changed_block_ids an array with all the blocks that must
+     *             be marked for log
      * @return a reason code
      */
-    int lixa_state_table_extend(lixa_state_table_t *this);
+    int lixa_state_table_extend(lixa_state_table_t *this,
+                                GArray *changed_block_ids);
     
     
 
@@ -206,10 +209,13 @@ extern "C" {
      * transition is valid or not
      * @param[in,out] this state table object
      * @param[in] new_status to be set
+     * @param[in] dry_run boolean value, TRUE if function must only test the
+     *            status change, FALSE if real switch must be performed
      * @return a reason code
      */
     int lixa_state_table_set_status(lixa_state_table_t *this,
-                                    enum lixa_state_table_status_e new_status);
+                                    enum lixa_state_table_status_e new_status,
+                                    int dry_run);
 
     
 
