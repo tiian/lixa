@@ -783,7 +783,7 @@ int lixa_state_log_check_actions(lixa_state_log_t *this, int *must_flush,
             } /* if (this->size_of_block_ids == this->max_number_of_ ... */
         } /* if (this->number_of_block_ids == this->size_of_block_ids) */
         /* check again size because it could have been expanded in the
-           previous step*/
+           previous step */
         if (this->number_of_block_ids != this->size_of_block_ids) {
             /* there are free slots in the current buffer */
             uint32_t current_needed_pages = lixa_state_log_needed_pages(

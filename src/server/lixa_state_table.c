@@ -468,12 +468,13 @@ int lixa_state_table_extend(lixa_state_table_t *this,
         NULL_OBJECT,
         INVALID_STATUS,
         OPEN_ERROR,
-        FSTAT_ERROR,
+        FSTAT_ERROR1,
         MUNMAP_ERROR,
         CONTAINER_FULL,
         TRUNCATE_ERROR,
         LSEEK_ERROR,
         WRITE_ERROR,
+        FSTAT_ERROR2,
         MMAP_ERROR,
         SET_STATUS1,
         SET_STATUS2,
@@ -485,6 +486,7 @@ int lixa_state_table_extend(lixa_state_table_t *this,
     TRY {
         struct stat fd_stat;
         off_t curr_size, new_size, delta_size, i;
+        off_t curr_size_bytes, new_size_bytes;
         uint32_t tmp_block_id;
         
         if (NULL == this)
@@ -502,7 +504,7 @@ int lixa_state_table_extend(lixa_state_table_t *this,
         }
         /* retrieve current size */
         if (0 != fstat(this->fd, &fd_stat))
-            THROW(FSTAT_ERROR);
+            THROW(FSTAT_ERROR1);
         /* unmap the current mapping */
         if (0 != munmap(this->map, fd_stat.st_size))
             THROW(MUNMAP_ERROR);
@@ -511,10 +513,9 @@ int lixa_state_table_extend(lixa_state_table_t *this,
         curr_size = fd_stat.st_size / sizeof(lixa_state_slot_t);
         delta_size = fd_stat.st_size / sizeof(lixa_state_slot_t) *
             LIXA_STATE_TABLE_DELTA_SIZE / 100;
+        if (0 == delta_size)
+            delta_size++;
         new_size = curr_size + delta_size;
-        LIXA_TRACE(("lixa_state_table_extend: curr_size = " OFF_T_FORMAT
-                    ", new_size = " OFF_T_FORMAT "\n",
-                    curr_size, new_size));
         /* check reached size */
         if (new_size > UINT32_MAX) {
             LIXA_TRACE(("lixa_state_table_extend: new size after "
@@ -526,15 +527,16 @@ int lixa_state_table_extend(lixa_state_table_t *this,
             if (delta_size == 0)
                 THROW(CONTAINER_FULL);
         }
+        new_size_bytes = new_size * sizeof(lixa_state_slot_t);
+        curr_size_bytes = curr_size * sizeof(lixa_state_slot_t);
+        LIXA_TRACE(("lixa_state_table_extend: curr_size = " OFF_T_FORMAT
+                    " (" OFF_T_FORMAT "), new_size = " OFF_T_FORMAT " ("
+                    OFF_T_FORMAT ")\n", curr_size, curr_size_bytes,
+                    new_size, new_size_bytes));
+
         /* extend the file to new size */
-        if (-1 == ftruncate(this->fd, new_size)) {
-            LIXA_TRACE(("lixa_state_table_extend: error while extending "
-                        "(ftruncate) state table file '%s' (errno=%d)\n",
-                        this->pathname, errno));
-            THROW(TRUNCATE_ERROR);
-        }
         /* move file pointer to old size */
-        if (curr_size != lseek(this->fd, curr_size, SEEK_SET))
+        if (curr_size_bytes != lseek(this->fd, curr_size_bytes, SEEK_SET))
             THROW(LSEEK_ERROR);
         /* append the new records */
         for (i = 0; i < delta_size; ++i) {
@@ -553,16 +555,20 @@ int lixa_state_table_extend(lixa_state_table_t *this,
                                           sizeof(tmp_slot)))
                 THROW(WRITE_ERROR);
         } /* for (i = 0; i < delta_size; ++i) */
+        
+        if (0 != fstat(this->fd, &fd_stat))
+            THROW(FSTAT_ERROR2);
         /* map the state table file again */
-        if (NULL == (this->map = mmap(
-                         NULL, new_size * sizeof(lixa_state_slot_t),
-                         PROT_READ | PROT_WRITE, MAP_SHARED, this->fd, 0)))
+        if (NULL == (this->map = mmap(NULL, fd_stat.st_size,
+                                      PROT_READ | PROT_WRITE, MAP_SHARED,
+                                      this->fd, 0)))
             THROW(MMAP_ERROR);
         /* update free block list */
         this->map[0].sr.ctrl.first_free_block = curr_size;
         this->map[0].sr.ctrl.number_of_blocks = new_size;
-        LIXA_TRACE(("lixa_state_table_extend: state table file '%s' mapped at "
-                    "address %p\n", this->pathname, this->map));
+        LIXA_TRACE(("lixa_state_table_extend: state table file '%s' of "
+                    OFF_T_FORMAT " bytes mapped at address %p\n",
+                    this->pathname, fd_stat.st_size, this->map));
         /* first block must be marked for change */
         tmp_block_id = 0;
         g_array_append_val(changed_block_ids, tmp_block_id);
@@ -591,7 +597,8 @@ int lixa_state_table_extend(lixa_state_table_t *this,
             case OPEN_ERROR:
                 ret_cod = LIXA_RC_OPEN_ERROR;
                 break;
-            case FSTAT_ERROR:
+            case FSTAT_ERROR1:
+            case FSTAT_ERROR2:
                 ret_cod = LIXA_RC_FSTAT_ERROR;
                 break;
             case MUNMAP_ERROR:

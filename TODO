@@ -1,4 +1,6 @@
-Test lixa_state_table_extend method
+Go on with new state
+
+Remove thread_status_insert_old
 
 To preserve backward compatibility and to check the two persistency engines in
 parallel use this schema:
