@@ -747,3 +747,69 @@ int lixa_state_insert_block(lixa_state_t *this, uint32_t *block_id)
     return ret_cod;
 }
 
+
+
+int lixa_state_delete_block(lixa_state_t *this, uint32_t block_id)
+{
+    enum Exception {
+        NULL_OBJECT,
+        G_ARRAY_NEW_ERROR,
+        STATE_TABLE_DELETE_BLOCK_ERROR,
+        MARK_BLOCK_ERROR,
+        NONE
+    } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    GArray *changed_block_ids = NULL;
+    
+    LIXA_TRACE(("lixa_state_delete_block\n"));
+    TRY {
+        guint i;
+        
+        if (NULL == this)
+            THROW(NULL_OBJECT);
+        /* allocate an empty array */
+        if (NULL == (changed_block_ids = g_array_new(
+                         FALSE, FALSE, sizeof(uint32_t))))
+            THROW(G_ARRAY_NEW_ERROR);
+        /* insert the block in the table currently used */
+        if (LIXA_RC_OK != (ret_cod = lixa_state_table_delete_block(
+                               &this->tables[this->used_state_table],
+                               block_id, changed_block_ids)))
+            THROW(STATE_TABLE_DELETE_BLOCK_ERROR);
+        /* mark the changed blocks */
+        for (i=0; i<changed_block_ids->len; ++i) {
+            if (LIXA_RC_OK != (ret_cod = lixa_state_mark_block(
+                                   this, g_array_index(
+                                       changed_block_ids, uint32_t, i))))
+                THROW(MARK_BLOCK_ERROR);
+        }
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case NULL_OBJECT:
+                ret_cod = LIXA_RC_NULL_OBJECT;
+                break;
+            case G_ARRAY_NEW_ERROR:
+                ret_cod = LIXA_RC_G_ARRAY_NEW_ERROR;
+                break;
+            case STATE_TABLE_DELETE_BLOCK_ERROR:
+            case MARK_BLOCK_ERROR:
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+        /* recover memory */
+        if (NULL != changed_block_ids) {
+            g_array_free(changed_block_ids, TRUE);
+            changed_block_ids = NULL;
+        }
+    } /* TRY-CATCH */
+    LIXA_TRACE(("lixa_state_delete_block/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+

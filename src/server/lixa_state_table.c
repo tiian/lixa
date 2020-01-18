@@ -852,3 +852,131 @@ int lixa_state_table_insert_block(lixa_state_table_t *this,
     return ret_cod;
 }
 
+
+
+int lixa_state_table_delete_block(lixa_state_table_t *this,
+                                  uint32_t block_id,
+                                  GArray *changed_block_ids)
+{
+    enum Exception {
+        NULL_OBJECT,
+        INVALID_STATUS,
+        USED_BLOCK_NOT_FOUND,
+        OBJ_CORRUPTED,
+        NONE
+    } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    
+    LIXA_TRACE(("lixa_state_table_delete_block\n"));
+    TRY {
+        uint32_t tmp;
+        uint32_t ul; /* used list left block */
+        uint32_t ur; /* used list right block */
+        uint32_t fl; /* free list left block */
+        uint32_t fr; /* free list right block */
+        
+        if (NULL == this)
+            THROW(NULL_OBJECT);
+        /* check status */
+        if (STATE_TABLE_USED != this->status &&
+            STATE_TABLE_FULL != this->status) {
+            LIXA_TRACE(("lixa_state_table_delete_block: status %d does not "
+                        "allow delete_block operation\n", this->status));
+            THROW(INVALID_STATUS);
+        }
+
+        /* find ul and ur positions */
+        ul = 0;
+        ur = this->map[0].sr.ctrl.first_used_block;
+        LIXA_TRACE(("lixa_state_table_delete_block: ul=" UINT32_T_FORMAT
+                    ", ur=" UINT32_T_FORMAT "\n", ul, ur));
+        while (ur > 0) {
+            if (ur == block_id)
+                break;
+            ul = ur;
+            ur = this->map[ur].sr.data.next_block;
+#ifdef LIXA_DEBUG
+            LIXA_TRACE(("lixa_state_table_delete_block: ul=" UINT32_T_FORMAT
+                        ", ur=" UINT32_T_FORMAT "\n", ul, ur));
+#endif /* LIXA_DEBUG */
+        }
+        if (ur == 0)
+            THROW(USED_BLOCK_NOT_FOUND);
+        
+        /* find fl and fr positions */
+        fl = 0;
+        fr = this->map[0].sr.ctrl.first_free_block;
+        while (fr > 0) {
+            if (fr > block_id)
+                break;
+            else if (fr == block_id)
+                THROW(OBJ_CORRUPTED);
+            fl = fr;
+            fr = this->map[fr].sr.data.next_block;
+        }
+
+        LIXA_TRACE(("lixa_state_table_delete_block: ul=" UINT32_T_FORMAT
+                    ", ur=" UINT32_T_FORMAT ", fl=" UINT32_T_FORMAT
+                    ", fr=" UINT32_T_FORMAT "\n", ul, ur, fl, fr));
+        
+        /* remove block from used block list */
+        if (ul == 0) {
+            /* first block in used block list */
+            this->map[0].sr.ctrl.first_used_block =
+                this->map[ur].sr.data.next_block;
+            tmp = 0;
+            g_array_append_val(changed_block_ids, tmp);
+        } else {
+            /* central or last block in used block list */
+            this->map[ul].sr.data.next_block =
+                this->map[ur].sr.data.next_block;
+            g_array_append_val(changed_block_ids, ul);
+        }
+        this->map[ur].sr.data.next_block = 0;
+        g_array_append_val(changed_block_ids, ur);
+
+        /* insert block in free block list */
+        if (fl == 0) {
+            /* insertion happens at list head or list is empty */
+            if (fr != 0) {
+                /* list is not empty */
+                this->map[ur].sr.data.next_block = fr;
+                g_array_append_val(changed_block_ids, ur);
+            }
+            this->map[0].sr.ctrl.first_free_block = ur;
+            tmp = 0;
+            g_array_append_val(changed_block_ids, tmp);
+        } else {
+            /* insertion happens in the middle or at list tail */
+            this->map[ur].sr.data.next_block = fr;
+            g_array_append_val(changed_block_ids, ur);
+            this->map[fl].sr.data.next_block = ur;
+            g_array_append_val(changed_block_ids, fl);
+        }
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case NULL_OBJECT:
+                ret_cod = LIXA_RC_NULL_OBJECT;
+                break;
+            case INVALID_STATUS:
+                ret_cod = LIXA_RC_INVALID_STATUS;
+                break;
+            case USED_BLOCK_NOT_FOUND:
+                ret_cod = LIXA_RC_OBJ_NOT_FOUND;
+                break;
+            case OBJ_CORRUPTED:
+                ret_cod = LIXA_RC_OBJ_CORRUPTED;
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("lixa_state_table_delete_block/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}

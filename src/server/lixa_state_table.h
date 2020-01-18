@@ -234,6 +234,20 @@ extern "C" {
 
 
     /**
+     * Delete a used block from the state table
+     * @param[in,out] this state table object
+     * @param[in] block_id of the deleted block
+     * @param[out] changed_block_ids an array with all the blocks that must
+     *             be marked for log
+     * @return a reason code
+     */
+    int lixa_state_table_delete_block(lixa_state_table_t *this,
+                                      uint32_t block_id,
+                                      GArray *changed_block_ids);
+
+
+
+    /**
      * Return the reference to a slot of the state table
      * @param[in] this state table object
      * @param[in] block_id of the desired block

@@ -185,6 +185,16 @@ extern "C" {
 
 
     
+    /**
+     * Delete a used block from the state
+     * @param[in,out] this state object
+     * @param[in] block_id of the deleted block
+     * @return a reason code
+     */
+    int lixa_state_delete_block(lixa_state_t *this, uint32_t block_id);
+
+
+    
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

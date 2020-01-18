@@ -202,7 +202,6 @@ int thread_status_insert(struct thread_status_s *ts, uint32_t *slot)
 
 
 
-
 /*
   @@@ Remove me when "superfast" is completed
 */
@@ -402,8 +401,46 @@ int thread_status_insert_old(struct thread_status_s *ts, uint32_t *slot)
 
 
 
-int thread_status_delete(struct thread_status_s *ts,
-                         uint32_t slot)
+int thread_status_delete(struct thread_status_s *ts, uint32_t slot)
+{
+    enum Exception {
+        DELETE_OLD_ERROR,
+        STATE_DELETE_BLOCK_ERROR,
+        NONE
+    } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    
+    LIXA_TRACE(("thread_status_delete\n"));
+    TRY {
+        /* call the legacy code @@@, remove when superfast is ready */
+        if (LIXA_RC_OK != (ret_cod = thread_status_delete_old(ts, slot)))
+            THROW(DELETE_OLD_ERROR);
+        /* call the new code introduced by "superfast" */
+        if (LIXA_RC_OK != (ret_cod = lixa_state_delete_block(
+                               &ts->state, slot)))
+            THROW(STATE_DELETE_BLOCK_ERROR);
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case DELETE_OLD_ERROR:
+            case STATE_DELETE_BLOCK_ERROR:
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("thread_status_delete/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
+
+int thread_status_delete_old(struct thread_status_s *ts, uint32_t slot)
 {
     enum Exception {
         USED_BLOCK_NOT_FOUND,
@@ -419,7 +456,7 @@ int thread_status_delete(struct thread_status_s *ts,
     } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     
-    LIXA_TRACE(("thread_status_delete\n"));
+    LIXA_TRACE(("thread_status_delete_old\n"));
     TRY {
         status_record_t *csr = ts->curr_status;
         uint32_t ul; /* used list left block */
@@ -430,7 +467,7 @@ int thread_status_delete(struct thread_status_s *ts,
         /* find ul and ur positions */
         ul = 0;
         ur = csr[0].sr.ctrl.first_used_block;
-        LIXA_TRACE(("thread_status_delete: ul=" UINT32_T_FORMAT
+        LIXA_TRACE(("thread_status_delete_old: ul=" UINT32_T_FORMAT
                     ", ur=" UINT32_T_FORMAT "\n", ul, ur));
         while (ur > 0) {
             if (ur == slot)
@@ -438,7 +475,7 @@ int thread_status_delete(struct thread_status_s *ts,
             ul = ur;
             ur = csr[ur].sr.data.next_block;
 #ifdef LIXA_DEBUG
-            LIXA_TRACE(("thread_status_delete: ul=" UINT32_T_FORMAT
+            LIXA_TRACE(("thread_status_delete_old: ul=" UINT32_T_FORMAT
                         ", ur=" UINT32_T_FORMAT "\n", ul, ur));
 #endif /* LIXA_DEBUG */
         }
@@ -457,7 +494,7 @@ int thread_status_delete(struct thread_status_s *ts,
             fr = csr[fr].sr.data.next_block;
         }
 
-        LIXA_TRACE(("thread_status_delete: ul=" UINT32_T_FORMAT
+        LIXA_TRACE(("thread_status_delete_old: ul=" UINT32_T_FORMAT
                     ", ur=" UINT32_T_FORMAT ", fl=" UINT32_T_FORMAT
                     ", fr=" UINT32_T_FORMAT "\n", ul, ur, fl, fr));
         
@@ -523,7 +560,7 @@ int thread_status_delete(struct thread_status_s *ts,
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
         } /* switch (excp) */
     } /* TRY-CATCH */
-    LIXA_TRACE(("thread_status_delete/excp=%d/"
+    LIXA_TRACE(("thread_status_delete_old/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }
