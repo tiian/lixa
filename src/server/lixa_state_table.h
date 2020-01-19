@@ -186,10 +186,21 @@ extern "C" {
      */
     static inline int lixa_state_table_is_full(const lixa_state_table_t *this)
     {
-        return this->status == STATE_TABLE_FULL;
+        return STATE_TABLE_FULL == this->status;
     }
 
 
+
+    /**
+     * Return a boolean value: is the state file in the progress of a
+     * synchronization?
+     */
+    static inline int lixa_state_table_is_syncing(
+        const lixa_state_table_t *this) {
+        return STATE_TABLE_SYNCH == this->status;
+    }
+
+    
     
     /**
      * Extend the state table; this method is typically called if the state

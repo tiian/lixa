@@ -1,4 +1,8 @@
-Go on with new state
+lixa_state_table_delete_block behaves differently than _delete_old,
+try to trace it with LIXA_DEBUG to understand if there's a bug in how chains
+are managed by new code
+
+Go on with function lixa_state_switch
 
 Remove thread_status_insert_old
 

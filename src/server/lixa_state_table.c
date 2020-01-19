@@ -161,11 +161,11 @@ int lixa_state_table_create_new_file(lixa_state_table_t *this)
                 if (LIXA_RC_OK != (ret_cod = gettimeofday(
                                        &tmp_slot.sr.ctrl.last_sync, NULL)))
                     THROW(GETTIMEOFDAY_ERROR);
-                tmp_slot.sr.ctrl.number_of_blocks = STATUS_FILE_INIT_SIZE;
+                tmp_slot.sr.ctrl.number_of_blocks = LIXA_STATE_TABLE_INIT_SIZE;
                 tmp_slot.sr.ctrl.first_used_block = 0;
                 tmp_slot.sr.ctrl.first_free_block = 1;
             } else {
-                if (i == STATUS_FILE_INIT_SIZE - 1)
+                if (i == LIXA_STATE_TABLE_INIT_SIZE-1)
                     tmp_slot.sr.data.next_block = 0;
                 else
                     tmp_slot.sr.data.next_block = i + 1;
@@ -867,7 +867,8 @@ int lixa_state_table_delete_block(lixa_state_table_t *this,
     } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     
-    LIXA_TRACE(("lixa_state_table_delete_block\n"));
+    LIXA_TRACE(("lixa_state_table_delete_block(block_id=" UINT32_T_FORMAT
+                ")\n", block_id));
     TRY {
         uint32_t tmp;
         uint32_t ul; /* used list left block */

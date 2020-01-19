@@ -163,6 +163,15 @@ extern "C" {
      */
     int lixa_state_extend_log(lixa_state_t *this);
 
+
+
+    /**
+     * Switch the current state table and log to the following ones
+     * @param[in,out] this state object
+     * @return a reason code
+     */     
+    int lixa_state_switch(lixa_state_t *this);
+
     
 
     /**
@@ -192,6 +201,30 @@ extern "C" {
      * @return a reason code
      */
     int lixa_state_delete_block(lixa_state_t *this, uint32_t block_id);
+
+
+
+    /**
+     * Return the state table used before the current one
+     * @param[in] this state object
+     * @return previous used state table (and log)
+     */
+    static inline int lixa_state_get_prev_state(const lixa_state_t *this) {
+        return 0 == this->used_state_table ?
+            LIXA_STATE_TABLES-1 : this->used_state_table-1;
+    }
+
+
+    
+    /**
+     * Return the state table that will be used after the current one
+     * @param[in] this state object
+     * @return previous used state table (and log)
+     */
+    static inline int lixa_state_get_next_state(const lixa_state_t *this) {
+        return LIXA_STATE_TABLES-1 == this->used_state_table ?
+            0 : this->used_state_table+1;
+    }
 
 
     

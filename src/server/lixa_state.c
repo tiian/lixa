@@ -587,6 +587,36 @@ int lixa_state_extend_log(lixa_state_t *this)
 
 
 
+int lixa_state_switch(lixa_state_t *this)
+{
+    enum Exception {
+        NONE
+    } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    
+    LIXA_TRACE(("lixa_state_switch\n"));
+    TRY {
+        /* @@@ switch state file */
+
+        /* @@@ switch log file */
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("lixa_state_switch/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
+
 int lixa_state_mark_block(lixa_state_t *this, uint32_t block_id)
 {
     enum Exception {
@@ -595,6 +625,7 @@ int lixa_state_mark_block(lixa_state_t *this, uint32_t block_id)
         CHECK_LOG_ACTIONS_ERROR,
         FLUSH_LOG_RECORDS_ERROR,
         FLUSH_LOG_EXTEND_ERROR,
+        SWITCH_ERROR,
         NONE
     } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
@@ -621,12 +652,19 @@ int lixa_state_mark_block(lixa_state_t *this, uint32_t block_id)
             if (LIXA_RC_OK != (ret_cod = lixa_state_flush_log_records(this)))
                 THROW(FLUSH_LOG_RECORDS_ERROR);
         }
-        /* @@@ not automatic, only if the state table can not be
-           switched! */
         if (must_switch) {
-            LIXA_TRACE(("lixa_state_mark_block: extend file\n"));
-            if (LIXA_RC_OK != (ret_cod = lixa_state_extend_log(this)))
-                THROW(FLUSH_LOG_EXTEND_ERROR);
+            /* is the previous state table in the middle of a synd phase? */
+            if (lixa_state_table_is_syncing(
+                    &this->tables[lixa_state_get_prev_state(this)])) {
+                LIXA_TRACE(("lixa_state_mark_block: extend log file\n"));
+                if (LIXA_RC_OK != (ret_cod = lixa_state_extend_log(this)))
+                    THROW(FLUSH_LOG_EXTEND_ERROR);
+            } else {
+                LIXA_TRACE(("lixa_state_mark_block: switch state table and "
+                            "log\n"));
+                if (LIXA_RC_OK != (ret_cod = lixa_state_switch(this)))
+                    THROW(SWITCH_ERROR);
+            }
         }
         
         THROW(NONE);
@@ -639,6 +677,7 @@ int lixa_state_mark_block(lixa_state_t *this, uint32_t block_id)
             case CHECK_LOG_ACTIONS_ERROR:
             case FLUSH_LOG_RECORDS_ERROR:
             case FLUSH_LOG_EXTEND_ERROR:
+            case SWITCH_ERROR:
                 break;
             case NONE:
                 ret_cod = LIXA_RC_OK;

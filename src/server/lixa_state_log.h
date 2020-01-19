@@ -355,7 +355,8 @@ extern "C" {
      * @param[in,out] this state log object
      * @param[out] must_flush if the buffer is full and it must be flushed
      * @param[out] must_switch if the log is full and it must be switched (or
-     *             expanded)
+     *             expanded); must_flush must be ever TRUE when must_switch is
+     *             TRUE
      * @return a boolean value
      */     
     int lixa_state_log_check_actions(lixa_state_log_t *this,

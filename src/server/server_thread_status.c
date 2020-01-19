@@ -456,7 +456,7 @@ int thread_status_delete_old(struct thread_status_s *ts, uint32_t slot)
     } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     
-    LIXA_TRACE(("thread_status_delete_old\n"));
+    LIXA_TRACE(("thread_status_delete_old(slot=" UINT32_T_FORMAT ")\n", slot));
     TRY {
         status_record_t *csr = ts->curr_status;
         uint32_t ul; /* used list left block */
