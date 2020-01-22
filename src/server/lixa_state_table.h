@@ -51,6 +51,7 @@
 #define LIXA_STATE_TABLE_DELTA_SIZE  STATUS_FILE_DELTA_SIZE
 
 
+
 /**
  * Possible statuses of a state table
  */

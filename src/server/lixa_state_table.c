@@ -672,10 +672,11 @@ int lixa_state_table_set_status(lixa_state_table_t *this,
             case STATE_TABLE_USED:
                 if (STATE_TABLE_COPY_TARGET != this->status &&
                     STATE_TABLE_FORMATTED != this->status &&
-                    STATE_TABLE_EXTENDED != this->status) {
+                    STATE_TABLE_EXTENDED != this->status &&
+                    STATE_TABLE_FULL != this->status) {
                     LIXA_TRACE(("lixa_state_table_set_status: transition to "
                                 "USED is acceptable only from COPY_TARGET, "
-                                "FORMATTED and EXTENDED\n"));
+                                "FORMATTED, EXTENDED and FULL\n"));
                     valid = FALSE;
                 }
                 break;
@@ -801,6 +802,10 @@ int lixa_state_table_insert_block(lixa_state_table_t *this,
             THROW(INVALID_STATUS);
         }
 
+#ifdef LIXA_DEBUG
+        lixa_state_slot_trace_lists(this->map);
+#endif /* LIXA_DEBUG */
+        
         LIXA_TRACE(("lixa_state_table_insert_block: first_free_block = "
                     UINT32_T_FORMAT ", first_used_block = "
                     UINT32_T_FORMAT "\n",
@@ -823,6 +828,10 @@ int lixa_state_table_insert_block(lixa_state_table_t *this,
                     this->map[0].sr.ctrl.first_free_block,
                     this->map[0].sr.ctrl.first_used_block,
                     this->map[*block_id].sr.data.next_block));
+#ifdef LIXA_DEBUG
+        lixa_state_slot_trace_lists(this->map);
+#endif /* LIXA_DEBUG */
+        
         /* is the state table now full? */
         if (0 == this->map[0].sr.ctrl.first_free_block)
             if (LIXA_RC_OK != (ret_cod = lixa_state_table_set_status(
@@ -863,6 +872,7 @@ int lixa_state_table_delete_block(lixa_state_table_t *this,
         INVALID_STATUS,
         USED_BLOCK_NOT_FOUND,
         OBJ_CORRUPTED,
+        SET_STATUS,
         NONE
     } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
@@ -886,6 +896,10 @@ int lixa_state_table_delete_block(lixa_state_table_t *this,
             THROW(INVALID_STATUS);
         }
 
+#ifdef LIXA_DEBUG
+        lixa_state_slot_trace_lists(this->map);
+#endif /* LIXA_DEBUG */
+        
         /* find ul and ur positions */
         ul = 0;
         ur = this->map[0].sr.ctrl.first_used_block;
@@ -955,6 +969,17 @@ int lixa_state_table_delete_block(lixa_state_table_t *this,
             g_array_append_val(changed_block_ids, fl);
         }
         
+#ifdef LIXA_DEBUG
+        lixa_state_slot_trace_lists(this->map);
+#endif /* LIXA_DEBUG */
+        
+        /* is the state table now not full? */
+        if (STATE_TABLE_FULL == this->status &&
+            0 != this->map[0].sr.ctrl.first_free_block)
+            if (LIXA_RC_OK != (ret_cod = lixa_state_table_set_status(
+                                   this, STATE_TABLE_USED, FALSE)))
+                THROW(SET_STATUS);
+        
         THROW(NONE);
     } CATCH {
         switch (excp) {
@@ -969,6 +994,8 @@ int lixa_state_table_delete_block(lixa_state_table_t *this,
                 break;
             case OBJ_CORRUPTED:
                 ret_cod = LIXA_RC_OBJ_CORRUPTED;
+                break;
+            case SET_STATUS:
                 break;
             case NONE:
                 ret_cod = LIXA_RC_OK;

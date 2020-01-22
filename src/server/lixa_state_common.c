@@ -70,3 +70,39 @@ int lixa_state_slot_sync(lixa_state_slot_t *slot)
     
 
 
+void lixa_state_slot_trace_lists(const lixa_state_slot_t *lss)
+{
+    uint32_t ur; /* used list block */
+    uint32_t fr; /* free list block */
+    gchar *tmp_string = NULL, *string = NULL;
+    gchar buffer[20];
+    
+    ur = lss[0].sr.ctrl.first_used_block;
+    string = g_strdup("-");
+    while (ur > 0) {
+        snprintf(buffer, sizeof(buffer), "[" UINT32_T_FORMAT "]", ur);
+        tmp_string = g_strconcat(string, buffer, NULL);
+        g_free(string);
+        string = tmp_string;
+        ur = lss[ur].sr.data.next_block;
+    }
+    LIXA_TRACE(("lixa_state_slot_trace_lists: used blocks list = %s\n",
+                string));
+    g_free(string);
+
+    fr = lss[0].sr.ctrl.first_free_block;
+    string = g_strdup("-");
+    while (fr > 0) {
+        snprintf(buffer, sizeof(buffer), "[" UINT32_T_FORMAT "]", fr);
+        tmp_string = g_strconcat(string, buffer, NULL);
+        g_free(string);
+        string = tmp_string;
+        fr = lss[fr].sr.data.next_block;
+    }
+    LIXA_TRACE(("lixa_state_slot_trace_lists: free blocks list = %s\n",
+                string));
+    g_free(string);
+}
+
+
+

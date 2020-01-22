@@ -135,6 +135,13 @@ extern "C" {
 
     
     
+    /**
+     * Trace the free list and used list
+     */
+    void lixa_state_slot_trace_lists(const lixa_state_slot_t *lss);
+
+    
+    
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

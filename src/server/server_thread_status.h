@@ -145,6 +145,13 @@ extern "C" {
     int thread_status_delete_old(struct thread_status_s *ts, uint32_t slot);
 
 
+
+    /**
+     * Trace the free list and used list
+     */
+    void thread_status_trace_lists(const status_record_t *csr);
+
+    
     
     /**
      * Dump the content of the thread status files

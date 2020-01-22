@@ -93,7 +93,7 @@ void thread_status_init(struct thread_status_s *ts, int id,
     ts->curr_status = NULL;
     if (id)
         ts->updated_records = g_tree_new(size_t_compare_func);
-    else /* listener does not need this structure */
+    else /* listner does not need this structure */
         ts->updated_records = NULL;
     ts->recovery_table = NULL;
     ts->trans_table = NULL;
@@ -239,6 +239,10 @@ int thread_status_insert_old(struct thread_status_s *ts, uint32_t *slot)
             status_filename = ts->status2_filename;
         }
         
+#ifdef LIXA_DEBUG
+        thread_status_trace_lists(ts->curr_status);
+#endif /* LIXA_DEBUG */
+        
         if (csr[0].sr.ctrl.first_free_block == 0) {
             struct stat fd_stat;
             off_t curr_size, new_size, delta_size, i;
@@ -346,6 +350,10 @@ int thread_status_insert_old(struct thread_status_s *ts, uint32_t *slot)
                     csr[0].sr.ctrl.first_used_block,
                     csr[*slot].sr.data.next_block));
 
+#ifdef LIXA_DEBUG
+        thread_status_trace_lists(ts->curr_status);
+#endif /* LIXA_DEBUG */
+        
         THROW(NONE);
     } CATCH {
         switch (excp) {
@@ -397,7 +405,7 @@ int thread_status_insert_old(struct thread_status_s *ts, uint32_t *slot)
     LIXA_TRACE(("thread_status_insert_old/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
-}
+    }
 
 
 
@@ -463,6 +471,10 @@ int thread_status_delete_old(struct thread_status_s *ts, uint32_t slot)
         uint32_t ur; /* used list right block */
         uint32_t fl; /* free list left block */
         uint32_t fr; /* free list right block */
+        
+#ifdef LIXA_DEBUG
+        thread_status_trace_lists(ts->curr_status);
+#endif /* LIXA_DEBUG */
         
         /* find ul and ur positions */
         ul = 0;
@@ -535,7 +547,10 @@ int thread_status_delete_old(struct thread_status_s *ts, uint32_t slot)
             if (LIXA_RC_OK != (ret_cod = thread_status_mark_block(ts, fl)))
                 THROW(THREAD_STATUS_MARK_BLOCK_ERROR7);
         }
-
+#ifdef LIXA_DEBUG
+        thread_status_trace_lists(ts->curr_status);
+#endif /* LIXA_DEBUG */
+        
         THROW(NONE);
     } CATCH {
         switch (excp) {
@@ -566,6 +581,40 @@ int thread_status_delete_old(struct thread_status_s *ts, uint32_t slot)
 }
 
 
+
+void thread_status_trace_lists(const status_record_t *csr)
+{
+    uint32_t ur; /* used list block */
+    uint32_t fr; /* free list block */
+    gchar *tmp_string = NULL, *string = NULL;
+    gchar buffer[20];
+    
+    ur = csr[0].sr.ctrl.first_used_block;
+    string = g_strdup("-");
+    while (ur > 0) {
+        snprintf(buffer, sizeof(buffer), "[" UINT32_T_FORMAT "]", ur);
+        tmp_string = g_strconcat(string, buffer, NULL);
+        g_free(string);
+        string = tmp_string;
+        ur = csr[ur].sr.data.next_block;
+    }
+    LIXA_TRACE(("thread_status_trace_lists: used blocks list = %s\n", string));
+    g_free(string);
+
+    fr = csr[0].sr.ctrl.first_free_block;
+    string = g_strdup("-");
+    while (fr > 0) {
+        snprintf(buffer, sizeof(buffer), "[" UINT32_T_FORMAT "]", fr);
+        tmp_string = g_strconcat(string, buffer, NULL);
+        g_free(string);
+        string = tmp_string;
+        fr = csr[fr].sr.data.next_block;
+    }
+    LIXA_TRACE(("thread_status_trace_lists: free blocks list = %s\n", string));
+    g_free(string);
+}
+
+    
 
 int thread_status_dump(const struct thread_status_s *ts,
                        const struct ts_dump_spec_s *tsds)
