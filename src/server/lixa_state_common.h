@@ -61,15 +61,15 @@
  * This type will replace the legacy struct status_record_s.
  */
 typedef struct lixa_state_slot_s {
-    /**
+    /** @@@ should be no more useful, remove it
      * This field is incremented twice between a couple of sync:
      * if the value is even, the record is synched
      * if the value is odd, the record is modified
      * This is the lifetime:
      * - increment once for first update after synch
      * - increment before compute the record digest and successive synch
-     */
     uint32_t                       counter;
+     */
     /**
      * This field contains a control record or a data record, briefly "sr"
      * (Status Record)

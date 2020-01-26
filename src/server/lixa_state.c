@@ -325,18 +325,22 @@ int lixa_state_cold_start(lixa_state_t *this)
         if (-1 == unlink(lixa_state_table_get_pathname(&(this->tables[0]))) &&
             errno != ENOENT)
             THROW(UNLINK_ERROR1);
-        if (LIXA_RC_OK != (ret_cod = (lixa_state_table_create_new_file(
-                                          &(this->tables[0]))))) {
+        if (LIXA_RC_OK != (
+                ret_cod = (lixa_state_table_create_new_file(
+                               &(this->tables[0]),
+                               LIXA_STATE_TABLE_INIT_SIZE)))) {
             LIXA_SYSLOG((LOG_ERR, LIXA_SYSLOG_LXD043E,
                          lixa_state_table_get_pathname(&(this->tables[0]))));
             THROW(TABLE_CREATE_NEW_FILE1);
         }
-        if (LIXA_RC_OK != (ret_cod = (lixa_state_table_synchronize(
-                                          &(this->tables[0]))))) {
+        /* @@@ Is it really useful?!
+        if (LIXA_RC_OK != (
+                ret_cod = (lixa_state_table_sign(&(this->tables[0]))))) {
             LIXA_SYSLOG((LOG_ERR, LIXA_SYSLOG_LXD045E,
                          lixa_state_table_get_pathname(&(this->tables[0]))));
             THROW(TABLE_SYNCHRONIZE);
         }
+        */
         if (LIXA_RC_OK != (ret_cod = (lixa_state_table_close(
                                           &(this->tables[0]))))) {
             LIXA_SYSLOG((LOG_ERR, LIXA_SYSLOG_LXD046E,
@@ -350,8 +354,10 @@ int lixa_state_cold_start(lixa_state_t *this)
         if (-1 == unlink(lixa_state_table_get_pathname(&(this->tables[1]))) &&
             errno != ENOENT)
             THROW(UNLINK_ERROR2);
-        if (LIXA_RC_OK != (ret_cod = (lixa_state_table_create_new_file(
-                                          &(this->tables[1]))))) {
+        if (LIXA_RC_OK != (
+                ret_cod = (lixa_state_table_create_new_file(
+                               &(this->tables[1]),
+                               LIXA_STATE_TABLE_INIT_SIZE)))) {
             LIXA_SYSLOG((LOG_ERR, LIXA_SYSLOG_LXD043E,
                          lixa_state_table_get_pathname(&(this->tables[1]))));
             THROW(TABLE_CREATE_NEW_FILE2);
@@ -590,19 +596,72 @@ int lixa_state_extend_log(lixa_state_t *this)
 int lixa_state_switch(lixa_state_t *this)
 {
     enum Exception {
+        NULL_OBJECT,
+        TABLE_CREATE_NEW_FILE,
+        SET_STATUS1,
+        SET_STATUS2,
+        TABLE_COPY_FROM,
+        SET_STATUS3,
         NONE
     } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     
     LIXA_TRACE(("lixa_state_switch\n"));
     TRY {
-        /* @@@ switch state file */
+        /* check object is not null */
+        if (NULL == this)
+            THROW(NULL_OBJECT);
+        /* has next state table to be created and formatted? */
+        if (STATE_TABLE_UNDEFINED == lixa_state_table_get_status(
+                &this->tables[lixa_state_get_next_state(this)])) {
+            if (LIXA_RC_OK != (
+                    ret_cod = lixa_state_table_create_new_file(
+                        &this->tables[lixa_state_get_next_state(this)],
+                        LIXA_STATE_TABLE_INIT_SIZE)))
+                THROW(TABLE_CREATE_NEW_FILE);
+        }
+        /* current state table is switched to COPY_SOURCE status */
+        if (LIXA_RC_OK != (
+                ret_cod = lixa_state_table_set_status(
+                    &this->tables[this->used_state_table],
+                    STATE_TABLE_COPY_SOURCE, FALSE)))
+            THROW(SET_STATUS1);
+        /* next state table is switched to COPY_TARGET status */
+        if (LIXA_RC_OK != (
+                ret_cod = lixa_state_table_set_status(
+                    &this->tables[lixa_state_get_next_state(this)],
+                    STATE_TABLE_COPY_TARGET, FALSE)))
+            THROW(SET_STATUS2);
+        /* copy to target (next) from source (current) */
+        if (LIXA_RC_OK != (ret_cod = lixa_state_table_copy_from(
+                               &this->tables[lixa_state_get_next_state(this)],
+                               &this->tables[this->used_state_table])))
+            THROW(TABLE_COPY_FROM);
+        /* @@@ start disk synchronization of current state file using a
+           background thread ... */
 
+        /* next state table is switched to USED status */
+        if (LIXA_RC_OK != (
+                ret_cod = lixa_state_table_set_status(
+                    &this->tables[lixa_state_get_next_state(this)],
+                    STATE_TABLE_USED, FALSE)))
+            THROW(SET_STATUS3);
+        
         /* @@@ switch log file */
+
+        /* @@@ change used_state_table */
         
         THROW(NONE);
     } CATCH {
         switch (excp) {
+            case NULL_OBJECT:
+                ret_cod = LIXA_RC_NULL_OBJECT;
+                break;
+            case SET_STATUS1:
+            case SET_STATUS2:
+            case TABLE_COPY_FROM:
+            case SET_STATUS3:
+                break;
             case NONE:
                 ret_cod = LIXA_RC_OK;
                 break;
@@ -622,6 +681,7 @@ int lixa_state_mark_block(lixa_state_t *this, uint32_t block_id)
     enum Exception {
         NULL_OBJECT,
         STATE_LOG_MARK_BLOCK_ERROR,
+        STATE_TABLE_SYNC_BLOCK_ERROR,
         CHECK_LOG_ACTIONS_ERROR,
         FLUSH_LOG_RECORDS_ERROR,
         FLUSH_LOG_EXTEND_ERROR,
@@ -643,6 +703,10 @@ int lixa_state_mark_block(lixa_state_t *this, uint32_t block_id)
         if (LIXA_RC_OK != (ret_cod = lixa_state_log_mark_block(
                                &this->log, block_id)))
             THROW(STATE_LOG_MARK_BLOCK_ERROR);
+        if (LIXA_RC_OK != (
+                ret_cod = lixa_state_table_sync_block(
+                    &this->tables[this->used_state_table], block_id)))
+            THROW(STATE_TABLE_SYNC_BLOCK_ERROR);
         /* check if state log must be flushed */
         if (LIXA_RC_OK != (ret_cod = lixa_state_check_log_actions(
                                this, &must_flush, &must_switch)))
@@ -652,8 +716,9 @@ int lixa_state_mark_block(lixa_state_t *this, uint32_t block_id)
             if (LIXA_RC_OK != (ret_cod = lixa_state_flush_log_records(this)))
                 THROW(FLUSH_LOG_RECORDS_ERROR);
         }
+
         if (must_switch) {
-            /* is the previous state table in the middle of a synd phase? */
+            /* is the previous state table in the middle of a sync phase? */
             if (lixa_state_table_is_syncing(
                     &this->tables[lixa_state_get_prev_state(this)])) {
                 LIXA_TRACE(("lixa_state_mark_block: extend log file\n"));
@@ -674,6 +739,7 @@ int lixa_state_mark_block(lixa_state_t *this, uint32_t block_id)
                 ret_cod = LIXA_RC_NULL_OBJECT;
                 break;
             case STATE_LOG_MARK_BLOCK_ERROR:
+            case STATE_TABLE_SYNC_BLOCK_ERROR:
             case CHECK_LOG_ACTIONS_ERROR:
             case FLUSH_LOG_RECORDS_ERROR:
             case FLUSH_LOG_EXTEND_ERROR:

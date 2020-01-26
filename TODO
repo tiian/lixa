@@ -1,8 +1,5 @@
-lixa_state_table_delete_block behaves differently than _delete_old,
-try to trace it with LIXA_DEBUG to understand if there's a bug in how chains
-are managed by new code
-
-Go on with function lixa_state_switch
+Go on with function lixa_state_switch: implement the background synch of the
+current (old) state file
 
 Remove thread_status_insert_old
 
@@ -40,6 +37,8 @@ persistency engine
 
 Can function status_record_create_file removed and its code moved in 
 lixa_state_file_create_new_file?
+
+Remove all useless @@@
 
 Clean memory leaks by mean of valgrind
 

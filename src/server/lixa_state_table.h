@@ -121,18 +121,22 @@ extern "C" {
     /**
      * Create a new underlying file for the state table object
      * @param[in,out] this state table object
+     * @param[in] number of (initial) blocks in the file
      * @return a reason code
      */
-    int lixa_state_table_create_new_file(lixa_state_table_t *this);
+    int lixa_state_table_create_new_file(lixa_state_table_t *this,
+                                         uint32_t number_of_blocks);
 
     
 
     /**
-     * Synchronize the underlying state file
+     * Synchronize (and sign) a block in the state table
      * @param[in,out] this state table object
+     * @param[in] block_id to be signed
      * @return a reason code
      */
-    int lixa_state_table_synchronize(lixa_state_table_t *this);
+    int lixa_state_table_sync_block(lixa_state_table_t *this,
+                                    uint32_t block_id);
 
 
     
@@ -229,8 +233,18 @@ extern "C" {
                                     enum lixa_state_table_status_e new_status,
                                     int dry_run);
 
-    
 
+    
+    /**
+     * Return the current status of the state table
+     */
+    static inline enum lixa_state_table_status_e
+    lixa_state_table_get_status(const lixa_state_table_t *this) {
+        return this->status;
+    }
+
+
+    
     /**
      * Insert a new used block in the state table
      * @param[in,out] this state table object
@@ -260,6 +274,17 @@ extern "C" {
 
 
     /**
+     * Copy the content of another state table to the current one
+     * @param[in,out] this state table object
+     * @param[in] source state table that's used to copy from
+     * @return a reason code
+     */
+    int lixa_state_table_copy_from(lixa_state_table_t *this,
+                                   const lixa_state_table_t *source);
+
+    
+    
+    /**
      * Return the reference to a slot of the state table
      * @param[in] this state table object
      * @param[in] block_id of the desired block
@@ -271,7 +296,7 @@ extern "C" {
     }
 
 
-    
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
