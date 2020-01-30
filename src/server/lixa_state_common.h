@@ -55,6 +55,20 @@
 
 
 /**
+ * Operations that can be sent from the main thread to the flusher thread
+ */
+enum lixa_state_flusher_ops_e {
+    /** nothing to do, just wait on condition */
+    STATE_FLUSHER_WAIT = 0,
+    /** flush the buffer / mapped pages to the current used file */
+    STATE_FLUSHER_FLUSH,
+    /** thread termination */
+    STATE_FLUSHER_EXIT
+};
+
+
+
+/**
  * This struct is the basic type of a status record: it contains two control
  * fields and one payload field.
  * THE POSITION OF THE FIELDS MUST NOT BE CHANGED INSIDE THE RECORD.

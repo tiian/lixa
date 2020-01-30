@@ -28,6 +28,9 @@
 #ifdef HAVE_GLIB_H
 #include <glib.h>
 #endif
+#ifdef HAVE_PTHREAD_H
+# include <pthread.h>
+#endif
 
 
 
@@ -95,7 +98,41 @@ typedef struct lixa_state_table_s {
     /**
      * Memory map associated to the underlying file
      */
-    lixa_state_slot_t               *map;    
+    lixa_state_slot_t               *map;
+    /**
+     * This internal struct is synchronized with a mutex and a condition to
+     * avoid race conditions between the main thread and the flusher thread
+     */
+    struct {
+        /**
+         * Mutex used to protect the object when accessed concurrently by the
+         * flusher thread
+         */
+        pthread_mutex_t                     mutex;
+        /**
+         * Condition used to signal events between main thread and flusher
+         * thread
+         */
+        pthread_cond_t                      cond;
+        /**
+         * Operation asked by main thread to flusher thread
+         */
+        enum lixa_state_flusher_ops_e       operation;
+        /**
+         * File that must be flushed by the flusher thread: it's protected by
+         * flusher_mutex and by flusher_cond
+         */
+        size_t                              file_pos;
+        /**
+         * Boolean flag: master set it to TRUE before flushing, flusher set it
+         * to FALSE after completion
+         */
+        int                                 to_be_flushed;
+        /**
+         * Thread used to flush the log files in background (asynchronously)
+         */
+        pthread_t                           thread;
+    } synch;
 } lixa_state_table_t;
 
 
@@ -297,6 +334,14 @@ extern "C" {
 
 
 
+    /**
+     * Entry point of the flusher thread
+     * @param[in,out] data is of type @ref lixa_state_table_t
+     */
+    void *lixa_state_table_flusher(void *data);
+
+
+    
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

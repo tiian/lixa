@@ -166,7 +166,7 @@ int lixa_state_log_init(lixa_state_log_t *this,
             THROW(PTHREAD_MUTEX_INIT_ERROR);
         if (0 != (pte = pthread_cond_init(&this->synch.cond, NULL)))
             THROW(PTHREAD_COND_INIT_ERROR);
-        this->synch.operation = STATE_LOG_FLUSHER_WAIT;
+        this->synch.operation = STATE_FLUSHER_WAIT;
         this->synch.file_pos = 0;
         this->synch.to_be_flushed = FALSE;
         this->synch.number_of_pages = 0;
@@ -290,7 +290,7 @@ int lixa_state_log_clean(lixa_state_log_t *this)
         /* ask flusher termination */
         LIXA_TRACE(("lixa_state_log_clean: sending to flusher thread "
                     "exit request...\n"));
-        this->synch.operation = STATE_LOG_FLUSHER_EXIT;
+        this->synch.operation = STATE_FLUSHER_EXIT;
         if (0 != (pte = pthread_cond_signal(&this->synch.cond)))
             THROW(PTHREAD_COND_SIGNAL_ERROR);
         /* unlock the mutex */
@@ -355,7 +355,7 @@ int lixa_state_log_clean(lixa_state_log_t *this)
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
         } /* switch (excp) */
         /* restore mutex in the event of error */
-        if (mutex_locked)
+        if (mutex_locked && excp < PTHREAD_MUTEX_UNLOCK_ERROR)
             pthread_mutex_unlock(&this->synch.mutex);
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_state_log_clean/excp=%d/"
@@ -497,7 +497,7 @@ int lixa_state_log_flush(lixa_state_log_t *this,
         /* ask to flusher thread to perform the flushing */
         LIXA_TRACE(("lixa_state_log_flush: asking flusher thread to flush "
                     "the buffer to file\n"));
-        this->synch.operation = STATE_LOG_FLUSHER_FLUSH;
+        this->synch.operation = STATE_FLUSHER_FLUSH;
         this->synch.file_pos = this->used_file;
         this->synch.to_be_flushed = TRUE;
         this->synch.number_of_pages = number_of_pages;
@@ -893,7 +893,7 @@ void *lixa_state_log_flusher(void *data)
             } else
                 mutex_locked = TRUE;
             /* check the operation asked by the main thread */
-            if (STATE_LOG_FLUSHER_WAIT == log->synch.operation) {
+            if (STATE_FLUSHER_WAIT == log->synch.operation) {
                 LIXA_TRACE(("lixa_state_log_flusher: WAITING on condition"
                             "...\n"));
                 if (0 != (pte = pthread_cond_wait(
@@ -902,7 +902,7 @@ void *lixa_state_log_flusher(void *data)
                 LIXA_TRACE(("lixa_state_log_flusher: condition has been "
                             "signaled\n"));
             }
-            if (STATE_LOG_FLUSHER_FLUSH == log->synch.operation) {
+            if (STATE_FLUSHER_FLUSH == log->synch.operation) {
                 LIXA_TRACE(("lixa_state_log_flusher: FLUSHING file #"
                             SIZE_T_FORMAT "\n", log->synch.file_pos));
                 /* checking array index to avoid memory crash */
@@ -927,19 +927,19 @@ void *lixa_state_log_flusher(void *data)
                 }
                 /* reset flushing condition */
                 log->synch.to_be_flushed = FALSE;
-                log->synch.operation = STATE_LOG_FLUSHER_WAIT;
+                log->synch.operation = STATE_FLUSHER_WAIT;
                 /* signaling to master thread */
                 if (0 != (pte = pthread_cond_signal(&log->synch.cond)))
                     THROW(PTHREAD_COND_SIGNAL_ERROR);
             }
-            if (STATE_LOG_FLUSHER_EXIT == log->synch.operation) {
+            if (STATE_FLUSHER_EXIT == log->synch.operation) {
                 LIXA_TRACE(("lixa_state_log_flusher: EXITING\n"));
                 exit = TRUE;
             }
             /* this should never happen */
-            if (STATE_LOG_FLUSHER_WAIT != log->synch.operation &&
-                STATE_LOG_FLUSHER_FLUSH != log->synch.operation &&
-                STATE_LOG_FLUSHER_EXIT != log->synch.operation) {
+            if (STATE_FLUSHER_WAIT != log->synch.operation &&
+                STATE_FLUSHER_FLUSH != log->synch.operation &&
+                STATE_FLUSHER_EXIT != log->synch.operation) {
                 LIXA_TRACE(("lixa_state_log_flusher: internal error "
                             "flusher_operation=%d\n",
                             log->synch.operation));

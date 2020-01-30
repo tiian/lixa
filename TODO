@@ -1,3 +1,16 @@
+Move the logic from lixa_state_table.c to lixa_state_table_file.c as it is for
+lixa_state_log_file.c . This is necessary to avoid N flusher threads instead of
+a single 1 . The change will require some rework, unfortunately :(
+
+From lixa_state_log.c to lixa_state_table.c reproduce the behaviour related
+to sync.* fields:
+mutex
+cond
+operation
+file_pos
+to_be_flushed
+thread
+
 Go on with function lixa_state_switch: implement the background synch of the
 current (old) state file
 
@@ -41,6 +54,10 @@ lixa_state_file_create_new_file?
 Remove all useless @@@
 
 Clean memory leaks by mean of valgrind
+
+Introduce a clean up policy in lixa_state_table_copy_from(): all the failed
+transactions that are older than T1 and all the recovery pending transactions 
+that are older than T2 will not be copied in the target state table
 
 Improving the state file synchronization elapsed time is now a priority to
 avoid annoying connection timeout errors!!!

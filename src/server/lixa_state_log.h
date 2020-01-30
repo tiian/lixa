@@ -77,20 +77,6 @@ typedef struct lixa_state_table_s lixa_state_table_t;
 
 
 /**
- * Operations that can be sent from the main thread to the flusher thread
- */
-enum lixa_state_log_flusher_ops_e {
-    /** nothing to do, just wait on condition */
-    STATE_LOG_FLUSHER_WAIT = 0,
-    /** flush the buffer to the current used file */
-    STATE_LOG_FLUSHER_FLUSH,
-    /** thread termination */
-    STATE_LOG_FLUSHER_EXIT
-};
-
-
-
-/**
  * LIXA State Log data type ("class")
  */
 typedef struct lixa_state_log_s {
@@ -147,7 +133,7 @@ typedef struct lixa_state_log_s {
         /**
          * Operation asked by main thread to flusher thread
          */
-        enum lixa_state_log_flusher_ops_e operation;
+        enum lixa_state_flusher_ops_e     operation;
         /**
          * File that must be flushed by the flusher thread: it's protected by
          * flusher_mutex and by flusher_cond
