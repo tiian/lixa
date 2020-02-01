@@ -402,8 +402,8 @@ int lixa_state_log_flush(lixa_state_log_t *this,
             THROW(PTHREAD_MUTEX_LOCK_ERROR);
         } else
             mutex_locked = TRUE;
-        /* this synchronization is necessary to overlap a previous flusher
-           execution, under normal condition it must be very fast */
+        /* this synchronization is necessary to avoid overlapping a previous
+           flusher execution, under normal condition it must be very fast */
         if (this->synch.to_be_flushed) {
             lixa_timer_t timer;
             long duration;
@@ -414,7 +414,7 @@ int lixa_state_log_flush(lixa_state_log_t *this,
                           &this->synch.cond, &this->synch.mutex)))
                 THROW(PTHREAD_COND_WAIT_ERROR);
             lixa_timer_stop(&timer);
-            duration = lixa_timer_get_diff(&timer);
+            duration = lixa_timer_get_diff(&timer)/1000;
             LIXA_SYSLOG((LOG_NOTICE, LIXA_SYSLOG_LXD053N, duration));
             LIXA_TRACE(("lixa_state_log_flush: condition has been "
                         "signaled, total wait time is %ld ms\n", duration));

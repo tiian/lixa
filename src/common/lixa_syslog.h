@@ -257,6 +257,14 @@
 #define LIXA_SYSLOG_LXD056I "LXD056I pwrite operation to log file required " \
     "%ld ms: this must be considered a non optimal performance"
 #define LIXA_SYSLOG_LXD057E "LXD057E unable to use state table ('%s')"
+#define LIXA_SYSLOG_LXD058N "LXD058N father thread waited table flusher " \
+    "thread for %ld ms; storage is not properly tuned for the real workload"
+#define LIXA_SYSLOG_LXD059W "LXD059W msync lasted %ld ms for " OFF_T_FORMAT \
+    " bytes to file '%s': storage is dramatically slow"
+#define LIXA_SYSLOG_LXD060N "LXD060N msync lasted %ld ms for " OFF_T_FORMAT \
+    " bytes to file '%s': storage is very slow"
+#define LIXA_SYSLOG_LXD061I "LXD061I msync lasted %ld ms for " OFF_T_FORMAT \
+    " bytes to file '%s': storage is quite slow"
 
 
 

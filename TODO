@@ -1,3 +1,5 @@
+Restart from lixa_state_switch
+
 From lixa_state_log.c to lixa_state.c reproduce the behaviour related
 to sync.* fields:
 mutex

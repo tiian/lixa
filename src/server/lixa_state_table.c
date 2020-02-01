@@ -1127,6 +1127,8 @@ int lixa_state_table_sync_map(lixa_state_table_t *this)
     LIXA_TRACE(("lixa_state_table_sync_map\n"));
     TRY {
         struct stat fd_stat;
+        lixa_timer_t timer;
+        long duration;
         
         if (NULL == this)
             THROW(NULL_OBJECT);
@@ -1135,11 +1137,29 @@ int lixa_state_table_sync_map(lixa_state_table_t *this)
             THROW(FSTAT_ERROR);
         
         LIXA_TRACE(("lixa_state_table_sync_map: SYNCHING "
-                    OFF_T_FORMAT " bytes to file '%s'"
-                    SIZE_T_FORMAT "\n", fd_stat.st_size, this->pathname));
+                    OFF_T_FORMAT " bytes to file '%s'\n", fd_stat.st_size,
+                    this->pathname));
         
+        lixa_timer_start(&timer);
         if (0 != msync(this->map, fd_stat.st_size, MS_SYNC))
             THROW(MSYNC_ERROR);
+        lixa_timer_stop(&timer);
+        duration = lixa_timer_get_diff(&timer)/1000;
+        /* log a message if performance is not good */
+        if (duration > 500) {
+            LIXA_SYSLOG((LOG_WARNING, LIXA_SYSLOG_LXD059W, duration,
+                         fd_stat.st_size, this->pathname));
+        } else if (duration > 50) {
+            LIXA_SYSLOG((LOG_NOTICE, LIXA_SYSLOG_LXD060N, duration,
+                         fd_stat.st_size, this->pathname));
+        } else if (duration > 5) {
+            LIXA_SYSLOG((LOG_INFO, LIXA_SYSLOG_LXD061I, duration,
+                         fd_stat.st_size, this->pathname));
+        }
+        
+        LIXA_TRACE(("lixa_state_table_sync_map: synchronization of mapped "
+                    "memory to the underlying file required %ld ms\n",
+                    duration));
         
         THROW(NONE);
     } CATCH {

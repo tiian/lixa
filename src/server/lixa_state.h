@@ -80,10 +80,9 @@ struct lixa_table_synchronizer_s {
      */
     enum lixa_state_flusher_ops_e       operation;
     /**
-     * File that must be flushed by the flusher thread: it's protected by
-     * flusher_mutex and by flusher_cond
+     * A reference to the state table that must be flushed
      */
-    size_t                              file_pos;
+    lixa_state_table_t                 *table;
     /**
      * Boolean flag: master set it to TRUE before flushing, flusher set it
      * to FALSE after completion
@@ -93,10 +92,6 @@ struct lixa_table_synchronizer_s {
      * Thread used to flush the log files in background (asynchronously)
      */
     pthread_t                           thread;
-    /**
-     * A reference to the state table that must be flushed
-     */
-    lixa_state_table_t                 *table;
 };
 
 
