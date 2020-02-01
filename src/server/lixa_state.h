@@ -28,6 +28,9 @@
 #ifdef HAVE_GLIB_H
 # include <glib.h>
 #endif
+#ifdef HAVE_PTHREAD_H
+# include <pthread.h>
+#endif
 
 
 
@@ -57,25 +60,72 @@ extern const char *LIXA_STATE_TABLE_SUFFIX;
 
 
 /**
+ * This internal struct is synchronized with a mutex and a condition to
+ * avoid race conditions between the main thread and the flusher thread
+ * dedicated to state table synchronization
+ */
+struct lixa_table_synchronizer_s {
+    /**
+     * Mutex used to protect the object when accessed concurrently by the
+     * flusher thread
+     */
+    pthread_mutex_t                     mutex;
+    /**
+     * Condition used to signal events between main thread and flusher
+     * thread
+     */
+    pthread_cond_t                      cond;
+    /**
+     * Operation asked by main thread to flusher thread
+     */
+    enum lixa_state_flusher_ops_e       operation;
+    /**
+     * File that must be flushed by the flusher thread: it's protected by
+     * flusher_mutex and by flusher_cond
+     */
+    size_t                              file_pos;
+    /**
+     * Boolean flag: master set it to TRUE before flushing, flusher set it
+     * to FALSE after completion
+     */
+    int                                 to_be_flushed;
+    /**
+     * Thread used to flush the log files in background (asynchronously)
+     */
+    pthread_t                           thread;
+    /**
+     * A reference to the state table that must be flushed
+     */
+    lixa_state_table_t                 *table;
+};
+
+
+
+/**
  * LIXA State data type ("class")
  */
 typedef struct lixa_state_s {
     /**
      * Maximum size of the log buffer, typically retrieved from configuration
      */
-    size_t                max_buffer_log_size;
+    size_t                           max_buffer_log_size;
     /**
      * Points to the state table (and state log) currently in use
      */
-    int                   used_state_table;
+    int                              used_state_table;
     /**
      * Array of state tables
      */
-    lixa_state_table_t    tables[LIXA_STATE_TABLES];
+    lixa_state_table_t               tables[LIXA_STATE_TABLES];
     /**
      * Array of state logs
      */
-    lixa_state_log_t      log;
+    lixa_state_log_t                 log;
+    /**
+     * Struct used to communicate with the background flusher thread for
+     * state tables
+     */
+    struct lixa_table_synchronizer_s table_synchronizer;
 } lixa_state_t;
 
 
@@ -225,6 +275,14 @@ extern "C" {
         return LIXA_STATE_TABLES-1 == this->used_state_table ?
             0 : this->used_state_table+1;
     }
+
+
+    
+    /**
+     * Entry point of the flusher thread for state tables
+     * @param[in,out] data is of type @ref lixa_state_table_t
+     */
+    void *lixa_state_async_table_flusher(void *data);
 
 
     
