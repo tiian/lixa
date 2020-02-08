@@ -53,6 +53,13 @@
 
 
 /**
+ * Suffix appended when a new state table is created
+ */
+extern const char *LIXA_STATE_TABLE_SUFFIX;
+
+
+
+/**
  * Possible statuses of a state table
  */
 enum lixa_state_table_status_e {
@@ -121,7 +128,8 @@ extern "C" {
     /**
      * Create a new underlying file for the state table object
      * @param[in,out] this state table object
-     * @param[in] number of (initial) blocks in the file
+     * @param[in] number_of_blocks is the number of (initial) blocks in the
+     *            file
      * @return a reason code
      */
     int lixa_state_table_create_new_file(lixa_state_table_t *this,
@@ -165,7 +173,7 @@ extern "C" {
      * @param[in] this state table object
      * @return a reason code, LIXA_RC_OK if the file exists and can be opened
      */
-    int lixa_state_table_exist_file(lixa_state_table_t *this);
+    int lixa_state_table_file_exist(lixa_state_table_t *this);
 
     
     

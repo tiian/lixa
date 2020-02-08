@@ -55,6 +55,7 @@
 
 
 extern gboolean run_as_daemon;
+const char *LIXA_STATE_TABLE_SUFFIX = ".table";
 
 
 
@@ -78,8 +79,10 @@ int lixa_state_table_init(lixa_state_table_t *this,
         if (NULL == pathname)
             THROW(NULL_OBJECT2);
         /* check the state table has not been already used */
-        if (STATE_TABLE_UNDEFINED != this->status)
+        if (STATE_TABLE_UNDEFINED != this->status) {
+            LIXA_TRACE(("lixa_state_table_init: status=%d\n", this->status));
             THROW(INVALID_STATUS);
+        }
         /* clean-up the object memory, maybe not necessary, but safer */
         memset(this, 0, sizeof(lixa_state_table_t));
         /* keep a local copy of the pathname */
@@ -394,7 +397,7 @@ int lixa_state_table_map(lixa_state_table_t *this, int read_only)
 
 
 
-int lixa_state_table_exist_file(lixa_state_table_t *this)
+int lixa_state_table_file_exist(lixa_state_table_t *this)
 {
     enum Exception {
         NULL_OBJECT,
@@ -403,7 +406,7 @@ int lixa_state_table_exist_file(lixa_state_table_t *this)
     } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     
-    LIXA_TRACE(("lixa_state_table_exist_file\n"));
+    LIXA_TRACE(("lixa_state_table_file_exist\n"));
     TRY {
         int fd;
         
@@ -431,7 +434,7 @@ int lixa_state_table_exist_file(lixa_state_table_t *this)
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
         } /* switch (excp) */
     } /* TRY-CATCH */
-    LIXA_TRACE(("lixa_state_table_exist_file/excp=%d/"
+    LIXA_TRACE(("lixa_state_table_file_exist/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }

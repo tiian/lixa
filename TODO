@@ -1,3 +1,5 @@
+Implement set_status function for log as it is for table
+
 Restart from lixa_state_switch
 
 From lixa_state_log.c to lixa_state.c reproduce the behaviour related
@@ -33,6 +35,8 @@ Rework status_record_insert and status_record_delete
 
 Turn on again log file management in function thread_status_mark_block in file
 server_thread_status.c, look at @@@@ (4)
+
+Remove inclusion of "server_status.h" from "lixa_state_table.c"
 
 Implement auto-migration from old state files to new state tables:
 - if cold start & state files exists => migrate and switch

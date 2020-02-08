@@ -53,13 +53,6 @@
 
 
 /**
- * Suffix appended when a new state table is created
- */
-extern const char *LIXA_STATE_TABLE_SUFFIX;
-
-
-
-/**
  * This internal struct is synchronized with a mutex and a condition to
  * avoid race conditions between the main thread and the flusher thread
  * dedicated to state table synchronization
@@ -97,32 +90,112 @@ struct lixa_table_synchronizer_s {
 
 
 /**
+ * This internal struct is synchronized with a mutex and a condition to
+ * avoid race conditions between the main thread and the flusher thread
+ */
+struct lixa_log_synchronizer_s {
+    /**
+     * Mutex used to protect the object when accessed concurrently by the
+     * flusher thread
+     */
+    pthread_mutex_t                   mutex;
+    /**
+     * Condition used to signal events between main thread and flusher
+     * thread
+     */
+    pthread_cond_t                    cond;
+    /**
+     * Operation asked by main thread to flusher thread
+     */
+    enum lixa_state_flusher_ops_e     operation;
+    /**
+     * A reference to the state log that must be flushed
+     */
+    lixa_state_log_t                 *log;
+    /**
+     * Boolean flag: master set it to TRUE before flushing, flusher set it
+     * to FALSE after completion
+     */
+    int                               to_be_flushed;
+    /**
+     * Number of pages that must be flushed from buffer to file
+     */
+    size_t                            number_of_pages;
+    /**
+     * Size of the buffer used to manage I/O; unit is "number of bytes"
+     */
+    size_t                            buffer_size;
+    /**
+     * Buffer used to manage I/O
+     */
+    void                             *buffer;
+    /**
+     * Thread used to flush the log files in background (asynchronously)
+     */
+    pthread_t                         thread;
+};
+
+
+
+/**
  * LIXA State data type ("class")
  */
 typedef struct lixa_state_s {
     /**
-     * Maximum size of the log buffer, typically retrieved from configuration
-     */
-    size_t                           max_buffer_log_size;
-    /**
      * Points to the state table (and state log) currently in use
      */
-    int                              used_state_table;
+    int                               used_state_table;
     /**
      * Array of state tables
      */
-    lixa_state_table_t               tables[LIXA_STATE_TABLES];
+    lixa_state_table_t                tables[LIXA_STATE_TABLES];
     /**
      * Array of state logs
      */
-    lixa_state_log_t                 log;
+    lixa_state_log_t                  logs[LIXA_STATE_TABLES];
+    /*
+     * Section dedicated to log management
+     */
+    /**
+     * Maximum size of the log buffer, typically retrieved from configuration
+     */
+    size_t                            max_buffer_log_size;
+    /**
+     * The size of the array, the number of block_ids that can be currently
+     * managed by the buffer
+     */
+    size_t                            size_of_block_ids;
+    /**
+     * An array used to store the positions of all the changed blocks in the
+     * state file
+     */
+    uint32_t                         *block_ids;
+    /**
+     * The number of block_id values in block_ids array
+     */
+    size_t                            number_of_block_ids;
+    /**
+     * Maximum size of the array, upper limit to cap memory consumption
+     */
+    size_t                            max_number_of_block_ids;
+    /**
+     * A single memory page used for special purposes like formatting logs
+     */
+    void                             *single_page;
+    /**
+     * Struct used to communicate with the background flusher thread for
+     * state logs
+     */
+    struct lixa_log_synchronizer_s    log_synchronizer;
+    /*
+     * Section dedicated to table management
+     */
     /**
      * Struct used to communicate with the background flusher thread for
      * state tables
      */
-    struct lixa_table_synchronizer_s table_synchronizer;
+    struct lixa_table_synchronizer_s  table_synchronizer;
 } lixa_state_t;
-
 
 
 #ifdef __cplusplus
@@ -278,6 +351,14 @@ extern "C" {
      * @param[in,out] data is of type @ref lixa_state_table_t
      */
     void *lixa_state_async_table_flusher(void *data);
+
+
+    
+    /**
+     * Entry point of the flusher thread for state logs
+     * @param[in,out] data is of type @ref lixa_state_log_t
+     */
+    void *lixa_state_async_log_flusher(void *data);
 
 
     

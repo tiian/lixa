@@ -41,8 +41,6 @@
 #include "lixa_trace.h"
 #include "lixa_utils.h"
 #include "lixa_state_common.h"
-#include "lixa_state_log_file.h"
-#include "status_record.h"
 
 
 
@@ -59,6 +57,10 @@
 
 /** Initial buffer size (unit = byte) */
 #define LIXA_STATE_LOG_BUFFER_SIZE_DEFAULT   (2*LIXA_SYSTEM_PAGE_SIZE)
+/** Initial file size (unit = byte) */
+#define LIXA_STATE_LOG_FILE_SIZE_DEFAULT     (50*LIXA_SYSTEM_PAGE_SIZE)
+/** Incremental file size (unit = byte) */
+#define LIXA_STATE_LOG_FILE_SIZE_INCREMENT   (25*LIXA_SYSTEM_PAGE_SIZE)
 
 
 
@@ -66,6 +68,25 @@
  * Number of record that can be stored in a memory page
  */
 extern size_t LIXA_STATE_LOG_RECORDS_PER_PAGE;
+/**
+ * Suffix appended when a new log file is created
+ */
+extern const char *LIXA_STATE_LOG_FILE_SUFFIX;
+
+
+
+/**
+ * Possible statuses of a state log
+ */
+enum lixa_state_log_status_e {
+    STATE_LOG_FILE_UNDEFINED = 0,
+    STATE_LOG_FILE_FORMATTED,
+    STATE_LOG_FILE_USED,
+    STATE_LOG_FILE_FULL,
+    STATE_LOG_FILE_EXTENDED,
+    STATE_LOG_FILE_CLOSED,
+    STATE_LOG_FILE_DISPOSED
+};
 
 
 
@@ -81,86 +102,50 @@ typedef struct lixa_state_table_s lixa_state_table_t;
  */
 typedef struct lixa_state_log_s {
     /**
-     * Files used to persist the log
+     * Current status of the state log
      */
-    lixa_state_log_file_t             files[LIXA_STATE_TABLES];
+    enum lixa_state_log_status_e      status;
     /**
-     * Points to the currently used file, @ref files array
+     * Name of the associated underlying file
      */
-    size_t                            used_file;
+    char                             *pathname;
     /**
-     * A single memory page used for special purposes like formatting
+     * File descriptor associated to the underlying file
      */
-    void                             *single_page;
+    int                               fd;
     /**
-     * An array used to store the positions of all the changed blocks in the
-     * state file
+     * Persistency flags associated to the underlying file
      */
-    uint32_t                         *block_ids;
-    /**
-     * The size of the array, the number of block_ids that can be currently
-     * managed by the buffer
-     */
-    size_t                            size_of_block_ids;
-    /**
-     * The number of block_id values in block_ids array
-     */
-    size_t                            number_of_block_ids;
-    /**
-     * Maximum size of the array, upper limit to cap memory consumption
-     */
-    size_t                            max_number_of_block_ids;
+    int                               pers_flags;
     /**
      * Last record id used in the state log; 0 has special meaning of resetted
      * record, unused record
      */
     lixa_word_t                       last_record_id;
     /**
-     * This internal struct is synchronized with a mutex and a condition to
-     * avoid race conditions between the main thread and the flusher thread
+     * This internal struct is synchronized with a mutex to avoid inconsistent
+     * states between the main thread and the flusher thread
      */
     struct {
         /**
          * Mutex used to protect the object when accessed concurrently by the
          * flusher thread
          */
-        pthread_mutex_t                   mutex;
+        pthread_mutex_t               mutex;
         /**
-         * Condition used to signal events between main thread and flusher
-         * thread
+         * Total size of the underlying file in bytes
          */
-        pthread_cond_t                    cond;
+        off_t                         total_size;
         /**
-         * Operation asked by main thread to flusher thread
+         * Offset of the first writable page in the file
          */
-        enum lixa_state_flusher_ops_e     operation;
+        off_t                         offset;
         /**
-         * File that must be flushed by the flusher thread: it's protected by
-         * flusher_mutex and by flusher_cond
+         * Number of bytes reserved after offset due to an in progress
+         * asynchronous flushing or generic file operation
          */
-        size_t                            file_pos;
-        /**
-         * Boolean flag: master set it to TRUE before flushing, flusher set it
-         * to FALSE after completion
-         */
-        int                               to_be_flushed;
-        /**
-         * Number of pages that must be flushed from buffer to file
-         */
-        size_t                            number_of_pages;
-        /**
-         * Size of the buffer used to manage I/O; unit is "number of bytes"
-         */
-        size_t                            buffer_size;
-        /**
-         * Buffer used to manage I/O
-         */
-        void                             *buffer;
-        /**
-         * Thread used to flush the log files in background (asynchronously)
-         */
-        pthread_t                         thread;
-    } synch;
+        off_t                         reserved;
+    } file_synchronizer;
 } lixa_state_log_t;
 
 
@@ -222,33 +207,22 @@ extern "C" {
     /**
      * Create a new underlying file for the state log object
      * @param[in,out] this current state file object
-     * @param[in] pos postion of the file to be created in the array
+     * @param[in,out] single_page of memory that's page aligned and that can
+     *                be used for buffering
      * @return a reason code
      */
-    static inline int lixa_state_log_create_new_file(
-        lixa_state_log_t *this, size_t pos)
-    {
-        return LIXA_STATE_TABLES > pos ?
-            lixa_state_log_file_create_new(
-                &this->files[pos], this->single_page) : LIXA_RC_OUT_OF_RANGE;
-    }
+    int lixa_state_log_create_new_file(lixa_state_log_t *this,
+                                       void *single_page);
 
 
-
+    
     /**
      * Check if an underlying file exists and can be opened
      * @param[in] this current state log object
-     * @param[in] pos position of the file to be checked in the array
      * @return a reason code, LIXA_RC_OK if the file exists and can be opened
      */
-    static inline int lixa_state_log_exist_file(lixa_state_log_t *this,
-                                                size_t pos)
-    {
-        return LIXA_STATE_TABLES > pos ?
-            lixa_state_log_file_exists(&this->files[pos]) :
-            LIXA_RC_OUT_OF_RANGE;
-    }
-
+    int lixa_state_log_file_exist(lixa_state_log_t *this);
+        
 
 
     /**
@@ -259,94 +233,48 @@ extern "C" {
 
 
     /**
-     * Set the file to be used for logging
-     */
-    static inline void lixa_state_log_set_used_file(
-        lixa_state_log_t *this, size_t used_file) {
-        if (LIXA_STATE_TABLES > used_file)
-            this->used_file = used_file;
-        else {
-            LIXA_TRACE(("lixa_state_log_set_used_file: used_file="
-                        SIZE_T_FORMAT"!!!\n", used_file));
-        }
-    }
-
-    
-
-    /**
-     * Return the pathname of one of the files associated to the state log
-     * @param[in] this current state log object
-     * @param[in] pos position of the file to be checked in the array
-     * @return a pathname
+     * Return the pathname of the file associated to the state log file
+     * object
      */
     static inline const char* lixa_state_log_get_pathname(
-        const lixa_state_log_t *this, size_t pos) {
-        return LIXA_STATE_TABLES > pos ?
-            lixa_state_log_file_get_pathname(&this->files[pos]) : NULL;
+        const lixa_state_log_t *this) {
+        return this->pathname;
     }
 
-    
-    
+
+
     /**
-     * Flush the records to the underlying file
-     * @param[in,out] this state log object
-     * @param[in] state_table
-     * @return a reason code
+     * Return the id of the last record in the log
      */
-    int lixa_state_log_flush(lixa_state_log_t *this,
-                             const lixa_state_table_t *state_table);
-    /*
-                             status_record_t *status_records);
-    */
+    static inline lixa_word_t lixa_state_log_get_last_record_id(
+        const lixa_state_log_t *this) {
+        return this->last_record_id;
+    }
+
+
+
+    /**
+     * Return the id of the next record that will be appended in the log;
+     * updated the id of the last record as well
+     * @param[in,out] this state log object
+     * @return the id of the next record
+     */
+    static inline lixa_word_t lixa_state_log_get_next_record_id(
+        lixa_state_log_t *this) {
+        if (0 == ++(this->last_record_id))
+            /* 0 is a reserved value and must be skipped */
+            ++(this->last_record_id);
+        return this->last_record_id;
+    }
+
+
     
-
-
     /**
      * Extend the underlying file
      * @param[in,out] this state log object
      * @return a reason code
      */
     int lixa_state_log_extend(lixa_state_log_t *this);
-
-
-
-    /**
-     * Mark a block because it has been updated; the function assumes that
-     * a block has not been marked before, the function does not manage
-     * deduplication by itself
-     * @param[in,out] this state log object
-     * @param[in] block_id of the changed block
-     * @return a reason code
-     */
-    int lixa_state_log_mark_block(lixa_state_log_t *this,
-                                  uint32_t block_id);
-
-
-
-    /**
-     * Returns the number of marked block_ids
-     * @param[in,out] this state log object
-     * @return a value
-     */     
-    static inline uint32_t lixa_state_log_get_number_of_block_ids(
-        lixa_state_log_t *this)
-    {
-        return this->number_of_block_ids;
-    }
-
-
-
-    /**
-     * Check if the state log require some actions
-     * @param[in,out] this state log object
-     * @param[out] must_flush if the buffer is full and it must be flushed
-     * @param[out] must_switch if the log is full and it must be switched (or
-     *             expanded); must_flush must be ever TRUE when must_switch is
-     *             TRUE
-     * @return a boolean value
-     */     
-    int lixa_state_log_check_actions(lixa_state_log_t *this,
-                                     int *must_flush, int *must_switch);
 
 
 
@@ -406,13 +334,88 @@ extern "C" {
 
 
     /**
-     * Entry point of the flusher thread
-     * @param[in,out] data is of type @ref lixa_state_log_t
+     * Return the total size of the underlying file in bytes
      */
-    void *lixa_state_log_flusher(void *data);
+    static inline off_t lixa_state_log_get_total_size(lixa_state_log_t *this)
+    {
+        off_t total_size;
+        pthread_mutex_lock(&this->file_synchronizer.mutex);
+        total_size = this->file_synchronizer.total_size;
+        pthread_mutex_unlock(&this->file_synchronizer.mutex);
+        return total_size;
+    }
 
 
     
+    /**
+     * Return the reserved size of the underlying file in bytes
+     */
+    static inline off_t lixa_state_log_get_reserved(lixa_state_log_t *this)
+    {
+        off_t reserved;
+        pthread_mutex_lock(&this->file_synchronizer.mutex);
+        reserved = this->file_synchronizer.reserved;
+        pthread_mutex_unlock(&this->file_synchronizer.mutex);
+        return reserved;
+    }
+
+
+    
+    /**
+     * Set a reserved space in the log file, at the right offset
+     * @param[in,out] this state log object
+     * @param[in] reserved space in byte that must be reserved
+     * @return a reason code
+     */
+    int lixa_state_log_set_reserved(lixa_state_log_t *this,
+                                    off_t reserved);
+
+
+
+    /**
+     * Return the offset of the first writable page in the underlying file
+     */
+    static inline off_t lixa_state_log_get_offset(lixa_state_log_t *this)
+    {
+        off_t offset;
+        pthread_mutex_lock(&this->file_synchronizer.mutex);
+        offset = this->file_synchronizer.offset;
+        pthread_mutex_unlock(&this->file_synchronizer.mutex);
+        return offset;
+    }
+
+
+
+    /**
+     * Return the free space really available in the file, taking into
+     * consideration even reserved space in the event of a
+     * scheduled/in progress write operation
+     */
+    static inline off_t lixa_state_log_get_free_space(lixa_state_log_t *this)
+    {
+        off_t free_space;
+        pthread_mutex_lock(&this->file_synchronizer.mutex);
+        free_space = this->file_synchronizer.total_size -
+            this->file_synchronizer.offset -
+            this->file_synchronizer.reserved;
+        pthread_mutex_unlock(&this->file_synchronizer.mutex);
+        return free_space;
+    }
+
+
+    
+    /**
+     * Write a buffer to the state log
+     * @param[in,out] this state log file object
+     * @param[in] buffer to be written
+     * @param[in] number_of_pages to write
+     * @return a reason code
+     */
+    int lixa_state_log_write(lixa_state_log_t *this, const void *buffer,
+                             size_t number_of_pages);
+
+    
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
