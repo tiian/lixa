@@ -1,7 +1,3 @@
-Implement set_status function for log as it is for table
-
-Restart from lixa_state_switch
-
 From lixa_state_log.c to lixa_state.c reproduce the behaviour related
 to sync.* fields:
 mutex
@@ -10,13 +6,6 @@ operation
 file_pos
 to_be_flushed
 thread
-
-Reproduce in lixa_state_log the same structure of lixa_state_table: move to
-lixa_state some logic, move logic from lixa_state_log_file to lixa_state_log
-and remove the intermediate level
-
-Go on with function lixa_state_switch: implement the background synch of the
-current (old) state file
 
 Remove thread_status_insert_old
 

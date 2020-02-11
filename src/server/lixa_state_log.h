@@ -79,13 +79,13 @@ extern const char *LIXA_STATE_LOG_FILE_SUFFIX;
  * Possible statuses of a state log
  */
 enum lixa_state_log_status_e {
-    STATE_LOG_FILE_UNDEFINED = 0,
-    STATE_LOG_FILE_FORMATTED,
-    STATE_LOG_FILE_USED,
-    STATE_LOG_FILE_FULL,
-    STATE_LOG_FILE_EXTENDED,
-    STATE_LOG_FILE_CLOSED,
-    STATE_LOG_FILE_DISPOSED
+    STATE_LOG_UNDEFINED = 0,
+    STATE_LOG_FORMATTED,
+    STATE_LOG_USED,
+    STATE_LOG_FULL,
+    STATE_LOG_EXTENDED,
+    STATE_LOG_CLOSED,
+    STATE_LOG_DISPOSED
 };
 
 
@@ -416,6 +416,31 @@ extern "C" {
 
     
 
+    /**
+     * Set a new status for the state log: before setting, it checks if the
+     * transition is valid or not
+     * @param[in,out] this state log object
+     * @param[in] new_status to be set
+     * @param[in] dry_run boolean value, TRUE if function must only test the
+     *            status change, FALSE if real switch must be performed
+     * @return a reason code
+     */
+    int lixa_state_log_set_status(lixa_state_log_t *this,
+                                  enum lixa_state_log_status_e new_status,
+                                  int dry_run);
+
+
+    
+    /**
+     * Return the current status of the state table
+     */
+    static inline enum lixa_state_log_status_e
+    lixa_state_log_get_status(const lixa_state_log_t *this) {
+        return this->status;
+    }
+
+
+    
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

@@ -265,6 +265,8 @@
     " bytes to file '%s': storage is very slow"
 #define LIXA_SYSLOG_LXD061I "LXD061I msync lasted %ld ms for " OFF_T_FORMAT \
     " bytes to file '%s': storage is quite slow"
+#define LIXA_SYSLOG_LXD062N "LXD062N father thread waited log flusher " \
+    "thread for %ld ms; storage is not properly tuned for the real workload"
 
 
 
