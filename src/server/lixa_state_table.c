@@ -231,6 +231,96 @@ int lixa_state_table_create_new_file(lixa_state_table_t *this,
 
 
 
+int lixa_state_table_open_file(lixa_state_table_t *this, int read_only)
+{
+    enum Exception {
+        NULL_OBJECT,
+        INVALID_STATUS,
+        OPEN_ERROR,
+        FSTAT_ERROR,
+        MMAP_ERROR,
+        SET_STATUS,
+        NONE
+    } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    
+    LIXA_TRACE(("lixa_state_table_open_file\n"));
+    TRY {
+        struct stat fd_stat;
+        
+        if (NULL == this)
+            THROW(NULL_OBJECT);
+        /* check status */
+        if (LIXA_RC_OK != (ret_cod = lixa_state_table_set_status(
+                               this, STATE_TABLE_OPENED, TRUE))) {
+            LIXA_TRACE(("lixa_state_table_open_file: status %d does not "
+                        "allow open operation\n", this->status));
+            THROW(INVALID_STATUS);
+        }
+        
+        LIXA_SYSLOG((LOG_INFO, LIXA_SYSLOG_LXD063I, this->pathname));
+        /* open the file descriptor */
+        if (-1 == (this->fd = open(this->pathname, this->flags))) {
+            LIXA_TRACE(("lixa_state_table_open_file: open('%s')=%d "
+                        "(%s)\n", this->pathname, errno, strerror(errno)));
+            LIXA_SYSLOG((LOG_WARNING, LIXA_SYSLOG_LXD064W,
+                         this->pathname, errno, strerror(errno)));
+            THROW(OPEN_ERROR);
+        }
+        /* retrieve file size */
+        if (0 != fstat(this->fd, &fd_stat))
+            THROW(FSTAT_ERROR);
+        /* map the file */
+        if (NULL == (this->map = mmap(NULL, fd_stat.st_size,
+                                      PROT_READ | PROT_WRITE,
+                                      read_only ? MAP_PRIVATE : MAP_SHARED,
+                                      this->fd, 0)))
+            THROW(MMAP_ERROR);
+        LIXA_TRACE(("lixa_state_table_open_file: state table file '%s' mapped "
+                    "at address %p\n", this->pathname, this->map));
+
+        /* analyze the content */
+        /* @@@ */
+        
+        /* move status to OPENED */
+        if (LIXA_RC_OK != (ret_cod = lixa_state_table_set_status(
+                               this, STATE_TABLE_OPENED, FALSE)))
+            THROW(SET_STATUS);
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case NULL_OBJECT:
+                ret_cod = LIXA_RC_NULL_OBJECT;
+                break;
+            case INVALID_STATUS:
+                ret_cod = LIXA_RC_INVALID_STATUS;
+                break;
+            case OPEN_ERROR:
+                ret_cod = LIXA_RC_OPEN_ERROR;
+                break;
+            case FSTAT_ERROR:
+                ret_cod = LIXA_RC_FSTAT_ERROR;
+                break;
+            case MMAP_ERROR:
+                ret_cod = LIXA_RC_MMAP_ERROR;
+                break;
+            case SET_STATUS:
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("lixa_state_table_open_file/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
+
 int lixa_state_table_sync_block(lixa_state_table_t *this,
                                 uint32_t block_id)
 {
@@ -342,17 +432,16 @@ int lixa_state_table_map(lixa_state_table_t *this, int read_only)
         if (NULL == this)
             THROW(NULL_OBJECT);
         /* check status */
-        if (STATE_TABLE_FORMATTED != this->status ||
-            LIXA_RC_OK != (ret_cod = lixa_state_table_set_status(
+        if (LIXA_RC_OK != (ret_cod = lixa_state_table_set_status(
                                this, STATE_TABLE_USED, TRUE))) {
             LIXA_TRACE(("lixa_state_table_map: status %d does not "
                         "allow map operation\n", this->status));
             THROW(INVALID_STATUS);
         }
-        /* map the file */
+        /* retrieve file size */
         if (0 != fstat(this->fd, &fd_stat))
             THROW(FSTAT_ERROR);
-
+        /* map the file */
         if (NULL == (this->map = mmap(NULL, fd_stat.st_size,
                                       PROT_READ | PROT_WRITE,
                                       read_only ? MAP_PRIVATE : MAP_SHARED,
@@ -690,14 +779,22 @@ int lixa_state_table_set_status(lixa_state_table_t *this,
                     valid = FALSE;
                 }
                 break;
+            case STATE_TABLE_OPENED:
+                if (STATE_TABLE_UNDEFINED != this->status) {
+                    LIXA_TRACE(("lixa_state_table_set_status: transition to "
+                                "OPENED is acceptable only from UNDEFINED\n"));
+                    valid = FALSE;
+                }
+                break;
             case STATE_TABLE_USED:
                 if (STATE_TABLE_COPY_TARGET != this->status &&
                     STATE_TABLE_FORMATTED != this->status &&
+                    STATE_TABLE_OPENED != this->status &&
                     STATE_TABLE_EXTENDED != this->status &&
                     STATE_TABLE_FULL != this->status) {
                     LIXA_TRACE(("lixa_state_table_set_status: transition to "
                                 "USED is acceptable only from COPY_TARGET, "
-                                "FORMATTED, EXTENDED and FULL\n"));
+                                "FORMATTED, OPENED, EXTENDED and FULL\n"));
                     valid = FALSE;
                 }
                 break;

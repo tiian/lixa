@@ -215,6 +215,15 @@ extern "C" {
                                        void *single_page);
 
 
+
+    /**
+     * Open an existing state log file
+     * @param[in,out] this state log object
+     * @return a reason code
+     */
+    int lixa_state_log_open_file(lixa_state_log_t *this);
+
+
     
     /**
      * Check if an underlying file exists and can be opened

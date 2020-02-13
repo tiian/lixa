@@ -65,6 +65,7 @@ extern const char *LIXA_STATE_TABLE_SUFFIX;
 enum lixa_state_table_status_e {
     STATE_TABLE_UNDEFINED = 0,
     STATE_TABLE_FORMATTED,
+    STATE_TABLE_OPENED,
     STATE_TABLE_USED,
     STATE_TABLE_FULL,
     STATE_TABLE_EXTENDED,
@@ -134,6 +135,17 @@ extern "C" {
      */
     int lixa_state_table_create_new_file(lixa_state_table_t *this,
                                          uint32_t number_of_blocks);
+
+
+
+    /**
+     * Open an existing state log table
+     * @param[in,out] this state table object
+     * @param[in] read_only boolean condition that allows to open the file only
+     *                      for reading
+     * @return a reason code
+     */
+    int lixa_state_table_open_file(lixa_state_table_t *this, int read_only);
 
     
 

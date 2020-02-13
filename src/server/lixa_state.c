@@ -71,6 +71,7 @@ int lixa_state_init(lixa_state_t *this, const char *path_prefix,
         STATE_TABLE_INIT_ERROR,
         ANALYZE_AND_START,
         COLD_START_ERROR,
+        WARM_START_ERROR,
         NONE
     } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
@@ -81,7 +82,7 @@ int lixa_state_init(lixa_state_t *this, const char *path_prefix,
     TRY {
         int error, i;
         size_t pathname_len;
-        int state_exists[LIXA_STATE_TABLES];
+        int table_exists[LIXA_STATE_TABLES];
         int log_exists[LIXA_STATE_TABLES];
         int cold_start = FALSE;
         
@@ -224,12 +225,12 @@ int lixa_state_init(lixa_state_t *this, const char *path_prefix,
                 LIXA_SYSLOG((LOG_INFO, LIXA_SYSLOG_LXD036I,
                              lixa_state_table_get_pathname(
                                  &(this->tables[i]))));
-                state_exists[i] = TRUE;
+                table_exists[i] = TRUE;
             } else {
                 LIXA_SYSLOG((LOG_NOTICE, LIXA_SYSLOG_LXD037N,
                              lixa_state_table_get_pathname(
                                  &(this->tables[i]))));
-                state_exists[i] = FALSE;
+                table_exists[i] = FALSE;
             }
             /* check log files */
             if (LIXA_RC_OK == (ret_cod = lixa_state_log_file_exist(
@@ -245,7 +246,7 @@ int lixa_state_init(lixa_state_t *this, const char *path_prefix,
         }
         /* analyze how many file exists and how to proceed... */
         if (LIXA_RC_OK != (ret_cod = lixa_state_analyze(
-                               this, state_exists, log_exists, &cold_start)))
+                               this, table_exists, log_exists, &cold_start)))
             THROW(ANALYZE_AND_START);
         
         /* cold start or warm restart */
@@ -253,8 +254,9 @@ int lixa_state_init(lixa_state_t *this, const char *path_prefix,
             if (LIXA_RC_OK != (ret_cod = lixa_state_cold_start(this)))
                 THROW(COLD_START_ERROR);
         } else {
-            /* @@@ warm start */
-            ;
+            if (LIXA_RC_OK != (ret_cod = lixa_state_warm_start(
+                                   this, table_exists, log_exists, FALSE)))
+                THROW(WARM_START_ERROR);
         }
                     
         THROW(NONE);
@@ -295,8 +297,8 @@ int lixa_state_init(lixa_state_t *this, const char *path_prefix,
             case STATE_LOG_INIT_ERROR:
             case STATE_TABLE_INIT_ERROR:
             case ANALYZE_AND_START:
-                break;
             case COLD_START_ERROR:
+            case WARM_START_ERROR:
                 break;
             case NONE:
                 ret_cod = LIXA_RC_OK;
@@ -332,7 +334,7 @@ int lixa_state_init(lixa_state_t *this, const char *path_prefix,
 
 
 int lixa_state_analyze(lixa_state_t *this,
-                       const int *state_exists,
+                       const int *table_exists,
                        const int *log_exists,
                        int *cold_start)
 {
@@ -344,29 +346,29 @@ int lixa_state_analyze(lixa_state_t *this,
     
     LIXA_TRACE(("lixa_state_analyze\n"));
     TRY {
-        int i, number_of_states, number_of_logs, number_of_consec_states,
-            number_of_consec_logs, previous_state, previous_log;
+        int i, number_of_tables, number_of_logs, number_of_consec_tables,
+            number_of_consec_logs, previous_table, previous_log;
         /* by default, the state server restart from previous state */
         *cold_start = FALSE;
         /* count the number of state tables and log files */
-        number_of_states = number_of_logs = number_of_consec_states =
+        number_of_tables = number_of_logs = number_of_consec_tables =
             number_of_consec_logs = 0;
-        previous_state = previous_log = TRUE;
+        previous_table = previous_log = TRUE;
         for (i=0; i<LIXA_STATE_TABLES; ++i) {
-            if (state_exists[i])
-                number_of_states++;
+            if (table_exists[i])
+                number_of_tables++;
             if (log_exists[i])
                 number_of_logs++;
             if (0 == i) {
-                if (previous_state && state_exists[i])
-                    number_of_consec_states++;
+                if (previous_table && table_exists[i])
+                    number_of_consec_tables++;
                 else
-                    previous_state = FALSE;
+                    previous_table = FALSE;
             } else {
-                if (previous_state && state_exists[i])
-                    number_of_consec_states++;
+                if (previous_table && table_exists[i])
+                    number_of_consec_tables++;
                 else
-                    previous_state = FALSE;
+                    previous_table = FALSE;
                 if (previous_log && log_exists[i])
                     number_of_consec_logs++;
                 else
@@ -374,26 +376,26 @@ int lixa_state_analyze(lixa_state_t *this,
             }
         }
         /* fix the number of ordered logs if necessary */
-        if (number_of_consec_states == LIXA_STATE_TABLES &&
+        if (number_of_consec_tables == LIXA_STATE_TABLES &&
             number_of_consec_logs == LIXA_STATE_TABLES-1 &&
             log_exists[0])
             number_of_consec_logs++;
             
         LIXA_TRACE(("lixa_state_analyze: number of table files "
                     "is %d/%d, number of log files is %d/%d\n",
-                    number_of_consec_states, number_of_states,
+                    number_of_consec_tables, number_of_tables,
                     number_of_consec_logs, number_of_logs));
-        if (0 == number_of_states && 0 == number_of_logs) {
+        if (0 == number_of_tables && 0 == number_of_logs) {
             /* no file exists */
             LIXA_SYSLOG((LOG_NOTICE, LIXA_SYSLOG_LXD038N));
             *cold_start = TRUE;
-        } else if (1 == number_of_consec_states &&
+        } else if (1 == number_of_consec_tables &&
                    0 == number_of_consec_logs) {
             /* only first state table is available */
             LIXA_SYSLOG((LOG_WARNING, LIXA_SYSLOG_LXD039W,
                          lixa_state_table_get_pathname(&(this->tables[0]))));
             *cold_start = TRUE;
-        } else if (2 == number_of_consec_states &&
+        } else if (2 == number_of_consec_tables &&
                    0 == number_of_consec_logs) {
             /* only first and second state tables are available */
             LIXA_SYSLOG((LOG_WARNING, LIXA_SYSLOG_LXD040W,
@@ -401,17 +403,17 @@ int lixa_state_analyze(lixa_state_t *this,
                          lixa_state_table_get_pathname(&(this->tables[1]))));
             *cold_start = TRUE;
         } else if (
-            (number_of_states == number_of_consec_states &&
+            (number_of_tables == number_of_consec_tables &&
              number_of_logs == number_of_consec_logs) && (
                  /* state tables are 1 more than log files */
-                 (number_of_consec_states == number_of_consec_logs+1) ||
+                 (number_of_consec_tables == number_of_consec_logs+1) ||
                  /* state tables are 2 more than log files */
-                 (number_of_consec_states == number_of_consec_logs+2) ||
+                 (number_of_consec_tables == number_of_consec_logs+2) ||
                  /* state tables and log files are the same number */
-                 (number_of_consec_states == number_of_consec_logs)
+                 (number_of_consec_tables == number_of_consec_logs)
                                                            )) {
             LIXA_SYSLOG((LOG_WARNING, LIXA_SYSLOG_LXD041N,
-                         number_of_states, number_of_logs));
+                         number_of_tables, number_of_logs));
         } else {
             LIXA_SYSLOG((LOG_WARNING, LIXA_SYSLOG_LXD042E));
             THROW(CORRUPTED_STATUS_FILE);
@@ -483,8 +485,8 @@ int lixa_state_cold_start(lixa_state_t *this)
             THROW(TABLE_SYNCHRONIZE);
         }
         */
-        if (LIXA_RC_OK != (ret_cod = (lixa_state_table_close(
-                                          &this->tables[0])))) {
+        if (LIXA_RC_OK != (
+                ret_cod = (lixa_state_table_close(&this->tables[0])))) {
             LIXA_SYSLOG((LOG_ERR, LIXA_SYSLOG_LXD046E,
                          lixa_state_table_get_pathname(&this->tables[0])));
             THROW(TABLE_CLOSE);
@@ -504,8 +506,8 @@ int lixa_state_cold_start(lixa_state_t *this)
                          lixa_state_table_get_pathname(&this->tables[1])));
             THROW(TABLE_CREATE_NEW_FILE2);
         }
-        if (LIXA_RC_OK != (ret_cod = (lixa_state_table_map(
-                                          &this->tables[1], FALSE)))) {
+        if (LIXA_RC_OK != (
+                ret_cod = (lixa_state_table_map(&this->tables[1], FALSE)))) {
             LIXA_SYSLOG((LOG_ERR, LIXA_SYSLOG_LXD057E,
                          lixa_state_table_get_pathname(&this->tables[1])));
             THROW(TABLE_MAP);
@@ -558,6 +560,61 @@ int lixa_state_cold_start(lixa_state_t *this)
         } /* switch (excp) */
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_state_cold_start/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
+
+int lixa_state_warm_start(lixa_state_t *this,
+                          const int *table_exists,
+                          const int *log_exists,
+                          int read_only)
+{
+    enum Exception {
+        NULL_OBJECT,
+        TABLE_OPEN_ERROR,
+        NONE
+    } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    
+    LIXA_TRACE(("lixa_state_warm_start\n"));
+    TRY {
+        int i;
+
+        if (NULL == this)
+            THROW(NULL_OBJECT);
+        
+        /* open all the available files */
+        for (i=0; i<LIXA_STATE_TABLES; ++i) {
+            if (table_exists[i])
+                if (LIXA_RC_OK != (ret_cod = lixa_state_table_open_file(
+                                       &this->tables[i], read_only)))
+                    THROW(TABLE_OPEN_ERROR);
+            if (log_exists[i])
+                if (LIXA_RC_OK != (ret_cod = lixa_state_log_open_file(
+                                       &this->logs[i])))
+                    THROW(TABLE_OPEN_ERROR);
+        } /* for (i=0; i<LIXA_STATE_TABLES; ++i) */
+
+        /* @@@ analyze the tables and the logs */
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case NULL_OBJECT:
+                ret_cod = LIXA_RC_NULL_OBJECT;
+                break;
+            case TABLE_OPEN_ERROR:
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("lixa_state_warm_start/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }

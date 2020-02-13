@@ -439,6 +439,55 @@ int lixa_state_log_create_new_file(lixa_state_log_t *this, void *single_page)
 
 
 
+int lixa_state_log_open_file(lixa_state_log_t *this)
+{
+    enum Exception {
+        NULL_OBJECT,
+        OPEN_ERROR,
+        NONE
+    } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    
+    LIXA_TRACE(("lixa_state_log_open_file\n"));
+    TRY {
+        if (NULL == this)
+            THROW(NULL_OBJECT);
+        
+        LIXA_SYSLOG((LOG_INFO, LIXA_SYSLOG_LXD065I, this->pathname));
+        /* open the file descriptor */
+        if (-1 == (this->fd = open(this->pathname, this->pers_flags))) {
+            LIXA_TRACE(("lixa_state_log_open_file: open('%s')=%d "
+                        "(%s)\n", this->pathname, errno, strerror(errno)));
+            LIXA_SYSLOG((LOG_WARNING, LIXA_SYSLOG_LXD066W,
+                         this->pathname, errno, strerror(errno)));
+            THROW(OPEN_ERROR);
+        }
+        /* analyze the content */
+        /* @@@ */
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case NULL_OBJECT:
+                ret_cod = LIXA_RC_NULL_OBJECT;
+                break;
+            case OPEN_ERROR:
+                ret_cod = LIXA_RC_OPEN_ERROR;
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("lixa_state_log_open_file/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
+
 int lixa_state_log_set_reserved(lixa_state_log_t *this, off_t reserved)
 {
     enum Exception {

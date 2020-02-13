@@ -226,24 +226,24 @@
     "and '%s' are " \
     "available: probably a previous bootstrap failed prematurely; a cold " \
     "start will be attempted"
-#define LIXA_SYSLOG_LXD041N "LXD041N %d state tables and %d log files are " \
+#define LIXA_SYSLOG_LXD041N "LXD041N %d table files and %d log files are " \
     "available: a warm restart will be attempted"
-#define LIXA_SYSLOG_LXD042E "LXD042E the available state tables and log " \
+#define LIXA_SYSLOG_LXD042E "LXD042E the available table files and log " \
     "files are not consistent: recover the missing ones to attempt a warm " \
     "restart or delete all to attempt a cold start"
-#define LIXA_SYSLOG_LXD043E "LXD043E unable to create state table ('%s')"
-#define LIXA_SYSLOG_LXD044I "LXD044I creating a new state table ('%s')"
-#define LIXA_SYSLOG_LXD045E "LXD045E unable to synchronize state table ('%s')"
-#define LIXA_SYSLOG_LXD046E "LXD046E unable to close state table ('%s')"
-#define LIXA_SYSLOG_LXD047I "LXD047I creating a new state log ('%s')"
-#define LIXA_SYSLOG_LXD048E "LXD048E unable to create state log ('%s')"
+#define LIXA_SYSLOG_LXD043E "LXD043E unable to create table file ('%s')"
+#define LIXA_SYSLOG_LXD044I "LXD044I creating a new table file ('%s')"
+#define LIXA_SYSLOG_LXD045E "LXD045E unable to synchronize table file ('%s')"
+#define LIXA_SYSLOG_LXD046E "LXD046E unable to close table file ('%s')"
+#define LIXA_SYSLOG_LXD047I "LXD047I creating a new log file ('%s')"
+#define LIXA_SYSLOG_LXD048E "LXD048E unable to create log file ('%s')"
 #define LIXA_SYSLOG_LXD049I "LXD049I cold start was successful for new " \
     "files '%s', '%s', and '%s'"
 #define LIXA_SYSLOG_LXD050N "LXD050N state log buffer reached the " \
     "configured upper limit and must " \
     "be flushed, current limit is " SIZE_T_FORMAT " bytes, " \
     "a larger one might perform better"
-#define LIXA_SYSLOG_LXD051I "LXD051I state log '%s' is full and it " \
+#define LIXA_SYSLOG_LXD051I "LXD051I state log file '%s' is full and it " \
     "must be switched"
 #define LIXA_SYSLOG_LXD052W "LXD052W state log buffer can not be extended " \
     "due to lack of RAM, a larger one might perform better"
@@ -256,7 +256,7 @@
     "%ld ms: this must be considered a slow performance"
 #define LIXA_SYSLOG_LXD056I "LXD056I pwrite operation to log file required " \
     "%ld ms: this must be considered a non optimal performance"
-#define LIXA_SYSLOG_LXD057E "LXD057E unable to use state table ('%s')"
+#define LIXA_SYSLOG_LXD057E "LXD057E unable to use table file ('%s')"
 #define LIXA_SYSLOG_LXD058N "LXD058N father thread waited table flusher " \
     "thread for %ld ms; storage is not properly tuned for the real workload"
 #define LIXA_SYSLOG_LXD059W "LXD059W msync lasted %ld ms for " OFF_T_FORMAT \
@@ -267,6 +267,12 @@
     " bytes to file '%s': storage is quite slow"
 #define LIXA_SYSLOG_LXD062N "LXD062N father thread waited log flusher " \
     "thread for %ld ms; storage is not properly tuned for the real workload"
+#define LIXA_SYSLOG_LXD063I "LXD063I opening state table file '%s'"
+#define LIXA_SYSLOG_LXD064W "LXD063W state table file '%s' can not be " \
+    "opened: errno=%d (%s)"
+#define LIXA_SYSLOG_LXD065I "LXD065I opening state log file '%s'"
+#define LIXA_SYSLOG_LXD066W "LXD066W state log file '%s' can not be " \
+    "opened: errno=%d (%s)"
 
 
 

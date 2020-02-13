@@ -1,11 +1,6 @@
-From lixa_state_log.c to lixa_state.c reproduce the behaviour related
-to sync.* fields:
-mutex
-cond
-operation
-file_pos
-to_be_flushed
-thread
+Go on with lixa_state_table_open
+Go on with lixa_state_log_open
+Go on with lixa_state_warm_start
 
 Remove thread_status_insert_old
 

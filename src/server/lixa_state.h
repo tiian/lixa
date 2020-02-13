@@ -221,21 +221,21 @@ extern "C" {
      * Analyze the available state and log files: establish if a warm restart
      * or a cold start must be performed
      * @param[in,out] this state object
-     * @param[in] state_exists specifies which state tables are available
-     * @param[in] log_exists specifies which log tables are available
+     * @param[in] table_exists specifies which table files are available
+     * @param[in] log_exists specifies which log files are available
      * @param[out] cold_start returns TRUE if a cold start must be performed
      * @return a reason code
      */     
     int lixa_state_analyze(lixa_state_t *this,
-                           const int *state_exists,
+                           const int *table_exists,
                            const int *log_exists,
                            int *cold_start);
 
     
     
     /**
-     * Create new state and log files for this state object because a cold
-     * start must be done
+     * Start a fresh new state table and log set because a cold start must be
+     * done
      * @param[in,out] this state object
      * @return a reason code
      */
@@ -243,6 +243,22 @@ extern "C" {
 
     
     
+    /**
+     * Start the existing state table and log set because a warm start must be
+     * done
+     * @param[in,out] this state object
+     * @param[in] table_exists specifies which table files are available
+     * @param[in] log_exists specifies which log files are available
+     * @param[in] read_only mode for state inspection from another process
+     * @return a reason code
+     */
+    int lixa_state_warm_start(lixa_state_t *this,
+                              const int *table_exists,
+                              const int *log_exists,
+                              int read_only);
+
+    
+
     /**
      * Cleanup a State object
      * @param[in,out] this state object
