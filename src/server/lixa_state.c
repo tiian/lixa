@@ -49,7 +49,7 @@
 
 
 int lixa_state_init(lixa_state_t *this, const char *path_prefix,
-                    size_t max_buffer_log_size)
+                    size_t max_buffer_log_size, int read_only)
 {
     enum Exception {
         NULL_OBJECT1,
@@ -207,14 +207,14 @@ int lixa_state_init(lixa_state_t *this, const char *path_prefix,
                      LIXA_STATE_LOG_FILE_SUFFIX);
             if (LIXA_RC_OK != (ret_cod = lixa_state_log_init(
                                    &(this->logs[i]), pathname,
-                                   max_buffer_log_size,
+                                   max_buffer_log_size, read_only,
                                    TRUE, FALSE, FALSE, FALSE)))
                 THROW(STATE_LOG_INIT_ERROR);
             /* initialize the state tables */
             snprintf(pathname, pathname_len, "%s_%d%s", path_prefix, i,
                      LIXA_STATE_TABLE_SUFFIX);
             if (LIXA_RC_OK != (ret_cod = lixa_state_table_init(
-                                   &(this->tables[i]), pathname)))
+                                   &(this->tables[i]), pathname, read_only)))
                 THROW(STATE_TABLE_INIT_ERROR);
         }
         /* check for file existence */
@@ -589,7 +589,7 @@ int lixa_state_warm_start(lixa_state_t *this,
         for (i=0; i<LIXA_STATE_TABLES; ++i) {
             if (table_exists[i])
                 if (LIXA_RC_OK != (ret_cod = lixa_state_table_open_file(
-                                       &this->tables[i], read_only)))
+                                       &this->tables[i])))
                     THROW(TABLE_OPEN_ERROR);
             if (log_exists[i])
                 if (LIXA_RC_OK != (ret_cod = lixa_state_log_open_file(

@@ -60,7 +60,7 @@ const char *LIXA_STATE_TABLE_SUFFIX = ".table";
 
 
 int lixa_state_table_init(lixa_state_table_t *this,
-                         const char *pathname)
+                          const char *pathname, int read_only)
 {
     enum Exception {
         NULL_OBJECT1,
@@ -88,7 +88,10 @@ int lixa_state_table_init(lixa_state_table_t *this,
         /* keep a local copy of the pathname */
         if (NULL == (this->pathname = strdup(pathname)))
             THROW(STRDUP_ERROR);
-        this->flags = O_RDWR;
+        if (read_only)
+            this->flags = O_RDONLY;
+        else
+            this->flags = O_RDWR;
         this->fd = LIXA_NULL_FD;
         
         THROW(NONE);
@@ -231,7 +234,7 @@ int lixa_state_table_create_new_file(lixa_state_table_t *this,
 
 
 
-int lixa_state_table_open_file(lixa_state_table_t *this, int read_only)
+int lixa_state_table_open_file(lixa_state_table_t *this)
 {
     enum Exception {
         NULL_OBJECT,
@@ -239,6 +242,7 @@ int lixa_state_table_open_file(lixa_state_table_t *this, int read_only)
         OPEN_ERROR,
         FSTAT_ERROR,
         MMAP_ERROR,
+        CHECK_INTEGRITY,
         SET_STATUS,
         NONE
     } excp;
@@ -247,6 +251,7 @@ int lixa_state_table_open_file(lixa_state_table_t *this, int read_only)
     LIXA_TRACE(("lixa_state_table_open_file\n"));
     TRY {
         struct stat fd_stat;
+        int read_only;
         
         if (NULL == this)
             THROW(NULL_OBJECT);
@@ -271,15 +276,20 @@ int lixa_state_table_open_file(lixa_state_table_t *this, int read_only)
         if (0 != fstat(this->fd, &fd_stat))
             THROW(FSTAT_ERROR);
         /* map the file */
-        if (NULL == (this->map = mmap(NULL, fd_stat.st_size,
-                                      PROT_READ | PROT_WRITE,
-                                      read_only ? MAP_PRIVATE : MAP_SHARED,
-                                      this->fd, 0)))
+        read_only = this->flags & O_RDONLY;
+        if (NULL == (this->map = mmap(
+                         NULL, fd_stat.st_size,
+                         read_only ? PROT_READ : PROT_READ | PROT_WRITE,
+                         read_only ? MAP_PRIVATE : MAP_SHARED,
+                         this->fd, 0)))
             THROW(MMAP_ERROR);
         LIXA_TRACE(("lixa_state_table_open_file: state table file '%s' mapped "
                     "at address %p\n", this->pathname, this->map));
 
         /* analyze the content */
+        if (LIXA_RC_OK != (ret_cod = lixa_state_table_check_integrity(this)))
+            THROW(CHECK_INTEGRITY);
+        
         /* @@@ */
         
         /* move status to OPENED */
@@ -305,6 +315,7 @@ int lixa_state_table_open_file(lixa_state_table_t *this, int read_only)
             case MMAP_ERROR:
                 ret_cod = LIXA_RC_MMAP_ERROR;
                 break;
+            case CHECK_INTEGRITY:
             case SET_STATUS:
                 break;
             case NONE:
@@ -315,6 +326,82 @@ int lixa_state_table_open_file(lixa_state_table_t *this, int read_only)
         } /* switch (excp) */
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_state_table_open_file/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
+
+int lixa_state_table_check_integrity(lixa_state_table_t *this)
+{
+    enum Exception {
+        NULL_OBJECT,
+        CRC_DOES_NOT_MATCH1,
+        NONE
+    } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    
+    LIXA_TRACE(("lixa_state_table_check_integrity\n"));
+    TRY {
+        lixa_state_slot_t *first_slot = NULL;
+        uint32_t tmp_crc32;
+        char iso_timestamp[ISO_TIMESTAMP_BUFFER_SIZE];
+        
+        if (NULL == this)
+            THROW(NULL_OBJECT);
+        
+        /* check the integrity of first slot */
+        first_slot = &this->map[0];
+        tmp_crc32 = lixa_crc32((const uint8_t *)&first_slot->sr,
+                               sizeof(lixa_state_record_t));
+        if (tmp_crc32 != first_slot->crc32) {
+            LIXA_TRACE(("lixa_state_table_check_integrity: the CRC of the "
+                        "first block does not match current=" UINT32_T_FORMAT
+                        ", expected=" UINT32_T_FORMAT "\n", tmp_crc32,
+                        first_slot->crc32));
+            THROW(CRC_DOES_NOT_MATCH1);
+        }
+        LIXA_TRACE(("lixa_state_table_check_integrity:"
+                    " first block content:\n"));
+        LIXA_TRACE(("lixa_state_table_check_integrity:"
+                    "   [magic_number] = "
+                    UINT32_T_FORMAT "\n", first_slot->sr.ctrl.magic_number));
+        LIXA_TRACE(("lixa_state_table_check_integrity:"
+                    "   [level] = "
+                    UINT32_T_FORMAT "\n", first_slot->sr.ctrl.level));
+        lixa_utils_iso_timestamp(&first_slot->sr.ctrl.last_sync,
+                                 iso_timestamp, sizeof(iso_timestamp));
+        LIXA_TRACE(("lixa_state_table_check_integrity:"
+                    "   [last_sync] = %s\n", iso_timestamp));
+        LIXA_TRACE(("lixa_state_table_check_integrity:"
+                    "   [number_of_blocks] = " UINT32_T_FORMAT "\n",
+                    first_slot->sr.ctrl.number_of_blocks));
+        LIXA_TRACE(("lixa_state_table_check_integrity:"
+                    "   [first_used_block] = " UINT32_T_FORMAT "\n",
+                    first_slot->sr.ctrl.first_used_block));
+        LIXA_TRACE(("lixa_state_table_check_integrity:"
+                    "   [first_free_block] = " UINT32_T_FORMAT "\n",
+                    first_slot->sr.ctrl.first_free_block));
+        
+        /* @@@ implement me, copy from status_record_check_integrity */
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case NULL_OBJECT:
+                ret_cod = LIXA_RC_NULL_OBJECT;
+                break;
+            case CRC_DOES_NOT_MATCH1:
+                ret_cod = LIXA_RC_OBJ_CORRUPTED;
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("lixa_state_table_check_integrity/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }
@@ -339,6 +426,9 @@ int lixa_state_table_sync_block(lixa_state_table_t *this,
         if (LIXA_RC_OK != (
                 ret_cod = lixa_state_slot_sync(&this->map[block_id])))
             THROW(STATE_SLOT_SYNC);
+        LIXA_TRACE(("lixa_state_table_sync_block: block_id=" UINT32_T_FORMAT
+                    ", CRC32=" UINT32_T_FORMAT ")\n", block_id,
+                    lixa_state_slot_get_crc32(&this->map[block_id])));
         
         THROW(NONE);
     } CATCH {

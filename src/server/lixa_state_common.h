@@ -123,6 +123,16 @@ extern "C" {
     }
 
 
+
+    /**
+     * Return the CRC of the slot
+     */
+    static inline uint32_t lixa_state_slot_get_crc32(
+        const lixa_state_slot_t *slot) {
+        return slot->crc32;
+    }
+
+
     
     /**
      * Conversion from buffer size to number of pages

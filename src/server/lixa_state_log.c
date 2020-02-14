@@ -66,6 +66,7 @@ const char *LIXA_STATE_LOG_FILE_SUFFIX = ".log";
 int lixa_state_log_init(lixa_state_log_t *this,
                         const char *pathname,
                         size_t max_buffer_size,
+                        int read_only,
                         int o_direct_bool,
                         int o_dsync_bool,
                         int o_rsync_bool,
@@ -104,12 +105,15 @@ int lixa_state_log_init(lixa_state_log_t *this,
         memset(this, 0, sizeof(lixa_state_log_t));
         this->fd = LIXA_NULL_FD;
         /* try to open the already existent files */
-        pers_flags = O_RDWR;
+        if (read_only)
+            pers_flags = O_RDONLY;
+        else
+            pers_flags = O_RDWR;
         if (o_direct_bool) pers_flags |= O_DIRECT;
         if (o_dsync_bool)  pers_flags |= O_DSYNC;
         if (o_rsync_bool)  pers_flags |= O_RSYNC;
         if (o_sync_bool)   pers_flags |= O_SYNC;
-        this->pers_flags = pers_flags;
+        this->flags = pers_flags;
         /* keep a local copy of the pathname */
         if (NULL == (this->pathname = strdup(pathname)))
             THROW(STRDUP_ERROR);
@@ -316,7 +320,7 @@ int lixa_state_log_file_exist(lixa_state_log_t *this)
         if (NULL == this)
             THROW(NULL_OBJECT);
         /* try to open the file with the same flags of a real usage */
-        if (-1 == (fd = open(this->pathname, this->pers_flags)))
+        if (-1 == (fd = open(this->pathname, this->flags)))
             THROW(OPEN_ERROR);
         close(fd);
         
@@ -370,10 +374,10 @@ int lixa_state_log_create_new_file(lixa_state_log_t *this, void *single_page)
                                this, STATE_LOG_FORMATTED, TRUE)))
             THROW(INVALID_STATUS);
         /* add O_EXCL and O_CREAT flags: file must not exist */
-        this->pers_flags |= O_EXCL | O_CREAT;
+        this->flags |= O_EXCL | O_CREAT;
         /* mode flags (security) */
         mode = S_IRUSR | S_IWUSR | S_IRGRP;
-        if (-1 == (this->fd = open(this->pathname, this->pers_flags, mode)))
+        if (-1 == (this->fd = open(this->pathname, this->flags, mode)))
             THROW(OPEN_ERROR);
         /* obtain the lock of the synchronized structure */
         if (0 != (pte = pthread_mutex_lock(&this->file_synchronizer.mutex))) {
@@ -455,7 +459,7 @@ int lixa_state_log_open_file(lixa_state_log_t *this)
         
         LIXA_SYSLOG((LOG_INFO, LIXA_SYSLOG_LXD065I, this->pathname));
         /* open the file descriptor */
-        if (-1 == (this->fd = open(this->pathname, this->pers_flags))) {
+        if (-1 == (this->fd = open(this->pathname, this->flags))) {
             LIXA_TRACE(("lixa_state_log_open_file: open('%s')=%d "
                         "(%s)\n", this->pathname, errno, strerror(errno)));
             LIXA_SYSLOG((LOG_WARNING, LIXA_SYSLOG_LXD066W,

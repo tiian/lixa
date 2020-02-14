@@ -210,10 +210,12 @@ extern "C" {
      * @param[in] path_prefix of the state and log files
      * @param[in] max_buffer_log_size maximum number of bytes that can be used
      *            for the log I/O buffer
+     * @param[in] read_only must be TRUE if the state will be used only in
+     *            read-only mode
      * @return a reason code
      */
     int lixa_state_init(lixa_state_t *this, const char *path_prefix,
-                        size_t max_buffer_log_size);
+                        size_t max_buffer_log_size, int read_only);
 
 
 

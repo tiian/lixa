@@ -119,10 +119,12 @@ extern "C" {
      * @param[in,out] this object to be initialized
      * @param[in] pathname that must be used to open or create the underlying
      *            file
+     * @param[in] read_only must be TRUE if the object is created only for
+     *            reading state and not changing it
      * @return a reason code
      */
     int lixa_state_table_init(lixa_state_table_t *this,
-                             const char *pathname);
+                              const char *pathname, int read_only);
 
     
 
@@ -139,16 +141,25 @@ extern "C" {
 
 
     /**
-     * Open an existing state log table
+     * Open an existing state table file
      * @param[in,out] this state table object
      * @param[in] read_only boolean condition that allows to open the file only
      *                      for reading
      * @return a reason code
      */
-    int lixa_state_table_open_file(lixa_state_table_t *this, int read_only);
+    int lixa_state_table_open_file(lixa_state_table_t *this);
 
     
 
+    /**
+     * Check the integrity of a state table
+     * @param[in,out] this state table object
+     * @return a reason code
+     */
+    int lixa_state_table_check_integrity(lixa_state_table_t *this);
+
+
+    
     /**
      * Synchronize (and sign) a block in the state table
      * @param[in,out] this state table object

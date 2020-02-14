@@ -36,7 +36,6 @@
 int lixa_state_slot_sync(lixa_state_slot_t *slot)
 {
     enum Exception {
-        DIGEST_SIZE_ERROR,
         NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     

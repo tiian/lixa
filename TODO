@@ -1,5 +1,8 @@
-Go on with lixa_state_table_open
-Go on with lixa_state_log_open
+Work on how lixa_state_tables are closed when the daemon shut down
+
+Go on with lixa_state_table_check_integrity
+Go on with lixa_state_table_open_file
+Go on with lixa_state_log_open_file
 Go on with lixa_state_warm_start
 
 Remove thread_status_insert_old
