@@ -1,4 +1,6 @@
-Work on how lixa_state_tables are closed when the daemon shut down
+Work on how lixa_state_tables are closed when the daemon shut down:
+  - implement the synchronization of time in record 0 and the flushing of the
+    content before closing
 
 Go on with lixa_state_table_check_integrity
 Go on with lixa_state_table_open_file
@@ -11,6 +13,8 @@ To preserve backward compatibility and to check the two persistency engines in
 parallel use this schema:
 - write: write old and copy to new
 - read: read from new and if possible check if new != old
+
+Restore multiple threads in lixad_conf.xml / lixad_conf.xml.in
 
 To clean up the code, a pointer to sr (union status_record_u) must be returned
 because counter and digest are internal fields. The type might be renamed in

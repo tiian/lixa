@@ -41,7 +41,7 @@ int lixa_state_slot_sync(lixa_state_slot_t *slot)
     
     LIXA_TRACE(("lixa_state_slot_sync\n"));
     TRY {
-        /*
+        /* @@@ probably useless, to be removed
         if (slot->counter%2) {
             slot->counter++;
         } else {
@@ -50,9 +50,12 @@ int lixa_state_slot_sync(lixa_state_slot_t *slot)
         }
         */
         /* compute the CRC32 signature */
-        slot->crc32 = lixa_crc32(
-            (const uint8_t *)slot,
-            sizeof(lixa_state_slot_t) - sizeof(uint32_t));
+        slot->crc32 = lixa_crc32((const uint8_t *)&slot->sr,
+                                 sizeof(lixa_state_record_t));
+        /*
+        LIXA_TRACE(("lixa_state_slot_sync: CRC32=" UINT32_T_XFORMAT ")\n",
+                    lixa_state_slot_get_crc32(slot)));
+        */
         
         THROW(NONE);
     } CATCH {

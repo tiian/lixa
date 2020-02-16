@@ -123,6 +123,7 @@
 #else
 # error Unable to determine sizeof(uint32_t)
 #endif
+#define UINT32_T_XFORMAT "0x%08x"
 
 
 
