@@ -1,3 +1,11 @@
+In lixa_state_close, before sending STATE_FLUSHER_EXIT, it must be checked it
+has not been asked to previously sync, wait as in lixa_state_switch: better,
+extract a function with name lixa_state_exit_flusher that manages the
+process
+
+Implement lixa_state_table_close
+Implement lixa_state_log_close
+
 Work on how lixa_state_tables are closed when the daemon shut down:
   - implement the synchronization of time in record 0 and the flushing of the
     content before closing

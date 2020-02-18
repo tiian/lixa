@@ -245,17 +245,20 @@ int server_pipes_init(struct thread_pipe_array_s *tpa)
 
 void *server_manager_thread(void *void_ts)
 {
-    enum Exception { ADD_POLL_ERROR,
-                     THREAD_STATUS_SYNC_FILES_ERROR1,
-                     THREAD_STATUS_SYNC_FILES_ERROR2,
-                     FIX_POLL_ERROR,
-                     POLL_ERROR,
-                     DROP_CLIENT_ERROR,
-                     NETWORK_EVENT_ERROR,
-                     POLLIN_CTRL_ERROR,
-                     POLLIN_DATA_ERROR,
-                     POLLOUT_ERROR,
-                     NONE } excp;
+    enum Exception {
+        ADD_POLL_ERROR,
+        THREAD_STATUS_SYNC_FILES_ERROR1,
+        THREAD_STATUS_SYNC_FILES_ERROR2,
+        FIX_POLL_ERROR,
+        POLL_ERROR,
+        DROP_CLIENT_ERROR,
+        NETWORK_EVENT_ERROR,
+        POLLIN_CTRL_ERROR,
+        POLLIN_DATA_ERROR,
+        POLLOUT_ERROR,
+        STATE_CLOSE,
+        NONE
+    } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
 
     struct thread_status_s *ts = (struct thread_status_s *) void_ts;
@@ -417,6 +420,10 @@ void *server_manager_thread(void *void_ts)
 
         } /* while (TRUE) */
 
+        /* closing state object */
+        if (LIXA_RC_OK != (ret_cod = lixa_state_close(&ts->state)))
+            THROW(STATE_CLOSE);
+        
         THROW(NONE);
     } CATCH {
         switch (excp) {
@@ -437,6 +444,7 @@ void *server_manager_thread(void *void_ts)
             case POLLIN_DATA_ERROR:
             case POLLIN_CTRL_ERROR:
             case POLLOUT_ERROR:
+            case STATE_CLOSE:
                 break;
             case NONE:
                 ret_cod = LIXA_RC_OK;
@@ -513,6 +521,7 @@ void server_manager_thread_cleanup(struct thread_status_s *ts)
 
     /* clean-up memory */
     thread_status_destroy(ts);
+    lixa_state_clean(&ts->state);
     return;
 }
 

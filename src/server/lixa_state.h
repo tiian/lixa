@@ -259,8 +259,18 @@ extern "C" {
                               const int *log_exists,
                               int read_only);
 
-    
 
+
+    /**
+     * Close a state object, shutdown the state and put everything in a
+     * consistent and durable status
+     * @param[in,out] this state object
+     * @return a reason code
+     */     
+    int lixa_state_close(lixa_state_t *this);
+
+
+    
     /**
      * Cleanup a State object
      * @param[in,out] this state object
@@ -290,7 +300,7 @@ extern "C" {
      */
     int lixa_state_flush_log_records(lixa_state_t *this);
 
-    
+
 
     /**
      * Extend the state log
@@ -300,6 +310,15 @@ extern "C" {
     int lixa_state_extend_log(lixa_state_t *this);
 
 
+
+    /**
+     * Start the background flush of the current state table
+     * @param[in,out] this state object
+     * @return a reason code
+     */
+    int lixa_state_flush_table(lixa_state_t *this);
+
+    
 
     /**
      * Switch the current state table and log to the following ones

@@ -238,6 +238,15 @@ extern "C" {
 
 
     /**
+     * Close a State Log object and make durable the current
+     * @param[in,out] this current state log object
+     * @return a reason code
+     */
+    int lixa_state_log_close(lixa_state_log_t *this);
+    
+
+    
+    /**
      * Cleanup a StateLog object
      */
     int lixa_state_log_clean(lixa_state_log_t *this);

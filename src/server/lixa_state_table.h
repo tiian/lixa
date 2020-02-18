@@ -143,8 +143,6 @@ extern "C" {
     /**
      * Open an existing state table file
      * @param[in,out] this state table object
-     * @param[in] read_only boolean condition that allows to open the file only
-     *                      for reading
      * @return a reason code
      */
     int lixa_state_table_open_file(lixa_state_table_t *this);
