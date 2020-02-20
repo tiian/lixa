@@ -273,6 +273,12 @@
 #define LIXA_SYSLOG_LXD065I "LXD065I opening state log file '%s'"
 #define LIXA_SYSLOG_LXD066W "LXD066W state log file '%s' can not be " \
     "opened: errno=%d (%s)"
+#define LIXA_SYSLOG_LXD067C "LXD067C async table flusher raised unexpected " \
+    "exception (lixa_state_async_table_flusher: excp=%d,ret_cod=%d," \
+    "pthreaderror=%d,errno=%d); immediate shutdown will terminate the server"
+#define LIXA_SYSLOG_LXD068C "LXD068C async log flusher raised unexpected " \
+    "exception (lixa_state_async_log_flusher: excp=%d,ret_cod=%d," \
+    "pthreaderror=%d,errno=%d); immediate shutdown will terminate the server"
 
 
 

@@ -626,6 +626,7 @@ int lixa_state_close(lixa_state_t *this)
     enum Exception {
         FLUSH_TABLE,
         PTHREAD_MUTEX_LOCK_ERROR1,
+        PTHREAD_COND_WAIT_ERROR1,
         PTHREAD_COND_SIGNAL_ERROR1,
         PTHREAD_MUTEX_UNLOCK_ERROR1,
         PTHREAD_JOIN_ERROR1,
@@ -657,6 +658,27 @@ int lixa_state_close(lixa_state_t *this)
                     THROW(PTHREAD_MUTEX_LOCK_ERROR1);
                 } else
                     mutex_locked = TRUE;
+                /* this synchronization is necessary to avoid overlapping a
+                   previous flusher execution, under normal condition it must
+                   be very fast */
+                if (this->table_synchronizer.to_be_flushed) {
+                    lixa_timer_t timer;
+                    long duration;
+            
+                    LIXA_TRACE(("lixa_state_close: WAITING on "
+                                "condition...\n"));
+                    lixa_timer_start(&timer);
+                    if (0 != (pte = pthread_cond_wait(
+                                  &this->table_synchronizer.cond,
+                                  &this->table_synchronizer.mutex)))
+                        THROW(PTHREAD_COND_WAIT_ERROR1);
+                    lixa_timer_stop(&timer);
+                    duration = lixa_timer_get_diff(&timer)/1000;
+                    LIXA_SYSLOG((LOG_NOTICE, LIXA_SYSLOG_LXD058N, duration));
+                    LIXA_TRACE(("lixa_state_close: condition has been "
+                                "signaled, total wait time is %ld ms\n",
+                                duration));
+                }
                 /* ask flusher termination */
                 LIXA_TRACE(("lixa_state_close: sending to table flusher "
                             "thread exit request...\n"));
@@ -703,6 +725,9 @@ int lixa_state_close(lixa_state_t *this)
                 break;
             case PTHREAD_MUTEX_LOCK_ERROR1:
                 ret_cod = LIXA_RC_PTHREAD_MUTEX_LOCK_ERROR;
+                break;
+            case PTHREAD_COND_WAIT_ERROR1:
+                ret_cod = LIXA_RC_PTHREAD_COND_WAIT_ERROR;
                 break;
             case PTHREAD_COND_SIGNAL_ERROR1:
                 ret_cod = LIXA_RC_PTHREAD_COND_SIGNAL_ERROR;
@@ -1306,6 +1331,7 @@ int lixa_state_extend_log(lixa_state_t *this)
 int lixa_state_flush_table(lixa_state_t *this)
 {
     enum Exception {
+        NULL_OBJECT,
         PTHREAD_MUTEX_LOCK_ERROR,
         PTHREAD_COND_WAIT_ERROR,
         PTHREAD_COND_SIGNAL_ERROR,
@@ -1318,6 +1344,10 @@ int lixa_state_flush_table(lixa_state_t *this)
     
     LIXA_TRACE(("lixa_state_flush_table\n"));
     TRY {
+        /* check object is not null */
+        if (NULL == this)
+            THROW(NULL_OBJECT);
+        
         /* acquire the lock of the synchronized structure */
         if (0 != (pte = pthread_mutex_lock(&this->table_synchronizer.mutex))) {
             THROW(PTHREAD_MUTEX_LOCK_ERROR);
@@ -1329,7 +1359,7 @@ int lixa_state_flush_table(lixa_state_t *this)
             lixa_timer_t timer;
             long duration;
             
-            LIXA_TRACE(("lixa_state_switch: WAITING on condition...\n"));
+            LIXA_TRACE(("lixa_state_flush_table: WAITING on condition...\n"));
             lixa_timer_start(&timer);
             if (0 != (pte = pthread_cond_wait(
                           &this->table_synchronizer.cond,
@@ -1338,11 +1368,11 @@ int lixa_state_flush_table(lixa_state_t *this)
             lixa_timer_stop(&timer);
             duration = lixa_timer_get_diff(&timer)/1000;
             LIXA_SYSLOG((LOG_NOTICE, LIXA_SYSLOG_LXD058N, duration));
-            LIXA_TRACE(("lixa_state_switch: condition has been "
+            LIXA_TRACE(("lixa_state_flush_table: condition has been "
                         "signaled, total wait time is %ld ms\n", duration));
         }
         /* ask to table flusher thread to perform the flushing */
-        LIXA_TRACE(("lixa_state_switch: asking table flusher thread to "
+        LIXA_TRACE(("lixa_state_flush_table: asking table flusher thread to "
                     "synchronize the memory map with the underlying file\n"));
         this->table_synchronizer.operation = STATE_FLUSHER_FLUSH;
         this->table_synchronizer.table = &this->tables[this->used_state_table];
@@ -1358,6 +1388,9 @@ int lixa_state_flush_table(lixa_state_t *this)
         THROW(NONE);
     } CATCH {
         switch (excp) {
+            case NULL_OBJECT:
+                ret_cod = LIXA_RC_NULL_OBJECT;
+                break;
             case PTHREAD_MUTEX_LOCK_ERROR:
                 ret_cod = LIXA_RC_PTHREAD_MUTEX_LOCK_ERROR;
                 break;
@@ -1388,6 +1421,99 @@ int lixa_state_flush_table(lixa_state_t *this)
 
 
 
+int lixa_state_sync_log(lixa_state_t *this)
+{
+    enum Exception {
+        NULL_OBJECT,
+        PTHREAD_MUTEX_LOCK_ERROR,
+        PTHREAD_COND_WAIT_ERROR,
+        PTHREAD_COND_SIGNAL_ERROR,
+        PTHREAD_MUTEX_UNLOCK_ERROR,
+        NONE
+    } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    int pte = 0;
+    int mutex_locked = FALSE;
+    
+    LIXA_TRACE(("lixa_state_sync_log\n"));
+    TRY {
+        /* check object is not null */
+        if (NULL == this)
+            THROW(NULL_OBJECT);
+        
+        /* acquire the lock of the synchronized structure */
+        if (0 != (pte = pthread_mutex_lock(&this->log_synchronizer.mutex))) {
+            THROW(PTHREAD_MUTEX_LOCK_ERROR);
+        } else
+            mutex_locked = TRUE;
+        /* this synchronization is necessary to avoid overlapping a previous
+           flusher execution, under normal condition it must be very fast */
+        if (this->log_synchronizer.to_be_flushed) {
+            lixa_timer_t timer;
+            long duration;
+            
+            LIXA_TRACE(("lixa_state_sync_log: WAITING on condition...\n"));
+            lixa_timer_start(&timer);
+            if (0 != (pte = pthread_cond_wait(
+                          &this->log_synchronizer.cond,
+                          &this->log_synchronizer.mutex)))
+                THROW(PTHREAD_COND_WAIT_ERROR);
+            lixa_timer_stop(&timer);
+            duration = lixa_timer_get_diff(&timer)/1000;
+            LIXA_SYSLOG((LOG_NOTICE, LIXA_SYSLOG_LXD062N, duration));
+            LIXA_TRACE(("lixa_state_sync_log: condition has been "
+                        "signaled, total wait time is %ld ms\n", duration));
+        }
+        /* ask to log flusher thread to perform the flushing */
+        LIXA_TRACE(("lixa_state_sync_log: asking log flusher thread to "
+                    "synchronize the memory map with the underlying file\n"));
+        this->log_synchronizer.operation = STATE_FLUSHER_FLUSH;
+        this->log_synchronizer.log = &this->logs[this->used_state_table];
+        this->log_synchronizer.to_be_flushed = TRUE;
+        if (0 != (pte = pthread_cond_signal(&this->log_synchronizer.cond)))
+            THROW(PTHREAD_COND_SIGNAL_ERROR);
+        if (0 != (pte = pthread_mutex_unlock(
+                      &this->log_synchronizer.mutex))) {
+            THROW(PTHREAD_MUTEX_UNLOCK_ERROR);
+        } else
+            mutex_locked = FALSE;
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case NULL_OBJECT:
+                ret_cod = LIXA_RC_NULL_OBJECT;
+                break;
+            case PTHREAD_MUTEX_LOCK_ERROR:
+                ret_cod = LIXA_RC_PTHREAD_MUTEX_LOCK_ERROR;
+                break;
+            case PTHREAD_COND_WAIT_ERROR:
+                ret_cod = LIXA_RC_PTHREAD_COND_WAIT_ERROR;
+                break;
+            case PTHREAD_COND_SIGNAL_ERROR:
+                ret_cod = LIXA_RC_PTHREAD_COND_SIGNAL_ERROR;
+                break;
+            case PTHREAD_MUTEX_UNLOCK_ERROR:
+                ret_cod = LIXA_RC_PTHREAD_MUTEX_UNLOCK_ERROR;
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+        /* restore mutex in the event of error */
+        if (mutex_locked)
+            pthread_mutex_unlock(&this->log_synchronizer.mutex);
+    } /* TRY-CATCH */
+    LIXA_TRACE(("lixa_state_sync_log/excp=%d/"
+                "ret_cod=%d/pthreaderror=%d/errno=%d\n", excp, ret_cod, pte,
+                errno));
+    return ret_cod;
+}
+
+
+
 int lixa_state_switch(lixa_state_t *this)
 {
     enum Exception {
@@ -1399,15 +1525,10 @@ int lixa_state_switch(lixa_state_t *this)
         FLUSH_TABLE,
         SET_STATUS3,
         LOG_CREATE_NEW_FILE,
-        PTHREAD_MUTEX_LOCK_ERROR,
-        PTHREAD_COND_WAIT_ERROR,
-        PTHREAD_COND_SIGNAL_ERROR,
-        PTHREAD_MUTEX_UNLOCK_ERROR,
+        SYNC_LOG,
         NONE
     } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
-    int pte = 0;
-    int log_mutex_locked = FALSE;
     
     LIXA_TRACE(("lixa_state_switch\n"));
     TRY {
@@ -1462,43 +1583,9 @@ int lixa_state_switch(lixa_state_t *this)
                         &this->logs[lixa_state_get_next_state(this)],
                         this->single_page)))
                 THROW(LOG_CREATE_NEW_FILE);
-        } 
-        /* acquire the lock of the synchronized structure */
-        if (0 != (pte = pthread_mutex_lock(&this->log_synchronizer.mutex))) {
-            THROW(PTHREAD_MUTEX_LOCK_ERROR);
-        } else
-            log_mutex_locked = TRUE;
-        /* this synchronization is necessary to avoid overlapping a previous
-           flusher execution, under normal condition it must be very fast */
-        if (this->log_synchronizer.to_be_flushed) {
-            lixa_timer_t timer;
-            long duration;
-            
-            LIXA_TRACE(("lixa_state_switch: WAITING on condition...\n"));
-            lixa_timer_start(&timer);
-            if (0 != (pte = pthread_cond_wait(
-                          &this->log_synchronizer.cond,
-                          &this->log_synchronizer.mutex)))
-                THROW(PTHREAD_COND_WAIT_ERROR);
-            lixa_timer_stop(&timer);
-            duration = lixa_timer_get_diff(&timer)/1000;
-            LIXA_SYSLOG((LOG_NOTICE, LIXA_SYSLOG_LXD062N, duration));
-            LIXA_TRACE(("lixa_state_switch: condition has been "
-                        "signaled, total wait time is %ld ms\n", duration));
         }
-        /* ask to log flusher thread to perform the flushing */
-        LIXA_TRACE(("lixa_state_switch: asking log flusher thread to "
-                    "synchronize the memory map with the underlying file\n"));
-        this->log_synchronizer.operation = STATE_FLUSHER_FLUSH;
-        this->log_synchronizer.log = &this->logs[this->used_state_table];
-        this->log_synchronizer.to_be_flushed = TRUE;
-        if (0 != (pte = pthread_cond_signal(&this->log_synchronizer.cond)))
-            THROW(PTHREAD_COND_SIGNAL_ERROR);
-        if (0 != (pte = pthread_mutex_unlock(
-                      &this->log_synchronizer.mutex))) {
-            THROW(PTHREAD_MUTEX_UNLOCK_ERROR);
-        } else
-            log_mutex_locked = FALSE;
+        if (LIXA_RC_OK != (ret_cod = lixa_state_sync_log(this)))
+            THROW(SYNC_LOG);
 
         /* change used_state_table */
         this->used_state_table = lixa_state_get_next_state(this);
@@ -1517,19 +1604,8 @@ int lixa_state_switch(lixa_state_t *this)
             case FLUSH_TABLE:
             case SET_STATUS3:
                 break;
-            case PTHREAD_MUTEX_LOCK_ERROR:
-                ret_cod = LIXA_RC_PTHREAD_MUTEX_LOCK_ERROR;
-                break;
-            case PTHREAD_COND_WAIT_ERROR:
-                ret_cod = LIXA_RC_PTHREAD_COND_WAIT_ERROR;
-                break;
-            case PTHREAD_COND_SIGNAL_ERROR:
-                ret_cod = LIXA_RC_PTHREAD_COND_SIGNAL_ERROR;
-                break;
-            case PTHREAD_MUTEX_UNLOCK_ERROR:
-                ret_cod = LIXA_RC_PTHREAD_MUTEX_UNLOCK_ERROR;
-                break;
             case LOG_CREATE_NEW_FILE:
+            case SYNC_LOG:
                 break;
             case NONE:
                 ret_cod = LIXA_RC_OK;
@@ -1537,13 +1613,9 @@ int lixa_state_switch(lixa_state_t *this)
             default:
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
         } /* switch (excp) */
-        /* restore mutex in the event of error */
-        if (log_mutex_locked)
-            pthread_mutex_unlock(&this->log_synchronizer.mutex);
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_state_switch/excp=%d/"
-                "ret_cod=%d/pthreaderror=%d/errno=%d\n", excp, ret_cod, pte,
-                errno));
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }
 
@@ -1940,6 +2012,17 @@ void *lixa_state_async_table_flusher(void *data)
     LIXA_TRACE(("lixa_state_async_table_flusher/excp=%d/"
                 "ret_cod=%d/pthreaderror=%d/errno=%d\n", excp, ret_cod, pte,
                 errno));
+    /* Emergency exit? */
+    if (NONE != excp) {
+        int rc;
+        LIXA_SYSLOG((LOG_CRIT, LIXA_SYSLOG_LXD067C, excp, ret_cod, pte,
+                     errno));
+        /* sending kill to this process */
+        if (0 != (rc = kill(getpid(), SIGKILL))) {
+            LIXA_TRACE(("lixa_state_async_table_flusher/kill: errno=%d, "
+                        "'%s'\n", errno, strerror(errno)));
+        }
+    } /* if (NONE != excp) */
     return NULL;
 }
 
@@ -2070,6 +2153,17 @@ void *lixa_state_async_log_flusher(void *data)
     LIXA_TRACE(("lixa_state_async_log_flusher/excp=%d/"
                 "ret_cod=%d/pthreaderror=%d/errno=%d\n", excp, ret_cod, pte,
                 errno));
+    /* Emergency exit? */
+    if (NONE != excp) {
+        int rc;
+        LIXA_SYSLOG((LOG_CRIT, LIXA_SYSLOG_LXD068C, excp, ret_cod, pte,
+                     errno));
+        /* sending kill to this process */
+        if (0 != (rc = kill(getpid(), SIGKILL))) {
+            LIXA_TRACE(("lixa_state_async_log_flusher/kill: errno=%d, "
+                        "'%s'\n", errno, strerror(errno)));
+        }
+    } /* if (NONE != excp) */
     return NULL;
 }
 

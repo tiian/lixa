@@ -318,7 +318,16 @@ extern "C" {
      */
     int lixa_state_flush_table(lixa_state_t *this);
 
+
     
+    /**
+     * Start the background sync of the current state log
+     * @param[in,out] this state object
+     * @return a reason code
+     */
+    int lixa_state_sync_log(lixa_state_t *this);
+    
+
 
     /**
      * Switch the current state table and log to the following ones

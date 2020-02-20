@@ -1,7 +1,5 @@
-In lixa_state_close, before sending STATE_FLUSHER_EXIT, it must be checked it
-has not been asked to previously sync, wait as in lixa_state_switch: better,
-extract a function with name lixa_state_exit_flusher that manages the
-process
+In lixa_state_close: fix the wrong status of state table before closing
+In lixa_state_close: implement state log closing
 
 Implement lixa_state_table_close
 Implement lixa_state_log_close
