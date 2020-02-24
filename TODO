@@ -1,5 +1,5 @@
-In lixa_state_close: fix the wrong status of state table before closing
-In lixa_state_close: implement state log closing
+Go on with lixa_state_close: 
+- implement state log closing
 
 Implement lixa_state_table_close
 Implement lixa_state_log_close

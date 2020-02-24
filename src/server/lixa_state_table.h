@@ -113,6 +113,14 @@ extern "C" {
 #endif /* __cplusplus */
 
 
+
+    /**
+     * Return the human readable string associated to a status
+     */
+    const char *lixa_state_table_status_string(
+        enum lixa_state_table_status_e status);
+
+    
     
     /**
      * Initialize a StateTable object to manage a state table

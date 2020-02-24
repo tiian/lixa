@@ -142,9 +142,10 @@ struct lixa_log_synchronizer_s {
  */
 typedef struct lixa_state_s {
     /**
-     * Points to the state table (and state log) currently in use
+     * Points to the active state table and state log: the objects currently
+     * in use
      */
-    int                               used_state_table;
+    int                               active_state;
     /**
      * Array of state tables
      */
@@ -374,8 +375,8 @@ extern "C" {
      * @return previous used state table (and log)
      */
     static inline int lixa_state_get_prev_state(const lixa_state_t *this) {
-        return 0 == this->used_state_table ?
-            LIXA_STATE_TABLES-1 : this->used_state_table-1;
+        return 0 == this->active_state ?
+            LIXA_STATE_TABLES-1 : this->active_state-1;
     }
 
 
@@ -386,8 +387,8 @@ extern "C" {
      * @return previous used state table (and log)
      */
     static inline int lixa_state_get_next_state(const lixa_state_t *this) {
-        return LIXA_STATE_TABLES-1 == this->used_state_table ?
-            0 : this->used_state_table+1;
+        return LIXA_STATE_TABLES-1 == this->active_state ?
+            0 : this->active_state+1;
     }
 
 
