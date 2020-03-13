@@ -632,6 +632,14 @@ int lixa_state_close(lixa_state_t *this)
         PTHREAD_JOIN_ERROR1,
         PTHREAD_COND_DESTROY_ERROR1,
         PTHREAD_MUTEX_DESTROY_ERROR1,
+        FLUSH_LOG_RECORDS,
+        PTHREAD_MUTEX_LOCK_ERROR2,
+        PTHREAD_COND_WAIT_ERROR2,
+        PTHREAD_COND_SIGNAL_ERROR2,
+        PTHREAD_MUTEX_UNLOCK_ERROR2,
+        PTHREAD_JOIN_ERROR2,
+        PTHREAD_COND_DESTROY_ERROR2,
+        PTHREAD_MUTEX_DESTROY_ERROR2,
         TABLE_CLOSE,
         LOG_CLOSE,
         NONE
@@ -649,6 +657,9 @@ int lixa_state_close(lixa_state_t *this)
             LIXA_TRACE(("lixa_state_close: closing state table and log "
                         "number %d\n", this->active_state));
             if (this->active_state == saved_active_state) {
+                /*
+                 * STATE TABLE SECTION
+                 */
                 /* flush current state table */
                 if (LIXA_RC_OK != (ret_cod = lixa_state_flush_table(this)))
                     THROW(FLUSH_TABLE);
@@ -666,7 +677,7 @@ int lixa_state_close(lixa_state_t *this)
                     long duration;
             
                     LIXA_TRACE(("lixa_state_close: WAITING on "
-                                "condition...\n"));
+                                "condition for table flusher thread...\n"));
                     lixa_timer_start(&timer);
                     if (0 != (pte = pthread_cond_wait(
                                   &this->table_synchronizer.cond,
@@ -705,6 +716,66 @@ int lixa_state_close(lixa_state_t *this)
                 if (0 != (pte = pthread_mutex_destroy(
                               &this->table_synchronizer.mutex)))
                     THROW(PTHREAD_MUTEX_DESTROY_ERROR1);
+                /*
+                 * STATE LOG SECTION
+                 */
+                /* flush current state log */
+                if (LIXA_RC_OK != (ret_cod =
+                                   lixa_state_flush_log_records(this)))
+                    THROW(FLUSH_LOG_RECORDS);
+                /* obtain the lock of the synchronized structure */
+                if (0 != (pte = pthread_mutex_lock(
+                              &this->log_synchronizer.mutex))) {
+                    THROW(PTHREAD_MUTEX_LOCK_ERROR2);
+                } else
+                    mutex_locked = TRUE;
+                /* this synchronization is necessary to avoid overlapping a
+                   previous flusher execution, under normal condition it must
+                   be very fast */
+                if (this->log_synchronizer.to_be_flushed) {
+                    lixa_timer_t timer;
+                    long duration;
+            
+                    LIXA_TRACE(("lixa_state_close: WAITING on "
+                                "condition for log flusher thread...\n"));
+                    lixa_timer_start(&timer);
+                    if (0 != (pte = pthread_cond_wait(
+                                  &this->log_synchronizer.cond,
+                                  &this->log_synchronizer.mutex)))
+                        THROW(PTHREAD_COND_WAIT_ERROR1);
+                    lixa_timer_stop(&timer);
+                    duration = lixa_timer_get_diff(&timer)/1000;
+                    LIXA_SYSLOG((LOG_NOTICE, LIXA_SYSLOG_LXD058N, duration));
+                    LIXA_TRACE(("lixa_state_close: condition has been "
+                                "signaled, total wait time is %ld ms\n",
+                                duration));
+                }
+                /* ask flusher termination */
+                LIXA_TRACE(("lixa_state_close: sending to log flusher "
+                            "thread exit request...\n"));
+                this->log_synchronizer.operation = STATE_FLUSHER_EXIT;
+                if (0 != (pte = pthread_cond_signal(
+                              &this->log_synchronizer.cond)))
+                    THROW(PTHREAD_COND_SIGNAL_ERROR2);
+                /* unlock the mutex */
+                if (0 != (pte = pthread_mutex_unlock(
+                              &this->log_synchronizer.mutex))) {
+                    THROW(PTHREAD_MUTEX_UNLOCK_ERROR2);
+                } else
+                    mutex_locked = FALSE;
+                /* wait flusher termination */
+                if (0 != (pte = pthread_join(this->log_synchronizer.thread,
+                                             NULL)))
+                    THROW(PTHREAD_JOIN_ERROR2);
+                LIXA_TRACE(("lixa_state_close: log flusher thread "
+                            "terminated\n"));
+                /* mutex and condition are no more necessary */
+                if (0 != (pte = pthread_cond_destroy(
+                              &this->log_synchronizer.cond)))
+                    THROW(PTHREAD_COND_DESTROY_ERROR2);
+                if (0 != (pte = pthread_mutex_destroy(
+                              &this->log_synchronizer.mutex)))
+                    THROW(PTHREAD_MUTEX_DESTROY_ERROR2);
             } /* this->active_state == saved_active_state */
             /* closing the state table */
             if (LIXA_RC_OK != (ret_cod = lixa_state_table_close(
@@ -722,26 +793,34 @@ int lixa_state_close(lixa_state_t *this)
     } CATCH {
         switch (excp) {
             case FLUSH_TABLE:
+            case FLUSH_LOG_RECORDS:
                 break;
             case PTHREAD_MUTEX_LOCK_ERROR1:
+            case PTHREAD_MUTEX_LOCK_ERROR2:
                 ret_cod = LIXA_RC_PTHREAD_MUTEX_LOCK_ERROR;
                 break;
             case PTHREAD_COND_WAIT_ERROR1:
+            case PTHREAD_COND_WAIT_ERROR2:
                 ret_cod = LIXA_RC_PTHREAD_COND_WAIT_ERROR;
                 break;
             case PTHREAD_COND_SIGNAL_ERROR1:
+            case PTHREAD_COND_SIGNAL_ERROR2:
                 ret_cod = LIXA_RC_PTHREAD_COND_SIGNAL_ERROR;
                 break;
             case PTHREAD_MUTEX_UNLOCK_ERROR1:
+            case PTHREAD_MUTEX_UNLOCK_ERROR2:
                 ret_cod = LIXA_RC_PTHREAD_MUTEX_UNLOCK_ERROR;
                 break;
             case PTHREAD_JOIN_ERROR1:
+            case PTHREAD_JOIN_ERROR2:
                 ret_cod = LIXA_RC_PTHREAD_JOIN_ERROR;
                 break;
             case PTHREAD_COND_DESTROY_ERROR1:
+            case PTHREAD_COND_DESTROY_ERROR2:
                 ret_cod = LIXA_RC_PTHREAD_COND_DESTROY_ERROR;
                 break;
             case PTHREAD_MUTEX_DESTROY_ERROR1:
+            case PTHREAD_MUTEX_DESTROY_ERROR2:
                 ret_cod = LIXA_RC_PTHREAD_MUTEX_DESTROY_ERROR;
                 break;
             case TABLE_CLOSE:
@@ -758,6 +837,10 @@ int lixa_state_close(lixa_state_t *this)
             excp > PTHREAD_MUTEX_LOCK_ERROR1 &&
             excp < PTHREAD_MUTEX_UNLOCK_ERROR1)
             pthread_mutex_unlock(&this->table_synchronizer.mutex);
+        if (mutex_locked &&
+            excp > PTHREAD_MUTEX_LOCK_ERROR2 &&
+            excp < PTHREAD_MUTEX_UNLOCK_ERROR2)
+            pthread_mutex_unlock(&this->log_synchronizer.mutex);
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_state_close/excp=%d/"
                 "ret_cod=%d/pthreaderror=%d/errno=%d\n", excp, ret_cod, pte,
@@ -1142,12 +1225,22 @@ int lixa_state_flush_log_records(lixa_state_t *this)
         /* compute the number of buffer pages */
         number_of_pages = lixa_state_log_blocks2pages(
             this->number_of_block_ids);
-        /* compute the number of page in the buffer */
+        /* compute the number of pages in the buffer */
         number_of_pages_in_buffer =
             this->log_synchronizer.buffer_size / LIXA_SYSTEM_PAGE_SIZE;
         /* this should never be true */
-        if (number_of_pages > number_of_pages_in_buffer)
+        if (number_of_pages > number_of_pages_in_buffer) {
+            LIXA_TRACE(("lixa_state_flush_log_records: "
+                        "this->number_of_block_ids=" SIZE_T_FORMAT
+                        ", this->log_synchronizer.buffer_size=" SIZE_T_FORMAT
+                        ", number_of_pages=" SIZE_T_FORMAT
+                        ", number_of_pages_in_buffer=" SIZE_T_FORMAT "\n",
+                        this->number_of_block_ids,
+                        this->log_synchronizer.buffer_size,
+                        number_of_pages,
+                        number_of_pages_in_buffer));
             THROW(BUFFER_OVERFLOW1);
+        }
         /* check the amount of free space in the log */
         log_free_pages = lixa_state_common_buffer2pages(
             lixa_state_log_get_total_size(
