@@ -1,11 +1,3 @@
-Understand why it happens and fix it:
-2020-03-13 22:06:45.318303 [6939/140716095657728] lixa_state_flush_log_records: 
-this->number_of_block_ids=1, this->log_synchronizer.buffer_size=0, number_of_pag
-es=1, number_of_pages_in_buffer=0
-2020-03-13 22:06:45.318306 [6939/140716095657728] lixa_state_flush_log_records/e
-xcp=3/ret_cod=-7/pthreaderror=0/errno=0
-
-
 Go on with lixa_state_close: 
 - implement state log closing
 

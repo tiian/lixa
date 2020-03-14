@@ -626,7 +626,7 @@ int lixa_state_log_write(lixa_state_log_t *this, const void *buffer,
             THROW(PWRITE_ERROR);
         } else {
             LIXA_TRACE(("lixa_state_log_write: written " SIZE_T_FORMAT
-                        " pages, " SSIZE_T_FORMAT " bytes in %ld ms to log\n",
+                        " pages, " SSIZE_T_FORMAT " bytes in %ld us to log\n",
                         number_of_pages, written_bytes, duration));
             if (duration > 1000) {
                 LIXA_SYSLOG((LOG_WARNING, LIXA_SYSLOG_LXD054W, duration));

@@ -1395,6 +1395,7 @@ int lixa_state_table_sync_map(lixa_state_table_t *this)
         if (0 != msync(this->map, fd_stat.st_size, MS_SYNC))
             THROW(MSYNC_ERROR);
         lixa_timer_stop(&timer);
+        /* transform micro seconds to milli seconds */
         duration = lixa_timer_get_diff(&timer)/1000;
         /* log a message if performance is not good */
         if (duration > 500) {

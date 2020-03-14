@@ -122,6 +122,9 @@ int lixa_state_init(lixa_state_t *this, const char *path_prefix,
         pathname_len += strlen(LIXA_STATE_TABLE_SUFFIX) + 100;
         if (NULL == (pathname = (char *)malloc(pathname_len)))
             THROW(MALLOC_ERROR1);
+        /* initial size of the buffer */
+        this->size_of_block_ids = lixa_state_log_buffer2blocks(
+            LIXA_STATE_LOG_BUFFER_SIZE_DEFAULT);
         /* initialize background thread for state table synchronization */
         /* initialize the synchronized internal structure shared with the
            flusher thread */
@@ -178,12 +181,9 @@ int lixa_state_init(lixa_state_t *this, const char *path_prefix,
                                        (void *)&this->log_synchronizer)))
             THROW(PTHREAD_CREATE_ERROR2);
         
-        /* initial size of the buffer */
-        this->size_of_block_ids = lixa_state_log_buffer2blocks(
-            LIXA_STATE_LOG_BUFFER_SIZE_DEFAULT);
         /* check max buffer size, resize it if necessary */
         if (max_buffer_log_size < LIXA_STATE_LOG_BUFFER_SIZE_DEFAULT) {
-            LIXA_TRACE(("lixa_state_log_init: max_buffer_size ("
+            LIXA_TRACE(("lixa_state_init: max_buffer_size ("
                         SIZE_T_FORMAT ") is less then "
                         "default (" SIZE_T_FORMAT "), using default\n",
                         max_buffer_log_size,
@@ -684,6 +684,7 @@ int lixa_state_close(lixa_state_t *this)
                                   &this->table_synchronizer.mutex)))
                         THROW(PTHREAD_COND_WAIT_ERROR1);
                     lixa_timer_stop(&timer);
+                    /* transform microseconds to milliseconds */
                     duration = lixa_timer_get_diff(&timer)/1000;
                     LIXA_SYSLOG((LOG_NOTICE, LIXA_SYSLOG_LXD058N, duration));
                     LIXA_TRACE(("lixa_state_close: condition has been "
@@ -744,6 +745,7 @@ int lixa_state_close(lixa_state_t *this)
                                   &this->log_synchronizer.mutex)))
                         THROW(PTHREAD_COND_WAIT_ERROR1);
                     lixa_timer_stop(&timer);
+                    /* transform microseconds to milliseconds */
                     duration = lixa_timer_get_diff(&timer)/1000;
                     LIXA_SYSLOG((LOG_NOTICE, LIXA_SYSLOG_LXD058N, duration));
                     LIXA_TRACE(("lixa_state_close: condition has been "
@@ -1228,6 +1230,21 @@ int lixa_state_flush_log_records(lixa_state_t *this)
         /* compute the number of pages in the buffer */
         number_of_pages_in_buffer =
             this->log_synchronizer.buffer_size / LIXA_SYSTEM_PAGE_SIZE;
+        /* check the amount of free space in the log */
+        log_free_pages = lixa_state_common_buffer2pages(
+            lixa_state_log_get_total_size(
+                &this->logs[this->active_state]) -
+            lixa_state_log_get_offset(&this->logs[this->active_state]));
+        LIXA_TRACE(("lixa_state_flush_log_records: "
+                    "number_of_block_ids=" UINT32_T_FORMAT ", "
+                    "number_of_records_per_page=" SIZE_T_FORMAT ", "
+                    "number_of_pages=" SIZE_T_FORMAT ", "
+                    "number_of_pages_in_buffer=" SIZE_T_FORMAT ", "
+                    "log_free_pages=" SIZE_T_FORMAT "\n",
+                    this->number_of_block_ids,
+                    LIXA_STATE_LOG_RECORDS_PER_PAGE,
+                    number_of_pages, number_of_pages_in_buffer,
+                    log_free_pages));
         /* this should never be true */
         if (number_of_pages > number_of_pages_in_buffer) {
             LIXA_TRACE(("lixa_state_flush_log_records: "
@@ -1241,24 +1258,9 @@ int lixa_state_flush_log_records(lixa_state_t *this)
                         number_of_pages_in_buffer));
             THROW(BUFFER_OVERFLOW1);
         }
-        /* check the amount of free space in the log */
-        log_free_pages = lixa_state_common_buffer2pages(
-            lixa_state_log_get_total_size(
-                &this->logs[this->active_state]) -
-            lixa_state_log_get_offset(&this->logs[this->active_state]));
         /* this should never be true */
         if (number_of_pages > log_free_pages)
             THROW(BUFFER_OVERFLOW2);
-        LIXA_TRACE(("lixa_state_flush_log_records: "
-                    "number_of_block_ids=" UINT32_T_FORMAT ", "
-                    "number_of_records_per_page=" SIZE_T_FORMAT ", "
-                    "number_of_pages=" SIZE_T_FORMAT ", "
-                    "number_of_pages_in_buffer=" SIZE_T_FORMAT ", "
-                    "log_free_pages=" SIZE_T_FORMAT "\n",
-                    this->number_of_block_ids,
-                    LIXA_STATE_LOG_RECORDS_PER_PAGE,
-                    number_of_pages, number_of_pages_in_buffer,
-                    log_free_pages));
         /* retrieve the timestamp associated to this flush operation */
         if (0 != gettimeofday(&timestamp, NULL))
             THROW(GETTIMEOFDAY_ERROR);
