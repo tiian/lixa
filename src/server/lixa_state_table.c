@@ -1395,23 +1395,23 @@ int lixa_state_table_sync_map(lixa_state_table_t *this)
         if (0 != msync(this->map, fd_stat.st_size, MS_SYNC))
             THROW(MSYNC_ERROR);
         lixa_timer_stop(&timer);
-        /* transform micro seconds to milli seconds */
-        duration = lixa_timer_get_diff(&timer)/1000;
-        /* log a message if performance is not good */
-        if (duration > 500) {
-            LIXA_SYSLOG((LOG_WARNING, LIXA_SYSLOG_LXD059W, duration,
-                         fd_stat.st_size, this->pathname));
-        } else if (duration > 50) {
-            LIXA_SYSLOG((LOG_NOTICE, LIXA_SYSLOG_LXD060N, duration,
-                         fd_stat.st_size, this->pathname));
-        } else if (duration > 5) {
-            LIXA_SYSLOG((LOG_INFO, LIXA_SYSLOG_LXD061I, duration,
-                         fd_stat.st_size, this->pathname));
-        }
-        
+        duration = lixa_timer_get_diff(&timer);
         LIXA_TRACE(("lixa_state_table_sync_map: synchronization of mapped "
                     "memory to the underlying file required %ld ms\n",
                     duration));
+        /* transform micro seconds to milli seconds */
+        duration /= 1000;
+        /* log a message if performance is not good */
+        if (duration > 500) { /* half second :( */
+            LIXA_SYSLOG((LOG_WARNING, LIXA_SYSLOG_LXD059W, duration,
+                         fd_stat.st_size, this->pathname));
+        } else if (duration > 50) { /* 50 ms */
+            LIXA_SYSLOG((LOG_NOTICE, LIXA_SYSLOG_LXD060N, duration,
+                         fd_stat.st_size, this->pathname));
+        } else if (duration > 5) { /* 5 ms */
+            LIXA_SYSLOG((LOG_INFO, LIXA_SYSLOG_LXD061I, duration,
+                         fd_stat.st_size, this->pathname));
+        }
         
         THROW(NONE);
     } CATCH {

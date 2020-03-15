@@ -63,6 +63,24 @@ const char *LIXA_STATE_LOG_FILE_SUFFIX = ".log";
 
 
 
+const char *lixa_state_log_status_string(
+    enum lixa_state_log_status_e status)
+{
+    switch (status) {
+        case STATE_LOG_UNDEFINED:   return "UNDEFINED";        break;
+        case STATE_LOG_FORMATTED:   return "FORMATTED";        break;
+        case STATE_LOG_USED:        return "USED";             break;
+        case STATE_LOG_FULL:        return "FULL";             break;
+        case STATE_LOG_EXTENDED:    return "EXTENDED";         break;
+        case STATE_LOG_CLOSED:      return "CLOSED";           break;
+        case STATE_LOG_DISPOSED:    return "DISPOSED";         break;
+        default:                    return "???";
+    }
+    return "!!!";
+}
+
+
+
 int lixa_state_log_init(lixa_state_log_t *this,
                         const char *pathname,
                         size_t max_buffer_size,
@@ -159,16 +177,58 @@ int lixa_state_log_init(lixa_state_log_t *this,
 int lixa_state_log_close(lixa_state_log_t *this)
 {
     enum Exception {
+        NULL_OBJECT,
+        NOTHING_TO_DO,
+        INVALID_STATUS,
+        CLOSE_ERROR,
+        SET_STATUS,
         NONE
     } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     
     LIXA_TRACE(("lixa_state_log_close\n"));
     TRY {
-        
+        if (NULL == this)
+            THROW(NULL_OBJECT);
+
+        /* check if the operation must be skipped because useless */
+        if (STATE_LOG_UNDEFINED == this->status ||
+            STATE_LOG_CLOSED == this->status) {
+            LIXA_TRACE(("lixa_state_log_close: nothing to do, status is "
+                        "%d:%s\n", this->status,
+                        lixa_state_log_status_string(this->status)));
+            THROW(NOTHING_TO_DO);
+        }
+
+        /* check if the current status is compatible with closing */
+        if (LIXA_RC_OK != (ret_cod = lixa_state_log_set_status(
+                               this, STATE_LOG_CLOSED, TRUE)))
+            THROW(INVALID_STATUS);
+        /* close the file descriptor */
+        if (-1 == close(this->fd)) {
+            THROW(CLOSE_ERROR);
+        }
+        /* set new status */
+        if (LIXA_RC_OK != (ret_cod = lixa_state_log_set_status(
+                               this, STATE_LOG_CLOSED, FALSE)))
+            THROW(SET_STATUS);
+                
         THROW(NONE);
     } CATCH {
         switch (excp) {
+            case NULL_OBJECT:
+                ret_cod = LIXA_RC_NULL_OBJECT;
+                break;
+            case NOTHING_TO_DO:
+                ret_cod = LIXA_RC_OK;
+                break;
+            case CLOSE_ERROR:
+                ret_cod = LIXA_RC_CLOSE_ERROR;
+                break;
+            case INVALID_STATUS:
+            case SET_STATUS:
+                ret_cod = LIXA_RC_INVALID_STATUS;
+                break;
             case NONE:
                 ret_cod = LIXA_RC_OK;
                 break;
@@ -383,7 +443,8 @@ int lixa_state_log_create_new_file(lixa_state_log_t *this, void *single_page)
         PTHREAD_MUTEX_LOCK_ERROR,
         TRUNCATE_ERROR,
         PTHREAD_MUTEX_UNLOCK_ERROR,
-        SET_STATUS,
+        SET_STATUS1,
+        SET_STATUS2,
         NONE
     } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
@@ -402,6 +463,8 @@ int lixa_state_log_create_new_file(lixa_state_log_t *this, void *single_page)
             THROW(INVALID_STATUS);
         /* add O_EXCL and O_CREAT flags: file must not exist */
         this->flags |= O_EXCL | O_CREAT;
+        LIXA_TRACE(("lixa_state_log_create_new_file: creating file '%s'\n",
+                    this->pathname));
         /* mode flags (security) */
         mode = S_IRUSR | S_IWUSR | S_IRGRP;
         if (-1 == (this->fd = open(this->pathname, this->flags, mode)))
@@ -424,10 +487,14 @@ int lixa_state_log_create_new_file(lixa_state_log_t *this, void *single_page)
             THROW(PTHREAD_MUTEX_UNLOCK_ERROR);
         } else
             mutex_locked = FALSE;
-        /* set the new status */
+        /* set the new status to FORMATTED */
         if (LIXA_RC_OK != (ret_cod = lixa_state_log_set_status(
                                this, STATE_LOG_FORMATTED, FALSE)))
-            THROW(SET_STATUS);
+            THROW(SET_STATUS1);
+        /* set the new status to USED */
+        if (LIXA_RC_OK != (ret_cod = lixa_state_log_set_status(
+                               this, STATE_LOG_USED, FALSE)))
+            THROW(SET_STATUS2);
         
         THROW(NONE);
     } CATCH {
@@ -450,7 +517,8 @@ int lixa_state_log_create_new_file(lixa_state_log_t *this, void *single_page)
             case PTHREAD_MUTEX_UNLOCK_ERROR:
                 ret_cod = LIXA_RC_PTHREAD_MUTEX_UNLOCK_ERROR;
                 break;
-            case SET_STATUS:
+            case SET_STATUS1:
+            case SET_STATUS2:
                 break;
             case NONE:
                 ret_cod = LIXA_RC_OK;
@@ -628,6 +696,8 @@ int lixa_state_log_write(lixa_state_log_t *this, const void *buffer,
             LIXA_TRACE(("lixa_state_log_write: written " SIZE_T_FORMAT
                         " pages, " SSIZE_T_FORMAT " bytes in %ld us to log\n",
                         number_of_pages, written_bytes, duration));
+            /* transform microseconds to milliseconds */
+            duration /= 1000;
             if (duration > 1000) {
                 LIXA_SYSLOG((LOG_WARNING, LIXA_SYSLOG_LXD054W, duration));
             } else if (duration > 100) {
@@ -697,16 +767,17 @@ int lixa_state_log_set_status(lixa_state_log_t *this,
     } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     
-    LIXA_TRACE(("lixa_state_log_set_status(new_status=%d, dry_run=%d)\n",
-                new_status, dry_run));
+    LIXA_TRACE(("lixa_state_log_set_status(new_status=%d:%s, dry_run=%d)\n",
+                new_status, lixa_state_log_status_string(new_status),
+                dry_run));
     TRY {
         int valid = TRUE;
         
         if (NULL == this)
             THROW(NULL_OBJECT);
 
-        LIXA_TRACE(("lixa_state_log_set_status: current status is %d\n",
-                    this->status));
+        LIXA_TRACE(("lixa_state_log_set_status: current status is %d:%s\n",
+                    this->status, lixa_state_log_status_string(this->status)));
         switch (new_status) {
             case STATE_LOG_UNDEFINED:
                 LIXA_TRACE(("lixa_state_log_set_status: transition to "
@@ -762,8 +833,9 @@ int lixa_state_log_set_status(lixa_state_log_t *this,
                 }
                 break;
             default:
-                LIXA_TRACE(("lixa_state_log_set_status: %d is not a valid "
-                            "value for a the new_status\n", new_status));
+                LIXA_TRACE(("lixa_state_log_set_status: %d:%s is not a valid "
+                            "value for a the new_status\n", new_status,
+                            lixa_state_log_status_string(new_status)));
                 valid = FALSE;
                 break;
         } /* switch (new_status) */
@@ -771,11 +843,17 @@ int lixa_state_log_set_status(lixa_state_log_t *this,
             THROW(INVALID_STATUS);
         } else if (dry_run) {
             LIXA_TRACE(("lixa_state_log_set_status: dry run, status can be "
-                        "switched from %d to %d\n",
-                        this->status, new_status));
+                        "switched from %d:%s to %d:%s\n",
+                        this->status,
+                        lixa_state_log_status_string(this->status),
+                        new_status,
+                        lixa_state_log_status_string(new_status)));
         } else {
-            LIXA_TRACE(("lixa_state_log_set_status: %d -> %d\n",
-                        this->status, new_status));
+            LIXA_TRACE(("lixa_state_log_set_status: %d:%s -> %d:%s\n",
+                        this->status,
+                        lixa_state_log_status_string(this->status),
+                        new_status,
+                        lixa_state_log_status_string(new_status)));
             this->status = new_status;
         }
         

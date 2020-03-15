@@ -217,7 +217,7 @@
 #define LIXA_SYSLOG_LXD036I "LXD036I state table '%s' exists and can be opened"
 #define LIXA_SYSLOG_LXD037N "LXD037N state table '%s' does not exist or can " \
     "not be opened"
-#define LIXA_SYSLOG_LXD038N "LXD038D neither table files nor log files are " \
+#define LIXA_SYSLOG_LXD038N "LXD038N neither table files nor log files are " \
     "available: new ones will be created, a cold start will be performed"
 #define LIXA_SYSLOG_LXD039W "LXD039W only the first state table '%s' is " \
     "available: probably a previous bootstrap failed prematurely; a cold " \

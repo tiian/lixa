@@ -182,6 +182,14 @@ extern "C" {
 
 
     /**
+     * Return the human readable string associated to a status
+     */
+    const char *lixa_state_log_status_string(
+        enum lixa_state_log_status_e status);
+
+    
+    
+    /**
      * Initialize a StateLog object to manage a state log
      * @param[in,out] this object to be initialized
      * @param[in] path_prefix that must be used to open or create the

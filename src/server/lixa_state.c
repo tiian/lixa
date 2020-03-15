@@ -684,12 +684,15 @@ int lixa_state_close(lixa_state_t *this)
                                   &this->table_synchronizer.mutex)))
                         THROW(PTHREAD_COND_WAIT_ERROR1);
                     lixa_timer_stop(&timer);
-                    /* transform microseconds to milliseconds */
-                    duration = lixa_timer_get_diff(&timer)/1000;
-                    LIXA_SYSLOG((LOG_NOTICE, LIXA_SYSLOG_LXD058N, duration));
+                    duration = lixa_timer_get_diff(&timer);
                     LIXA_TRACE(("lixa_state_close: condition has been "
-                                "signaled, total wait time is %ld ms\n",
+                                "signaled, total wait time is %ld us\n",
                                 duration));
+                    /* transform microseconds to milliseconds */
+                    duration /= 1000;
+                    if (duration > 0)
+                        LIXA_SYSLOG((LOG_NOTICE, LIXA_SYSLOG_LXD058N,
+                                     duration));
                 }
                 /* ask flusher termination */
                 LIXA_TRACE(("lixa_state_close: sending to table flusher "
@@ -745,12 +748,15 @@ int lixa_state_close(lixa_state_t *this)
                                   &this->log_synchronizer.mutex)))
                         THROW(PTHREAD_COND_WAIT_ERROR1);
                     lixa_timer_stop(&timer);
-                    /* transform microseconds to milliseconds */
-                    duration = lixa_timer_get_diff(&timer)/1000;
-                    LIXA_SYSLOG((LOG_NOTICE, LIXA_SYSLOG_LXD058N, duration));
+                    duration = lixa_timer_get_diff(&timer);
                     LIXA_TRACE(("lixa_state_close: condition has been "
-                                "signaled, total wait time is %ld ms\n",
+                                "signaled, total wait time is %ld us\n",
                                 duration));
+                    /* transform microseconds to milliseconds */
+                    duration /= 1000;
+                    if (duration > 0)
+                        LIXA_SYSLOG((LOG_NOTICE, LIXA_SYSLOG_LXD058N,
+                                     duration));
                 }
                 /* ask flusher termination */
                 LIXA_TRACE(("lixa_state_close: sending to log flusher "
@@ -1461,10 +1467,12 @@ int lixa_state_flush_table(lixa_state_t *this)
                           &this->table_synchronizer.mutex)))
                 THROW(PTHREAD_COND_WAIT_ERROR);
             lixa_timer_stop(&timer);
-            duration = lixa_timer_get_diff(&timer)/1000;
-            LIXA_SYSLOG((LOG_NOTICE, LIXA_SYSLOG_LXD058N, duration));
+            duration = lixa_timer_get_diff(&timer);
             LIXA_TRACE(("lixa_state_flush_table: condition has been "
-                        "signaled, total wait time is %ld ms\n", duration));
+                        "signaled, total wait time is %ld us\n", duration));
+            duration /= 1000; /* transform to milliseconds */
+            if (duration > 0)
+                LIXA_SYSLOG((LOG_NOTICE, LIXA_SYSLOG_LXD058N, duration));
         }
         /* ask to table flusher thread to perform the flushing */
         LIXA_TRACE(("lixa_state_flush_table: asking table flusher thread to "
