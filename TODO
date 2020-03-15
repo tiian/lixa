@@ -1,7 +1,3 @@
-Work on how lixa_state_tables are closed when the daemon shut down:
-  - implement the synchronization of time in record 0 and the flushing of the
-    content before closing
-
 Go on with lixa_state_table_check_integrity
 Go on with lixa_state_table_open_file
 Go on with lixa_state_log_open_file

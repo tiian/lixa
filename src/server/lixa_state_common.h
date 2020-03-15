@@ -105,8 +105,7 @@ extern "C" {
 
 
     /**
-     * Prepare a slot for synchronization: counter is changed from odd to
-     * even, signature is computed
+     * Prepare a slot for synchronization: signature is computed
      * @param[in,out] slot that must be marked for update
      * @return a reason code
      */

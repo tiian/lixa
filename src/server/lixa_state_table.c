@@ -1364,6 +1364,8 @@ int lixa_state_table_sync_map(lixa_state_table_t *this)
     enum Exception {
         NULL_OBJECT,
         TABLE_SET_STATUS,
+        GETTIMEOFDAY_ERROR,
+        STATE_TABLE_SLOT_SYNC_ERROR,
         FSTAT_ERROR,
         MSYNC_ERROR,
         NONE
@@ -1375,6 +1377,7 @@ int lixa_state_table_sync_map(lixa_state_table_t *this)
         struct stat fd_stat;
         lixa_timer_t timer;
         long duration;
+        lixa_state_slot_t *slot;
         
         if (NULL == this)
             THROW(NULL_OBJECT);
@@ -1383,7 +1386,15 @@ int lixa_state_table_sync_map(lixa_state_table_t *this)
         if (LIXA_RC_OK != (ret_cod = lixa_state_table_set_status(
                                this, STATE_TABLE_SYNCH, FALSE)))
             THROW(TABLE_SET_STATUS);
-                    
+
+        /* update last_sync timestamp */
+        slot = &this->map[0];
+        if (LIXA_RC_OK != (ret_cod = gettimeofday(
+                               &slot->sr.ctrl.last_sync, NULL)))
+            THROW(GETTIMEOFDAY_ERROR);
+        if (LIXA_RC_OK != (ret_cod = lixa_state_slot_sync(slot)))
+            THROW(STATE_TABLE_SLOT_SYNC_ERROR);
+        
         if (0 != fstat(this->fd, &fd_stat))
             THROW(FSTAT_ERROR);
         
@@ -1397,7 +1408,7 @@ int lixa_state_table_sync_map(lixa_state_table_t *this)
         lixa_timer_stop(&timer);
         duration = lixa_timer_get_diff(&timer);
         LIXA_TRACE(("lixa_state_table_sync_map: synchronization of mapped "
-                    "memory to the underlying file required %ld ms\n",
+                    "memory to the underlying file required %ld us\n",
                     duration));
         /* transform micro seconds to milli seconds */
         duration /= 1000;
@@ -1420,6 +1431,11 @@ int lixa_state_table_sync_map(lixa_state_table_t *this)
                 ret_cod = LIXA_RC_NULL_OBJECT;
                 break;
             case TABLE_SET_STATUS:
+                break;
+            case GETTIMEOFDAY_ERROR:
+                ret_cod = LIXA_RC_GETTIMEOFDAY_ERROR;
+                break;
+            case STATE_TABLE_SLOT_SYNC_ERROR:
                 break;
             case FSTAT_ERROR:
                 ret_cod = LIXA_RC_FSTAT_ERROR;
