@@ -359,6 +359,8 @@ int lixa_state_table_check_integrity(lixa_state_table_t *this)
     enum Exception {
         NULL_OBJECT,
         CRC_DOES_NOT_MATCH1,
+        CRC_DOES_NOT_MATCH2,
+        DAMAGED_CHAINS,
         NONE
     } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
@@ -367,6 +369,7 @@ int lixa_state_table_check_integrity(lixa_state_table_t *this)
     TRY {
         lixa_state_slot_t *first_slot = NULL;
         uint32_t tmp_crc32;
+        uint32_t i, free_blocks, used_blocks;
         char iso_timestamp[ISO_TIMESTAMP_BUFFER_SIZE];
         
         if (NULL == this)
@@ -404,8 +407,56 @@ int lixa_state_table_check_integrity(lixa_state_table_t *this)
         LIXA_TRACE(("lixa_state_table_check_integrity:"
                     "   [first_free_block] = " UINT32_T_FORMAT "\n",
                     first_slot->sr.ctrl.first_free_block));
+        /* check data blocks */
+        for (i=1; i<first_slot->sr.ctrl.number_of_blocks; ++i) {
+            LIXA_TRACE(("lixa_state_table_check_integrity: checking block # "
+                        UINT32_T_FORMAT "\n", i));
+            /* compute status record CRC */
+            tmp_crc32 = lixa_crc32((const uint8_t *)&this->map[i].sr,
+                                   sizeof(lixa_state_record_t));
+            if (this->map[i].crc32 != tmp_crc32) {
+                LIXA_TRACE(("lixa_state_table_check_integrity: the CRC of "
+                            "block " UINT32_T_FORMAT "does not match: "
+                            "current=" UINT32_T_XFORMAT ", expected="
+                            UINT32_T_XFORMAT "\n", i, tmp_crc32,
+                            first_slot->crc32));
+                THROW(CRC_DOES_NOT_MATCH2);
+            }
+        } /* for (i=1; i<first_slot->sr.ctrl.number_of_blocks; ++i) */
+        /* check used blocks chain */
+        LIXA_TRACE(("lixa_state_table_check_integrity: checking used blocks "
+                    "chain...\n"));
+        used_blocks = 0;
+        if (0 != (i = first_slot->sr.ctrl.first_used_block)) {
+            used_blocks++;
+            /* traverse the chain */
+            while (0 != (i = this->map[i].sr.data.next_block))
+                used_blocks++;
+        }
+        LIXA_TRACE(("lixa_state_table_check_integrity: there are "
+                    UINT32_T_FORMAT " data used blocks\n", used_blocks));
         
-        /* @@@ implement me, copy from status_record_check_integrity */
+        /* check free blocks chain */
+        LIXA_TRACE(("lixa_state_table_check_integrity: checking free blocks "
+                    "chain...\n"));
+        free_blocks = 0;
+        if (0 != (i = first_slot->sr.ctrl.first_free_block)) {
+            free_blocks++;
+            /* traverse the chain */
+            while (0 != (i = this->map[i].sr.data.next_block))
+                free_blocks++;
+        }
+        LIXA_TRACE(("lixa_state_table_check_integrity: there are "
+                    UINT32_T_FORMAT " data free blocks\n", free_blocks));
+        if (used_blocks + free_blocks + 1 !=
+            first_slot->sr.ctrl.number_of_blocks) {
+            LIXA_TRACE(("lixa_state_table_check_integrity: used blocks ("
+                        UINT32_T_FORMAT ") + free blocks (" UINT32_T_FORMAT
+                        ") + 1 != number of blocks (" UINT32_T_FORMAT ")\n",
+                        used_blocks, free_blocks,
+                        first_slot->sr.ctrl.number_of_blocks));
+            THROW(DAMAGED_CHAINS);
+        }
         
         THROW(NONE);
     } CATCH {
@@ -414,6 +465,8 @@ int lixa_state_table_check_integrity(lixa_state_table_t *this)
                 ret_cod = LIXA_RC_NULL_OBJECT;
                 break;
             case CRC_DOES_NOT_MATCH1:
+            case CRC_DOES_NOT_MATCH2:
+            case DAMAGED_CHAINS:
                 ret_cod = LIXA_RC_OBJ_CORRUPTED;
                 break;
             case NONE:
