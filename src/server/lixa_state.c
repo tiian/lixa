@@ -1617,11 +1617,12 @@ int lixa_state_sync_log(lixa_state_t *this)
 
 
 
-int lixa_state_switch(lixa_state_t *this)
+int lixa_state_switch(lixa_state_t *this, lixa_word_t last_record_id)
 {
     enum Exception {
         NULL_OBJECT,
         TABLE_CREATE_NEW_FILE,
+        SET_LAST_RECORD_ID,
         SET_STATUS1,
         SET_STATUS2,
         TABLE_COPY_FROM,
@@ -1633,7 +1634,8 @@ int lixa_state_switch(lixa_state_t *this)
     } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     
-    LIXA_TRACE(("lixa_state_switch\n"));
+    LIXA_TRACE(("lixa_state_switch(last_record_id=" LIXA_WORD_T_FORMAT ")\n",
+                last_record_id));
     TRY {
         /* check object is not null */
         if (NULL == this)
@@ -1647,6 +1649,12 @@ int lixa_state_switch(lixa_state_t *this)
                         LIXA_STATE_TABLE_INIT_SIZE)))
                 THROW(TABLE_CREATE_NEW_FILE);
         }
+        /* put in state table header a reference to the last record that has
+           been for sure flushed by the state log */
+        if (LIXA_RC_OK != (
+                ret_cod = lixa_state_table_set_last_record_id(
+                    &this->tables[this->active_state], last_record_id)))
+            THROW(SET_LAST_RECORD_ID);
         /* current state table is switched to COPY_SOURCE status */
         if (LIXA_RC_OK != (
                 ret_cod = lixa_state_table_set_status(
@@ -1701,6 +1709,7 @@ int lixa_state_switch(lixa_state_t *this)
             case NULL_OBJECT:
                 ret_cod = LIXA_RC_NULL_OBJECT;
                 break;
+            case SET_LAST_RECORD_ID:
             case SET_STATUS1:
             case SET_STATUS2:
             case TABLE_COPY_FROM:
@@ -1743,6 +1752,7 @@ int lixa_state_mark_block(lixa_state_t *this, uint32_t block_id)
     TRY {
         int must_flush = FALSE;
         int must_switch = FALSE;
+        lixa_word_t last_record_id;
         
         if (NULL == this)
             THROW(NULL_OBJECT);
@@ -1765,11 +1775,18 @@ int lixa_state_mark_block(lixa_state_t *this, uint32_t block_id)
         if (LIXA_RC_OK != (ret_cod = lixa_state_check_log_actions(
                                this, &must_flush, &must_switch)))
             THROW(CHECK_LOG_ACTIONS_ERROR);
+        /* retrieve the id of the last record in the current log state file:
+           it will be written in the state table in the event of switching */
+        last_record_id = lixa_state_log_get_last_record_id(
+            &this->logs[this->active_state]);
+        /* flush the state log if necessary */
         if (must_flush) {
             LIXA_TRACE(("lixa_state_mark_block: flush records\n"));
             if (LIXA_RC_OK != (ret_cod = lixa_state_flush_log_records(this)))
                 THROW(FLUSH_LOG_RECORDS_ERROR);
         }
+        /* at this point we are sure last_record_id has been flushed because
+           above flushing started after it */
         if (must_switch) {
             /* is the previous state table in the middle of a sync phase? */
             if (lixa_state_table_is_syncing(
@@ -1780,7 +1797,8 @@ int lixa_state_mark_block(lixa_state_t *this, uint32_t block_id)
             } else {
                 LIXA_TRACE(("lixa_state_mark_block: switch state table and "
                             "log\n"));
-                if (LIXA_RC_OK != (ret_cod = lixa_state_switch(this)))
+                if (LIXA_RC_OK != (ret_cod = lixa_state_switch(
+                                       this, last_record_id)))
                     THROW(SWITCH_ERROR);
             }
         }

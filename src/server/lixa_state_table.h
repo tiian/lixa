@@ -342,6 +342,18 @@ extern "C" {
     int lixa_state_table_sync_map(lixa_state_table_t *this);
 
 
+
+    /**
+     * Save in state table header the id of a state log record that for sure
+     * has been persisted till now
+     * @param[in,out] this state table object
+     * @param[in] last_record_id persisted in the state log
+     * @return a reason code
+     */
+    int lixa_state_table_set_last_record_id(lixa_state_table_t *this,
+                                            lixa_word_t last_record_id);
+
+
     
 #ifdef __cplusplus
 }

@@ -83,6 +83,10 @@ struct status_record_ctrl_s
      */
     struct timeval last_sync;
     /**
+     * Last record ID persisted in the state log
+     */
+    lixa_word_t last_record_id;
+    /**
      * The total number of blocks kept by the status file. The control block
      * itself (block_id = 0) is computed.
      */

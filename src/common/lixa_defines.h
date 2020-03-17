@@ -124,6 +124,7 @@
 # error Unable to determine sizeof(uint32_t)
 #endif
 #define UINT32_T_XFORMAT "0x%08x"
+#define LIXA_WORD_T_FORMAT   UINT32_T_FORMAT
 
 
 
@@ -278,6 +279,7 @@ extern "C" {
 
     /**
      * Control word
+     * LIXA_WORD_T_FORMAT == UINT32_T_FORMAT
      */
     typedef uint32_t lixa_word_t;
 

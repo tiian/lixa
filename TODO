@@ -4,6 +4,9 @@ Go on with lixa_state_warm_start
 
 Remove thread_status_insert_old
 
+Check restart after state table and log switch; check function
+lixa_state_table_set_last_record_id() is called in the "right way"
+
 To preserve backward compatibility and to check the two persistency engines in
 parallel use this schema:
 - write: write old and copy to new

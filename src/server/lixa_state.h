@@ -333,9 +333,11 @@ extern "C" {
     /**
      * Switch the current state table and log to the following ones
      * @param[in,out] this state object
+     * @param[in] last_record_id is the identifier of the last record that's
+     *            for sure in current state log
      * @return a reason code
      */     
-    int lixa_state_switch(lixa_state_t *this);
+    int lixa_state_switch(lixa_state_t *this, lixa_word_t last_record_id);
 
     
 
