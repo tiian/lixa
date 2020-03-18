@@ -56,11 +56,11 @@
 
 
 /** Initial buffer size (unit = byte) */
-#define LIXA_STATE_LOG_BUFFER_SIZE_DEFAULT   (2*LIXA_SYSTEM_PAGE_SIZE)
+#define LIXA_STATE_LOG_BUFFER_SIZE_DEFAULT   (1/*2*/*LIXA_SYSTEM_PAGE_SIZE)
 /** Initial file size (unit = byte) */
-#define LIXA_STATE_LOG_FILE_SIZE_DEFAULT     (50*LIXA_SYSTEM_PAGE_SIZE)
+#define LIXA_STATE_LOG_FILE_SIZE_DEFAULT     (1/*50*/*LIXA_SYSTEM_PAGE_SIZE)
 /** Incremental file size (unit = byte) */
-#define LIXA_STATE_LOG_FILE_SIZE_INCREMENT   (25*LIXA_SYSTEM_PAGE_SIZE)
+#define LIXA_STATE_LOG_FILE_SIZE_INCREMENT   (1/*25*/*LIXA_SYSTEM_PAGE_SIZE)
 
 
 
@@ -427,6 +427,12 @@ extern "C" {
         free_space = this->file_synchronizer.total_size -
             this->file_synchronizer.offset -
             this->file_synchronizer.reserved;
+        LIXA_TRACE(("lixa_state_log_get_free_space: total_size=" OFF_T_FORMAT
+                    ", offset=" OFF_T_FORMAT ", reserved=" OFF_T_FORMAT
+                    ", free_space=" OFF_T_FORMAT "\n",
+                    this->file_synchronizer.total_size,
+                    this->file_synchronizer.offset,
+                    this->file_synchronizer.reserved, free_space));
         pthread_mutex_unlock(&this->file_synchronizer.mutex);
         return free_space;
     }

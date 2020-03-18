@@ -505,7 +505,7 @@ int lixa_state_table_sync_block(lixa_state_table_t *this,
                 ret_cod = lixa_state_slot_sync(&this->map[block_id])))
             THROW(STATE_SLOT_SYNC);
         LIXA_TRACE(("lixa_state_table_sync_block: block_id=" UINT32_T_FORMAT
-                    ", CRC32=" UINT32_T_XFORMAT ")\n", block_id,
+                    ", CRC32=" UINT32_T_XFORMAT "\n", block_id,
                     lixa_state_slot_get_crc32(&this->map[block_id])));
         
         THROW(NONE);
@@ -1408,9 +1408,9 @@ int lixa_state_table_copy_from(lixa_state_table_t *this,
             THROW(FSTAT_ERROR2);
         /* check if the state files differ */
         if (fd_stat_this.st_size != fd_stat_source.st_size) {
-            LIXA_TRACE(("lixa_state_table_copy_from: this state file is "
-                        OFF_T_FORMAT "bytes long, source state file is "
-                        OFF_T_FORMAT "bytes long\n", fd_stat_this.st_size,
+            LIXA_TRACE(("lixa_state_table_copy_from: this state table file is "
+                        OFF_T_FORMAT " bytes long, source state table file is "
+                        OFF_T_FORMAT " bytes long\n", fd_stat_this.st_size,
                         fd_stat_source.st_size));
             /* check if this state file is mapped */
             if (NULL != this->map) {

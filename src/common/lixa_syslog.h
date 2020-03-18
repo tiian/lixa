@@ -259,12 +259,12 @@
 #define LIXA_SYSLOG_LXD057E "LXD057E unable to use table file ('%s')"
 #define LIXA_SYSLOG_LXD058N "LXD058N father thread waited table flusher " \
     "thread for %ld ms; storage is not properly tuned for the real workload"
-#define LIXA_SYSLOG_LXD059W "LXD059W msync lasted %ld ms for " OFF_T_FORMAT \
-    " bytes to file '%s': storage is dramatically slow"
-#define LIXA_SYSLOG_LXD060N "LXD060N msync lasted %ld ms for " OFF_T_FORMAT \
-    " bytes to file '%s': storage is very slow"
-#define LIXA_SYSLOG_LXD061I "LXD061I msync lasted %ld ms for " OFF_T_FORMAT \
-    " bytes to file '%s': storage is quite slow"
+#define LIXA_SYSLOG_LXD059W "LXD059W msync lasted %ld ms for synchronizing " \
+    OFF_T_FORMAT " bytes to file '%s': storage is dramatically slow"
+#define LIXA_SYSLOG_LXD060N "LXD060N msync lasted %ld ms for synchronizing " \
+    OFF_T_FORMAT " bytes to file '%s': storage is very slow"
+#define LIXA_SYSLOG_LXD061I "LXD061I msync lasted %ld ms for synchronizing " \
+    OFF_T_FORMAT " bytes to file '%s': storage is quite slow"
 #define LIXA_SYSLOG_LXD062N "LXD062N father thread waited log flusher " \
     "thread for %ld ms; storage is not properly tuned for the real workload"
 #define LIXA_SYSLOG_LXD063I "LXD063I opening state table file '%s'"

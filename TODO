@@ -2,7 +2,10 @@ Go on with lixa_state_table_open_file
 Go on with lixa_state_log_open_file
 Go on with lixa_state_warm_start
 
+Restore "normal" values in lixa_state_log.h for log files
 Remove thread_status_insert_old
+
+Remove lixa_state_sync_log: it seems useless...
 
 Check restart after state table and log switch; check function
 lixa_state_table_set_last_record_id() is called in the "right way"
