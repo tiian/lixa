@@ -74,6 +74,7 @@ const char *lixa_state_table_status_string(
         case STATE_TABLE_SYNCH:       return "SYNCH";            break;
         case STATE_TABLE_CLOSED:      return "CLOSED";           break;
         case STATE_TABLE_DISPOSED:    return "DISPOSED";         break;
+        case STATE_TABLE_CORRUPTED:   return "CORRUPTED";        break;
         default:                      return "???";
     }
     return "!!!";
@@ -274,6 +275,7 @@ int lixa_state_table_open_file(lixa_state_table_t *this)
     TRY {
         struct stat fd_stat;
         int read_only;
+        enum lixa_state_table_status_e new_status;
         
         if (NULL == this)
             THROW(NULL_OBJECT);
@@ -309,14 +311,17 @@ int lixa_state_table_open_file(lixa_state_table_t *this)
                     "at address %p\n", this->pathname, this->map));
 
         /* analyze the content */
-        if (LIXA_RC_OK != (ret_cod = lixa_state_table_check_integrity(this)))
+        ret_cod = lixa_state_table_check_integrity(this);
+        if (LIXA_RC_OK == ret_cod)
+            new_status = STATE_TABLE_OPENED;
+        else if (LIXA_RC_OBJ_CORRUPTED == ret_cod)
+            new_status = STATE_TABLE_CORRUPTED;
+        else
             THROW(CHECK_INTEGRITY);
-        
-        /* @@@ */
         
         /* move status to OPENED */
         if (LIXA_RC_OK != (ret_cod = lixa_state_table_set_status(
-                               this, STATE_TABLE_OPENED, FALSE)))
+                               this, new_status, FALSE)))
             THROW(SET_STATUS);
         
         THROW(NONE);
@@ -1046,6 +1051,14 @@ int lixa_state_table_set_status(lixa_state_table_t *this,
                     LIXA_TRACE(("lixa_state_table_set_status: transition to "
                                 "DISPOSED is acceptable only from "
                                 "CLOSED\n"));
+                    valid = FALSE;
+                }
+                break;
+            case STATE_TABLE_CORRUPTED:
+                if (STATE_TABLE_UNDEFINED != this->status) {
+                    LIXA_TRACE(("lixa_state_table_set_status: transition to "
+                                "CORRUPTED is acceptable only from "
+                                "UNDEFINED\n"));
                     valid = FALSE;
                 }
                 break;

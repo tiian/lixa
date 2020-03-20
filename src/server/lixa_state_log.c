@@ -538,17 +538,22 @@ int lixa_state_log_create_new_file(lixa_state_log_t *this, void *single_page)
 
 
 
-int lixa_state_log_open_file(lixa_state_log_t *this)
+int lixa_state_log_open_file(lixa_state_log_t *this, void *single_page)
 {
     enum Exception {
         NULL_OBJECT,
         OPEN_ERROR,
+        FSTAT_ERROR,
         NONE
     } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     
     LIXA_TRACE(("lixa_state_log_open_file\n"));
     TRY {
+        struct stat fd_stat;
+        off_t number_of_pages, i;
+        int error = FALSE;
+        
         if (NULL == this)
             THROW(NULL_OBJECT);
         
@@ -561,8 +566,56 @@ int lixa_state_log_open_file(lixa_state_log_t *this)
                          this->pathname, errno, strerror(errno)));
             THROW(OPEN_ERROR);
         }
-        /* analyze the content */
-        /* @@@ */
+        /* retrieve log file size */
+        if (0 != fstat(this->fd, &fd_stat))
+            THROW(FSTAT_ERROR);
+        number_of_pages = fd_stat.st_size / LIXA_SYSTEM_PAGE_SIZE;
+        if (fd_stat.st_size % LIXA_SYSTEM_PAGE_SIZE) {
+            /* someone or something removed or added bytes at the end of the
+               state log file, anyway we will try to read them */
+            LIXA_TRACE(("lixa_state_log_open_file: log file '%s' has size "
+                        OFF_T_FORMAT " bytes that's not multiple of system "
+                        "page size (" SIZE_T_FORMAT "); something strange "
+                        "at the end of the file happened...\n",
+                        fd_stat.st_size, LIXA_SYSTEM_PAGE_SIZE));
+            LIXA_SYSLOG((LOG_NOTICE, LIXA_SYSLOG_LXD070N,
+                         this->pathname, fd_stat.st_size,
+                         LIXA_SYSTEM_PAGE_SIZE));
+            number_of_pages++;
+        }
+        /* analyze the content; this loop will try to read as much as
+           possible from the underlying file
+           Note: using a larger buffer would be faster, but this function is
+           called only at warm start-up time: could be a future improvement!
+        */
+        for (i=0; i<number_of_pages; ++i) {
+            ssize_t read_bytes;
+            
+            LIXA_TRACE(("lixa_state_log_open_file: reading page "
+                        OFF_T_FORMAT "/" OFF_T_FORMAT "\n", i,
+                        number_of_pages));
+            read_bytes = pread(this->fd, single_page, LIXA_SYSTEM_PAGE_SIZE,
+                               i*LIXA_SYSTEM_PAGE_SIZE);
+            if (0 >= read_bytes) {
+                LIXA_TRACE(("lixa_state_log_open_file: pread() returned error "
+                            "%d ('%s'); read_bytes=" SSIZE_T_FORMAT "\n",
+                            errno, strerror(errno)));
+                LIXA_SYSLOG((LOG_WARNING, LIXA_SYSLOG_LXD069W,
+                             i, this->pathname, errno, strerror(errno),
+                             read_bytes));
+                error = TRUE;
+                break;
+            } else {
+                LIXA_TRACE(("lixa_state_log_open_file: pread() returned "
+                            SSIZE_T_FORMAT " bytes\n", read_bytes));
+            }
+            /* @@@ */
+        } /* for (i=0; i<number_of_pages; ++i) */
+
+        /*
+          if (error)
+          something wrong happened...
+        */
         
         THROW(NONE);
     } CATCH {
@@ -572,6 +625,9 @@ int lixa_state_log_open_file(lixa_state_log_t *this)
                 break;
             case OPEN_ERROR:
                 ret_cod = LIXA_RC_OPEN_ERROR;
+                break;
+            case FSTAT_ERROR:
+                ret_cod = LIXA_RC_FSTAT_ERROR;
                 break;
             case NONE:
                 ret_cod = LIXA_RC_OK;

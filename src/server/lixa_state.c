@@ -593,7 +593,7 @@ int lixa_state_warm_start(lixa_state_t *this,
                     THROW(TABLE_OPEN_ERROR);
             if (log_exists[i])
                 if (LIXA_RC_OK != (ret_cod = lixa_state_log_open_file(
-                                       &this->logs[i])))
+                                       &this->logs[i], this->single_page)))
                     THROW(TABLE_OPEN_ERROR);
         } /* for (i=0; i<LIXA_STATE_TABLES; ++i) */
 

@@ -279,6 +279,11 @@
 #define LIXA_SYSLOG_LXD068C "LXD068C async log flusher raised unexpected " \
     "exception (lixa_state_async_log_flusher: excp=%d,ret_cod=%d," \
     "pthreaderror=%d,errno=%d); immediate shutdown will terminate the server"
+#define LIXA_SYSLOG_LXD069W "LXD069W error reading page " OFF_T_FORMAT \
+    " from file '%s': errno=%d, '%s', read_bytes=" SSIZE_T_FORMAT
+#define LIXA_SYSLOG_LXD070N "LXD070N log file '%s' is " OFF_T_FORMAT \
+    " bytes long: it's not multiple of system page size (" SIZE_T_FORMAT \
+    "); something strange happened at the end of the file"
 
 
 
