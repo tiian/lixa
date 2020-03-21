@@ -1295,7 +1295,7 @@ int lixa_state_flush_log_records(lixa_state_t *this)
                    sizeof(union status_record_u));
             /* compute the CRC32 code */
             log_record->crc32 = lixa_crc32(
-                (const uint8_t *)log_record,
+                (const uint8_t *)log_record + sizeof(uint32_t),
                 sizeof(struct lixa_state_log_record_s) - sizeof(uint32_t));
             LIXA_TRACE(("lixa_state_flush_log_records: filled_page="
                         SIZE_T_FORMAT ", pos_in_page=" SIZE_T_FORMAT
@@ -1304,6 +1304,13 @@ int lixa_state_flush_log_records(lixa_state_t *this)
                         UINT32_T_FORMAT "\n",
                         filled_pages, pos_in_page, log_record->id,
                         log_record->crc32, this->block_ids[r]));
+            /* use only when really necessary: it creates a huge
+               amount of data
+            LIXA_TRACE_HEX_DATA(
+                "lixa_state_flush_log_records: record content: ",
+                (const byte_t *)log_record,
+                sizeof(struct lixa_state_log_record_s));
+            */
             pos_in_page++;
             if (pos_in_page % LIXA_STATE_LOG_RECORDS_PER_PAGE == 0) {
                 pos_in_page = 0;

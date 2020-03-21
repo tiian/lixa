@@ -69,6 +69,7 @@ const char *lixa_state_log_status_string(
     switch (status) {
         case STATE_LOG_UNDEFINED:   return "UNDEFINED";        break;
         case STATE_LOG_FORMATTED:   return "FORMATTED";        break;
+        case STATE_LOG_OPENED:      return "OPENED";           break;
         case STATE_LOG_USED:        return "USED";             break;
         case STATE_LOG_FULL:        return "FULL";             break;
         case STATE_LOG_EXTENDED:    return "EXTENDED";         break;
@@ -542,8 +543,10 @@ int lixa_state_log_open_file(lixa_state_log_t *this, void *single_page)
 {
     enum Exception {
         NULL_OBJECT,
+        INVALID_STATUS,
         OPEN_ERROR,
         FSTAT_ERROR,
+        SET_STATUS,
         NONE
     } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
@@ -551,11 +554,16 @@ int lixa_state_log_open_file(lixa_state_log_t *this, void *single_page)
     LIXA_TRACE(("lixa_state_log_open_file\n"));
     TRY {
         struct stat fd_stat;
-        off_t number_of_pages, i;
+        off_t number_of_pages, i, j, number_of_records = 0;
         int error = FALSE;
         
         if (NULL == this)
             THROW(NULL_OBJECT);
+        
+        /* check if the current status is compatible with closing */
+        if (LIXA_RC_OK != (ret_cod = lixa_state_log_set_status(
+                               this, STATE_LOG_OPENED, TRUE)))
+            THROW(INVALID_STATUS);
         
         LIXA_SYSLOG((LOG_INFO, LIXA_SYSLOG_LXD065I, this->pathname));
         /* open the file descriptor */
@@ -604,24 +612,80 @@ int lixa_state_log_open_file(lixa_state_log_t *this, void *single_page)
                              i, this->pathname, errno, strerror(errno),
                              read_bytes));
                 error = TRUE;
-                break;
-            } else {
-                LIXA_TRACE(("lixa_state_log_open_file: pread() returned "
-                            SSIZE_T_FORMAT " bytes\n", read_bytes));
+                break; /* leave the loop prematurely */
             }
-            /* @@@ */
+            LIXA_TRACE(("lixa_state_log_open_file: pread() returned "
+                        SSIZE_T_FORMAT " bytes\n", read_bytes));
+            /* reset the tail if a partial page has been read */
+            if (read_bytes < LIXA_SYSTEM_PAGE_SIZE)
+                memset(single_page + read_bytes, 0,
+                       LIXA_SYSTEM_PAGE_SIZE - read_bytes);
+            /* loop on the records that can be available in the page */
+            for (j=0; j<LIXA_STATE_LOG_RECORDS_PER_PAGE; ++j) {
+                uint32_t crc32;
+                struct lixa_state_log_record_s *log_record =
+                    (struct lixa_state_log_record_s *)
+                    (single_page + j * sizeof(struct lixa_state_log_record_s));
+                char iso_timestamp[ISO_TIMESTAMP_BUFFER_SIZE];
+                /* compute crc32 of the record and check with the stored one */
+                crc32 = lixa_crc32(
+                    (const uint8_t *)log_record + sizeof(uint32_t),
+                    sizeof(struct lixa_state_log_record_s) - sizeof(uint32_t));
+                if (crc32 == log_record->crc32) {
+                    if (0 == number_of_records) {
+                        this->read_info.first_read_id = log_record->id;
+                        this->read_info.first_read_timestamp =
+                            log_record->timestamp;
+                    }
+                    this->read_info.last_read_id = log_record->id;
+                    this->read_info.last_read_timestamp =
+                        log_record->timestamp;
+                    number_of_records++;
+                    lixa_utils_iso_timestamp(&log_record->timestamp,
+                                             iso_timestamp,
+                                             sizeof(iso_timestamp));
+                    LIXA_TRACE(("lixa_state_log_open_file: record "
+                                OFF_T_FORMAT " in page " OFF_T_FORMAT " is "
+                                "valid: id=" LIXA_WORD_T_FORMAT
+                                ", timestamp=%s, crc32=" UINT32_T_XFORMAT "\n",
+                                j, i, log_record->id, iso_timestamp,
+                                log_record->crc32));
+                } else {
+                    LIXA_TRACE(("lixa_state_log_open_file: record "
+                                OFF_T_FORMAT " in page " OFF_T_FORMAT " is "
+                                "corrupted: on disk crc32=" UINT32_T_XFORMAT
+                                ", current crc32=" UINT32_T_XFORMAT "\n",
+                                j, i, log_record->crc32, crc32));
+                    /* use only when really necessary: it creates a huge
+                       amount of data
+                    LIXA_TRACE_HEX_DATA(
+                        "lixa_state_log_open_file: record content: ",
+                        (const byte_t *)log_record,
+                        sizeof(struct lixa_state_log_record_s));
+                    */
+                }
+            } /* for (j=0; j<LIXA_STATE_LOG_RECORDS_PER_PAGE) */
         } /* for (i=0; i<number_of_pages; ++i) */
-
-        /*
-          if (error)
-          something wrong happened...
-        */
+        LIXA_TRACE(("lixa_state_log_open_file: number_of_records="
+                    OFF_T_FORMAT ", first record id=" LIXA_WORD_T_FORMAT
+                    ", last record id=" LIXA_WORD_T_FORMAT "\n",
+                    number_of_records, this->read_info.first_read_id,
+                    this->read_info.last_read_id));
+        
+        /* set new status */
+        if (LIXA_RC_OK != (ret_cod = lixa_state_log_set_status(
+                               this, STATE_LOG_OPENED, FALSE)))
+            THROW(SET_STATUS);
         
         THROW(NONE);
     } CATCH {
         switch (excp) {
             case NULL_OBJECT:
                 ret_cod = LIXA_RC_NULL_OBJECT;
+                break;
+            case INVALID_STATUS:
+            case SET_STATUS:
+                ret_cod = LIXA_RC_INVALID_STATUS;
                 break;
             case OPEN_ERROR:
                 ret_cod = LIXA_RC_OPEN_ERROR;
@@ -844,6 +908,14 @@ int lixa_state_log_set_status(lixa_state_log_t *this,
                 if (STATE_LOG_UNDEFINED != this->status) {
                     LIXA_TRACE(("lixa_state_log_set_status: transition to "
                                 "FORMATTED is acceptable only from "
+                                "UNDEFINED\n"));
+                    valid = FALSE;
+                }
+                break;
+            case STATE_LOG_OPENED:
+                if (STATE_LOG_UNDEFINED != this->status) {
+                    LIXA_TRACE(("lixa_state_log_set_status: transition to "
+                                "OPENED is acceptable only from "
                                 "UNDEFINED\n"));
                     valid = FALSE;
                 }

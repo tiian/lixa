@@ -81,6 +81,7 @@ extern const char *LIXA_STATE_LOG_FILE_SUFFIX;
 enum lixa_state_log_status_e {
     STATE_LOG_UNDEFINED = 0,
     STATE_LOG_FORMATTED,
+    STATE_LOG_OPENED,
     STATE_LOG_USED,
     STATE_LOG_FULL,
     STATE_LOG_EXTENDED,
@@ -94,6 +95,32 @@ enum lixa_state_log_status_e {
  * Just a declaration
  */
 typedef struct lixa_state_table_s lixa_state_table_t;
+
+
+
+/**
+ * Struct used to access records in the state log file
+ */
+struct lixa_state_log_record_s {
+    /**
+     * CRC to check record integrity: this MUST BE the first field in the
+     * struct
+     */
+    uint32_t                         crc32;
+    /**
+     * Unique identifier of the record
+     */
+    lixa_word_t                      id;
+    /**
+     * Time of the record flush operation (many records can have the same
+     * timestamp because flushing can happen inside a batch)
+     */
+    struct timeval                   timestamp;
+    /**
+     * The record that must be transferred
+     */
+    union status_record_u            record;
+};
 
 
 
@@ -123,6 +150,32 @@ typedef struct lixa_state_log_s {
      */
     lixa_word_t                       last_record_id;
     /**
+     * This internal struct is used to save the most relevant info read from
+     * log file; @ref lixa_state_log_open_file sets the values during start-up
+     */
+    struct {
+        /**
+         * Number of (valid) records available in the log file
+         */
+        off_t                         number_of_records;
+        /**
+         * Unique identifier of the first read record
+         */
+        lixa_word_t                   first_read_id;
+        /**
+         * Time of first read record flush operation
+         */
+        struct timeval                first_read_timestamp;
+        /**
+         * Unique identifier of the last read record
+         */
+        lixa_word_t                   last_read_id;
+        /**
+         * Time of last read record flush operation
+         */
+        struct timeval                last_read_timestamp;
+    } read_info;
+    /**
      * This internal struct is synchronized with a mutex to avoid inconsistent
      * states between the main thread and the flusher thread
      */
@@ -147,31 +200,6 @@ typedef struct lixa_state_log_s {
         off_t                         reserved;
     } file_synchronizer;
 } lixa_state_log_t;
-
-
-
-/**
- * Struct used to access records in the state log file
- */
-struct lixa_state_log_record_s {
-    /**
-     * Unique identifier of the record
-     */
-    lixa_word_t                      id;
-    /**
-     * Time of the record flush operation (many records can have the same
-     * timestamp because flushing can happen inside a batch
-     */
-    struct timeval                   timestamp;
-    /**
-     * The record that must be transferred
-     */
-    union status_record_u            record;
-    /**
-     * CRC to check record integrity
-     */
-    uint32_t                         crc32;
-};
 
 
 
