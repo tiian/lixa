@@ -161,19 +161,19 @@ typedef struct lixa_state_log_s {
         /**
          * Unique identifier of the first read record
          */
-        lixa_word_t                   first_read_id;
+        lixa_word_t                   first_record_id;
         /**
          * Time of first read record flush operation
          */
-        struct timeval                first_read_timestamp;
+        struct timeval                first_record_timestamp;
         /**
          * Unique identifier of the last read record
          */
-        lixa_word_t                   last_read_id;
+        lixa_word_t                   last_record_id;
         /**
          * Time of last read record flush operation
          */
-        struct timeval                last_read_timestamp;
+        struct timeval                last_record_timestamp;
     } read_info;
     /**
      * This internal struct is synchronized with a mutex to avoid inconsistent
@@ -471,7 +471,7 @@ extern "C" {
     
     /**
      * Write a buffer to the state log
-     * @param[in,out] this state log file object
+     * @param[in,out] this state log object
      * @param[in] buffer to be written
      * @param[in] number_of_pages to write
      * @return a reason code
@@ -502,6 +502,68 @@ extern "C" {
     static inline enum lixa_state_log_status_e
     lixa_state_log_get_status(const lixa_state_log_t *this) {
         return this->status;
+    }
+
+
+
+    /**
+     * Information read from the underlying file at start-up time
+     * @param[in] this state log object
+     * @return the number of valid records in the file
+     */
+    static inline off_t lixa_state_log_get_ri_number_of_records(
+        const lixa_state_log_t *this) {
+        return NULL == this ? 0 : this->read_info.number_of_records;
+    }
+
+
+    
+    /**
+     * Information read from the underlying file at start-up time
+     * @param[in] this state log object
+     * @return the id of the first record in the file
+     */
+    static inline lixa_word_t lixa_state_log_get_ri_first_record_id(
+        const lixa_state_log_t *this) {
+        return NULL == this ? 0 : this->read_info.first_record_id;
+    }
+
+
+    
+    /**
+     * Information read from the underlying file at start-up time
+     * @param[in] this state log object
+     * @return the timestamp associated to the first record in the file
+     */
+    static inline const struct timeval
+    *lixa_state_log_get_ri_first_record_timestamp(
+    const lixa_state_log_t *this) {
+        return NULL == this ? NULL : &this->read_info.first_record_timestamp;
+    }
+
+
+    
+    /**
+     * Information read from the underlying file at start-up time
+     * @param[in] this state log object
+     * @return the id of the last record in the file
+     */
+    static inline lixa_word_t lixa_state_log_get_ri_last_record_id(
+        const lixa_state_log_t *this) {
+        return NULL == this ? 0 : this->read_info.last_record_id;
+    }
+
+
+    
+    /**
+     * Information read from the underlying file at start-up time
+     * @param[in] this state log object
+     * @return the timestamp associated to the last record in the file
+     */
+    static inline const struct timeval
+    *lixa_state_log_get_ri_last_record_timestamp(
+    const lixa_state_log_t *this) {
+        return NULL == this ? NULL : &this->read_info.last_record_timestamp;
     }
 
 

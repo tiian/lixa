@@ -110,3 +110,33 @@ void lixa_state_slot_trace_lists(const lixa_state_slot_t *lss)
 
 
 
+int lixa_state_common_chkp_order(lixa_word_t first_record_id,
+                                 const struct timeval *first_timeval,
+                                 lixa_word_t second_record_id,
+                                 const struct timeval *second_timeval)
+{
+    int result = 0;
+    
+    if (first_record_id == second_record_id)
+        result = 0; /* record id precedence */
+    else if (first_record_id < second_record_id)
+        result = -1; /* record id precedence */
+    else { /* first record seems to be older than second record */
+        if (timercmp(first_timeval, second_timeval, <))
+            result = -1; /* timeval precedence */
+        else if (timercmp(first_timeval, second_timeval, >))
+            result = +1; /* it's really older! */
+        else
+            result = +1; /* ??? tricky situation, record id precedence !!! */
+    }
+    LIXA_TRACE(("lixa_state_common_chkp_order(first_record_id="
+                LIXA_WORD_T_FORMAT ", first_timeval->tv_sec=%d, "
+                "first_timeval->tv_usec=%d, second_record_id="
+                LIXA_WORD_T_FORMAT ", second_timeval->tv_sec=%d, "
+                "second_timeval->tv_usec=%d)=%d\n", first_record_id,
+                (int)first_timeval->tv_sec, (int)first_timeval->tv_usec,
+                second_record_id, (int)second_timeval->tv_sec,
+                (int)second_timeval->tv_usec, result));
+    return result;
+}
+

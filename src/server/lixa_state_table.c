@@ -287,7 +287,7 @@ int lixa_state_table_open_file(lixa_state_table_t *this)
             THROW(INVALID_STATUS);
         }
         
-        LIXA_SYSLOG((LOG_INFO, LIXA_SYSLOG_LXD063I, this->pathname));
+        LIXA_SYSLOG((LOG_INFO, LIXA_SYSLOG_LXD063D, this->pathname));
         /* open the file descriptor */
         if (-1 == (this->fd = open(this->pathname, this->flags))) {
             LIXA_TRACE(("lixa_state_table_open_file: open('%s')=%d "

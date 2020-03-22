@@ -147,6 +147,13 @@ extern "C" {
 
 
     /**
+     * Trace the free list and used list
+     */
+    void lixa_state_slot_trace_lists(const lixa_state_slot_t *lss);
+
+    
+    
+    /**
      * Conversion from number of pages to buffer size in bytes
      * @param[in] number_of_pages
      * @return the buffer size in bytes
@@ -157,13 +164,32 @@ extern "C" {
     }
 
     
-    
-    /**
-     * Trace the free list and used list
-     */
-    void lixa_state_slot_trace_lists(const lixa_state_slot_t *lss);
 
-    
+    /**
+     * Compares two checkpoints composed by a record id and a timestamp
+     * @param[in] first_record_id
+     * @param[in] first_timeval
+     * @param[in] second_record_id
+     * @param[in] second_timeval
+     * @return an integer less than, equal to, or greater than zero if first
+     *         checkpoint is found, respectively, to be older than, to
+     *         be as old as, or be younger than second checkpoint
+     */
+    int lixa_state_common_chkp_order(lixa_word_t first_record_id,
+                                     const struct timeval *first_timeval,
+                                     lixa_word_t second_record_id,
+                                     const struct timeval *second_timeval);
+
+
+
+    /**
+     * Compute the successive state (table or log)
+     */
+    static inline int lixa_state_common_succ_state(int current) {
+        return ++current >= LIXA_STATE_TABLES ? 0 : current;
+    }
+
+
     
 #ifdef __cplusplus
 }

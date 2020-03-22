@@ -267,10 +267,10 @@
     OFF_T_FORMAT " bytes to file '%s': storage is quite slow"
 #define LIXA_SYSLOG_LXD062N "LXD062N father thread waited log flusher " \
     "thread for %ld ms; storage is not properly tuned for the real workload"
-#define LIXA_SYSLOG_LXD063I "LXD063I opening state table file '%s'"
+#define LIXA_SYSLOG_LXD063D "LXD063D opening state table file '%s'"
 #define LIXA_SYSLOG_LXD064W "LXD063W state table file '%s' can not be " \
     "opened: errno=%d (%s)"
-#define LIXA_SYSLOG_LXD065I "LXD065I opening state log file '%s'"
+#define LIXA_SYSLOG_LXD065D "LXD065D opening state log file '%s'"
 #define LIXA_SYSLOG_LXD066W "LXD066W state log file '%s' can not be " \
     "opened: errno=%d (%s)"
 #define LIXA_SYSLOG_LXD067C "LXD067C async table flusher raised unexpected " \
@@ -284,6 +284,14 @@
 #define LIXA_SYSLOG_LXD070N "LXD070N log file '%s' is " OFF_T_FORMAT \
     " bytes long: it's not multiple of system page size (" SIZE_T_FORMAT \
     "); something strange happened at the end of the file"
+#define LIXA_SYSLOG_LXD071I "LXD071I state table file '%s' was synchronized " \
+    "at %s and is aligned with record id " LIXA_WORD_T_FORMAT
+#define LIXA_SYSLOG_LXD072I "LXD072I state log file '%s' contains " \
+    OFF_T_FORMAT " valid records: first record id is " LIXA_WORD_T_FORMAT \
+    " and it was synchronized at %s; second record id is " LIXA_WORD_T_FORMAT \
+    " and it was synchronized at %s"
+#define LIXA_SYSLOG_LXD073E "LXD073E unable to determine the last state " \
+    "table, lixad server can NOT be started; possible state files corruption!"
 
 
 

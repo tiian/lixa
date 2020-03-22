@@ -355,6 +355,30 @@ extern "C" {
                                             lixa_word_t last_record_id);
 
 
+
+    /**
+     * Getter method for last_record_id
+     * @param[in] this state table object
+     * @return the record id of the last synchronization
+     */
+    static inline lixa_word_t lixa_state_table_get_last_record_id(
+        const lixa_state_table_t *this) {
+        return NULL == this ? 0 : this->map[0].sr.ctrl.last_record_id;
+    }
+
+
+    
+    /**
+     * Getter method for last_sync
+     * @param[in] this state table object
+     * @return the timestamp of the last synchronization
+     */
+    static inline const struct timeval *lixa_state_table_get_last_sync(
+        const lixa_state_table_t *this) {
+        return NULL == this ? NULL : &this->map[0].sr.ctrl.last_sync;
+    }
+
+
     
 #ifdef __cplusplus
 }

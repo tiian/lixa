@@ -574,29 +574,115 @@ int lixa_state_warm_start(lixa_state_t *this,
     enum Exception {
         NULL_OBJECT,
         TABLE_OPEN_ERROR,
+        CORRUPTED_STATUS_FILE,
         NONE
     } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     
     LIXA_TRACE(("lixa_state_warm_start\n"));
     TRY {
-        int i;
+        int i, last_table = -1;
 
         if (NULL == this)
             THROW(NULL_OBJECT);
         
         /* open all the available files */
         for (i=0; i<LIXA_STATE_TABLES; ++i) {
-            if (table_exists[i])
+            char iso_timestamp1[ISO_TIMESTAMP_BUFFER_SIZE];
+            char iso_timestamp2[ISO_TIMESTAMP_BUFFER_SIZE];
+
+            if (table_exists[i]) {
                 if (LIXA_RC_OK != (ret_cod = lixa_state_table_open_file(
                                        &this->tables[i])))
                     THROW(TABLE_OPEN_ERROR);
-            if (log_exists[i])
+                lixa_utils_iso_timestamp(
+                    lixa_state_table_get_last_sync(
+                        &this->tables[i]), iso_timestamp1,
+                        sizeof(iso_timestamp1));
+                LIXA_SYSLOG((LOG_INFO, LIXA_SYSLOG_LXD071I,
+                             lixa_state_table_get_pathname(&this->tables[i]),
+                             iso_timestamp1,
+                             lixa_state_table_get_last_record_id(
+                                 &this->tables[i])));
+                LIXA_TRACE(("lixa_state_warm_start: state table file '%s' was "
+                            "synchronized at %s and is aligned with record id "
+                            LIXA_WORD_T_FORMAT "\n",
+                            lixa_state_table_get_pathname(&this->tables[i]),
+                            iso_timestamp1,
+                            lixa_state_table_get_last_record_id(
+                                &this->tables[i])));
+            } /* if (table_exists[i]) */
+            if (log_exists[i]) {
                 if (LIXA_RC_OK != (ret_cod = lixa_state_log_open_file(
                                        &this->logs[i], this->single_page)))
                     THROW(TABLE_OPEN_ERROR);
+                lixa_utils_iso_timestamp(
+                    lixa_state_log_get_ri_first_record_timestamp(
+                        &this->logs[i]), iso_timestamp1,
+                        sizeof(iso_timestamp1));
+                lixa_utils_iso_timestamp(
+                    lixa_state_log_get_ri_last_record_timestamp(
+                        &this->logs[i]), iso_timestamp2,
+                        sizeof(iso_timestamp2));
+                LIXA_SYSLOG((LOG_INFO, LIXA_SYSLOG_LXD072I,
+                             lixa_state_log_get_pathname(&this->logs[i]),
+                             lixa_state_log_get_ri_number_of_records(
+                                 &this->logs[i]),
+                             lixa_state_log_get_ri_first_record_id(
+                                 &this->logs[i]),
+                             iso_timestamp1,
+                             lixa_state_log_get_ri_last_record_id(
+                                 &this->logs[i]),
+                             iso_timestamp2));
+                LIXA_TRACE(("lixa_state_warm_start: state log file '%s' "
+                            "contains " OFF_T_FORMAT " valid records: first "
+                            "record id is " LIXA_WORD_T_FORMAT " and it was "
+                            "synchronized at %s; second record id is "
+                            LIXA_WORD_T_FORMAT " and it was synchronized at %s"
+                            "\n",
+                            lixa_state_log_get_pathname(&this->logs[i]),
+                            lixa_state_log_get_ri_number_of_records(
+                                &this->logs[i]),
+                            lixa_state_log_get_ri_first_record_id(
+                                &this->logs[i]),
+                            iso_timestamp1,
+                            lixa_state_log_get_ri_last_record_id(
+                                &this->logs[i]),
+                            iso_timestamp2));
+            } /* if (log_exists[i])*/
         } /* for (i=0; i<LIXA_STATE_TABLES; ++i) */
 
+        /* what's the last table? */
+        for (i=0; i<LIXA_STATE_TABLES; ++i) {
+            int succ, order;
+            if (!table_exists[i] ||
+                lixa_state_table_get_status(&this->tables[i]) !=
+                STATE_TABLE_OPENED)
+                continue;
+            succ = lixa_state_common_succ_state(i);
+            if (!table_exists[succ] ||
+                lixa_state_table_get_status(&this->tables[succ]) !=
+                STATE_TABLE_OPENED)
+                continue;
+            order = lixa_state_common_chkp_order(
+                lixa_state_table_get_last_record_id(&this->tables[i]),
+                lixa_state_table_get_last_sync(&this->tables[i]),
+                lixa_state_table_get_last_record_id(&this->tables[succ]),
+                lixa_state_table_get_last_sync(&this->tables[succ]));
+            if (order >= 0)
+                last_table = succ;
+            else
+                last_table = i;
+        } /* for (i=0; i<LIXA_STATE_TABLES; ++i) */
+        if (last_table < 0) {
+            LIXA_SYSLOG((LOG_ERR, LIXA_SYSLOG_LXD073E));
+            THROW(CORRUPTED_STATUS_FILE);
+        } else {
+            LIXA_TRACE(("lixa_state_warm_start: last_table is %d\n",
+                        last_table));
+        }
+                            
+                
         /* @@@ analyze the tables and the logs */
         
         THROW(NONE);
@@ -606,6 +692,9 @@ int lixa_state_warm_start(lixa_state_t *this,
                 ret_cod = LIXA_RC_NULL_OBJECT;
                 break;
             case TABLE_OPEN_ERROR:
+                break;
+            case CORRUPTED_STATUS_FILE:
+                ret_cod = LIXA_RC_CORRUPTED_STATUS_FILE;
                 break;
             case NONE:
                 ret_cod = LIXA_RC_OK;

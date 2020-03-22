@@ -554,7 +554,7 @@ int lixa_state_log_open_file(lixa_state_log_t *this, void *single_page)
     LIXA_TRACE(("lixa_state_log_open_file\n"));
     TRY {
         struct stat fd_stat;
-        off_t number_of_pages, i, j, number_of_records = 0;
+        off_t number_of_pages, i, j;
         int error = FALSE;
         
         if (NULL == this)
@@ -565,7 +565,7 @@ int lixa_state_log_open_file(lixa_state_log_t *this, void *single_page)
                                this, STATE_LOG_OPENED, TRUE)))
             THROW(INVALID_STATUS);
         
-        LIXA_SYSLOG((LOG_INFO, LIXA_SYSLOG_LXD065I, this->pathname));
+        LIXA_SYSLOG((LOG_INFO, LIXA_SYSLOG_LXD065D, this->pathname));
         /* open the file descriptor */
         if (-1 == (this->fd = open(this->pathname, this->flags))) {
             LIXA_TRACE(("lixa_state_log_open_file: open('%s')=%d "
@@ -591,6 +591,8 @@ int lixa_state_log_open_file(lixa_state_log_t *this, void *single_page)
                          LIXA_SYSTEM_PAGE_SIZE));
             number_of_pages++;
         }
+        /* reset the area that will be used to store the data */
+        memset(&this->read_info, 0, sizeof(this->read_info));
         /* analyze the content; this loop will try to read as much as
            possible from the underlying file
            Note: using a larger buffer would be faster, but this function is
@@ -632,15 +634,15 @@ int lixa_state_log_open_file(lixa_state_log_t *this, void *single_page)
                     (const uint8_t *)log_record + sizeof(uint32_t),
                     sizeof(struct lixa_state_log_record_s) - sizeof(uint32_t));
                 if (crc32 == log_record->crc32) {
-                    if (0 == number_of_records) {
-                        this->read_info.first_read_id = log_record->id;
-                        this->read_info.first_read_timestamp =
+                    if (0 == this->read_info.number_of_records) {
+                        this->read_info.first_record_id = log_record->id;
+                        this->read_info.first_record_timestamp =
                             log_record->timestamp;
                     }
-                    this->read_info.last_read_id = log_record->id;
-                    this->read_info.last_read_timestamp =
+                    this->read_info.last_record_id = log_record->id;
+                    this->read_info.last_record_timestamp =
                         log_record->timestamp;
-                    number_of_records++;
+                    this->read_info.number_of_records++;
                     lixa_utils_iso_timestamp(&log_record->timestamp,
                                              iso_timestamp,
                                              sizeof(iso_timestamp));
@@ -669,8 +671,9 @@ int lixa_state_log_open_file(lixa_state_log_t *this, void *single_page)
         LIXA_TRACE(("lixa_state_log_open_file: number_of_records="
                     OFF_T_FORMAT ", first record id=" LIXA_WORD_T_FORMAT
                     ", last record id=" LIXA_WORD_T_FORMAT "\n",
-                    number_of_records, this->read_info.first_read_id,
-                    this->read_info.last_read_id));
+                    this->read_info.number_of_records,
+                    this->read_info.first_record_id,
+                    this->read_info.last_record_id));
         
         /* set new status */
         if (LIXA_RC_OK != (ret_cod = lixa_state_log_set_status(
