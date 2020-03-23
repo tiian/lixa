@@ -575,6 +575,7 @@ int lixa_state_warm_start(lixa_state_t *this,
         NULL_OBJECT,
         TABLE_OPEN_ERROR,
         CORRUPTED_STATUS_FILE,
+        LOG_READ_FILE,
         NONE
     } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
@@ -680,10 +681,29 @@ int lixa_state_warm_start(lixa_state_t *this,
         } else {
             LIXA_TRACE(("lixa_state_warm_start: last_table is %d\n",
                         last_table));
+            LIXA_SYSLOG((LOG_INFO, LIXA_SYSLOG_LXD074I,
+                         lixa_state_table_get_pathname(
+                             &this->tables[last_table])));
         }
-                            
-                
-        /* @@@ analyze the tables and the logs */
+        /* looping on all logs */
+        i = last_table;
+        do { /* looping on all logs */
+            off_t j;
+            struct lixa_state_log_record_s buffer;
+            /* looping on all the records in the log */
+            for (j=0;
+                 j<lixa_state_log_get_ri_number_of_records(&this->logs[i]);
+                 ++j) {
+                if (LIXA_RC_OK != (ret_cod = lixa_state_log_read_file(
+                                       &this->logs[i], j, &buffer,
+                                       this->single_page)))
+                    THROW(LOG_READ_FILE);
+                /* @@@ analyze the log record and applies it if necessary */
+                /* @@@ write a syslog message with the number of applied
+                   records for every log file */
+            } /* for (j */
+            i = lixa_state_common_succ_state(i);
+        } while (i != last_table);
         
         THROW(NONE);
     } CATCH {
@@ -695,6 +715,8 @@ int lixa_state_warm_start(lixa_state_t *this,
                 break;
             case CORRUPTED_STATUS_FILE:
                 ret_cod = LIXA_RC_CORRUPTED_STATUS_FILE;
+                break;
+            case LOG_READ_FILE:
                 break;
             case NONE:
                 ret_cod = LIXA_RC_OK;
@@ -1380,6 +1402,7 @@ int lixa_state_flush_log_records(lixa_state_t *this)
             log_record->id = lixa_state_log_get_next_record_id(
                 &this->logs[this->active_state]);
             log_record->timestamp = timestamp;
+            log_record->original_slot = this->block_ids[r];
             memcpy(&(log_record->record), record,
                    sizeof(union status_record_u));
             /* compute the CRC32 code */
@@ -1389,10 +1412,10 @@ int lixa_state_flush_log_records(lixa_state_t *this)
             LIXA_TRACE(("lixa_state_flush_log_records: filled_page="
                         SIZE_T_FORMAT ", pos_in_page=" SIZE_T_FORMAT
                         ", log_record->id=" UINT32_T_FORMAT
-                        ", log_record->crc32=0x%08x, slot in state table = "
-                        UINT32_T_FORMAT "\n",
+                        ", log_record->crc32=0x%08x, "
+                        "log_record->original_slot=" UINT32_T_FORMAT "\n",
                         filled_pages, pos_in_page, log_record->id,
-                        log_record->crc32, this->block_ids[r]));
+                        log_record->crc32, log_record->original_slot));
             /* use only when really necessary: it creates a huge
                amount of data
             LIXA_TRACE_HEX_DATA(

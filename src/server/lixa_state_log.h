@@ -108,6 +108,10 @@ struct lixa_state_log_record_s {
      */
     uint32_t                         crc32;
     /**
+     * The position of the record in the state table
+     */
+    uint32_t                         original_slot;
+    /**
      * Unique identifier of the record
      */
     lixa_word_t                      id;
@@ -264,6 +268,21 @@ extern "C" {
      */
     int lixa_state_log_open_file(lixa_state_log_t *this, void *single_page);
 
+    
+
+    /**
+     * Retrieve a record from the underlying file
+     * @param[in,out] this state log object
+     * @param[in] pos of the record in the file
+     * @param[out] buffer used to store the retrieved record
+     * @param[in,out] single_page of memory that's page aligned and that can
+     *                be used for buffering
+     * @return a reason code
+     */
+    int lixa_state_log_read_file(lixa_state_log_t *this, off_t pos,
+                                 struct lixa_state_log_record_s *buffer,
+                                 void *single_page);
+                               
 
     
     /**

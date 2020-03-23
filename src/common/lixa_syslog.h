@@ -292,6 +292,8 @@
     " and it was synchronized at %s"
 #define LIXA_SYSLOG_LXD073E "LXD073E unable to determine the last state " \
     "table, lixad server can NOT be started; possible state files corruption!"
+#define LIXA_SYSLOG_LXD074I "LXD074I last consistent state table file is " \
+    "'%s': applying log changes on it..."
 
 
 

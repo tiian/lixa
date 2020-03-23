@@ -565,7 +565,7 @@ int lixa_state_log_open_file(lixa_state_log_t *this, void *single_page)
                                this, STATE_LOG_OPENED, TRUE)))
             THROW(INVALID_STATUS);
         
-        LIXA_SYSLOG((LOG_INFO, LIXA_SYSLOG_LXD065D, this->pathname));
+        LIXA_SYSLOG((LOG_DEBUG, LIXA_SYSLOG_LXD065D, this->pathname));
         /* open the file descriptor */
         if (-1 == (this->fd = open(this->pathname, this->flags))) {
             LIXA_TRACE(("lixa_state_log_open_file: open('%s')=%d "
@@ -649,9 +649,10 @@ int lixa_state_log_open_file(lixa_state_log_t *this, void *single_page)
                     LIXA_TRACE(("lixa_state_log_open_file: record "
                                 OFF_T_FORMAT " in page " OFF_T_FORMAT " is "
                                 "valid: id=" LIXA_WORD_T_FORMAT
-                                ", timestamp=%s, crc32=" UINT32_T_XFORMAT "\n",
+                                ", timestamp=%s, crc32=" UINT32_T_XFORMAT
+                                ", original_slot=" UINT32_T_FORMAT "\n",
                                 j, i, log_record->id, iso_timestamp,
-                                log_record->crc32));
+                                log_record->crc32, log_record->original_slot));
                 } else {
                     LIXA_TRACE(("lixa_state_log_open_file: record "
                                 OFF_T_FORMAT " in page " OFF_T_FORMAT " is "
@@ -704,6 +705,83 @@ int lixa_state_log_open_file(lixa_state_log_t *this, void *single_page)
         } /* switch (excp) */
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_state_log_open_file/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
+
+int lixa_state_log_read_file(lixa_state_log_t *this, off_t pos,
+                             struct lixa_state_log_record_s *buffer,
+                             void *single_page)
+{
+    enum Exception {
+        NULL_OBJECT,
+        INVALID_STATUS,
+        PREAD_ERROR,
+        BUFFER_OVERFLOW,
+        NONE
+    } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    
+    LIXA_TRACE(("lixa_state_log_read_file(pos=" OFF_T_FORMAT "\n", pos));
+    TRY {
+        off_t page_number, pos_in_page;
+        ssize_t read_bytes;
+        
+        if (NULL == this)
+            THROW(NULL_OBJECT);
+
+        /* log file must be in opened status */
+        if (STATE_LOG_OPENED != this->status)
+            THROW(INVALID_STATUS);
+
+        /* where is the record stored? */
+        page_number = pos / LIXA_STATE_LOG_RECORDS_PER_PAGE;
+        pos_in_page = pos % LIXA_STATE_LOG_RECORDS_PER_PAGE;
+        /* read the whole page that contains the record */
+        read_bytes = pread(this->fd, single_page, LIXA_SYSTEM_PAGE_SIZE,
+                           page_number*LIXA_SYSTEM_PAGE_SIZE);
+        /* pread OK? */
+        if (0 >= read_bytes) {
+            LIXA_TRACE(("lixa_state_log_read_file: pread() returned error "
+                        "%d ('%s'); read_bytes=" SSIZE_T_FORMAT "\n",
+                        errno, strerror(errno)));
+            THROW(PREAD_ERROR);
+        }
+        /* the record has been read (the page could be broken if it's the
+           last one) */
+        if (read_bytes <
+            (pos_in_page+1)*sizeof(struct lixa_state_log_record_s))
+            THROW(BUFFER_OVERFLOW);
+        /* copy data to buffer */
+        memcpy(buffer, single_page +
+               pos_in_page * sizeof(struct lixa_state_log_record_s),
+               sizeof(struct lixa_state_log_record_s));
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case NULL_OBJECT:
+                ret_cod = LIXA_RC_NULL_OBJECT;
+                break;
+            case INVALID_STATUS:
+                ret_cod = LIXA_RC_INVALID_STATUS;
+                break;
+            case PREAD_ERROR:
+                ret_cod = LIXA_RC_PREAD_ERROR;
+                break;
+            case BUFFER_OVERFLOW:
+                ret_cod = LIXA_RC_BUFFER_OVERFLOW;
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("lixa_state_log_read_file/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }
