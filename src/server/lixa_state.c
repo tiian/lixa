@@ -576,6 +576,7 @@ int lixa_state_warm_start(lixa_state_t *this,
         TABLE_OPEN_ERROR,
         CORRUPTED_STATUS_FILE,
         LOG_READ_FILE,
+        TABLE_PATCH_SLOT,
         NONE
     } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
@@ -687,23 +688,56 @@ int lixa_state_warm_start(lixa_state_t *this,
         }
         /* looping on all logs */
         i = last_table;
-        do { /* looping on all logs */
-            off_t j;
+        do { /* looping on all logs using variable i*/
+            off_t j, prev_j=-1, count=0;
             struct lixa_state_log_record_s buffer;
             /* looping on all the records in the log */
             for (j=0;
                  j<lixa_state_log_get_ri_number_of_records(&this->logs[i]);
                  ++j) {
+                int order;
+                
                 if (LIXA_RC_OK != (ret_cod = lixa_state_log_read_file(
-                                       &this->logs[i], j, &buffer,
+                                       &this->logs[i], j, prev_j++, &buffer,
                                        this->single_page)))
                     THROW(LOG_READ_FILE);
-                /* @@@ analyze the log record and applies it if necessary */
-                /* @@@ write a syslog message with the number of applied
-                   records for every log file */
+                /* check if the log record must be applied to the state
+                   table */
+                order = lixa_state_common_chkp_order(
+                    lixa_state_table_get_last_record_id(
+                        &this->tables[last_table]),
+                    lixa_state_table_get_last_sync(
+                        &this->tables[last_table]),
+                    lixa_state_log_record_get_id(&buffer),
+                    lixa_state_log_record_get_timestamp(&buffer));
+                /* analyze the log record and applies it if necessary */
+                if (order < 0) {
+                    LIXA_TRACE(("lixa_state_warm_start: log record is younger "
+                                "than state table and it MUST be applied\n"));
+                    if (LIXA_RC_OK != (
+                            ret_cod = lixa_state_table_patch_slot(
+                                &this->tables[last_table],
+                                lixa_state_log_record_get_original_slot(
+                                    &buffer),
+                                lixa_state_log_record_get_record(&buffer))))
+                        THROW(TABLE_PATCH_SLOT);
+                    count++;
+                }  else {
+                    LIXA_TRACE(("lixa_state_warm_start: log record is NOT "
+                                "younger than state table and must be "
+                                "skipped\n"));
+                }
             } /* for (j */
+            if (count > 0)
+                LIXA_SYSLOG((LOG_INFO, LIXA_SYSLOG_LXD075I, count,
+                             lixa_state_log_get_pathname(&this->logs[i]),
+                             lixa_state_table_get_pathname(
+                                 &this->tables[last_table])));
             i = lixa_state_common_succ_state(i);
         } while (i != last_table);
+
+        /* @@@ what else now?! maybe a sync of state table and log must start!
+         */
         
         THROW(NONE);
     } CATCH {
@@ -717,6 +751,7 @@ int lixa_state_warm_start(lixa_state_t *this,
                 ret_cod = LIXA_RC_CORRUPTED_STATUS_FILE;
                 break;
             case LOG_READ_FILE:
+            case TABLE_PATCH_SLOT:
                 break;
             case NONE:
                 ret_cod = LIXA_RC_OK;

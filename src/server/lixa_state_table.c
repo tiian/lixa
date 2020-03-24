@@ -1615,3 +1615,48 @@ int lixa_state_table_set_last_record_id(lixa_state_table_t *this,
     return ret_cod;
 }
 
+
+
+int lixa_state_table_patch_slot(lixa_state_table_t *this,
+                                uint32_t block_id,
+                                const lixa_state_record_t *sr)
+{
+    enum Exception {
+        NULL_OBJECT,
+        SYNC_BLOCK,
+        NONE
+    } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    
+    LIXA_TRACE(("lixa_state_table_patch_slot(block_id=" UINT32_T_FORMAT "\n",
+                block_id));
+    TRY {
+        if (NULL == this || NULL == sr)
+            THROW(NULL_OBJECT);
+        /* replacing the content */
+        memcpy(&this->map[block_id].sr, sr, sizeof(lixa_state_record_t));
+        /* resyncing the CRC of the record */
+        if (LIXA_RC_OK != (ret_cod = lixa_state_table_sync_block(
+                               this, block_id)))
+            THROW(SYNC_BLOCK);
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case NULL_OBJECT:
+                ret_cod = LIXA_RC_NULL_OBJECT;
+                break;
+            case SYNC_BLOCK:
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("lixa_state_table_patch_slot/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+

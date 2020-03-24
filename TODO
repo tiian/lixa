@@ -1,5 +1,10 @@
 Go on with lixa_state_warm_start
 
+lixa_state does NOT receive data, 
+thread_status_get_record4update and thread_status_get_record4read
+are pointing to the legacy status: the switch must be implemented to test 
+the new persistence engine
+
 Restore "normal" values in lixa_state_log.h for log files
 Remove thread_status_insert_old
 

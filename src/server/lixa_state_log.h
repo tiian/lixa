@@ -121,9 +121,9 @@ struct lixa_state_log_record_s {
      */
     struct timeval                   timestamp;
     /**
-     * The record that must be transferred
+     * The record that must be persisted/retrieved
      */
-    union status_record_u            record;
+    lixa_state_record_t              record;
 };
 
 
@@ -213,6 +213,41 @@ extern "C" {
 
 
 
+    static inline uint32_t lixa_state_log_record_get_crc32(
+        const struct lixa_state_log_record_s *r) {
+        return r->crc32;
+    }
+    
+
+    
+    static inline uint32_t lixa_state_log_record_get_original_slot(
+        const struct lixa_state_log_record_s *r) {
+        return r->original_slot;
+    }
+    
+
+    
+    static inline lixa_word_t lixa_state_log_record_get_id(
+        const struct lixa_state_log_record_s *r) {
+        return r->id;
+    }
+    
+
+    
+    static inline const struct timeval *lixa_state_log_record_get_timestamp(
+        const struct lixa_state_log_record_s *r) {
+        return &r->timestamp;
+    }
+
+
+
+    static inline const lixa_state_record_t *
+    lixa_state_log_record_get_record(const struct lixa_state_log_record_s *r) {
+        return &r->record;
+    }
+
+
+    
     /**
      * Return the human readable string associated to a status
      */
@@ -274,12 +309,14 @@ extern "C" {
      * Retrieve a record from the underlying file
      * @param[in,out] this state log object
      * @param[in] pos of the record in the file
+     * @param[in] prev_pos was the position of the previous read record
      * @param[out] buffer used to store the retrieved record
      * @param[in,out] single_page of memory that's page aligned and that can
      *                be used for buffering
      * @return a reason code
      */
     int lixa_state_log_read_file(lixa_state_log_t *this, off_t pos,
+                                 off_t prev_pos,
                                  struct lixa_state_log_record_s *buffer,
                                  void *single_page);
                                

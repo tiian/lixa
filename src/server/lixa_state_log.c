@@ -711,7 +711,7 @@ int lixa_state_log_open_file(lixa_state_log_t *this, void *single_page)
 
 
 
-int lixa_state_log_read_file(lixa_state_log_t *this, off_t pos,
+int lixa_state_log_read_file(lixa_state_log_t *this, off_t pos, off_t prev_pos,
                              struct lixa_state_log_record_s *buffer,
                              void *single_page)
 {
@@ -724,9 +724,10 @@ int lixa_state_log_read_file(lixa_state_log_t *this, off_t pos,
     } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     
-    LIXA_TRACE(("lixa_state_log_read_file(pos=" OFF_T_FORMAT "\n", pos));
+    LIXA_TRACE(("lixa_state_log_read_file(pos=" OFF_T_FORMAT ", prev_pos="
+                OFF_T_FORMAT "\n", pos, prev_pos));
     TRY {
-        off_t page_number, pos_in_page;
+        off_t page_number, pos_in_page, prev_page_number;
         ssize_t read_bytes;
         
         if (NULL == this)
@@ -738,22 +739,25 @@ int lixa_state_log_read_file(lixa_state_log_t *this, off_t pos,
 
         /* where is the record stored? */
         page_number = pos / LIXA_STATE_LOG_RECORDS_PER_PAGE;
+        prev_page_number = prev_pos / LIXA_STATE_LOG_RECORDS_PER_PAGE;
         pos_in_page = pos % LIXA_STATE_LOG_RECORDS_PER_PAGE;
-        /* read the whole page that contains the record */
-        read_bytes = pread(this->fd, single_page, LIXA_SYSTEM_PAGE_SIZE,
-                           page_number*LIXA_SYSTEM_PAGE_SIZE);
-        /* pread OK? */
-        if (0 >= read_bytes) {
-            LIXA_TRACE(("lixa_state_log_read_file: pread() returned error "
-                        "%d ('%s'); read_bytes=" SSIZE_T_FORMAT "\n",
-                        errno, strerror(errno)));
-            THROW(PREAD_ERROR);
-        }
-        /* the record has been read (the page could be broken if it's the
-           last one) */
-        if (read_bytes <
-            (pos_in_page+1)*sizeof(struct lixa_state_log_record_s))
-            THROW(BUFFER_OVERFLOW);
+        if (page_number != prev_page_number) {
+            /* read the whole page that contains the record */
+            read_bytes = pread(this->fd, single_page, LIXA_SYSTEM_PAGE_SIZE,
+                               page_number*LIXA_SYSTEM_PAGE_SIZE);
+            /* pread OK? */
+            if (0 >= read_bytes) {
+                LIXA_TRACE(("lixa_state_log_read_file: pread() returned error "
+                            "%d ('%s'); read_bytes=" SSIZE_T_FORMAT "\n",
+                            errno, strerror(errno)));
+                THROW(PREAD_ERROR);
+            }
+            /* the record has been read (the page could be broken if it's the
+               last one) */
+            if (read_bytes <
+                (pos_in_page+1)*sizeof(struct lixa_state_log_record_s))
+                THROW(BUFFER_OVERFLOW);
+        } /* if (page_number != prev_page_number) */
         /* copy data to buffer */
         memcpy(buffer, single_page +
                pos_in_page * sizeof(struct lixa_state_log_record_s),

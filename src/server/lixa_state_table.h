@@ -379,6 +379,17 @@ extern "C" {
     }
 
 
+
+    /**
+     * Replace the content of a slot, patching the inner record
+     * @param[in,out] this state table object
+     * @return a reason code
+     */
+    int lixa_state_table_patch_slot(lixa_state_table_t *this,
+                                    uint32_t block_id,
+                                    const lixa_state_record_t *sr);
+
+    
     
 #ifdef __cplusplus
 }
