@@ -1,4 +1,5 @@
-Go on with lixa_state_warm_start
+Go on with lixa_state_warm_start: it restarts, but a second restart fails.
+Play a little bit with it!
 
 lixa_state does NOT receive data, 
 thread_status_get_record4update and thread_status_get_record4read

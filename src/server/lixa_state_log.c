@@ -725,7 +725,7 @@ int lixa_state_log_read_file(lixa_state_log_t *this, off_t pos, off_t prev_pos,
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     
     LIXA_TRACE(("lixa_state_log_read_file(pos=" OFF_T_FORMAT ", prev_pos="
-                OFF_T_FORMAT "\n", pos, prev_pos));
+                OFF_T_FORMAT ")\n", pos, prev_pos));
     TRY {
         off_t page_number, pos_in_page, prev_page_number;
         ssize_t read_bytes;

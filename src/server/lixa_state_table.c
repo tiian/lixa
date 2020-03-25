@@ -1039,10 +1039,11 @@ int lixa_state_table_set_status(lixa_state_table_t *this,
                 break;
             case STATE_TABLE_CLOSED:
                 if (STATE_TABLE_FORMATTED != this->status &&
-                    STATE_TABLE_SYNCH != this->status) {
+                    STATE_TABLE_SYNCH != this->status &&
+                    STATE_TABLE_OPENED != this->status) {
                     LIXA_TRACE(("lixa_state_table_set_status: transition to "
                                 "CLOSED is acceptable only from "
-                                "FORMATTED and SYNCH\n"));
+                                "FORMATTED, SYNCH, and OPENED\n"));
                     valid = FALSE;
                 }
                 break;
@@ -1628,7 +1629,7 @@ int lixa_state_table_patch_slot(lixa_state_table_t *this,
     } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     
-    LIXA_TRACE(("lixa_state_table_patch_slot(block_id=" UINT32_T_FORMAT "\n",
+    LIXA_TRACE(("lixa_state_table_patch_slot(block_id=" UINT32_T_FORMAT ")\n",
                 block_id));
     TRY {
         if (NULL == this || NULL == sr)
