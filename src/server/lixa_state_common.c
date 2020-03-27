@@ -118,16 +118,25 @@ int lixa_state_common_chkp_order(lixa_word_t first_record_id,
     int result = 0;
     
     if (first_record_id == second_record_id)
-        result = 0; /* record id precedence */
-    else if (first_record_id < second_record_id)
-        result = -1; /* record id precedence */
-    else { /* first record seems to be older than second record */
         if (timercmp(first_timeval, second_timeval, <))
             result = -1; /* timeval precedence */
         else if (timercmp(first_timeval, second_timeval, >))
             result = +1; /* it's really older! */
         else
-            result = +1; /* ??? tricky situation, record id precedence !!! */
+            result = 0;
+    else if (first_record_id < second_record_id)
+        result = -1; /* record id precedence */
+    else { /* first record seems to be older than second record */
+        if (first_record_id > 0xC000000 &&
+            second_record_id < 0x4000000) {
+            if (timercmp(first_timeval, second_timeval, <))
+                result = -1; /* timeval precedence */
+            else if (timercmp(first_timeval, second_timeval, >))
+                result = +1; /* it's really older! */
+            else
+                result = +1; /* ??? tricky situation !!! */
+        } else
+            result = +1;
     }
     LIXA_TRACE(("lixa_state_common_chkp_order(first_record_id="
                 LIXA_WORD_T_FORMAT ", first_timeval->tv_sec=%d, "

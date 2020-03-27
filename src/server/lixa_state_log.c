@@ -602,8 +602,8 @@ int lixa_state_log_open_file(lixa_state_log_t *this, void *single_page)
             ssize_t read_bytes;
             
             LIXA_TRACE(("lixa_state_log_open_file: reading page "
-                        OFF_T_FORMAT "/" OFF_T_FORMAT "\n", i,
-                        number_of_pages));
+                        OFF_T_FORMAT "/" OFF_T_FORMAT " from file '%s'\n", i,
+                        number_of_pages, this->pathname));
             read_bytes = pread(this->fd, single_page, LIXA_SYSTEM_PAGE_SIZE,
                                i*LIXA_SYSTEM_PAGE_SIZE);
             if (0 >= read_bytes) {
@@ -1030,7 +1030,8 @@ int lixa_state_log_set_status(lixa_state_log_t *this,
                 break;
             case STATE_LOG_CLOSED:
                 if (STATE_LOG_USED != this->status &&
-                    STATE_LOG_FULL != this->status) {
+                    STATE_LOG_FULL != this->status &&
+                    STATE_LOG_OPENED != this->status) {
                     LIXA_TRACE(("lixa_state_log_set_status: transition to "
                                 "CLOSED is acceptable only from "
                                 "USED and FULL\n"));

@@ -369,6 +369,17 @@ extern "C" {
 
 
     /**
+     * Set the id of the last record in the (previous) log: used during
+     * log switching
+     */
+    static inline void lixa_state_log_set_last_record_id(
+        lixa_state_log_t *this, lixa_word_t last_record_id) {
+        this->last_record_id = last_record_id;
+    }
+
+    
+
+    /**
      * Return the id of the next record that will be appended in the log;
      * updated the id of the last record as well
      * @param[in,out] this state log object

@@ -288,7 +288,7 @@
     "at %s and is aligned with record id " LIXA_WORD_T_FORMAT
 #define LIXA_SYSLOG_LXD072I "LXD072I state log file '%s' contains " \
     OFF_T_FORMAT " valid records: first record id is " LIXA_WORD_T_FORMAT \
-    " and it was synchronized at %s; second record id is " LIXA_WORD_T_FORMAT \
+    " and it was synchronized at %s; last record id is " LIXA_WORD_T_FORMAT \
     " and it was synchronized at %s"
 #define LIXA_SYSLOG_LXD073E "LXD073E unable to determine the last state " \
     "table, lixad server can NOT be started; possible state files corruption!"

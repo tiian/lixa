@@ -554,6 +554,7 @@ int lixa_state_table_close(lixa_state_table_t *this)
 
         /* check if the operation must be skipped because useless */
         if (STATE_TABLE_UNDEFINED == this->status ||
+            STATE_TABLE_DISPOSED == this->status ||
             STATE_TABLE_CLOSED == this->status) {
             LIXA_TRACE(("lixa_state_table_close: nothing to do, status is "
                         "%d:%s\n", this->status,
@@ -1432,8 +1433,9 @@ int lixa_state_table_copy_from(lixa_state_table_t *this,
                     THROW(MUNMAP_ERROR);
                 this->map = NULL;
             }
-            /* truncate the state file to the desired length */
-            if (0 != ftruncate(this->fd, fd_stat_source.st_size))
+            /* truncate the state file to the desired length, if necessary */
+            if (fd_stat_this.st_size != fd_stat_source.st_size &&
+                0 != ftruncate(this->fd, fd_stat_source.st_size))
                 THROW(TRUNCATE_ERROR);
         }
         /* map the new state file if necessary */

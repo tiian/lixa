@@ -676,7 +676,7 @@ int lixa_state_warm_start(lixa_state_t *this,
                 lixa_state_table_get_last_sync(&this->tables[i]),
                 lixa_state_table_get_last_record_id(&this->tables[succ]),
                 lixa_state_table_get_last_sync(&this->tables[succ]));
-            if (order >= 0)
+            if (order < 0)
                 last_table = succ;
             else
                 last_table = i;
@@ -870,6 +870,8 @@ int lixa_state_close(lixa_state_t *this)
                 if (LIXA_RC_OK != (ret_cod = lixa_state_flush_table(this)))
                     THROW(FLUSH_TABLE);
                 /* obtain the lock of the synchronized structure */
+                LIXA_TRACE(("lixa_state_close: waiting for lock on "
+                            "table_synchronizer mutex...\n"));
                 if (0 != (pte = pthread_mutex_lock(
                               &this->table_synchronizer.mutex))) {
                     THROW(PTHREAD_MUTEX_LOCK_ERROR1);
@@ -934,6 +936,8 @@ int lixa_state_close(lixa_state_t *this)
                                    lixa_state_flush_log_records(this)))
                     THROW(FLUSH_LOG_RECORDS);
                 /* obtain the lock of the synchronized structure */
+                LIXA_TRACE(("lixa_state_close: waiting for lock on "
+                            "log_synchronizer mutex...\n"));
                 if (0 != (pte = pthread_mutex_lock(
                               &this->log_synchronizer.mutex))) {
                     THROW(PTHREAD_MUTEX_LOCK_ERROR2);
@@ -1068,51 +1072,19 @@ int lixa_state_clean(lixa_state_t *this)
 {
     enum Exception {
         NULL_OBJECT,
-        PTHREAD_MUTEX_LOCK_ERROR2,
-        PTHREAD_COND_SIGNAL_ERROR2,
-        PTHREAD_MUTEX_UNLOCK_ERROR2,
-        PTHREAD_JOIN_ERROR2,
-        PTHREAD_COND_DESTROY_ERROR2,
-        PTHREAD_MUTEX_DESTROY_ERROR2,
         STATE_LOG_CLEAN_ERROR,
         STATE_TABLE_CLEAN_ERROR,
         NONE
     } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     int pte = 0;
-    int mutex_locked = FALSE;
     
     LIXA_TRACE(("lixa_state_clean\n"));
     TRY {
         int i;
         if (NULL == this)
             THROW(NULL_OBJECT);
-
-        /* obtain the lock of the synchronized structure */
-        if (0 != (pte = pthread_mutex_lock(&this->log_synchronizer.mutex))) {
-            THROW(PTHREAD_MUTEX_LOCK_ERROR2);
-        } else
-            mutex_locked = TRUE;
-        /* ask flusher termination */
-        LIXA_TRACE(("lixa_state_clean: sending to log flusher thread "
-                    "exit request...\n"));
-        this->log_synchronizer.operation = STATE_FLUSHER_EXIT;
-        if (0 != (pte = pthread_cond_signal(&this->log_synchronizer.cond)))
-            THROW(PTHREAD_COND_SIGNAL_ERROR2);
-        /* unlock the mutex */
-        if (0 != (pte = pthread_mutex_unlock(&this->log_synchronizer.mutex))) {
-            THROW(PTHREAD_MUTEX_UNLOCK_ERROR2);
-        } else
-            mutex_locked = FALSE;
-        /* wait flusher termination */
-        if (0 != (pte = pthread_join(this->log_synchronizer.thread, NULL)))
-            THROW(PTHREAD_JOIN_ERROR2);
-        LIXA_TRACE(("lixa_state_clean: log flusher thread terminated\n"));
-        /* mutex and condition are no more necessary */
-        if (0 != (pte = pthread_cond_destroy(&this->log_synchronizer.cond)))
-            THROW(PTHREAD_COND_DESTROY_ERROR2);
-        if (0 != (pte = pthread_mutex_destroy(&this->log_synchronizer.mutex)))
-            THROW(PTHREAD_MUTEX_DESTROY_ERROR2);
+        
         /* call clean up for table and log objects */
         for (i=0; i<LIXA_STATE_TABLES; ++i) {
             if (LIXA_RC_OK != (ret_cod = lixa_state_log_clean(
@@ -1136,24 +1108,6 @@ int lixa_state_clean(lixa_state_t *this)
             case NULL_OBJECT:
                 ret_cod = LIXA_RC_NULL_OBJECT;
                 break;
-            case PTHREAD_MUTEX_LOCK_ERROR2:
-                ret_cod = LIXA_RC_PTHREAD_MUTEX_LOCK_ERROR;
-                break;
-            case PTHREAD_COND_SIGNAL_ERROR2:
-                ret_cod = LIXA_RC_PTHREAD_COND_SIGNAL_ERROR;
-                break;
-            case PTHREAD_MUTEX_UNLOCK_ERROR2:
-                ret_cod = LIXA_RC_PTHREAD_MUTEX_UNLOCK_ERROR;
-                break;
-            case PTHREAD_JOIN_ERROR2:
-                ret_cod = LIXA_RC_PTHREAD_JOIN_ERROR;
-                break;
-            case PTHREAD_COND_DESTROY_ERROR2:
-                ret_cod = LIXA_RC_PTHREAD_COND_DESTROY_ERROR;
-                break;
-            case PTHREAD_MUTEX_DESTROY_ERROR2:
-                ret_cod = LIXA_RC_PTHREAD_MUTEX_DESTROY_ERROR;
-                break;
             case STATE_LOG_CLEAN_ERROR:
             case STATE_TABLE_CLEAN_ERROR:
                 break;
@@ -1163,11 +1117,6 @@ int lixa_state_clean(lixa_state_t *this)
             default:
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
         } /* switch (excp) */
-        /* restore mutex in the event of error */
-        if (mutex_locked &&
-            excp > PTHREAD_MUTEX_LOCK_ERROR2 &&
-            excp < PTHREAD_MUTEX_UNLOCK_ERROR2)
-            pthread_mutex_unlock(&this->log_synchronizer.mutex);
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_state_clean/excp=%d/"
                 "ret_cod=%d/pthreaderror=%d/errno=%d\n", excp, ret_cod, pte,
@@ -1842,6 +1791,7 @@ int lixa_state_switch(lixa_state_t *this, lixa_word_t last_record_id)
         SET_STATUS1,
         SET_STATUS2,
         TABLE_COPY_FROM,
+        LOG_CLOSE,
         FLUSH_TABLE,
         SET_STATUS3,
         LOG_CREATE_NEW_FILE,
@@ -1884,10 +1834,19 @@ int lixa_state_switch(lixa_state_t *this, lixa_word_t last_record_id)
                     STATE_TABLE_COPY_TARGET, FALSE)))
             THROW(SET_STATUS2);
         /* copy to target (next) from source (current) */
+        LIXA_TRACE(("lixa_state_switch: copy content from table %d to "
+                    "table %d\n", this->active_state,
+                    lixa_state_get_next_state(this)));
         if (LIXA_RC_OK != (ret_cod = lixa_state_table_copy_from(
                                &this->tables[lixa_state_get_next_state(this)],
                                &this->tables[this->active_state])))
             THROW(TABLE_COPY_FROM);
+        /* close current log file */
+        LIXA_TRACE(("lixa_state_switch: closing log %d\n",
+                    this->active_state));
+        if (LIXA_RC_OK != (ret_cod = lixa_state_log_close(
+                               &this->logs[this->active_state])))
+            THROW(LOG_CLOSE);
         /* start disk synchronization of current state file using the
            background thread ... */
         if (LIXA_RC_OK != (ret_cod = lixa_state_flush_table(this)))
@@ -1897,8 +1856,7 @@ int lixa_state_switch(lixa_state_t *this, lixa_word_t last_record_id)
                 ret_cod = lixa_state_table_set_status(
                     &this->tables[lixa_state_get_next_state(this)],
                     STATE_TABLE_USED, FALSE)))
-            THROW(SET_STATUS3);
-        
+            THROW(SET_STATUS3);        
         /*
           switch log file: ask flusher thread to start synchronization
          */
@@ -1911,11 +1869,13 @@ int lixa_state_switch(lixa_state_t *this, lixa_word_t last_record_id)
                         this->single_page)))
                 THROW(LOG_CREATE_NEW_FILE);
         }
+        /* set the last_record_id in the state log object */
+        lixa_state_log_set_last_record_id(
+            &this->logs[lixa_state_get_next_state(this)], last_record_id);
         /* @@@ remove me: useless or dagerous...
         if (LIXA_RC_OK != (ret_cod = lixa_state_sync_log(this)))
             THROW(SYNC_LOG);
         */
-
         /* change active_state */
         this->active_state = lixa_state_get_next_state(this);
         LIXA_TRACE(("lixa_state_switch: new state table and log is now %d\n",
@@ -1931,6 +1891,7 @@ int lixa_state_switch(lixa_state_t *this, lixa_word_t last_record_id)
             case SET_STATUS1:
             case SET_STATUS2:
             case TABLE_COPY_FROM:
+            case LOG_CLOSE:
             case FLUSH_TABLE:
             case SET_STATUS3:
                 break;

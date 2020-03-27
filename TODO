@@ -1,3 +1,10 @@
+After 2 restarts, it does not accept new transactions:
+
+2020-03-27 22:36:02.476892 [16114/139787907589888] lixa_state_check_log_actions: number_of_block_ids=1, current_needed_pages= 1, future_needed_pages=1, available_pages=0, active_state=1, total_size=0, reserved=0, offset=0
+2020-03-27 22:36:02.476895 [16114/139787907589888] lixa_state_check_log_actions/excp=3/ret_cod=-7/pthreaderror=0/errno=0
+2020-03-27 22:36:02.476898 [16114/139787907589888] lixa_state_mark_block/excp=3/ret_cod=-7/errno=0
+
+
 Go on with lixa_state_warm_start: it restarts, but a second restart fails.
 Play a little bit with it!
 
