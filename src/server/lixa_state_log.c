@@ -805,7 +805,8 @@ int lixa_state_log_set_reserved(lixa_state_log_t *this, off_t reserved)
     int pte = 0;
     int mutex_locked = FALSE;
     
-    LIXA_TRACE(("lixa_state_log_set_reserved\n"));
+    LIXA_TRACE(("lixa_state_log_set_reserved(reserved=" OFF_T_FORMAT ")\n",
+                reserved));
     TRY {
         /* check the object is not null */
         if (NULL == this)

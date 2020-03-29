@@ -68,8 +68,8 @@ const char *lixa_state_table_status_string(
         case STATE_TABLE_OPENED:      return "OPENED";           break;
         case STATE_TABLE_USED:        return "USED";             break;
         case STATE_TABLE_FULL:        return "FULL";             break;
-        case STATE_TABLE_EXTENDED:    return "EXTENDED";         break;
-        case STATE_TABLE_COPY_SOURCE: return "COPY form SOURCE"; break;
+        case STATE_TABLE_EXTENDING:   return "EXTENDING";        break;
+        case STATE_TABLE_COPY_SOURCE: return "COPY from SOURCE"; break;
         case STATE_TABLE_COPY_TARGET: return "COPY to TARGET";   break;
         case STATE_TABLE_SYNCH:       return "SYNCH";            break;
         case STATE_TABLE_CLOSED:      return "CLOSED";           break;
@@ -769,7 +769,7 @@ int lixa_state_table_extend(lixa_state_table_t *this,
 {
     enum Exception {
         NULL_OBJECT,
-        INVALID_STATUS,
+        SET_STATUS1,
         OPEN_ERROR,
         FSTAT_ERROR1,
         MUNMAP_ERROR,
@@ -780,7 +780,6 @@ int lixa_state_table_extend(lixa_state_table_t *this,
         FSTAT_ERROR2,
         MMAP_ERROR,
         STATE_SLOT_SYNC,
-        SET_STATUS1,
         SET_STATUS2,
         NONE
     } excp;
@@ -797,8 +796,8 @@ int lixa_state_table_extend(lixa_state_table_t *this,
             THROW(NULL_OBJECT);
         /* check status */
         if (LIXA_RC_OK != (ret_cod = lixa_state_table_set_status(
-                               this, STATE_TABLE_EXTENDED, TRUE)))
-            THROW(INVALID_STATUS);
+                               this, STATE_TABLE_EXTENDING, FALSE)))
+            THROW(SET_STATUS1);
         /* re-open the file for append: new records must be added */
         if (-1 == (this->fd = open(this->pathname, this->flags | O_APPEND))) {
             LIXA_TRACE(("lixa_state_table_extend: error while opening "
@@ -885,17 +884,13 @@ int lixa_state_table_extend(lixa_state_table_t *this,
         }
         /* set the new status */
         if (LIXA_RC_OK != (ret_cod = lixa_state_table_set_status(
-                               this, STATE_TABLE_EXTENDED, FALSE)))
-            THROW(SET_STATUS1);
-        if (LIXA_RC_OK != (ret_cod = lixa_state_table_set_status(
                                this, STATE_TABLE_USED, FALSE)))
             THROW(SET_STATUS2);
         
         THROW(NONE);
     } CATCH {
         switch (excp) {
-            case INVALID_STATUS:
-                ret_cod = LIXA_RC_INVALID_STATUS;
+            case SET_STATUS1:
                 break;
             case NULL_OBJECT:
                 ret_cod = LIXA_RC_NULL_OBJECT;
@@ -926,7 +921,6 @@ int lixa_state_table_extend(lixa_state_table_t *this,
                 ret_cod = LIXA_RC_MMAP_ERROR;
                 break;
             case STATE_SLOT_SYNC:
-            case SET_STATUS1:
             case SET_STATUS2:
                 break;
             case NONE:
@@ -991,7 +985,7 @@ int lixa_state_table_set_status(lixa_state_table_t *this,
                 if (STATE_TABLE_COPY_TARGET != this->status &&
                     STATE_TABLE_FORMATTED != this->status &&
                     STATE_TABLE_OPENED != this->status &&
-                    STATE_TABLE_EXTENDED != this->status &&
+                    STATE_TABLE_EXTENDING != this->status &&
                     STATE_TABLE_FULL != this->status) {
                     LIXA_TRACE(("lixa_state_table_set_status: transition to "
                                 "USED is acceptable only from COPY_TARGET, "
@@ -1006,17 +1000,19 @@ int lixa_state_table_set_status(lixa_state_table_t *this,
                     valid = FALSE;
                 }
                 break;
-            case STATE_TABLE_EXTENDED:
+            case STATE_TABLE_EXTENDING:
                 if (STATE_TABLE_FULL != this->status) {
                     LIXA_TRACE(("lixa_state_table_set_status: transition to "
-                                "EXTENDED is acceptable only from FULL\n"));
+                                "EXTENDING is acceptable only from FULL\n"));
                     valid = FALSE;
                 }
                 break;
             case STATE_TABLE_COPY_SOURCE:
-                if (STATE_TABLE_USED != this->status) {
+                if (STATE_TABLE_USED != this->status &&
+                    STATE_TABLE_FULL != this->status) {
                     LIXA_TRACE(("lixa_state_table_set_status: transition to "
-                                "COPY_SOURCE is acceptable only from USED\n"));
+                                "COPY_SOURCE is acceptable only from USED"
+                                " and FULL\n"));
                     valid = FALSE;
                 }
                 break;
@@ -1484,11 +1480,12 @@ int lixa_state_table_sync_map(lixa_state_table_t *this)
 {
     enum Exception {
         NULL_OBJECT,
-        TABLE_SET_STATUS,
+        TABLE_SET_STATUS1,
         GETTIMEOFDAY_ERROR,
         STATE_TABLE_SLOT_SYNC_ERROR,
         FSTAT_ERROR,
         MSYNC_ERROR,
+        TABLE_SET_STATUS2,
         NONE
     } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
@@ -1506,7 +1503,7 @@ int lixa_state_table_sync_map(lixa_state_table_t *this)
         /* set the new status of the object */
         if (LIXA_RC_OK != (ret_cod = lixa_state_table_set_status(
                                this, STATE_TABLE_SYNCH, FALSE)))
-            THROW(TABLE_SET_STATUS);
+            THROW(TABLE_SET_STATUS1);
 
         /* update last_sync timestamp */
         slot = &this->map[0];
@@ -1529,8 +1526,8 @@ int lixa_state_table_sync_map(lixa_state_table_t *this)
         lixa_timer_stop(&timer);
         duration = lixa_timer_get_diff(&timer);
         LIXA_TRACE(("lixa_state_table_sync_map: synchronization of mapped "
-                    "memory to the underlying file required %ld us\n",
-                    duration));
+                    "memory to the underlying file '%s' required %ld us\n",
+                    this->pathname, duration));
         /* transform micro seconds to milli seconds */
         duration /= 1000;
         /* log a message if performance is not good */
@@ -1544,6 +1541,10 @@ int lixa_state_table_sync_map(lixa_state_table_t *this)
             LIXA_SYSLOG((LOG_INFO, LIXA_SYSLOG_LXD061I, duration,
                          fd_stat.st_size, this->pathname));
         }
+        /* set to CLOSED the status of this table */
+        if (LIXA_RC_OK != (ret_cod = lixa_state_table_set_status(
+                               this, STATE_TABLE_CLOSED, FALSE)))
+            THROW(TABLE_SET_STATUS2);
         
         THROW(NONE);
     } CATCH {
@@ -1551,7 +1552,8 @@ int lixa_state_table_sync_map(lixa_state_table_t *this)
             case NULL_OBJECT:
                 ret_cod = LIXA_RC_NULL_OBJECT;
                 break;
-            case TABLE_SET_STATUS:
+            case TABLE_SET_STATUS1:
+            case TABLE_SET_STATUS2:
                 break;
             case GETTIMEOFDAY_ERROR:
                 ret_cod = LIXA_RC_GETTIMEOFDAY_ERROR;
