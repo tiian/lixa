@@ -876,7 +876,8 @@ int lixa_state_log_write(lixa_state_log_t *this, const void *buffer,
     int pte = 0;
     int mutex_locked = FALSE;
     
-    LIXA_TRACE(("lixa_state_log_write\n"));
+    LIXA_TRACE(("lixa_state_log_write(number_of_pages=" SIZE_T_FORMAT ")\n",
+                number_of_pages));
     TRY {
         ssize_t written_bytes;
         size_t count = lixa_state_common_pages2buffer(number_of_pages);
@@ -887,6 +888,11 @@ int lixa_state_log_write(lixa_state_log_t *this, const void *buffer,
         /* check the object is not null */
         if (NULL == this)
             THROW(NULL_OBJECT);
+        LIXA_TRACE(("lixa_state_log_write: this->file_synchronizer.offset="
+                    OFF_T_FORMAT ", this->file_synchronizer.reserved="
+                    OFF_T_FORMAT "\n",
+                    this->file_synchronizer.offset,
+                    this->file_synchronizer.reserved));        
         /* use the method to get a synchronized value */
         offset = lixa_state_log_get_offset(this);
         lixa_timer_start(&timer);
@@ -921,6 +927,11 @@ int lixa_state_log_write(lixa_state_log_t *this, const void *buffer,
                 mutex_locked = TRUE;
             this->file_synchronizer.offset += written_bytes;
             this->file_synchronizer.reserved -= written_bytes;
+            LIXA_TRACE(("lixa_state_log_write: this->file_synchronizer.offset="
+                        OFF_T_FORMAT ", this->file_synchronizer.reserved="
+                        OFF_T_FORMAT "\n",
+                        this->file_synchronizer.offset,
+                        this->file_synchronizer.reserved));        
             /* unlock the mutex */
             if (0 != (pte = pthread_mutex_unlock(
                           &this->file_synchronizer.mutex))) {

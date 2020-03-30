@@ -568,6 +568,8 @@ int lixa_state_table_close(lixa_state_table_t *this)
             THROW(INVALID_STATUS);
         /* close the file descriptor */
         if (-1 == close(this->fd)) {
+            LIXA_SYSLOG((LOG_ERR, LIXA_SYSLOG_LXD046E,
+                         lixa_state_table_get_pathname(this)));
             THROW(CLOSE_ERROR);
         }
         /* set new status */
@@ -1412,6 +1414,10 @@ int lixa_state_table_copy_from(lixa_state_table_t *this,
         
         if (NULL == this || NULL == source)
             THROW(NULL_OBJECT);
+        LIXA_TRACE(("lixa_state_table_copy_from: this={fd=%d,'%s'}, "
+                    "source={fd=%d,'%s'}\n",
+                    this->fd, this->pathname,
+                    source->fd, source->pathname));
         /* retrieve the size of the two state table */
         if (0 != fstat(this->fd, &fd_stat_this))
             THROW(FSTAT_ERROR1);

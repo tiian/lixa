@@ -1,3 +1,14 @@
+In function lixa_state_switch:
+- remove lixa_state_log_close
+- substitue it to something that in the async_log_flusher, asks to switch the
+  log file after flushing
+  - async_log_flusher passes to state_log_write the information "write this
+    buffer, and then switch"
+  - state_log_write, after write operation, put the state log in STATE_LOG_CLOSED
+- prepare file_synchronizer.* for the next state log (offset=0, reserved=0, ...) that will be used (if a new one is created, it's not necessary because part of
+ the create new log file function)
+
+
 lixat -b exploits a bug related to state file rotation: go on with debugging...
 
 Go on with lixa_state_warm_start: it restarts, but a second restart fails.
@@ -65,6 +76,8 @@ that are older than T2 will not be copied in the target state table
 
 Improving the state file synchronization elapsed time is now a priority to
 avoid annoying connection timeout errors!!!
+
+Review command line help description for options -d and -D of lixat: they are not clear
 
 **********
 

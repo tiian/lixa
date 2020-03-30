@@ -448,7 +448,6 @@ int lixa_state_cold_start(lixa_state_t *this)
         TABLE_CREATE_NEW_FILE1,
         TABLE_MAP,
         TABLE_SYNCHRONIZE,
-        TABLE_CLOSE,
         UNLINK_ERROR2,
         TABLE_CREATE_NEW_FILE2,
         UNLINK_ERROR3,
@@ -485,12 +484,6 @@ int lixa_state_cold_start(lixa_state_t *this)
             THROW(TABLE_SYNCHRONIZE);
         }
         */
-        if (LIXA_RC_OK != (
-                ret_cod = (lixa_state_table_close(&this->tables[0])))) {
-            LIXA_SYSLOG((LOG_ERR, LIXA_SYSLOG_LXD046E,
-                         lixa_state_table_get_pathname(&this->tables[0])));
-            THROW(TABLE_CLOSE);
-        }
         /* create second state table, but don't sync and close it */
         LIXA_SYSLOG((LOG_INFO, LIXA_SYSLOG_LXD044I,
                      lixa_state_table_get_pathname(&this->tables[1])));
@@ -549,7 +542,6 @@ int lixa_state_cold_start(lixa_state_t *this)
             case TABLE_CREATE_NEW_FILE2:
             case TABLE_MAP:
             case TABLE_SYNCHRONIZE:
-            case TABLE_CLOSE:
             case LOG_CREATE_NEW_FILE:
                 break;
             case NONE:
@@ -1265,7 +1257,7 @@ int lixa_state_check_log_actions(lixa_state_t *this, int *must_flush,
                         &this->logs[this->active_state]));
             LIXA_TRACE(("lixa_state_check_log_actions: "
                         "number_of_block_ids=" UINT32_T_FORMAT ", "
-                        "current_needed_pages= " UINT32_T_FORMAT ", "
+                        "current_needed_pages=" UINT32_T_FORMAT ", "
                         "future_needed_pages=" UINT32_T_FORMAT ", "
                         "available_pages=" SIZE_T_FORMAT ", "
                         "active_state=%d, "
