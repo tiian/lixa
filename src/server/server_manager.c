@@ -421,7 +421,7 @@ void *server_manager_thread(void *void_ts)
         } /* while (TRUE) */
 
         /* closing state object */
-        if (LIXA_RC_OK != (ret_cod = lixa_state_close(&ts->state)))
+        if (LIXA_RC_OK != (ret_cod = lixa_state_shutdown(&ts->state)))
             THROW(STATE_CLOSE);
         
         THROW(NONE);

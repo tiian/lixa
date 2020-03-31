@@ -84,7 +84,7 @@ enum lixa_state_log_status_e {
     STATE_LOG_OPENED,
     STATE_LOG_USED,
     STATE_LOG_FULL,
-    STATE_LOG_EXTENDED,
+    STATE_LOG_EXTENDING,
     STATE_LOG_CLOSED,
     STATE_LOG_DISPOSED
 };
@@ -332,11 +332,20 @@ extern "C" {
 
 
     /**
-     * Close a State Log object and make durable the current
+     * Put in "closed" state a Log object
      * @param[in,out] this current state log object
      * @return a reason code
      */
     int lixa_state_log_close(lixa_state_log_t *this);
+    
+
+    
+    /**
+     * Shutdown a State Log object and make durable the current status
+     * @param[in,out] this current state log object
+     * @return a reason code
+     */
+    int lixa_state_log_shutdown(lixa_state_log_t *this);
     
 
     
@@ -541,10 +550,13 @@ extern "C" {
      * @param[in,out] this state log object
      * @param[in] buffer to be written
      * @param[in] number_of_pages to write
+     * @param[in] switch_after_write boolean flag to ask for the fsync of the
+     *            file and call to @ref lixa_state_log_close to put the 
+     *            state log object in "closed" status
      * @return a reason code
      */
     int lixa_state_log_write(lixa_state_log_t *this, const void *buffer,
-                             size_t number_of_pages);
+                             size_t number_of_pages, int switch_after_write);
 
     
 

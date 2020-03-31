@@ -152,6 +152,7 @@ int lixa_state_init(lixa_state_t *this, const char *path_prefix,
             THROW(PTHREAD_COND_INIT_ERROR2);
         this->log_synchronizer.operation = STATE_FLUSHER_WAIT;
         this->log_synchronizer.to_be_flushed = FALSE;
+        this->log_synchronizer.switch_after_write = FALSE;
         this->log_synchronizer.log = NULL;
         this->log_synchronizer.number_of_pages = 0;
         /* allocate the buffer for I/O */
@@ -570,7 +571,7 @@ int lixa_state_warm_start(lixa_state_t *this,
         LOG_READ_FILE,
         TABLE_PATCH_SLOT,
         TABLE_SET_STATUS1,
-        TABLE_SET_STATUS2,
+        STATE_TABLE_CLOSE_ERROR,
         TABLE_SET_STATUS3,
         SWITCH_ERROR,
         NONE
@@ -768,10 +769,9 @@ int lixa_state_warm_start(lixa_state_t *this,
                     THROW(TABLE_SET_STATUS1);
             } else {
                 /* switch to disposed */
-                if (LIXA_RC_OK != (
-                        ret_cod = lixa_state_table_set_status(
-                            &this->tables[i], STATE_TABLE_CLOSED, FALSE)))
-                    THROW(TABLE_SET_STATUS2);
+                if (LIXA_RC_OK != (ret_cod = lixa_state_table_close(
+                                       &this->tables[i])))
+                    THROW(STATE_TABLE_CLOSE_ERROR);
                 if (LIXA_RC_OK != (
                         ret_cod = lixa_state_table_set_status(
                             &this->tables[i], STATE_TABLE_DISPOSED, FALSE)))
@@ -801,7 +801,7 @@ int lixa_state_warm_start(lixa_state_t *this,
             case SWITCH_ERROR:
                 break;
             case TABLE_SET_STATUS1:
-            case TABLE_SET_STATUS2:
+            case STATE_TABLE_CLOSE_ERROR:
             case TABLE_SET_STATUS3:
                 ret_cod = LIXA_RC_INVALID_STATUS;
                 break;
@@ -819,7 +819,7 @@ int lixa_state_warm_start(lixa_state_t *this,
 
 
 
-int lixa_state_close(lixa_state_t *this)
+int lixa_state_shutdown(lixa_state_t *this)
 {
     enum Exception {
         FLUSH_TABLE,
@@ -838,21 +838,21 @@ int lixa_state_close(lixa_state_t *this)
         PTHREAD_JOIN_ERROR2,
         PTHREAD_COND_DESTROY_ERROR2,
         PTHREAD_MUTEX_DESTROY_ERROR2,
-        TABLE_CLOSE,
-        LOG_CLOSE,
+        TABLE_SHUTDOWN,
+        LOG_SHUTDOWN,
         NONE
     } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     int pte = 0;
     int mutex_locked = FALSE;
     
-    LIXA_TRACE(("lixa_state_close\n"));
+    LIXA_TRACE(("lixa_state_shutdown\n"));
     TRY {
         /* close all the objects starting from the current one in use */
         int saved_active_state = this->active_state;
 
         do {
-            LIXA_TRACE(("lixa_state_close: closing state table and log "
+            LIXA_TRACE(("lixa_state_shutdown: closing state table and log "
                         "number %d\n", this->active_state));
             if (this->active_state == saved_active_state) {
                 /*
@@ -862,7 +862,7 @@ int lixa_state_close(lixa_state_t *this)
                 if (LIXA_RC_OK != (ret_cod = lixa_state_flush_table(this)))
                     THROW(FLUSH_TABLE);
                 /* obtain the lock of the synchronized structure */
-                LIXA_TRACE(("lixa_state_close: waiting for lock on "
+                LIXA_TRACE(("lixa_state_shutdown: waiting for lock on "
                             "table_synchronizer mutex...\n"));
                 if (0 != (pte = pthread_mutex_lock(
                               &this->table_synchronizer.mutex))) {
@@ -876,7 +876,7 @@ int lixa_state_close(lixa_state_t *this)
                     lixa_timer_t timer;
                     long duration;
             
-                    LIXA_TRACE(("lixa_state_close: WAITING on "
+                    LIXA_TRACE(("lixa_state_shutdown: WAITING on "
                                 "condition for table flusher thread...\n"));
                     lixa_timer_start(&timer);
                     if (0 != (pte = pthread_cond_wait(
@@ -885,7 +885,7 @@ int lixa_state_close(lixa_state_t *this)
                         THROW(PTHREAD_COND_WAIT_ERROR1);
                     lixa_timer_stop(&timer);
                     duration = lixa_timer_get_diff(&timer);
-                    LIXA_TRACE(("lixa_state_close: condition has been "
+                    LIXA_TRACE(("lixa_state_shutdown: condition has been "
                                 "signaled, total wait time is %ld us\n",
                                 duration));
                     /* transform microseconds to milliseconds */
@@ -895,7 +895,7 @@ int lixa_state_close(lixa_state_t *this)
                                      duration));
                 }
                 /* ask flusher termination */
-                LIXA_TRACE(("lixa_state_close: sending to table flusher "
+                LIXA_TRACE(("lixa_state_shutdown: sending to table flusher "
                             "thread exit request...\n"));
                 this->table_synchronizer.operation = STATE_FLUSHER_EXIT;
                 if (0 != (pte = pthread_cond_signal(
@@ -911,7 +911,7 @@ int lixa_state_close(lixa_state_t *this)
                 if (0 != (pte = pthread_join(this->table_synchronizer.thread,
                                              NULL)))
                     THROW(PTHREAD_JOIN_ERROR1);
-                LIXA_TRACE(("lixa_state_close: table flusher thread "
+                LIXA_TRACE(("lixa_state_shutdown: table flusher thread "
                             "terminated\n"));
                 /* mutex and condition are no more necessary */
                 if (0 != (pte = pthread_cond_destroy(
@@ -925,10 +925,10 @@ int lixa_state_close(lixa_state_t *this)
                  */
                 /* flush current state log */
                 if (LIXA_RC_OK != (ret_cod =
-                                   lixa_state_flush_log_records(this)))
+                                   lixa_state_flush_log_records(this, TRUE)))
                     THROW(FLUSH_LOG_RECORDS);
                 /* obtain the lock of the synchronized structure */
-                LIXA_TRACE(("lixa_state_close: waiting for lock on "
+                LIXA_TRACE(("lixa_state_shutdown: waiting for lock on "
                             "log_synchronizer mutex...\n"));
                 if (0 != (pte = pthread_mutex_lock(
                               &this->log_synchronizer.mutex))) {
@@ -942,7 +942,7 @@ int lixa_state_close(lixa_state_t *this)
                     lixa_timer_t timer;
                     long duration;
             
-                    LIXA_TRACE(("lixa_state_close: WAITING on "
+                    LIXA_TRACE(("lixa_state_shutdown: WAITING on "
                                 "condition for log flusher thread...\n"));
                     lixa_timer_start(&timer);
                     if (0 != (pte = pthread_cond_wait(
@@ -951,7 +951,7 @@ int lixa_state_close(lixa_state_t *this)
                         THROW(PTHREAD_COND_WAIT_ERROR1);
                     lixa_timer_stop(&timer);
                     duration = lixa_timer_get_diff(&timer);
-                    LIXA_TRACE(("lixa_state_close: condition has been "
+                    LIXA_TRACE(("lixa_state_shutdown: condition has been "
                                 "signaled, total wait time is %ld us\n",
                                 duration));
                     /* transform microseconds to milliseconds */
@@ -961,7 +961,7 @@ int lixa_state_close(lixa_state_t *this)
                                      duration));
                 }
                 /* ask flusher termination */
-                LIXA_TRACE(("lixa_state_close: sending to log flusher "
+                LIXA_TRACE(("lixa_state_shutdown: sending to log flusher "
                             "thread exit request...\n"));
                 this->log_synchronizer.operation = STATE_FLUSHER_EXIT;
                 if (0 != (pte = pthread_cond_signal(
@@ -977,7 +977,7 @@ int lixa_state_close(lixa_state_t *this)
                 if (0 != (pte = pthread_join(this->log_synchronizer.thread,
                                              NULL)))
                     THROW(PTHREAD_JOIN_ERROR2);
-                LIXA_TRACE(("lixa_state_close: log flusher thread "
+                LIXA_TRACE(("lixa_state_shutdown: log flusher thread "
                             "terminated\n"));
                 /* mutex and condition are no more necessary */
                 if (0 != (pte = pthread_cond_destroy(
@@ -988,13 +988,13 @@ int lixa_state_close(lixa_state_t *this)
                     THROW(PTHREAD_MUTEX_DESTROY_ERROR2);
             } /* this->active_state == saved_active_state */
             /* closing the state table */
-            if (LIXA_RC_OK != (ret_cod = lixa_state_table_close(
+            if (LIXA_RC_OK != (ret_cod = lixa_state_table_shutdown(
                                    &this->tables[this->active_state])))
-                THROW(TABLE_CLOSE);
-            /* closing the state log */
-            if (LIXA_RC_OK != (ret_cod = lixa_state_log_close(
+                THROW(TABLE_SHUTDOWN);
+            /* shutting down the state log */
+            if (LIXA_RC_OK != (ret_cod = lixa_state_log_shutdown(
                                    &this->logs[this->active_state])))
-                THROW(LOG_CLOSE);
+                THROW(LOG_SHUTDOWN);
             /* go to next table and log */
             this->active_state = lixa_state_get_next_state(this);
         } while (this->active_state != saved_active_state);
@@ -1033,8 +1033,8 @@ int lixa_state_close(lixa_state_t *this)
             case PTHREAD_MUTEX_DESTROY_ERROR2:
                 ret_cod = LIXA_RC_PTHREAD_MUTEX_DESTROY_ERROR;
                 break;
-            case TABLE_CLOSE:
-            case LOG_CLOSE:
+            case TABLE_SHUTDOWN:
+            case LOG_SHUTDOWN:
                 break;
             case NONE:
                 ret_cod = LIXA_RC_OK;
@@ -1052,7 +1052,7 @@ int lixa_state_close(lixa_state_t *this)
             excp < PTHREAD_MUTEX_UNLOCK_ERROR2)
             pthread_mutex_unlock(&this->log_synchronizer.mutex);
     } /* TRY-CATCH */
-    LIXA_TRACE(("lixa_state_close/excp=%d/"
+    LIXA_TRACE(("lixa_state_shutdown/excp=%d/"
                 "ret_cod=%d/pthreaderror=%d/errno=%d\n", excp, ret_cod, pte,
                 errno));
     return ret_cod;
@@ -1321,7 +1321,7 @@ int lixa_state_check_log_actions(lixa_state_t *this, int *must_flush,
 
 
 
-int lixa_state_flush_log_records(lixa_state_t *this)
+int lixa_state_flush_log_records(lixa_state_t *this, int switch_after_write)
 {
     enum Exception {
         NULL_OBJECT,
@@ -1348,11 +1348,14 @@ int lixa_state_flush_log_records(lixa_state_t *this)
         size_t log_free_pages;
         off_t reserved;
         struct timeval timestamp;
+        lixa_timer_t timer;
+        long duration;
 
         if (NULL == this)
             THROW(NULL_OBJECT);
         LIXA_TRACE(("lixa_state_flush_log_records: active_state=%d\n",
                     this->active_state));
+        lixa_timer_start(&timer);
         /* acquire the lock of the synchronized structure */
         if (0 != (pte = pthread_mutex_lock(&this->log_synchronizer.mutex))) {
             THROW(PTHREAD_MUTEX_LOCK_ERROR);
@@ -1361,21 +1364,20 @@ int lixa_state_flush_log_records(lixa_state_t *this)
         /* this synchronization is necessary to avoid overlapping a previous
            flusher execution, under normal condition it must be very fast */
         if (this->log_synchronizer.to_be_flushed) {
-            lixa_timer_t timer;
-            long duration;
             
             LIXA_TRACE(("lixa_state_flush_log_records: WAITING on "
                         "condition...\n"));
-            lixa_timer_start(&timer);
             if (0 != (pte = pthread_cond_wait(
                           &this->log_synchronizer.cond,
                           &this->log_synchronizer.mutex)))
                 THROW(PTHREAD_COND_WAIT_ERROR);
-            lixa_timer_stop(&timer);
-            duration = lixa_timer_get_diff(&timer)/1000;
+        }
+        lixa_timer_stop(&timer);
+        duration = lixa_timer_get_diff(&timer)/1000;
+        if (duration > 0) {
             LIXA_SYSLOG((LOG_NOTICE, LIXA_SYSLOG_LXD053N, duration));
-            LIXA_TRACE(("lixa_state_flush_log_records: condition has been "
-                        "signaled, total wait time is %ld ms\n", duration));
+            LIXA_TRACE(("lixa_state_flush_log_records: father thread waited "
+                        "flusher thread for %ld ms\n", duration));
         }
         /* compute the number of buffer pages */
         number_of_pages = lixa_state_log_blocks2pages(
@@ -1467,9 +1469,11 @@ int lixa_state_flush_log_records(lixa_state_t *this)
         } /* for (r=0; r<number_of_records_to_be_flushed; ++r) */
         /* ask to flusher thread to perform the flushing */
         LIXA_TRACE(("lixa_state_flush_log_records: asking flusher thread to "
-                    "flush the buffer to file\n"));
+                    "flush the buffer to file (switch_after_write=%d)\n",
+                    switch_after_write));
         this->log_synchronizer.operation = STATE_FLUSHER_FLUSH;
         this->log_synchronizer.to_be_flushed = TRUE;
+        this->log_synchronizer.switch_after_write = switch_after_write;
         this->log_synchronizer.log = &this->logs[this->active_state];
         this->log_synchronizer.number_of_pages = number_of_pages;
         /* check there are no reservation in place */
@@ -1978,7 +1982,8 @@ int lixa_state_mark_block(lixa_state_t *this, uint32_t block_id)
         /* flush the state log if necessary */
         if (must_flush) {
             LIXA_TRACE(("lixa_state_mark_block: flush records\n"));
-            if (LIXA_RC_OK != (ret_cod = lixa_state_flush_log_records(this)))
+            if (LIXA_RC_OK != (ret_cod = lixa_state_flush_log_records(
+                                   this, must_switch)))
                 THROW(FLUSH_LOG_RECORDS_ERROR);
         }
         /* check if there are state table that can be put in DISPOSED state */
@@ -2081,7 +2086,7 @@ int lixa_state_insert_block(lixa_state_t *this, uint32_t *block_id)
             THROW(G_ARRAY_NEW_ERROR1);
         /* check if the current state table is full */
         if (lixa_state_table_is_full(&this->tables[this->active_state])) {
-            LIXA_TRACE(("lixa_state_insert_block: current state table (%d) "
+            LIXA_TRACE(("lixa_state_insert_block: current state table "
                         "is full and must be extended...\n"));
             if (LIXA_RC_OK != (ret_cod = lixa_state_table_extend(
                                    &this->tables[this->active_state],
@@ -2403,10 +2408,12 @@ void *lixa_state_async_log_flusher(void *data)
             if (STATE_FLUSHER_FLUSH == log_synchronizer->operation) {
                 /* flush the data to file */
                 if (log_synchronizer->to_be_flushed) {
-                    if (LIXA_RC_OK != (ret_cod = lixa_state_log_write(
-                                           log_synchronizer->log,
-                                           log_synchronizer->buffer,
-                                           log_synchronizer->number_of_pages)))
+                    if (LIXA_RC_OK != (
+                            ret_cod = lixa_state_log_write(
+                                log_synchronizer->log,
+                                log_synchronizer->buffer,
+                                log_synchronizer->number_of_pages,
+                                log_synchronizer->switch_after_write)))
                         THROW(LOG_FILE_WRITE_ERROR);
                 } else {
                     /* this is an internal error, it should never happen */

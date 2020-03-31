@@ -118,6 +118,11 @@ struct lixa_log_synchronizer_s {
      */
     int                               to_be_flushed;
     /**
+     * Boolean flag: ask the flusher thread to switch the log file at the end
+     * of the write operation
+     */
+    int                               switch_after_write;
+    /**
      * Number of pages that must be flushed from buffer to file
      */
     size_t                            number_of_pages;
@@ -263,12 +268,12 @@ extern "C" {
 
 
     /**
-     * Close a state object, shutdown the state and put everything in a
-     * consistent and durable status
+     * Shutdown a state object and put everything in a consistent and durable
+     * status
      * @param[in,out] this state object
      * @return a reason code
      */     
-    int lixa_state_close(lixa_state_t *this);
+    int lixa_state_shutdown(lixa_state_t *this);
 
 
     
@@ -297,9 +302,12 @@ extern "C" {
     /**
      * Flush the records to the state log
      * @param[in,out] this state object
+     * @param[in] switch_after_write boolean flag to ask for log switching
+     *            after log flushing
      * @return a reason code
      */
-    int lixa_state_flush_log_records(lixa_state_t *this);
+    int lixa_state_flush_log_records(lixa_state_t *this,
+                                     int switch_after_write);
 
 
 

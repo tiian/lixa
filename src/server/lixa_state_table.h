@@ -179,11 +179,20 @@ extern "C" {
 
     
     /**
-     * Close the underlying state file
+     * Put the state table object in "closed" status
      * @param[in,out] this state table object
      * @return a reason code
      */
     int lixa_state_table_close(lixa_state_table_t *this);
+
+
+    
+    /**
+     * Shutdown the state table object and make durable it
+     * @param[in,out] this state table object
+     * @return a reason code
+     */
+    int lixa_state_table_shutdown(lixa_state_table_t *this);
 
 
     

@@ -1,10 +1,6 @@
-In function lixa_state_switch:
-- remove lixa_state_log_close
-- substitue it to something that in the async_log_flusher, asks to switch the
-  log file after flushing
-  - async_log_flusher passes to state_log_write the information "write this
-    buffer, and then switch"
-  - state_log_write, after write operation, put the state log in STATE_LOG_CLOSED
+Look at the new error: lixad get killed :)
+
+
 - prepare file_synchronizer.* for the next state log (offset=0, reserved=0, ...) that will be used (if a new one is created, it's not necessary because part of
  the create new log file function)
 

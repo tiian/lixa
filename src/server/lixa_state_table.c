@@ -540,8 +540,6 @@ int lixa_state_table_close(lixa_state_table_t *this)
     enum Exception {
         NULL_OBJECT,
         NOTHING_TO_DO,
-        INVALID_STATUS,
-        CLOSE_ERROR,
         SET_STATUS,
         NONE
     } excp;
@@ -562,16 +560,6 @@ int lixa_state_table_close(lixa_state_table_t *this)
             THROW(NOTHING_TO_DO);
         }
 
-        /* check if the current status is compatible with closing */
-        if (LIXA_RC_OK != (ret_cod = lixa_state_table_set_status(
-                               this, STATE_TABLE_CLOSED, TRUE)))
-            THROW(INVALID_STATUS);
-        /* close the file descriptor */
-        if (-1 == close(this->fd)) {
-            LIXA_SYSLOG((LOG_ERR, LIXA_SYSLOG_LXD046E,
-                         lixa_state_table_get_pathname(this)));
-            THROW(CLOSE_ERROR);
-        }
         /* set new status */
         if (LIXA_RC_OK != (ret_cod = lixa_state_table_set_status(
                                this, STATE_TABLE_CLOSED, FALSE)))
@@ -586,12 +574,52 @@ int lixa_state_table_close(lixa_state_table_t *this)
             case NOTHING_TO_DO:
                 ret_cod = LIXA_RC_OK;
                 break;
-            case CLOSE_ERROR:
-                ret_cod = LIXA_RC_CLOSE_ERROR;
-                break;
-            case INVALID_STATUS:
             case SET_STATUS:
                 ret_cod = LIXA_RC_INVALID_STATUS;
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("lixa_state_table_close/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
+
+int lixa_state_table_shutdown(lixa_state_table_t *this)
+{
+    enum Exception {
+        NULL_OBJECT,
+        CLOSE_ERROR,
+        NONE
+    } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    
+    LIXA_TRACE(("lixa_state_table_shutdown\n"));
+    TRY {
+        if (NULL == this)
+            THROW(NULL_OBJECT);
+
+        /* close the file descriptor */
+        if (-1 == close(this->fd)) {
+            LIXA_SYSLOG((LOG_ERR, LIXA_SYSLOG_LXD046E,
+                         lixa_state_table_get_pathname(this)));
+            THROW(CLOSE_ERROR);
+        }
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case NULL_OBJECT:
+                ret_cod = LIXA_RC_NULL_OBJECT;
+                break;
+            case CLOSE_ERROR:
+                ret_cod = LIXA_RC_CLOSE_ERROR;
                 break;
             case NONE:
                 ret_cod = LIXA_RC_OK;
@@ -603,7 +631,7 @@ int lixa_state_table_close(lixa_state_table_t *this)
         if (excp > CLOSE_ERROR)
             this->fd = LIXA_NULL_FD;
     } /* TRY-CATCH */
-    LIXA_TRACE(("lixa_state_table_close/excp=%d/"
+    LIXA_TRACE(("lixa_state_table_shutdown/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }
