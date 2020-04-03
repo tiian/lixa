@@ -339,6 +339,18 @@ extern "C" {
 
 
     /**
+     * Synchronize the current state table and log files: flush log and switch
+     * both table and log
+     * @param[in,out] this state object
+     * @param[in] must_flush the state log file to disk
+     * @param[in] must_switch both the state log file and the state table file
+     * @return a reason code
+     */
+    int lixa_state_sync(lixa_state_t *this, int must_flush, int must_switch);
+    
+
+
+    /**
      * Switch the current state table and log to the following ones
      * @param[in,out] this state object
      * @param[in] last_record_id is the identifier of the last record that's

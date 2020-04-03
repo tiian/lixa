@@ -1052,10 +1052,11 @@ int lixa_state_log_set_status(lixa_state_log_t *this,
                 break;
             case STATE_LOG_USED:
                 if (STATE_LOG_FORMATTED != this->status &&
-                    STATE_LOG_EXTENDING != this->status) {
+                    STATE_LOG_EXTENDING != this->status &&
+                    STATE_LOG_DISPOSED != this->status) {
                     LIXA_TRACE(("lixa_state_log_set_status: transition to "
                                 "USED is acceptable only from "
-                                "FORMATTED and EXTENDING\n"));
+                                "FORMATTED, EXTENDING, and DISPOSED\n"));
                     valid = FALSE;
                 }
                 break;

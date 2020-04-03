@@ -1,11 +1,4 @@
-Look at the new error: lixad get killed :)
-
-
-- prepare file_synchronizer.* for the next state log (offset=0, reserved=0, ...) that will be used (if a new one is created, it's not necessary because part of
- the create new log file function)
-
-
-lixat -b exploits a bug related to state file rotation: go on with debugging...
+Fix log rotation: there are still some issues
 
 Go on with lixa_state_warm_start: it restarts, but a second restart fails.
 Play a little bit with it!

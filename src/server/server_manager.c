@@ -248,7 +248,9 @@ void *server_manager_thread(void *void_ts)
     enum Exception {
         ADD_POLL_ERROR,
         THREAD_STATUS_SYNC_FILES_ERROR1,
+        LIXA_STATE_SYNC_ERROR1,
         THREAD_STATUS_SYNC_FILES_ERROR2,
+        LIXA_STATE_SYNC_ERROR2,
         FIX_POLL_ERROR,
         POLL_ERROR,
         DROP_CLIENT_ERROR,
@@ -294,18 +296,29 @@ void *server_manager_thread(void *void_ts)
                        "good enought" approach to reduce disk enqueing, but
                        not to avoid disk enqueing (the operating system will
                        manage it without any issue) */
+                    /* @@@@ traditional synchronization */
                     if (LIXA_RC_OK !=
                         (ret_cod = thread_status_sync_files(ts)))
                         THROW(THREAD_STATUS_SYNC_FILES_ERROR1);
+                    /* @@@@ new synchronization */
+                    if (LIXA_RC_OK !=
+                        (ret_cod = lixa_state_sync(&ts->state, TRUE, FALSE)))
+                        THROW(LIXA_STATE_SYNC_ERROR1);
                     status_sync_init(&ts->status_sync);
                 } else if (delay >= ts->min_elapsed_sync_time) {
                     /* start synchronization only if there is no another thread
                        that's synchronizing its own state file */
                     if (g_mutex_trylock(&state_file_synchronization)) {
+                        /* @@@@ traditional synchronization */
                         ret_cod = thread_status_sync_files(ts);
                         g_mutex_unlock(&state_file_synchronization);
                         if (LIXA_RC_OK != ret_cod)
                             THROW(THREAD_STATUS_SYNC_FILES_ERROR2);
+                        /* @@@@ new synchronization */
+                        if (LIXA_RC_OK !=
+                            (ret_cod = lixa_state_sync(
+                                &ts->state, TRUE, FALSE)))
+                            THROW(LIXA_STATE_SYNC_ERROR2);
                         status_sync_init(&ts->status_sync);
                     }
                 }
@@ -430,7 +443,9 @@ void *server_manager_thread(void *void_ts)
             case ADD_POLL_ERROR:
                 break;
             case THREAD_STATUS_SYNC_FILES_ERROR1:
+            case LIXA_STATE_SYNC_ERROR1:
             case THREAD_STATUS_SYNC_FILES_ERROR2:
+            case LIXA_STATE_SYNC_ERROR2:
             case FIX_POLL_ERROR:
                 break;
             case POLL_ERROR:

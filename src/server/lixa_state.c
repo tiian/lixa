@@ -1332,6 +1332,8 @@ int lixa_state_flush_log_records(lixa_state_t *this, int switch_after_write)
         GETTIMEOFDAY_ERROR,
         INTERNAL_ERROR,
         FILE_SET_RESERVED,
+        LOG_SET_STATUS,
+        STATE_LOG_EXTEND,
         PTHREAD_COND_SIGNAL_ERROR,
         PTHREAD_MUTEX_UNLOCK_ERROR,
         NONE
@@ -1483,12 +1485,27 @@ int lixa_state_flush_log_records(lixa_state_t *this, int switch_after_write)
                         "reserved=" OFF_T_FORMAT "\n", reserved));
             THROW(INTERNAL_ERROR);
         }
-        /* set a reservation before waiking up the flusher thread */
+        /* set a reservation before waking up the flusher thread */
         if (LIXA_RC_OK != (ret_cod = lixa_state_log_set_reserved(
                                &this->logs[this->active_state],
                                lixa_state_common_pages2buffer(
                                    this->log_synchronizer.number_of_pages))))
             THROW(FILE_SET_RESERVED);
+        /* check there's at least one page of free space in the event the
+           switch is not requested */
+        if (!switch_after_write &&
+            LIXA_SYSTEM_PAGE_SIZE > lixa_state_log_get_free_space(
+                &this->logs[this->active_state])) {
+            /* extending current log */
+            if (LIXA_RC_OK != (ret_cod = lixa_state_log_set_status(
+                                   &this->logs[this->active_state],
+                                   STATE_LOG_FULL, FALSE)))
+                THROW(LOG_SET_STATUS);
+            if (LIXA_RC_OK != (ret_cod = lixa_state_log_extend(
+                                   &this->logs[this->active_state])))
+                THROW(STATE_LOG_EXTEND);
+        }
+        
         if (0 != (pte = pthread_cond_signal(&this->log_synchronizer.cond)))
             THROW(PTHREAD_COND_SIGNAL_ERROR);
         if (0 != (pte = pthread_mutex_unlock(&this->log_synchronizer.mutex))) {
@@ -1523,6 +1540,8 @@ int lixa_state_flush_log_records(lixa_state_t *this, int switch_after_write)
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
                 break;
             case FILE_SET_RESERVED:
+            case LOG_SET_STATUS:
+            case STATE_LOG_EXTEND:
                 break;
             case PTHREAD_COND_SIGNAL_ERROR:
                 ret_cod = LIXA_RC_PTHREAD_COND_SIGNAL_ERROR;
@@ -1791,6 +1810,7 @@ int lixa_state_switch(lixa_state_t *this, lixa_word_t last_record_id)
         SET_STATUS3,
         SET_STATUS4,
         LOG_CREATE_NEW_FILE,
+        SET_STATUS5,
         NONE
     } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
@@ -1868,7 +1888,13 @@ int lixa_state_switch(lixa_state_t *this, lixa_word_t last_record_id)
                         &this->logs[lixa_state_get_next_state(this)],
                         this->single_page)))
                 THROW(LOG_CREATE_NEW_FILE);
-        }
+        } else
+        /* next state log is switched to USED status */
+            if (LIXA_RC_OK != (
+                    ret_cod = lixa_state_log_set_status(
+                        &this->logs[lixa_state_get_next_state(this)],
+                        STATE_LOG_USED, FALSE)))
+                THROW(SET_STATUS5);
         /* set the last_record_id in the state log object */
         lixa_state_log_set_last_record_id(
             &this->logs[lixa_state_get_next_state(this)], last_record_id);
@@ -1890,8 +1916,8 @@ int lixa_state_switch(lixa_state_t *this, lixa_word_t last_record_id)
             case FLUSH_TABLE:
             case SET_STATUS3:
             case SET_STATUS4:
-                break;
             case LOG_CREATE_NEW_FILE:
+            case SET_STATUS5:
                 break;
             case NONE:
                 ret_cod = LIXA_RC_OK;
@@ -1907,6 +1933,92 @@ int lixa_state_switch(lixa_state_t *this, lixa_word_t last_record_id)
 
 
 
+int lixa_state_sync(lixa_state_t *this, int must_flush, int must_switch)
+{
+    enum Exception {
+        NULL_OBJECT,
+        LOG_SET_STATUS_ERROR,
+        FLUSH_LOG_EXTEND_ERROR,
+        FLUSH_LOG_RECORDS_ERROR1,
+        SWITCH_ERROR,
+        FLUSH_LOG_RECORDS_ERROR2,
+        NONE
+    } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    
+    LIXA_TRACE(("lixa_state_sync(must_flush=%d, must_switch=%d)\n",
+                must_flush, must_switch));
+    TRY {
+        lixa_word_t last_record_id;
+        
+        if (NULL == this)
+            THROW(NULL_OBJECT);
+        
+        /* can be the log and the table switched together? */
+        if (must_flush && must_switch) {
+            /* is the previous state table in the middle of a sync phase? */
+            if (lixa_state_table_is_syncing(
+                    &this->tables[lixa_state_get_prev_state(this)])) {
+                LIXA_TRACE(("lixa_state_sync: state table is syncing, "
+                            "extending log file\n"));
+                if (LIXA_RC_OK != (ret_cod = lixa_state_log_set_status(
+                                       &this->logs[this->active_state],
+                                       STATE_LOG_FULL, FALSE)))
+                    THROW(LOG_SET_STATUS_ERROR);
+                if (LIXA_RC_OK != (ret_cod = lixa_state_extend_log(this)))
+                    THROW(FLUSH_LOG_EXTEND_ERROR);
+            } else {
+                /* flush state log file */
+                LIXA_TRACE(("lixa_state_sync: flush records\n"));
+                if (LIXA_RC_OK != (ret_cod = lixa_state_flush_log_records(
+                                       this, must_switch)))
+                    THROW(FLUSH_LOG_RECORDS_ERROR1);
+                /* retrieve the id of the last record in the current log state
+                   file: it will be written in the state table in the event of
+                   switching */
+                last_record_id = lixa_state_log_get_last_record_id(
+                    &this->logs[this->active_state]);
+                /* switch state table and log */
+                LIXA_TRACE(("lixa_state_sync: switch state table and "
+                            "log\n"));
+                if (LIXA_RC_OK != (ret_cod = lixa_state_switch(
+                                       this, last_record_id)))
+                    THROW(SWITCH_ERROR);
+            } /* if (lixa_state_table_is_syncing( */
+        } else if (must_flush) {
+            /* flush the state log if necessary */
+            LIXA_TRACE(("lixa_state_sync: flush records\n"));
+            if (LIXA_RC_OK != (ret_cod = lixa_state_flush_log_records(
+                                   this, must_switch)))
+                THROW(FLUSH_LOG_RECORDS_ERROR2);
+        } /* if (must_flush && must_switch) */
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case NULL_OBJECT:
+                ret_cod = LIXA_RC_NULL_OBJECT;
+                break;
+            case LOG_SET_STATUS_ERROR:
+            case FLUSH_LOG_EXTEND_ERROR:
+            case FLUSH_LOG_RECORDS_ERROR1:
+            case SWITCH_ERROR:
+            case FLUSH_LOG_RECORDS_ERROR2:
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("lixa_state_sync/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
+
 int lixa_state_mark_block(lixa_state_t *this, uint32_t block_id)
 {
     enum Exception {
@@ -1914,12 +2026,9 @@ int lixa_state_mark_block(lixa_state_t *this, uint32_t block_id)
         BUFFER_OVERFLOW,
         STATE_TABLE_SYNC_BLOCK_ERROR,
         TABLE_SET_STATUS_ERROR,
-        CHECK_LOG_ACTIONS_ERROR,
         LOG_SET_STATUS_ERROR,
-        FLUSH_LOG_EXTEND_ERROR,
-        FLUSH_LOG_RECORDS_ERROR1,
-        SWITCH_ERROR,
-        FLUSH_LOG_RECORDS_ERROR2,
+        CHECK_LOG_ACTIONS_ERROR,
+        STATE_SYNC_ERROR,
         NONE
     } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
@@ -1930,7 +2039,6 @@ int lixa_state_mark_block(lixa_state_t *this, uint32_t block_id)
         int must_flush = FALSE;
         int must_switch = FALSE;
         int already_in_array = FALSE;
-        lixa_word_t last_record_id;
         uint32_t i;
         int j1, j2;
         
@@ -1958,66 +2066,47 @@ int lixa_state_mark_block(lixa_state_t *this, uint32_t block_id)
                 ret_cod = lixa_state_table_sync_block(
                     &this->tables[this->active_state], block_id)))
             THROW(STATE_TABLE_SYNC_BLOCK_ERROR);
-        /* check if there are state table that can be put in DISPOSED state */
+        /* check if there is a state table and/or log that can be put in
+           DISPOSED state */
         for (j1=0; j1<LIXA_STATE_TABLES; ++j1) {
-            enum lixa_state_table_status_e s1 = lixa_state_table_get_status(
+            enum lixa_state_table_status_e t1 = lixa_state_table_get_status(
                 &this->tables[j1]);
+            enum lixa_state_log_status_e l1 = lixa_state_log_get_status(
+                &this->logs[j1]);
             j2 = lixa_state_common_succ_state(j1);
-            enum lixa_state_table_status_e s2 = lixa_state_table_get_status(
+            enum lixa_state_table_status_e t2 = lixa_state_table_get_status(
                 &this->tables[j2]);
-            if (STATE_TABLE_CLOSED == s1 && STATE_TABLE_CLOSED == s2) {
+            enum lixa_state_log_status_e l2 = lixa_state_log_get_status(
+                &this->logs[j2]);
+            if (STATE_TABLE_CLOSED == t1 && STATE_TABLE_CLOSED == t2) {
                 LIXA_TRACE(("lixa_state_mark_block: state table %d is in "
                             "status '%s' like state table %d; %d can be "
                             "disposed\n", j1,
-                            lixa_state_table_status_string(s1), j2, j1));
+                            lixa_state_table_status_string(t1), j2, j1));
                 if (LIXA_RC_OK != (
                         ret_cod = lixa_state_table_set_status(
                             &this->tables[j1], STATE_TABLE_DISPOSED, FALSE)))
                     THROW(TABLE_SET_STATUS_ERROR);
-            } /* if (LIXA_STATE_CLOSED == s1 && LIXA_STATE_CLOSE == s2) */
+            } /* if (STATE_TABLE_CLOSED == s1 && STATE_TABLE_CLOSE == s2) */
+            if (STATE_LOG_CLOSED == l1 && STATE_LOG_CLOSED == l2) {
+                LIXA_TRACE(("lixa_state_mark_block: state log %d is in "
+                            "status '%s' like state log %d; %d can be "
+                            "disposed\n", j1,
+                            lixa_state_log_status_string(l1), j2, j1));
+                if (LIXA_RC_OK != (
+                        ret_cod = lixa_state_log_set_status(
+                            &this->logs[j1], STATE_LOG_DISPOSED, FALSE)))
+                    THROW(LOG_SET_STATUS_ERROR);
+            } /* if (STATE_LOG_CLOSED == s1 && STATE_LOG_CLOSED == s2) */
         } /* for (i=0; i<LIXA_STATE_TABLES; ++i) */
         /* check if state log must be flushed */
         if (LIXA_RC_OK != (ret_cod = lixa_state_check_log_actions(
                                this, &must_flush, &must_switch)))
             THROW(CHECK_LOG_ACTIONS_ERROR);
-        /* can be the log and the table switched together? */
-        if (must_flush && must_switch) {
-            /* is the previous state table in the middle of a sync phase? */
-            if (lixa_state_table_is_syncing(
-                    &this->tables[lixa_state_get_prev_state(this)])) {
-                LIXA_TRACE(("lixa_state_mark_block: state table is syncing, "
-                            "extending log file\n"));
-                if (LIXA_RC_OK != (ret_cod = lixa_state_log_set_status(
-                                       &this->logs[this->active_state],
-                                       STATE_LOG_FULL, FALSE)))
-                    THROW(LOG_SET_STATUS_ERROR);
-                if (LIXA_RC_OK != (ret_cod = lixa_state_extend_log(this)))
-                    THROW(FLUSH_LOG_EXTEND_ERROR);
-            } else {
-                /* flush state log file */
-                LIXA_TRACE(("lixa_state_mark_block: flush records\n"));
-                if (LIXA_RC_OK != (ret_cod = lixa_state_flush_log_records(
-                                       this, must_switch)))
-                    THROW(FLUSH_LOG_RECORDS_ERROR1);
-                /* retrieve the id of the last record in the current log state
-                   file: it will be written in the state table in the event of
-                   switching */
-                last_record_id = lixa_state_log_get_last_record_id(
-                    &this->logs[this->active_state]);
-                /* switch state table and log */
-                LIXA_TRACE(("lixa_state_mark_block: switch state table and "
-                            "log\n"));
-                if (LIXA_RC_OK != (ret_cod = lixa_state_switch(
-                                       this, last_record_id)))
-                    THROW(SWITCH_ERROR);
-            } /* if (lixa_state_table_is_syncing( */
-        } else if (must_flush) {
-            /* flush the state log if necessary */
-            LIXA_TRACE(("lixa_state_mark_block: flush records\n"));
-            if (LIXA_RC_OK != (ret_cod = lixa_state_flush_log_records(
-                                   this, must_switch)))
-                THROW(FLUSH_LOG_RECORDS_ERROR2);
-        } /* if (must_flush && must_switch) */
+        /* synchronize the state table and log files if necessary */
+        if (LIXA_RC_OK != (ret_cod = lixa_state_sync(
+                               this, must_flush, must_switch)))
+            THROW(STATE_SYNC_ERROR);
         
         THROW(NONE);
     } CATCH {
@@ -2030,12 +2119,9 @@ int lixa_state_mark_block(lixa_state_t *this, uint32_t block_id)
                 break;
             case STATE_TABLE_SYNC_BLOCK_ERROR:
             case TABLE_SET_STATUS_ERROR:
-            case CHECK_LOG_ACTIONS_ERROR:
             case LOG_SET_STATUS_ERROR:
-            case FLUSH_LOG_EXTEND_ERROR:
-            case FLUSH_LOG_RECORDS_ERROR1:
-            case SWITCH_ERROR:
-            case FLUSH_LOG_RECORDS_ERROR2:
+            case CHECK_LOG_ACTIONS_ERROR:
+            case STATE_SYNC_ERROR:
                 break;
             case NONE:
                 ret_cod = LIXA_RC_OK;
