@@ -1,4 +1,4 @@
-Fix log rotation: there are still some issues
+In warm restart: check the sequence of the log records applied
 
 Go on with lixa_state_warm_start: it restarts, but a second restart fails.
 Play a little bit with it!
@@ -56,6 +56,8 @@ Can function status_record_create_file removed and its code moved in
 lixa_state_file_create_new_file?
 
 Remove all useless @@@
+
+Change Copyright: it's still 2009-2019
 
 Clean memory leaks by mean of valgrind
 

@@ -163,6 +163,10 @@ typedef struct lixa_state_s {
      * Section dedicated to log management
      */
     /**
+     * Maximum size of a state log file, typically retrieved from configuration
+     */
+    off_t                             max_log_size;
+    /**
      * Maximum size of the log buffer, typically retrieved from configuration
      */
     size_t                            max_buffer_log_size;
@@ -214,6 +218,8 @@ extern "C" {
      * Initialize a State object to manage state server persistence
      * @param[in,out] this object to be initialized
      * @param[in] path_prefix of the state and log files
+     * @param[in] max_log_size maximum number of bytes that can be stored in
+     *            a log file
      * @param[in] max_buffer_log_size maximum number of bytes that can be used
      *            for the log I/O buffer
      * @param[in] read_only must be TRUE if the state will be used only in
@@ -221,7 +227,8 @@ extern "C" {
      * @return a reason code
      */
     int lixa_state_init(lixa_state_t *this, const char *path_prefix,
-                        size_t max_buffer_log_size, int read_only);
+                        off_t max_log_size, size_t max_buffer_log_size,
+                        int read_only);
 
 
 

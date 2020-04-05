@@ -49,7 +49,8 @@
 
 
 int lixa_state_init(lixa_state_t *this, const char *path_prefix,
-                    size_t max_buffer_log_size, int read_only)
+                    off_t max_log_size, size_t max_buffer_log_size,
+                    int read_only)
 {
     enum Exception {
         NULL_OBJECT1,
@@ -95,13 +96,15 @@ int lixa_state_init(lixa_state_t *this, const char *path_prefix,
         if (0 == (pathname_len = strlen(path_prefix)))
             THROW(INVALID_OPTION);
         LIXA_TRACE(("lixa_state_init: path_prefix='%s', "
-                    "max_buffer_log_size=" SIZE_T_FORMAT "\n",
-                    path_prefix, max_buffer_log_size));
+                    "max_buffer_log_size=" SIZE_T_FORMAT
+                    ", max_log_size=" OFF_T_FORMAT "\n",
+                    path_prefix, max_buffer_log_size, max_log_size));
         /* clean-up the object memory, maybe not necessary, but safer */
         memset(this, 0, sizeof(lixa_state_t));
         /* retrieve system page size */
         if (-1 == (LIXA_SYSTEM_PAGE_SIZE = (size_t)sysconf(_SC_PAGESIZE)))
             THROW(INTERNAL_ERROR);
+        this->max_log_size = max_log_size;
         this->max_buffer_log_size = max_buffer_log_size;
         /* compute the number of records per page */
         LIXA_STATE_LOG_RECORDS_PER_PAGE = LIXA_SYSTEM_PAGE_SIZE /
@@ -184,12 +187,19 @@ int lixa_state_init(lixa_state_t *this, const char *path_prefix,
         
         /* check max buffer size, resize it if necessary */
         if (max_buffer_log_size < LIXA_STATE_LOG_BUFFER_SIZE_DEFAULT) {
-            LIXA_TRACE(("lixa_state_init: max_buffer_size ("
+            LIXA_TRACE(("lixa_state_init: max_buffer_log_size ("
                         SIZE_T_FORMAT ") is less then "
                         "default (" SIZE_T_FORMAT "), using default\n",
                         max_buffer_log_size,
                         LIXA_STATE_LOG_BUFFER_SIZE_DEFAULT));
             max_buffer_log_size = LIXA_STATE_LOG_BUFFER_SIZE_DEFAULT;
+        }
+        /* check mas log size, resize if necessary */
+        if (max_log_size < (off_t)max_buffer_log_size) {
+            LIXA_TRACE(("lixa_state_init: max_log_size (" OFF_T_FORMAT ") is "
+                        "less then max_buffer_log_size (" SIZE_T_FORMAT "), "
+                        "resizing\n", max_log_size, max_buffer_log_size));
+            max_log_size = (off_t)max_buffer_log_size;
         }
         /* max number of records in buffer, config limit */
         this->max_number_of_block_ids = lixa_state_log_buffer2blocks(
@@ -1255,6 +1265,12 @@ int lixa_state_check_log_actions(lixa_state_t *this, int *must_flush,
                 lixa_state_common_buffer2pages(
                     lixa_state_log_get_free_space(
                         &this->logs[this->active_state]));
+            off_t log_total_size, log_offset, log_reserved, log_used_size;
+
+            lixa_state_log_get_file_stats(
+                &this->logs[this->active_state], &log_total_size, &log_offset,
+                &log_reserved);
+            log_used_size = log_offset + log_reserved;
             LIXA_TRACE(("lixa_state_check_log_actions: "
                         "number_of_block_ids=" UINT32_T_FORMAT ", "
                         "current_needed_pages=" UINT32_T_FORMAT ", "
@@ -1262,22 +1278,28 @@ int lixa_state_check_log_actions(lixa_state_t *this, int *must_flush,
                         "available_pages=" SIZE_T_FORMAT ", "
                         "active_state=%d, "
                         "total_size=" OFF_T_FORMAT ", "
+                        "used_size=" OFF_T_FORMAT ", "
                         "reserved=" OFF_T_FORMAT ", "
                         "offset=" OFF_T_FORMAT "\n",
                         this->number_of_block_ids,
                         current_needed_pages, future_needed_pages,
-                        available_pages, this->active_state,
-                        lixa_state_log_get_total_size(
-                            &this->logs[this->active_state]),
-                        lixa_state_log_get_reserved(
-                            &this->logs[this->active_state]),
-                        lixa_state_log_get_offset(
-                            &this->logs[this->active_state]) ));
+                        available_pages, this->active_state, log_total_size,
+                        log_used_size, log_reserved, log_offset));
             if (current_needed_pages > available_pages)
                 /* this is a severe internal error, a bug */
                 THROW(BUFFER_OVERFLOW);
-            if (current_needed_pages == available_pages &&
-                future_needed_pages > available_pages) {
+            /*
+             * Two conditions to ask table and log switch:
+             * 1. no more available pages
+             * 2. log file usage reached the maximum and the previous state
+             *    table is NOT synchronizing (if it was synchronizing, asking
+             *    a switch would extend the log file!)
+             */
+            if ((current_needed_pages == available_pages &&
+                 future_needed_pages > available_pages) ||
+                (log_used_size >= this->max_log_size &&
+                 !lixa_state_table_is_syncing(
+                     &this->tables[lixa_state_get_prev_state(this)]))) {
                 *must_flush = TRUE;
                 *must_switch = TRUE;
                 LIXA_SYSLOG((LOG_INFO, LIXA_SYSLOG_LXD051I,
@@ -1342,7 +1364,8 @@ int lixa_state_flush_log_records(lixa_state_t *this, int switch_after_write)
     int pte = 0;
     int mutex_locked = FALSE;
     
-    LIXA_TRACE(("lixa_state_flush_log_records\n"));
+    LIXA_TRACE(("lixa_state_flush_log_records(switch_after_write=%d)\n",
+                switch_after_write));
     TRY {
         size_t number_of_pages;
         size_t number_of_pages_in_buffer;
@@ -1811,6 +1834,7 @@ int lixa_state_switch(lixa_state_t *this, lixa_word_t last_record_id)
         SET_STATUS4,
         LOG_CREATE_NEW_FILE,
         SET_STATUS5,
+        LOG_REWIND,
         NONE
     } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
@@ -1895,6 +1919,9 @@ int lixa_state_switch(lixa_state_t *this, lixa_word_t last_record_id)
                         &this->logs[lixa_state_get_next_state(this)],
                         STATE_LOG_USED, FALSE)))
                 THROW(SET_STATUS5);
+        if (LIXA_RC_OK != (ret_cod = lixa_state_log_rewind(
+                               &this->logs[lixa_state_get_next_state(this)])))
+            THROW(LOG_REWIND);
         /* set the last_record_id in the state log object */
         lixa_state_log_set_last_record_id(
             &this->logs[lixa_state_get_next_state(this)], last_record_id);
@@ -1918,6 +1945,7 @@ int lixa_state_switch(lixa_state_t *this, lixa_word_t last_record_id)
             case SET_STATUS4:
             case LOG_CREATE_NEW_FILE:
             case SET_STATUS5:
+            case LOG_REWIND:
                 break;
             case NONE:
                 ret_cod = LIXA_RC_OK;
@@ -1953,7 +1981,6 @@ int lixa_state_sync(lixa_state_t *this, int must_flush, int must_switch)
         
         if (NULL == this)
             THROW(NULL_OBJECT);
-        
         /* can be the log and the table switched together? */
         if (must_flush && must_switch) {
             /* is the previous state table in the middle of a sync phase? */

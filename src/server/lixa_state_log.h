@@ -508,6 +508,17 @@ extern "C" {
 
 
     /**
+     * Rewind the state log file for reuse; this function is a reset of the
+     * offset and reserved quantities to allow a complete reuse of an existent
+     * log file
+     * @param[in,out] this state log object
+     * @return a reason code
+     */     
+    int lixa_state_log_rewind(lixa_state_log_t *this);
+
+
+    
+    /**
      * Return the offset of the first writable page in the underlying file
      */
     static inline off_t lixa_state_log_get_offset(lixa_state_log_t *this)
@@ -521,6 +532,43 @@ extern "C" {
 
 
 
+    /**
+     * Return the currently used size of the underlying file in bytes
+     */
+    static inline off_t lixa_state_log_get_used(lixa_state_log_t *this)
+    {
+        off_t used;
+        pthread_mutex_lock(&this->file_synchronizer.mutex);
+        used = this->file_synchronizer.offset +
+            this->file_synchronizer.reserved;
+        pthread_mutex_unlock(&this->file_synchronizer.mutex);
+        return used;
+    }
+
+
+
+
+    /**
+     * Get statistics about the state log file; the number of used bytes is the
+     * sum of @ref offset and @ref reserved
+     * @param[in] this state log object
+     * @param[out] total_size size of the file in bytes
+     * @param[out] offset of the first writable page in the underlying file
+     * @param[out] reserved space in byte that's reserved for an in flight
+     *             flushing
+     */
+    static inline void lixa_state_log_get_file_stats(
+        lixa_state_log_t *this, off_t *total_size, off_t *offset,
+        off_t *reserved) {
+        pthread_mutex_lock(&this->file_synchronizer.mutex);
+        *total_size = this->file_synchronizer.total_size;
+        *offset  = this->file_synchronizer.offset;
+        *reserved = this->file_synchronizer.reserved;
+        pthread_mutex_unlock(&this->file_synchronizer.mutex);
+    }
+
+
+    
     /**
      * Return the free space really available in the file, taking into
      * consideration even reserved space in the event of a
