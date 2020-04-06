@@ -247,6 +247,21 @@ extern "C" {
     }
 
 
+
+    /**
+     * Check if a log record is valid (TRUE) or corrupted (FALSE)
+     * @param[in] r log record
+     * @return a boolean value
+     */
+    static inline int lixa_state_log_record_is_valid(
+        const struct lixa_state_log_record_s *r) {
+        return  lixa_crc32(
+            (const uint8_t *)r + sizeof(uint32_t),
+            sizeof(struct lixa_state_log_record_s) - sizeof(uint32_t)) ==
+            r->crc32;
+    }
+
+
     
     /**
      * Return the human readable string associated to a status
@@ -330,6 +345,15 @@ extern "C" {
     int lixa_state_log_file_exist(lixa_state_log_t *this);
         
 
+
+    /**
+     * Reuse a previously disposed state log file
+     * @param[in,out] this current state log object
+     * @return a reason code
+     */
+    int lixa_state_log_reuse(lixa_state_log_t *this);
+
+    
 
     /**
      * Put in "closed" state a Log object

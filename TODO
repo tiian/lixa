@@ -1,7 +1,4 @@
-In warm restart: check the sequence of the log records applied
-
-Go on with lixa_state_warm_start: it restarts, but a second restart fails.
-Play a little bit with it!
+Go on with lixa_state_warm_start: Play a little bit with it!
 
 lixa_state does NOT receive data, 
 thread_status_get_record4update and thread_status_get_record4read
@@ -12,6 +9,8 @@ Restore "normal" values in lixa_state_log.h for log files
 Remove thread_status_insert_old
 
 Remove lixa_state_sync_log: it seems useless...
+
+Remove lixa_state_log_rewind: maybe it's useless...
 
 Check restart after state table and log switch; check function
 lixa_state_table_set_last_record_id() is called in the "right way"

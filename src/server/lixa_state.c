@@ -582,6 +582,8 @@ int lixa_state_warm_start(lixa_state_t *this,
         TABLE_PATCH_SLOT,
         TABLE_SET_STATUS1,
         STATE_TABLE_CLOSE_ERROR,
+        TABLE_SET_STATUS2,
+        STATE_LOG_CLOSE_ERROR,
         TABLE_SET_STATUS3,
         SWITCH_ERROR,
         NONE
@@ -699,28 +701,19 @@ int lixa_state_warm_start(lixa_state_t *this,
         /* looping on all logs */
         i = last_table;
         do { /* looping on all logs using variable i*/
-            off_t j, prev_j=-1, count=0;
+            off_t j=0, prev_j=-1, count=0, num_rec=0;
             struct lixa_state_log_record_s buffer;
             int order;
 
-            /* check if the log contains interesting records */
-            order = lixa_state_common_chkp_order(
-                lixa_state_table_get_last_record_id(&this->tables[last_table]),
-                lixa_state_table_get_last_sync(&this->tables[last_table]),
-                lixa_state_log_get_ri_last_record_id(&this->logs[i]),
-                lixa_state_log_get_ri_last_record_timestamp(&this->logs[i]));
-            if (order > 0) {
-                LIXA_TRACE(("lixa_state_warm_start: order=%d: state log "
-                            "file %d does not contain useful records\n",
-                            order, i));
-                goto next_step; /* at the end of do/while */
-            }
-            
+            LIXA_TRACE(("lixa_state_warm_start: analyzing " OFF_T_FORMAT
+                        " records from log file '%s'...\n",
+                        lixa_state_log_get_ri_number_of_records(
+                            &this->logs[i]),
+                        lixa_state_log_get_pathname(
+                            &this->logs[i])));
             /* looping on all the records in the log */
-            for (j=0;
-                 j<lixa_state_log_get_ri_number_of_records(&this->logs[i]);
-                 ++j) {
-                
+            while (num_rec<lixa_state_log_get_ri_number_of_records(
+                       &this->logs[i])) {
                 if (LIXA_RC_OK != (ret_cod = lixa_state_log_read_file(
                                        &this->logs[i], j, prev_j++, &buffer,
                                        this->single_page)))
@@ -735,11 +728,36 @@ int lixa_state_warm_start(lixa_state_t *this,
                     lixa_state_log_record_get_id(&buffer),
                     lixa_state_log_record_get_timestamp(&buffer));
                 /* analyze the log record and applies it if necessary */
-                if (order < 0) {
+                if (!lixa_state_log_record_is_valid(&buffer)) {
                     LIXA_TRACE(("lixa_state_warm_start: log record # "
                                 OFF_T_FORMAT ", id=" UINT32_T_FORMAT
-                                ", is younger than state table and it MUST "
-                                "be applied\n", j,
+                                ", can NOT be applied because it's "
+                                "corrupted\n", j,
+                                lixa_state_log_record_get_id(&buffer)));
+                } else if (lixa_state_log_record_get_id(&buffer) !=
+                           last_record_id+1) {
+                    LIXA_TRACE(("lixa_state_warm_start: log record # "
+                                OFF_T_FORMAT ", id=" UINT32_T_FORMAT
+                                ", can NOT be applied because it's "
+                                "out of sequence (expected id="
+                                UINT32_T_FORMAT ")\n", j,
+                                lixa_state_log_record_get_id(&buffer),
+                                last_record_id+1));
+                    num_rec++;
+                } else if (order >= 0) {
+                    LIXA_TRACE(("lixa_state_warm_start: log record # "
+                                OFF_T_FORMAT ", id=" UINT32_T_FORMAT
+                                ", can NOT be applied because it's not "
+                                "younger that state table last_record_id"
+                                "=" UINT32_T_FORMAT "\n", j,
+                                lixa_state_log_record_get_id(&buffer),
+                                lixa_state_table_get_last_record_id(
+                                    &this->tables[last_table])));
+                    num_rec++;
+                } else {
+                    LIXA_TRACE(("lixa_state_warm_start: log record # "
+                                OFF_T_FORMAT ", id=" UINT32_T_FORMAT
+                                " MUST be applied\n", j,
                                 lixa_state_log_record_get_id(&buffer)));
                     if (LIXA_RC_OK != (
                             ret_cod = lixa_state_table_patch_slot(
@@ -749,44 +767,54 @@ int lixa_state_warm_start(lixa_state_t *this,
                                 lixa_state_log_record_get_record(&buffer))))
                         THROW(TABLE_PATCH_SLOT);
                     last_record_id = lixa_state_log_record_get_id(&buffer);
+                    num_rec++;
                     count++;
-                }  else {
-                    LIXA_TRACE(("lixa_state_warm_start: log record is NOT "
-                                "younger than state table and must be "
-                                "skipped\n"));
                 }
-            } /* for (j */
+                j++; /* go to next valid or invalid record */
+            } /* while (count<lixa_state_log_get_ri_number_of_records( */
             if (count > 0)
-                LIXA_SYSLOG((LOG_INFO, LIXA_SYSLOG_LXD075I, count,
+                LIXA_SYSLOG((LOG_INFO, LIXA_SYSLOG_LXD075I, count, num_rec,
                              lixa_state_log_get_pathname(&this->logs[i]),
                              lixa_state_table_get_pathname(
                                  &this->tables[last_table])));
-          next_step:
             i = lixa_state_common_succ_state(i);
         } while (i != last_table);
 
         /* switch the status of the tables */
         for (i=0; i<LIXA_STATE_TABLES; ++i) {
-            if (!table_exists[i] ||
+            if (table_exists[i] &&
                 lixa_state_table_get_status(
-                    &this->tables[i]) != STATE_TABLE_OPENED)
-                continue;
-            if (i == last_table) {
-                /* switch to used */
+                    &this->tables[i]) == STATE_TABLE_OPENED) {
+                if (i == last_table) {
+                    /* switch to used */
+                    if (LIXA_RC_OK != (
+                            ret_cod = lixa_state_table_set_status(
+                                &this->tables[i], STATE_TABLE_USED, FALSE)))
+                        THROW(TABLE_SET_STATUS1);
+                } else {
+                    /* switch to disposed */
+                    if (LIXA_RC_OK != (ret_cod = lixa_state_table_close(
+                                           &this->tables[i])))
+                        THROW(STATE_TABLE_CLOSE_ERROR);
+                    if (LIXA_RC_OK != (
+                            ret_cod = lixa_state_table_set_status(
+                                &this->tables[i], STATE_TABLE_DISPOSED,
+                                FALSE)))
+                        THROW(TABLE_SET_STATUS2);
+                }
+            } /* if (table_exists[i] && */
+            if (log_exists[i] &&
+                lixa_state_log_get_status(
+                    &this->logs[i]) == STATE_LOG_OPENED) {
+                /* switch state log to disposed */
+                if (LIXA_RC_OK != (ret_cod = lixa_state_log_close(
+                                       &this->logs[i])))
+                    THROW(STATE_LOG_CLOSE_ERROR);
                 if (LIXA_RC_OK != (
-                        ret_cod = lixa_state_table_set_status(
-                            &this->tables[i], STATE_TABLE_USED, FALSE)))
-                    THROW(TABLE_SET_STATUS1);
-            } else {
-                /* switch to disposed */
-                if (LIXA_RC_OK != (ret_cod = lixa_state_table_close(
-                                       &this->tables[i])))
-                    THROW(STATE_TABLE_CLOSE_ERROR);
-                if (LIXA_RC_OK != (
-                        ret_cod = lixa_state_table_set_status(
-                            &this->tables[i], STATE_TABLE_DISPOSED, FALSE)))
+                        ret_cod = lixa_state_log_set_status(
+                            &this->logs[i], STATE_LOG_DISPOSED, FALSE)))
                     THROW(TABLE_SET_STATUS3);
-            }
+            } /* if (log_exists[i] && */
         } /* for (i=0; i<LIXA_STATE_TABLES; ++i) */
 
         /* set current state files */
@@ -812,6 +840,8 @@ int lixa_state_warm_start(lixa_state_t *this,
                 break;
             case TABLE_SET_STATUS1:
             case STATE_TABLE_CLOSE_ERROR:
+            case TABLE_SET_STATUS2:
+            case STATE_LOG_CLOSE_ERROR:
             case TABLE_SET_STATUS3:
                 ret_cod = LIXA_RC_INVALID_STATUS;
                 break;
@@ -1833,8 +1863,7 @@ int lixa_state_switch(lixa_state_t *this, lixa_word_t last_record_id)
         SET_STATUS3,
         SET_STATUS4,
         LOG_CREATE_NEW_FILE,
-        SET_STATUS5,
-        LOG_REWIND,
+        LOG_REUSE,
         NONE
     } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
@@ -1912,16 +1941,11 @@ int lixa_state_switch(lixa_state_t *this, lixa_word_t last_record_id)
                         &this->logs[lixa_state_get_next_state(this)],
                         this->single_page)))
                 THROW(LOG_CREATE_NEW_FILE);
-        } else
-        /* next state log is switched to USED status */
+        } else /* reuse next state log */
             if (LIXA_RC_OK != (
-                    ret_cod = lixa_state_log_set_status(
-                        &this->logs[lixa_state_get_next_state(this)],
-                        STATE_LOG_USED, FALSE)))
-                THROW(SET_STATUS5);
-        if (LIXA_RC_OK != (ret_cod = lixa_state_log_rewind(
-                               &this->logs[lixa_state_get_next_state(this)])))
-            THROW(LOG_REWIND);
+                    ret_cod = lixa_state_log_reuse(
+                        &this->logs[lixa_state_get_next_state(this)])))
+                THROW(LOG_REUSE);
         /* set the last_record_id in the state log object */
         lixa_state_log_set_last_record_id(
             &this->logs[lixa_state_get_next_state(this)], last_record_id);
@@ -1944,8 +1968,7 @@ int lixa_state_switch(lixa_state_t *this, lixa_word_t last_record_id)
             case SET_STATUS3:
             case SET_STATUS4:
             case LOG_CREATE_NEW_FILE:
-            case SET_STATUS5:
-            case LOG_REWIND:
+            case LOG_REUSE:
                 break;
             case NONE:
                 ret_cod = LIXA_RC_OK;

@@ -458,6 +458,101 @@ int lixa_state_log_file_exist(lixa_state_log_t *this)
 
 
 
+int lixa_state_log_reuse(lixa_state_log_t *this)
+{
+    enum Exception {
+        NULL_OBJECT,
+        PTHREAD_MUTEX_LOCK_ERROR,
+        FSTAT_ERROR,
+        TRUNCATE_ERROR,
+        PTHREAD_MUTEX_UNLOCK_ERROR,
+        SET_STATUS,
+        NONE
+    } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    int pte = 0;
+    int mutex_locked = FALSE;
+    
+    LIXA_TRACE(("lixa_state_log_reuse\n"));
+    TRY {
+        struct stat fd_stat;
+        
+        /* check the object is not null */
+        if (NULL == this)
+            THROW(NULL_OBJECT);
+        /* obtain the lock of the synchronized structure */
+        if (0 != (pte = pthread_mutex_lock(&this->file_synchronizer.mutex))) {
+            THROW(PTHREAD_MUTEX_LOCK_ERROR);
+        } else
+            mutex_locked = TRUE;
+        /* retrieve log file size */
+        if (0 != fstat(this->fd, &fd_stat))
+            THROW(FSTAT_ERROR);
+        if (fd_stat.st_size % LIXA_SYSTEM_PAGE_SIZE) {
+            off_t new_total_size = fd_stat.st_size / LIXA_SYSTEM_PAGE_SIZE *
+                LIXA_SYSTEM_PAGE_SIZE;
+            LIXA_TRACE(("lixa_state_log_reuse: file '%s' has wrong size "
+                        "(" OFF_T_FORMAT "), truncating to " OFF_T_FORMAT
+                        "\n", this->pathname, fd_stat.st_size,
+                        new_total_size));
+            /* someone or something removed or added bytes at the end of the
+               state log file, truncating it */
+            if (0 != ftruncate(this->fd, new_total_size))
+                THROW(TRUNCATE_ERROR);
+            this->file_synchronizer.total_size = new_total_size;
+        } else
+            this->file_synchronizer.total_size = fd_stat.st_size;
+        this->file_synchronizer.offset = 0;
+        this->file_synchronizer.reserved = 0;
+        /* unlock the mutex */
+        if (0 != (pte = pthread_mutex_unlock(
+                      &this->file_synchronizer.mutex))) {
+            THROW(PTHREAD_MUTEX_UNLOCK_ERROR);
+        } else
+            mutex_locked = FALSE;
+        /* set the new status */
+        if (LIXA_RC_OK != (ret_cod = lixa_state_log_set_status(
+                               this, STATE_LOG_USED, FALSE)))
+            THROW(SET_STATUS);
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case NULL_OBJECT:
+                ret_cod = LIXA_RC_NULL_OBJECT;
+                break;
+            case PTHREAD_MUTEX_LOCK_ERROR:
+                ret_cod = LIXA_RC_PTHREAD_MUTEX_LOCK_ERROR;
+                break;
+            case FSTAT_ERROR:
+                ret_cod = LIXA_RC_FSTAT_ERROR;
+                break;
+            case TRUNCATE_ERROR:
+                ret_cod = LIXA_RC_TRUNCATE_ERROR;
+                break;
+            case PTHREAD_MUTEX_UNLOCK_ERROR:
+                ret_cod = LIXA_RC_PTHREAD_MUTEX_UNLOCK_ERROR;
+                break;
+            case SET_STATUS:
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+        /* restore mutex in the event of error */
+        if (mutex_locked)
+            pthread_mutex_unlock(&this->file_synchronizer.mutex);
+    } /* TRY-CATCH */
+    LIXA_TRACE(("lixa_state_log_reuse/excp=%d/"
+                "ret_cod=%d/pthreaderror=%d/errno=%d\n", excp, ret_cod, pte,
+                errno));
+    return ret_cod;
+}
+
+
+
 int lixa_state_log_create_new_file(lixa_state_log_t *this, void *single_page)
 {
     enum Exception {
@@ -1108,10 +1203,12 @@ int lixa_state_log_set_status(lixa_state_log_t *this,
             case STATE_LOG_USED:
                 if (STATE_LOG_FORMATTED != this->status &&
                     STATE_LOG_EXTENDING != this->status &&
-                    STATE_LOG_DISPOSED != this->status) {
+                    STATE_LOG_DISPOSED != this->status &&
+                    STATE_LOG_OPENED != this->status) {
                     LIXA_TRACE(("lixa_state_log_set_status: transition to "
                                 "USED is acceptable only from "
-                                "FORMATTED, EXTENDING, and DISPOSED\n"));
+                                "FORMATTED, EXTENDING, DISPOSED, and "
+                                "OPENED\n"));
                     valid = FALSE;
                 }
                 break;

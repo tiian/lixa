@@ -294,8 +294,9 @@
     "table, lixad server can NOT be started; possible state files corruption!"
 #define LIXA_SYSLOG_LXD074I "LXD074I last consistent state table file is " \
     "'%s': applying log changes on it..."
-#define LIXA_SYSLOG_LXD075I "LXD075I " OFF_T_FORMAT " records from state " \
-    "log file '%s' have been copied to state table file '%s'"
+#define LIXA_SYSLOG_LXD075I "LXD075I " OFF_T_FORMAT "/" OFF_T_FORMAT \
+    " records from state log file '%s' have been copied to state table " \
+    "file '%s'"
 
 
 
