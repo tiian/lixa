@@ -20,27 +20,23 @@
 # define SERVER_CONFIG_H
 
 
-#include <config.h>
+
+#include "config.h"
 
 
 #ifdef HAVE_LIBXML_TREE_H
-
 # include <libxml/tree.h>
-
 #endif
 #ifdef HAVE_LIBXML_PARSER_H
-
 # include <libxml/parser.h>
-
 #endif
 #ifdef HAVE_NETINET_IN_H
-
 # include <netinet/in.h>
-
 #endif
 
 
-#include <server_status.h>
+
+#include "server_status.h"
 
 
 
@@ -52,6 +48,30 @@
 # undef LIXA_TRACE_MODULE_SAVE
 #endif /* LIXA_TRACE_MODULE */
 #define LIXA_TRACE_MODULE      LIXA_TRACE_MOD_SERVER_CONFIG
+
+
+
+/**
+ * Possible operating models of the state engine inside the lixad daemon
+ */
+enum server_config_state_engine_e {
+    /** msync based synchronization */
+    STATE_ENGINE_TRADITIONAL,
+    /** asynchronous journal */
+    STATE_ENGINE_JOURNAL,
+    /** both TRADITIONAL and JOURNAL, debug purpose */
+    STATE_ENGINE_PARALLEL,
+    /** migrate from TRADITIONAL to JOURNAL */
+    STATE_ENGINE_MIGRATE
+};
+
+
+
+/**
+ * Operating mode of the state engine
+ */
+extern enum server_config_state_engine_e SERVER_CONFIG_STATE_ENGINE;
+
 
 
 /**
@@ -73,6 +93,8 @@ struct listener_config_s
     in_port_t port;
 };
 
+
+
 /**
  * It contains the configuration of all listeners
  */
@@ -88,6 +110,8 @@ struct listener_config_array_s
     struct listener_config_s *array;
 };
 
+
+
 /**
  * It contains the configuration of a manager
  */
@@ -98,6 +122,8 @@ struct manager_config_s
      */
     char *status_file;
 };
+
+
 
 /**
  * It contains the configuration of all managers
@@ -114,6 +140,8 @@ struct manager_config_array_s
     struct manager_config_s *array;
 };
 
+
+
 /**
  * It contains the configuration of a whole server
  */
@@ -122,106 +150,114 @@ struct server_config_s
     /**
      * Path of the file will contain the server pid
      */
-    char *pid_file;
+    char                                *pid_file;
     /**
      * Minimum number of microseconds should elapse between two successive
      * synchronizations of the state file
      */
-    long min_elapsed_sync_time;
+    long                                 min_elapsed_sync_time;
     /**
      * Maximum number of microseconds should not be exceeded between two
      * successive synchronizations of the state file
      */
-    long max_elapsed_sync_time;
+    long                                 max_elapsed_sync_time;
     /**
      * Listeners' configuration
      */
-    struct listener_config_array_s listeners;
+    struct listener_config_array_s       listeners;
     /**
      * Managers' configuration
      */
-    struct manager_config_array_s managers;
+    struct manager_config_array_s        managers;
 };
+
 
 
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
 
+    
 
-/**
- * Read and parse server config file
- * @param sc OUT the object containing the server configuration
- * @param tpa OUT thread pipe array
- * @param config_filename IN a filename PATH must looked at before
- *                           searching default system config file
- *                           default = NULL
- * @return a standardized return code
- */
+    /**
+     * Read and parse server config file
+     * @param[out] sc the object containing the server configuration
+     * @param[out] tpa thread pipe array
+     * @param[in] config_filename a filename PATH must looked at before
+     *                           searching default system config file
+     *                           default = NULL
+     * @return a standardized return code
+     */
     int server_config(struct server_config_s *sc,
                       struct thread_pipe_array_s *tpa,
                       const char *config_filename);
 
 
-/**
- * Unconfig the server; the primary use of this function is to clean-up
- * memory and to avoid false memory leak notification when inspecting the
- * run time behavior
- * @param[out] sc the object containing the server configuration
- * @param[out] tpa threads communication pipes
- * @param[out] tsa status of all threads
- * @param[out] srt reference to the recovery table object
- * @param stt reference to the server transaction table
- * @return a standardized return code
- */
+    
+    /**
+     * Unconfig the server; the primary use of this function is to clean-up
+     * memory and to avoid false memory leak notification when inspecting the
+     * run time behavior
+     * @param[out] sc the object containing the server configuration
+     * @param[out] tpa threads communication pipes
+     * @param[out] tsa status of all threads
+     * @param[out] srt reference to the recovery table object
+     * @param stt reference to the server transaction table
+     * @return a standardized return code
+     */
     int server_cleanup(struct server_config_s *sc,
                        struct thread_pipe_array_s *tpa,
                        struct thread_status_array_s *tsa,
                        srvr_rcvr_tbl_t *srt, server_trans_tbl_t *stt);
 
+    
 
-/**
- * Parse the configuration tree
- * @param sc OUT server configuration structure
- * @param tpa OUT thread pipe array
- * @param a_node IN the current subtree must be parsed
- * @return a standardized return code
- */
+    /**
+     * Parse the configuration tree
+     * @param[out] sc server configuration structure
+     * @param[out] tpa thread pipe array
+     * @param[in] a_node the current subtree must be parsed
+     * @return a standardized return code
+     */
     int server_parse(struct server_config_s *sc,
                      struct thread_pipe_array_s *tpa,
                      xmlNode *a_node);
 
 
-/**
- * Parse a "listener" node tree
- * @param sc IN/OUT configuration structure
- * @param a_node IN listener node
- * @return a standardized return code
- */
+    
+    /**
+     * Parse a "listener" node tree
+     * @param[in,out] sc configuration structure
+     * @param[in] a_node listener node
+     * @return a standardized return code
+     */
     int server_parse_listener(struct server_config_s *sc,
                               xmlNode *a_node);
 
+    
 
-/**
- * Parse a "manager" node tree
- * @param sc IN/OUT configuration structure
- * @param tpa IN/OUT thread pipe array
- * @param a_node IN listener node
- * @return a standardized return code
- */
+    /**
+     * Parse a "manager" node tree
+     * @param[in,out] sc configuration structure
+     * @param[in,out] tpa thread pipe array
+     * @param[in] a_node listener node
+     * @return a standardized return code
+     */
     int server_parse_manager(struct server_config_s *sc,
                              struct thread_pipe_array_s *tpa,
                              xmlNode *a_node);
 
 
-/**
- * Initialize the configuration of the server
- * @param sc OUT the object must be initialized
- * @param tpa OUT the array of pipes used for thread communication
- */
+    
+    /**
+     * Initialize the configuration of the server
+     * @param[out] sc the object must be initialized
+     * @param[out] tpa the array of pipes used for thread communication
+     */
     void server_config_init(struct server_config_s *sc,
                             struct thread_pipe_array_s *tpa);
 
+    
 
 #ifdef __cplusplus
 }

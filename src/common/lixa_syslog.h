@@ -297,6 +297,10 @@
 #define LIXA_SYSLOG_LXD075I "LXD075I " OFF_T_FORMAT "/" OFF_T_FORMAT \
     " records from state log file '%s' have been copied to state table " \
     "file '%s'"
+#define LIXA_SYSLOG_LXD076I "LXD076I environment variable %s was found, " \
+    "the state engine is going to operate in %s mode"
+#define LIXA_SYSLOG_LXD077W "LXD077W environment variable %s was found, " \
+    "but the value '%s' is not a valid operating model"
 
 
 

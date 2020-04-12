@@ -2,6 +2,8 @@ lixa_state does NOT receive data,
 thread_status_get_record4update and thread_status_get_record4read
 are pointing to the legacy status: the switch must be implemented to test 
 the new persistence engine
+SERVER_CONFIG_STATE_ENGINE is the global variable that must be polled to get
+the engine operating model
 
 Restore "normal" values in lixa_state_log.h for log files
 Remove thread_status_insert_old
@@ -51,6 +53,8 @@ persistency engine
 
 Can function status_record_create_file removed and its code moved in 
 lixa_state_file_create_new_file?
+
+Document environment variable LIXA_STATE_ENGINE, see server_config.h
 
 Remove all useless @@@
 

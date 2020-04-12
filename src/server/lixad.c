@@ -19,78 +19,58 @@
 #include <config.h>
 
 
+
 #ifdef HAVE_GLIB_H
-
 # include <glib.h>
-
 #endif
 #ifdef HAVE_ERRNO_H
-
 # include <errno.h>
-
 #endif
 #ifdef HAVE_STDIO_H
-
 # include <stdio.h>
-
 #endif
 #ifdef HAVE_SIGNAL_H
-
 # include <signal.h>
-
 #endif
 #ifdef HAVE_STDLIB_H
-
 # include <stdlib.h>
-
 #endif
 #ifdef HAVE_SYSLOG_H
-
 # include <syslog.h>
-
 #endif
 #ifdef HAVE_SYS_TYPES_H
-
 # include <sys/types.h>
-
 #endif
 #ifdef HAVE_SYS_STAT_H
-
 # include <sys/stat.h>
-
 #endif
 #ifdef HAVE_FCNTL_H
-
 # include <fcntl.h>
-
 #endif
 #ifdef HAVE_UNISTD_H
-
 # include <unistd.h>
-
 #endif
 #ifdef HAVE_LIBXML_XMLVERSION_H
-
 # include <libxml/xmlversion.h>
-
 #endif
 #ifdef HAVE_LIBXML_PARSER_H
-
 # include <libxml/parser.h>
-
 #endif
 
 
-#include <lixa_crash.h>
-#include <lixa_errors.h>
-#include <lixa_trace.h>
-#include <lixa_utils.h>
-#include <lixa_syslog.h>
-#include <server_config.h>
-#include <server_listener.h>
-#include <server_manager.h>
-#include <server_recovery.h>
-#include <server_status.h>
+
+#include "lixa_crash.h"
+#include "lixa_errors.h"
+#include "lixa_trace.h"
+#include "lixa_utils.h"
+#include "lixa_syslog.h"
+#include "server_config.h"
+#include "server_listener.h"
+#include "server_manager.h"
+#include "server_recovery.h"
+#include "server_status.h"
+
+
 
 /* set module trace flag */
 #ifdef LIXA_TRACE_MODULE
@@ -126,6 +106,7 @@ static GOptionEntry entries[] =
     {"version",      'v', 0, G_OPTION_ARG_NONE,   &print_version, "Print package info and exit",                                                       NULL},
     {NULL}
 };
+
 
 
 int main(int argc, char *argv[])

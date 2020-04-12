@@ -75,7 +75,7 @@
  */
 #define STATUS_FILE_MAGIC_NUMBER 0x6110
 /**
- * Level (versione) of the lixa status files
+ * Level (version) of the lixa status files
  */
 #define STATUS_FILE_LEVEL 0x0001
 /**
@@ -94,16 +94,23 @@
 
 /**
  * Three different types of shutdown  can be requested to LIXA server:
- * QUIESCE: the server will wait every transaction completed; no new
- *          transaction can be started
- * IMMEDIATE: the server will flush the connected clients, synchronize status
- *            files and exit
- * FORCE: the server will synchronize status files and abruptly exit
  */
-enum shutdown_type_e { SHUTDOWN_NULL
-                       , SHUTDOWN_QUIESCE
-                       , SHUTDOWN_IMMEDIATE
-                       , SHUTDOWN_FORCE };
+enum shutdown_type_e { SHUTDOWN_NULL,
+                       /**
+                        * the server will wait every transaction completed;
+                        * no new transaction can be started
+                        */
+                       SHUTDOWN_QUIESCE,
+                       /**
+                        * the server will flush the connected clients,
+                        * synchronize status files and exit
+                        */
+                       SHUTDOWN_IMMEDIATE,
+                       /**
+                        * the server will synchronize status files and
+                        * abruptly exit
+                        */
+                       SHUTDOWN_FORCE };
 
 
 

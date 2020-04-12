@@ -32,6 +32,9 @@
 #ifdef HAVE_FCNTL_H
 # include <fcntl.h>
 #endif
+#ifdef HAVE_STDLIB_H
+# include <stdlib.h>
+#endif
 #ifdef HAVE_STRING_H
 # include <string.h>
 #endif
@@ -68,6 +71,18 @@
 
 
 
+/**
+ * Name of the environment variable that can be used to configure the type of
+ * state engine
+ */
+#define LIXA_STATE_ENGINE_ENV_VAR "LIXA_STATE_ENGINE"
+
+
+
+enum server_config_state_engine_e SERVER_CONFIG_STATE_ENGINE;
+
+
+
 int server_config(struct server_config_s *sc,
                   struct thread_pipe_array_s *tpa,
                   const char *config_filename)
@@ -92,6 +107,9 @@ int server_config(struct server_config_s *sc,
 
     LIXA_TRACE(("server_config\n"));
     TRY {
+        const char *state_engine_env_var;
+        int state_engine_env_var_is_valid;
+        
         /* checking if available the custom config file */
         if (NULL != config_filename &&
             -1 != (fd = open(config_filename, O_RDONLY))) {
@@ -137,6 +155,30 @@ int server_config(struct server_config_s *sc,
         if (sc->managers.n == 0)
             THROW(ZERO_MANAGERS);
 
+        /* configure the state engine to default value */
+        SERVER_CONFIG_STATE_ENGINE = STATE_ENGINE_TRADITIONAL;
+        /* check the environment variable */
+        if (NULL != (state_engine_env_var = getenv(
+                         LIXA_STATE_ENGINE_ENV_VAR))) {
+            state_engine_env_var_is_valid = TRUE;
+            if (0 == strcasecmp(state_engine_env_var, "TRADITIONAL"))
+                SERVER_CONFIG_STATE_ENGINE = STATE_ENGINE_TRADITIONAL;
+            else if (0 == strcasecmp(state_engine_env_var, "JOURNAL"))
+                SERVER_CONFIG_STATE_ENGINE = STATE_ENGINE_JOURNAL;
+            else if (0 == strcasecmp(state_engine_env_var, "PARALLEL"))
+                SERVER_CONFIG_STATE_ENGINE = STATE_ENGINE_PARALLEL;
+            else if (0 == strcasecmp(state_engine_env_var, "MIGRATE"))
+                SERVER_CONFIG_STATE_ENGINE = STATE_ENGINE_MIGRATE;
+            else
+                state_engine_env_var_is_valid = FALSE;
+            if (state_engine_env_var_is_valid)
+                LIXA_SYSLOG((LOG_INFO, LIXA_SYSLOG_LXD076I,
+                             LIXA_STATE_ENGINE_ENV_VAR, state_engine_env_var));
+            else
+                LIXA_SYSLOG((LOG_WARNING, LIXA_SYSLOG_LXD077W,
+                             LIXA_STATE_ENGINE_ENV_VAR, state_engine_env_var));
+        }
+        
         THROW(NONE);
     } CATCH {
         switch (excp) {
