@@ -2212,6 +2212,8 @@ int lixa_state_insert_block(lixa_state_t *this, uint32_t *block_id)
         if (NULL == (changed_block_ids = g_array_new(
                          FALSE, FALSE, sizeof(uint32_t))))
             THROW(G_ARRAY_NEW_ERROR1);
+        LIXA_TRACE(("lixa_state_insert_block: changed_block_ids=%p\n",
+                    changed_block_ids));
         /* check if the current state table is full */
         if (lixa_state_table_is_full(&this->tables[this->active_state])) {
             LIXA_TRACE(("lixa_state_insert_block: current state table "
@@ -2228,11 +2230,14 @@ int lixa_state_insert_block(lixa_state_t *this, uint32_t *block_id)
                     THROW(MARK_BLOCK_ERROR1);
             }
             /* free the array */
+            LIXA_TRACE(("lixa_state_insert_block: releasing "
+                        "changed_block_ids=%p\n", changed_block_ids));
             g_array_free(changed_block_ids, TRUE);
             changed_block_ids = NULL;
         }
-        /* allocate an empty array */
-        if (NULL == (changed_block_ids = g_array_new(
+        /* allocate an empty array if necessary */
+        if (NULL == changed_block_ids &&
+            NULL == (changed_block_ids = g_array_new(
                          FALSE, FALSE, sizeof(uint32_t))))
             THROW(G_ARRAY_NEW_ERROR2);
         /* insert the block in the table currently used */
@@ -2271,6 +2276,8 @@ int lixa_state_insert_block(lixa_state_t *this, uint32_t *block_id)
         } /* switch (excp) */
         /* recover memory */
         if (NULL != changed_block_ids) {
+            LIXA_TRACE(("lixa_state_insert_block: releasing "
+                        "changed_block_ids=%p\n", changed_block_ids));
             g_array_free(changed_block_ids, TRUE);
             changed_block_ids = NULL;
         }
