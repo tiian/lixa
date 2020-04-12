@@ -771,6 +771,9 @@ int lixa_state_table_clean(lixa_state_table_t *this)
             LIXA_TRACE(("lixa_state_table_clean: WARNING, status is "
                         "UNDEFINED!\n"));
         }
+        /* release allocated memory */
+        if (NULL != this->pathname)
+            free(this->pathname);
         /* reset everything, bye bye... */
         memset(this, 0, sizeof(lixa_state_table_t));
         

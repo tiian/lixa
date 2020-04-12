@@ -1,3 +1,16 @@
+There's a memory leak in the g_array passing of lixa_state_insert_block:
+
+==3926== 40 bytes in 1 blocks are definitely lost in loss record 9 of 12
+==3926==    at 0x4C2AB80: malloc (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
+==3926==    by 0x51EC6D0: g_malloc (in /lib/x86_64-linux-gnu/libglib-2.0.so.0.4002.0)
+==3926==    by 0x52022ED: g_slice_alloc (in /lib/x86_64-linux-gnu/libglib-2.0.so.0.4002.0)
+==3926==    by 0x51BBC34: g_array_sized_new (in /lib/x86_64-linux-gnu/libglib-2.0.so.0.4002.0)
+==3926==    by 0x4206DD: lixa_state_insert_block (lixa_state.c:2212)
+==3926==    by 0x40E441: thread_status_insert (server_thread_status.c:174)
+==3926==    by 0x40C40E: server_manager_new_client (server_manager.c:1999)
+==3926==    by 0x409004: server_manager_pollin_ctrl (server_manager.c:577)
+
+
 Go on with lixa_state_warm_start: Play a little bit with it!
 
 lixa_state does NOT receive data, 
