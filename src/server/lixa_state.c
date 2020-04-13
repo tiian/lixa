@@ -1321,13 +1321,13 @@ int lixa_state_check_log_actions(lixa_state_t *this, int *must_flush,
             /*
              * Two conditions to ask table and log switch:
              * 1. no more available pages
-             * 2. log file usage reached the maximum and the previous state
-             *    table is NOT synchronizing (if it was synchronizing, asking
-             *    a switch would extend the log file!)
+             * 2. log file usage reached the 90% of the (soft) maximum and the
+             *    previous state table is NOT synchronizing (if it was
+             *    synchronizing, asking a switch would extend the log file!)
              */
             if ((current_needed_pages == available_pages &&
                  future_needed_pages > available_pages) ||
-                (log_used_size >= this->max_log_size &&
+                (log_used_size >= this->max_log_size * 90 / 100 &&
                  !lixa_state_table_is_syncing(
                      &this->tables[lixa_state_get_prev_state(this)]))) {
                 *must_flush = TRUE;
@@ -1554,8 +1554,7 @@ int lixa_state_flush_log_records(lixa_state_t *this, int switch_after_write)
                                    &this->logs[this->active_state],
                                    STATE_LOG_FULL, FALSE)))
                 THROW(LOG_SET_STATUS);
-            if (LIXA_RC_OK != (ret_cod = lixa_state_log_extend(
-                                   &this->logs[this->active_state])))
+            if (LIXA_RC_OK != (ret_cod = lixa_state_extend_log(this)))
                 THROW(STATE_LOG_EXTEND);
         }
         
@@ -1631,10 +1630,28 @@ int lixa_state_extend_log(lixa_state_t *this)
     
     LIXA_TRACE(("lixa_state_extend_log\n"));
     TRY {
+        off_t total_size;
         if (NULL == this)
             THROW(NULL_OBJECT);
         LIXA_TRACE(("lixa_state_extend_log: active_state=%d\n",
                     this->active_state));
+        /* check the soft limit */
+        total_size = lixa_state_log_get_total_size(
+            &this->logs[this->active_state]);
+        if (this->max_log_size <= total_size) {
+            LIXA_TRACE(("lixa_state_extend_log: log '%s' is " OFF_T_FORMAT
+                        " bytes long and it will be furtherly extended: the "
+                        "soft limit of " OFF_T_FORMAT " bytes is too low for "
+                        "the current workload and in respect of the "
+                        "actual storage performance\n",
+                        lixa_state_log_get_pathname(
+                            &this->logs[this->active_state]),
+                        total_size, this->max_log_size));
+            LIXA_SYSLOG((LOG_NOTICE, LIXA_SYSLOG_LXD078N, 
+                         lixa_state_log_get_pathname(
+                             &this->logs[this->active_state]),
+                         total_size, this->max_log_size));
+        }
         if (LIXA_RC_OK != (ret_cod = lixa_state_log_extend(
                                &this->logs[this->active_state])))
             THROW(STATE_LOG_FLUSH_ERROR);

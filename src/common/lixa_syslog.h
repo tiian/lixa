@@ -301,6 +301,10 @@
     "the state engine is going to operate in %s mode"
 #define LIXA_SYSLOG_LXD077W "LXD077W environment variable %s was found, " \
     "but the value '%s' is not a valid operating model"
+#define LIXA_SYSLOG_LXD078N "LXD078N log '%s' is " OFF_T_FORMAT " bytes " \
+    "long and it will be furtherly extended: the soft limit of " OFF_T_FORMAT \
+    " bytes is too low for the current workload and in respect of the " \
+    "actual storage performance"
 
 
 
