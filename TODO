@@ -1,3 +1,19 @@
+Parallel mode has some issues, for example:
+thread_status_insert  calls
+  thread_status_insert_old  calls
+    thread_status_mark_block
+	inside it mark both in the traditional and in the superfast, but the
+	lixa_state_insert_block has not yet been called: it would have been
+	the next call from thread_status_insert after calling
+	thread_status_insert_old...  
+mumble mumble...
+and what happens if
+thread_status_insert: legacy code returned slot=1, new code returned slot=1, returning 1 to the caller
+returns two different slots?
+And what else if the two engines use a state file of different size?!
+Maybe the PARALLEL value is not feasible... thinking about it!
+
+
 lixa_state does NOT receive data, 
 thread_status_get_record4update and thread_status_get_record4read
 are pointing to the legacy status: the switch must be implemented to test 

@@ -53,7 +53,7 @@
 #include "lixa_syslog.h"
 #include "lixa_xml_msg_deserialize.h"
 #include "lixa_xml_msg_trace.h"
-#include "lixa_state.h"   /* @@@ maybe only temporary necessary, 20190904 */
+#include "lixa_state.h"
 #include "server_manager.h"
 #include "server_messages.h"
 #include "server_thread_status.h"
@@ -288,40 +288,45 @@ void *server_manager_thread(void *void_ts)
                             ts->max_elapsed_sync_time));
                 if (delay >= ts->max_elapsed_sync_time ||
                     SHUTDOWN_NULL != ts->shutdown_type) {
-                    /* start synchronization as soon as possible. This
-                       operation does not enqueue on the mutex but will
-                       enqueues on disk I/O; a better algorithm would use
-                       a mutex protected counter, but it will cost twice
-                       mutex synchronizations. This must be considered a
-                       "good enought" approach to reduce disk enqueing, but
-                       not to avoid disk enqueing (the operating system will
-                       manage it without any issue) */
-                    /* @@@@ traditional synchronization */
-                    if (LIXA_RC_OK !=
-                        (ret_cod = thread_status_sync_files(ts)))
-                        THROW(THREAD_STATUS_SYNC_FILES_ERROR1);
-                    /* @@@@ new synchronization */
-                    if (LIXA_RC_OK !=
-                        (ret_cod = lixa_state_sync(&ts->state, TRUE, FALSE)))
-                        THROW(LIXA_STATE_SYNC_ERROR1);
-                    status_sync_init(&ts->status_sync);
-                } else if (delay >= ts->min_elapsed_sync_time) {
-                    /* start synchronization only if there is no another thread
-                       that's synchronizing its own state file */
-                    if (g_mutex_trylock(&state_file_synchronization)) {
-                        /* @@@@ traditional synchronization */
-                        ret_cod = thread_status_sync_files(ts);
-                        g_mutex_unlock(&state_file_synchronization);
-                        if (LIXA_RC_OK != ret_cod)
-                            THROW(THREAD_STATUS_SYNC_FILES_ERROR2);
-                        /* @@@@ new synchronization */
+                    /* traditional synchronization */
+                    if (SERVER_CONFIG_STATE_ENGINE ==
+                        STATE_ENGINE_TRADITIONAL ||
+                        SERVER_CONFIG_STATE_ENGINE == STATE_ENGINE_PARALLEL)
+                        if (LIXA_RC_OK !=
+                            (ret_cod = thread_status_sync_files(ts)))
+                            THROW(THREAD_STATUS_SYNC_FILES_ERROR1);
+                    /* "superfast" synchronization */
+                    if (SERVER_CONFIG_STATE_ENGINE != STATE_ENGINE_TRADITIONAL)
                         if (LIXA_RC_OK !=
                             (ret_cod = lixa_state_sync(
                                 &ts->state, TRUE, FALSE)))
+                            THROW(LIXA_STATE_SYNC_ERROR1);
+                    status_sync_init(&ts->status_sync);
+                } else if (delay >= ts->min_elapsed_sync_time) {
+                    if (SERVER_CONFIG_STATE_ENGINE ==
+                        STATE_ENGINE_TRADITIONAL ||
+                        SERVER_CONFIG_STATE_ENGINE == STATE_ENGINE_PARALLEL) {
+                        /* traditional synchronization:
+                           start synchronization only if there is no another
+                           thread that's synchronizing its own state file */
+                        if (g_mutex_trylock(&state_file_synchronization)) {
+                            ret_cod = thread_status_sync_files(ts);
+                            g_mutex_unlock(&state_file_synchronization);
+                            if (LIXA_RC_OK != ret_cod)
+                                THROW(THREAD_STATUS_SYNC_FILES_ERROR2);
+                            status_sync_init(&ts->status_sync);
+                        }
+                    }
+                    if (SERVER_CONFIG_STATE_ENGINE !=
+                        STATE_ENGINE_TRADITIONAL) {
+                        /* "superfast" synchronization:
+                           can be started in any case */
+                        if (LIXA_RC_OK != (ret_cod = lixa_state_sync(
+                                               &ts->state, TRUE, FALSE)))
                             THROW(LIXA_STATE_SYNC_ERROR2);
                         status_sync_init(&ts->status_sync);
-                    }
-                }
+                    } /* "superfast" synchronization branch */
+                } /* if (delay >= ts->min_elapsed_sync_time) */
             }
             if (SHUTDOWN_NULL != ts->shutdown_type) {
                 LIXA_TRACE(("server_manager_thread: id=%d, leaving main "
@@ -433,9 +438,10 @@ void *server_manager_thread(void *void_ts)
 
         } /* while (TRUE) */
 
-        /* closing state object */
-        if (LIXA_RC_OK != (ret_cod = lixa_state_shutdown(&ts->state)))
-            THROW(STATE_CLOSE);
+        /* closing state object introduced by "superfast" synchronization */
+        if (SERVER_CONFIG_STATE_ENGINE != STATE_ENGINE_TRADITIONAL)
+            if (LIXA_RC_OK != (ret_cod = lixa_state_shutdown(&ts->state)))
+                THROW(STATE_CLOSE);
         
         THROW(NONE);
     } CATCH {
@@ -536,7 +542,9 @@ void server_manager_thread_cleanup(struct thread_status_s *ts)
 
     /* clean-up memory */
     thread_status_destroy(ts);
-    lixa_state_clean(&ts->state);
+    /* cleaning state object introduced by "superfast" synchronization */
+    if (SERVER_CONFIG_STATE_ENGINE != STATE_ENGINE_TRADITIONAL)
+        lixa_state_clean(&ts->state);
     return;
 }
 

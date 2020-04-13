@@ -56,11 +56,11 @@
 
 
 /** Initial buffer size (unit = byte) */
-#define LIXA_STATE_LOG_BUFFER_SIZE_DEFAULT   (1/*2*/*LIXA_SYSTEM_PAGE_SIZE)
+#define LIXA_STATE_LOG_BUFFER_SIZE_DEFAULT   (2*LIXA_SYSTEM_PAGE_SIZE)
 /** Initial file size (unit = byte) */
-#define LIXA_STATE_LOG_FILE_SIZE_DEFAULT     (1/*50*/*LIXA_SYSTEM_PAGE_SIZE)
+#define LIXA_STATE_LOG_FILE_SIZE_DEFAULT     (50*LIXA_SYSTEM_PAGE_SIZE)
 /** Incremental file size (unit = byte) */
-#define LIXA_STATE_LOG_FILE_SIZE_INCREMENT   (1/*25*/*LIXA_SYSTEM_PAGE_SIZE)
+#define LIXA_STATE_LOG_FILE_SIZE_INCREMENT   (25*LIXA_SYSTEM_PAGE_SIZE)
 
 
 

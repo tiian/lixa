@@ -106,7 +106,7 @@ void thread_status_init(struct thread_status_s *ts, int id,
     ts->shutdown_type = SHUTDOWN_NULL;
     
     /* @@@ FIX ME, JUST FOR DEBUGGING lixa_state 20190904 */
-    if (id) {
+    if ((SERVER_CONFIG_STATE_ENGINE != STATE_ENGINE_TRADITIONAL) && id) {
         /* skip id=0, the listener thread */
         snprintf(file_name, sizeof(file_name), "/tmp/lixad_state%d", id);
         assert(lixa_state_init(&ts->state, file_name, 128*1024, 32*1024, FALSE)
@@ -160,6 +160,7 @@ int thread_status_insert(struct thread_status_s *ts, uint32_t *slot)
     enum Exception {
         INSERT_OLD_ERROR,
         STATE_INSERT_BLOCK_ERROR,
+        INVALID_STATUS,
         NONE
     } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
@@ -167,27 +168,48 @@ int thread_status_insert(struct thread_status_s *ts, uint32_t *slot)
     LIXA_TRACE(("thread_status_insert\n"));
     TRY {
         uint32_t old_slot, new_slot;
-        /* call the legacy code @@@, remove when superfast is ready */
-        if (LIXA_RC_OK != (ret_cod = thread_status_insert_old(ts, &old_slot)))
-            THROW(INSERT_OLD_ERROR);
+        /* call the legacy code */
+        if (SERVER_CONFIG_STATE_ENGINE == STATE_ENGINE_TRADITIONAL ||
+            SERVER_CONFIG_STATE_ENGINE == STATE_ENGINE_PARALLEL)
+            if (LIXA_RC_OK != (ret_cod = thread_status_insert_old(
+                                   ts, &old_slot)))
+                THROW(INSERT_OLD_ERROR);
         /* call the new code introduced by "superfast" */
-        if (LIXA_RC_OK != (ret_cod = lixa_state_insert_block(
-                               &ts->state, &new_slot)))
-            THROW(STATE_INSERT_BLOCK_ERROR);
-        /* @@@ compare the two slots */
-        LIXA_TRACE(("thread_status_insert: legacy code returned slot="
-                    UINT32_T_FORMAT ", new code returned slot="
-                    UINT32_T_FORMAT "\n", old_slot, new_slot));
+        if (SERVER_CONFIG_STATE_ENGINE != STATE_ENGINE_TRADITIONAL)
+            if (LIXA_RC_OK != (ret_cod = lixa_state_insert_block(
+                                   &ts->state, &new_slot)))
+                THROW(STATE_INSERT_BLOCK_ERROR);
 
         /* return the slot */
-        *slot = old_slot;
+        switch (SERVER_CONFIG_STATE_ENGINE) {
+            case STATE_ENGINE_TRADITIONAL:
+                *slot = old_slot;
+                break;
+            case STATE_ENGINE_JOURNAL:
+                *slot = new_slot;
+                break;
+            case STATE_ENGINE_PARALLEL:
+                *slot = new_slot;
+                break;
+            case STATE_ENGINE_MIGRATE:
+                *slot = new_slot;
+                break;
+            default:
+                THROW(INVALID_STATUS);
+        } /* switch (SERVER_CONFIG_STATE_ENGINE) */
+        LIXA_TRACE(("thread_status_insert: legacy code returned slot="
+                    UINT32_T_FORMAT ", new code returned slot="
+                    UINT32_T_FORMAT ", returning " UINT32_T_FORMAT " to "
+                    "the caller\n", old_slot, new_slot, *slot));
         
         THROW(NONE);
     } CATCH {
         switch (excp) {
             case INSERT_OLD_ERROR:
-                break;
             case STATE_INSERT_BLOCK_ERROR:
+                break;
+            case INVALID_STATUS:
+                ret_cod = LIXA_RC_INVALID_STATUS;
                 break;
             case NONE:
                 ret_cod = LIXA_RC_OK;
@@ -203,9 +225,6 @@ int thread_status_insert(struct thread_status_s *ts, uint32_t *slot)
 
 
 
-/*
-  @@@ Remove me when "superfast" is completed
-*/
 int thread_status_insert_old(struct thread_status_s *ts, uint32_t *slot)
 {
     enum Exception {
@@ -421,12 +440,15 @@ int thread_status_delete(struct thread_status_s *ts, uint32_t slot)
     
     LIXA_TRACE(("thread_status_delete\n"));
     TRY {
-        /* call the legacy code @@@, remove when superfast is ready */
-        if (LIXA_RC_OK != (ret_cod = thread_status_delete_old(ts, slot)))
-            THROW(DELETE_OLD_ERROR);
+        /* call the legacy code */
+        if (SERVER_CONFIG_STATE_ENGINE == STATE_ENGINE_TRADITIONAL ||
+            SERVER_CONFIG_STATE_ENGINE == STATE_ENGINE_PARALLEL)
+            if (LIXA_RC_OK != (ret_cod = thread_status_delete_old(ts, slot)))
+                THROW(DELETE_OLD_ERROR);
         /* call the new code introduced by "superfast" */
-        if (LIXA_RC_OK != (ret_cod = lixa_state_delete_block(
-                               &ts->state, slot)))
+        if (SERVER_CONFIG_STATE_ENGINE != STATE_ENGINE_TRADITIONAL)
+            if (LIXA_RC_OK != (ret_cod = lixa_state_delete_block(
+                                   &ts->state, slot)))
             THROW(STATE_DELETE_BLOCK_ERROR);
         
         THROW(NONE);
@@ -1428,17 +1450,21 @@ int thread_status_mark_block(struct thread_status_s *ts,
         sr = ts->curr_status + block_id;
         if (!(sr->counter & 0x1)) {
             uintptr_t index = block_id;
-            sr->counter++;
-            /* the old way @@@ */
-            g_tree_insert(ts->updated_records, (gpointer)index, NULL);
-            LIXA_TRACE(("thread_status_mark_block: inserted index "
-                        UINTPTR_T_FORMAT " (counter=" UINT32_T_FORMAT
-                        ") in updated records tree\n",
-                        index, sr->counter));
-            /* the new way */
-            if (LIXA_RC_OK != (ret_cod = lixa_state_mark_block(
-                                   &ts->state, block_id)))
-                THROW(STATE_MARK_BLOCK_ERROR);
+            /* the traditional way */
+            if (SERVER_CONFIG_STATE_ENGINE == STATE_ENGINE_TRADITIONAL ||
+                SERVER_CONFIG_STATE_ENGINE == STATE_ENGINE_PARALLEL) {
+                sr->counter++;
+                g_tree_insert(ts->updated_records, (gpointer)index, NULL);
+                LIXA_TRACE(("thread_status_mark_block: inserted index "
+                            UINTPTR_T_FORMAT " (counter=" UINT32_T_FORMAT
+                            ") in updated records tree\n",
+                            index, sr->counter));
+            }
+            /* the superfast way */
+            if (SERVER_CONFIG_STATE_ENGINE != STATE_ENGINE_TRADITIONAL)
+                if (LIXA_RC_OK != (ret_cod = lixa_state_mark_block(
+                                       &ts->state, block_id)))
+                    THROW(STATE_MARK_BLOCK_ERROR);
         }
         
         THROW(NONE);
