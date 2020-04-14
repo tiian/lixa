@@ -293,6 +293,8 @@ int server_parse(struct server_config_s *sc,
         PID_FILE_ERROR,
         RETRIEVE_MIN_EST_ERROR,
         RETRIEVE_MAX_EST_ERROR,
+        RETRIEVE_LOG_SIZE,
+        RETRIEVE_BUFFER_SIZE,
         PARSE_LISTENER_ERROR,
         PARSE_MANAGER_ERROR,
         SERVER_PARSE_ERROR,
@@ -304,6 +306,8 @@ int server_parse(struct server_config_s *sc,
 
     LIXA_TRACE(("server_parse\n"));
     TRY {
+        long tmp;
+        
         for (cur_node = a_node; cur_node; cur_node = cur_node->next) {
             if (cur_node->type == XML_ELEMENT_NODE) {
                 LIXA_TRACE(("server_parse: tag %s\n", cur_node->name));
@@ -373,6 +377,55 @@ int server_parse(struct server_config_s *sc,
                                      sc->max_elapsed_sync_time));
                     } else if (LIXA_RC_OBJ_NOT_FOUND != ret_cod)
                         THROW(RETRIEVE_MAX_EST_ERROR);
+                    /* retrieve log_size */
+                    if (LIXA_RC_OK == (
+                            ret_cod = lixa_config_retrieve_generic_long(
+                                cur_node, LIXA_XML_CONFIG_SERVER_LOG_SIZE,
+                                &(sc->log_size)))) {
+                        LIXA_TRACE(("server_parse: parameter '%s' is %ld\n",
+                                    (const char *)
+                                    LIXA_XML_CONFIG_SERVER_LOG_SIZE,
+                                    sc->log_size));
+                        /* check and fix the parameter if wrong */
+                        if (sc->log_size < 0) {
+                            LIXA_SYSLOG((LOG_NOTICE, LIXA_SYSLOG_LXD028N,
+                                         sc->log_size,
+                                         (const char *)
+                                         LIXA_XML_CONFIG_SERVER_LOG_SIZE,
+                                         (long) 0));
+                            sc->log_size = 0;
+                        }
+                        LIXA_SYSLOG((LOG_INFO, LIXA_SYSLOG_LXD026I,
+                                     (const char *)
+                                     LIXA_XML_CONFIG_SERVER_LOG_SIZE,
+                                     sc->log_size));
+                    } else if (LIXA_RC_OBJ_NOT_FOUND != ret_cod)
+                        THROW(RETRIEVE_LOG_SIZE);
+                    /* retrieve max_buffer_log_size */
+                    if (LIXA_RC_OK == (
+                            ret_cod = lixa_config_retrieve_generic_long(
+                                cur_node, LIXA_XML_CONFIG_SERVER_BUFFER_SIZE,
+                                &tmp))) {
+                        sc->max_buffer_log_size = (size_t)tmp;
+                        LIXA_TRACE(("server_parse: parameter '%s' is "
+                                    SIZE_T_FORMAT "\n", (const char *)
+                                    LIXA_XML_CONFIG_SERVER_BUFFER_SIZE,
+                                    sc->max_buffer_log_size));
+                        /* check and fix the parameter if wrong */
+                        if (sc->max_buffer_log_size < 0) {
+                            LIXA_SYSLOG((LOG_NOTICE, LIXA_SYSLOG_LXD028N,
+                                         (long)sc->max_buffer_log_size,
+                                         (const char *)
+                                         LIXA_XML_CONFIG_SERVER_BUFFER_SIZE,
+                                         (long) 0));
+                            sc->max_buffer_log_size = 0;
+                        }
+                        LIXA_SYSLOG((LOG_INFO, LIXA_SYSLOG_LXD026I,
+                                     (const char *)
+                                     LIXA_XML_CONFIG_SERVER_BUFFER_SIZE,
+                                     (long)sc->max_buffer_log_size));
+                    } else if (LIXA_RC_OBJ_NOT_FOUND != ret_cod)
+                        THROW(RETRIEVE_BUFFER_SIZE);
                 } else if (!xmlStrcmp(cur_node->name,
                                       LIXA_XML_CONFIG_LISTENER)) {
                     if (LIXA_RC_OK != (ret_cod = server_parse_listener(
@@ -396,6 +449,8 @@ int server_parse(struct server_config_s *sc,
             case PID_FILE_ERROR:
             case RETRIEVE_MIN_EST_ERROR:
             case RETRIEVE_MAX_EST_ERROR:
+            case RETRIEVE_LOG_SIZE:
+            case RETRIEVE_BUFFER_SIZE:
             case PARSE_LISTENER_ERROR:
             case PARSE_MANAGER_ERROR:
             case SERVER_PARSE_ERROR:
@@ -508,10 +563,11 @@ int server_parse_manager(struct server_config_s *sc,
                          struct thread_pipe_array_s *tpa,
                          xmlNode *a_node)
 {
-    enum Exception { REALLOC_ERROR1
-                     , STATUS_NOT_AVAILABLE_ERROR
-                     , REALLOC_ERROR2
-                     , NONE } excp;
+    enum Exception {
+        REALLOC_ERROR1,
+        STATUS_NOT_AVAILABLE_ERROR,
+        REALLOC_ERROR2,
+        NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
 
     LIXA_TRACE(("server_parse_manager\n"));
@@ -574,6 +630,8 @@ void server_config_init(struct server_config_s *sc,
     LIXA_TRACE(("server_config_init/start\n"));
     sc->pid_file = NULL;
     sc->min_elapsed_sync_time = sc->max_elapsed_sync_time = 0;
+    sc->log_size = 0;
+    sc->max_buffer_log_size = 0;
     sc->listeners.n = 0;
     sc->listeners.array = NULL;
     sc->managers.n = 0;

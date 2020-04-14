@@ -116,9 +116,9 @@ struct listener_config_array_s
 struct manager_config_s
 {
     /**
-     * Path of the file containing the status
+     * Prefix path for the state files
      */
-    char *status_file;
+    char  *status_file;
 };
 
 
@@ -159,6 +159,18 @@ struct server_config_s
      * successive synchronizations of the state file
      */
     long                                 max_elapsed_sync_time;
+    /**
+     * Desired size for log files on disk (bytes): it's a soft limit
+     * and it can be exceeded if necessary. It's used only by the "superfast"
+     * state engine: traditional engine does not use it.
+     */
+    off_t                                log_size;
+    /**
+     * Maximum size for buffer logs (bytes): it's an hard limit and it uses
+     * RAM allocated by the server manager thread. It's used only by the
+     * "superfast" state engine: traditional engine does not use it.
+     */
+    size_t                               max_buffer_log_size;
     /**
      * Listeners' configuration
      */

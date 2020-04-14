@@ -119,6 +119,16 @@ extern const xmlChar *LIXA_XML_CONFIG_SERVER_MIN_EST;
 extern const xmlChar *LIXA_XML_CONFIG_SERVER_MAX_EST;
 
 /**
+ * Label used to specify "log_size" property in "server" tag
+ */
+extern const xmlChar *LIXA_XML_CONFIG_SERVER_LOG_SIZE;
+
+/**
+ * Label used to specify "max_buffer_log_size" property in "server" tag
+ */
+extern const xmlChar *LIXA_XML_CONFIG_SERVER_BUFFER_SIZE;
+
+/**
  * Label used to specify "domain" property
  */
 extern const xmlChar *LIXA_XML_CONFIG_DOMAIN_PROPERTY;

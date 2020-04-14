@@ -163,10 +163,10 @@ typedef struct lixa_state_s {
      * Section dedicated to log management
      */
     /**
-     * Maximum size of a state log file, typically retrieved from
+     * Size of a state log file, typically retrieved from
      * configuration. It's a "soft limit" that can be exceed if necessary
      */
-    off_t                             max_log_size;
+    off_t                             log_size;
     /**
      * Maximum size of the log buffer, typically retrieved from configuration
      */

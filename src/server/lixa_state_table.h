@@ -405,6 +405,8 @@ extern "C" {
     /**
      * Replace the content of a slot, patching the inner record
      * @param[in,out] this state table object
+     * @param[in] block_id of the desired block
+     * @param[in] sr source state record
      * @return a reason code
      */
     int lixa_state_table_patch_slot(lixa_state_table_t *this,

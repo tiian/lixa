@@ -73,11 +73,9 @@
 
 
 void thread_status_init(struct thread_status_s *ts, int id,
-                        struct thread_pipe_array_s *tpa, int mmode,
-                        long *crash_count)
+                        struct thread_pipe_array_s *tpa,
+                        int mmode, long *crash_count)
 {
-    char file_name[1000]; /* @@@ fix me */
-
     LIXA_TRACE(("thread_status_init: initializing thread status (id = %d)\n",
                 id));
     ts->id = id;
@@ -105,19 +103,6 @@ void thread_status_init(struct thread_status_s *ts, int id,
         ts->tid = 0;
     ts->shutdown_type = SHUTDOWN_NULL;
     
-    /* @@@ FIX ME, JUST FOR DEBUGGING lixa_state 20190904 */
-    if ((SERVER_CONFIG_STATE_ENGINE != STATE_ENGINE_TRADITIONAL) && id) {
-        /* skip id=0, the listener thread */
-        snprintf(file_name, sizeof(file_name), "/tmp/lixad_state%d", id);
-        assert(lixa_state_init(&ts->state, file_name, 128*1024, 32*1024, FALSE)
-               == LIXA_RC_OK);
-    }
-    /* @@@ put me in some different place... 
-    assert(lixa_state_clean(&ts->state) == LIXA_RC_OK);
-    */
-
-    /* @@@ end of FIX ME SECTION */
-        
 #ifdef _CRASH
     ts->crash_count = crash_count;
 #endif

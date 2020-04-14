@@ -49,7 +49,7 @@
 
 
 int lixa_state_init(lixa_state_t *this, const char *path_prefix,
-                    off_t max_log_size, size_t max_buffer_log_size,
+                    off_t log_size, size_t max_buffer_log_size,
                     int read_only)
 {
     enum Exception {
@@ -97,14 +97,14 @@ int lixa_state_init(lixa_state_t *this, const char *path_prefix,
             THROW(INVALID_OPTION);
         LIXA_TRACE(("lixa_state_init: path_prefix='%s', "
                     "max_buffer_log_size=" SIZE_T_FORMAT
-                    ", max_log_size=" OFF_T_FORMAT "\n",
-                    path_prefix, max_buffer_log_size, max_log_size));
+                    ", log_size=" OFF_T_FORMAT "\n",
+                    path_prefix, max_buffer_log_size, log_size));
         /* clean-up the object memory, maybe not necessary, but safer */
         memset(this, 0, sizeof(lixa_state_t));
         /* retrieve system page size */
         if (-1 == (LIXA_SYSTEM_PAGE_SIZE = (size_t)sysconf(_SC_PAGESIZE)))
             THROW(INTERNAL_ERROR);
-        this->max_log_size = max_log_size;
+        this->log_size = log_size;
         this->max_buffer_log_size = max_buffer_log_size;
         /* compute the number of records per page */
         LIXA_STATE_LOG_RECORDS_PER_PAGE = LIXA_SYSTEM_PAGE_SIZE /
@@ -195,11 +195,11 @@ int lixa_state_init(lixa_state_t *this, const char *path_prefix,
             max_buffer_log_size = LIXA_STATE_LOG_BUFFER_SIZE_DEFAULT;
         }
         /* check mas log size, resize if necessary */
-        if (max_log_size < (off_t)max_buffer_log_size) {
-            LIXA_TRACE(("lixa_state_init: max_log_size (" OFF_T_FORMAT ") is "
+        if (log_size < (off_t)max_buffer_log_size) {
+            LIXA_TRACE(("lixa_state_init: log_size (" OFF_T_FORMAT ") is "
                         "less then max_buffer_log_size (" SIZE_T_FORMAT "), "
-                        "resizing\n", max_log_size, max_buffer_log_size));
-            max_log_size = (off_t)max_buffer_log_size;
+                        "resizing\n", log_size, max_buffer_log_size));
+            log_size = (off_t)max_buffer_log_size;
         }
         /* max number of records in buffer, config limit */
         this->max_number_of_block_ids = lixa_state_log_buffer2blocks(
@@ -1327,7 +1327,7 @@ int lixa_state_check_log_actions(lixa_state_t *this, int *must_flush,
              */
             if ((current_needed_pages == available_pages &&
                  future_needed_pages > available_pages) ||
-                (log_used_size >= this->max_log_size * 90 / 100 &&
+                (log_used_size >= this->log_size * 90 / 100 &&
                  !lixa_state_table_is_syncing(
                      &this->tables[lixa_state_get_prev_state(this)]))) {
                 *must_flush = TRUE;
@@ -1638,7 +1638,7 @@ int lixa_state_extend_log(lixa_state_t *this)
         /* check the soft limit */
         total_size = lixa_state_log_get_total_size(
             &this->logs[this->active_state]);
-        if (this->max_log_size <= total_size) {
+        if (this->log_size <= total_size) {
             LIXA_TRACE(("lixa_state_extend_log: log '%s' is " OFF_T_FORMAT
                         " bytes long and it will be furtherly extended: the "
                         "soft limit of " OFF_T_FORMAT " bytes is too low for "
@@ -1646,11 +1646,11 @@ int lixa_state_extend_log(lixa_state_t *this)
                         "actual storage performance\n",
                         lixa_state_log_get_pathname(
                             &this->logs[this->active_state]),
-                        total_size, this->max_log_size));
+                        total_size, this->log_size));
             LIXA_SYSLOG((LOG_NOTICE, LIXA_SYSLOG_LXD078N, 
                          lixa_state_log_get_pathname(
                              &this->logs[this->active_state]),
-                         total_size, this->max_log_size));
+                         total_size, this->log_size));
         }
         if (LIXA_RC_OK != (ret_cod = lixa_state_log_extend(
                                &this->logs[this->active_state])))

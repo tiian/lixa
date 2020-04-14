@@ -74,11 +74,17 @@ const char *LIXA_NULL_STRING = "{null}";
 
 const xmlChar *LIXA_XML_CONFIG_LISTENER = (xmlChar *)"listener";
 const xmlChar *LIXA_XML_CONFIG_CLIENT = (xmlChar *)"client";
-const xmlChar *LIXA_XML_CONFIG_CLIENT_CONNECTION_TIMEOUT = (xmlChar *)"connection_timeout";
+const xmlChar *LIXA_XML_CONFIG_CLIENT_CONNECTION_TIMEOUT =
+    (xmlChar *)"connection_timeout";
 const xmlChar *LIXA_XML_CONFIG_SERVER = (xmlChar *)"server";
 const xmlChar *LIXA_XML_CONFIG_SERVER_PID = (xmlChar *)"pid_file";
-const xmlChar *LIXA_XML_CONFIG_SERVER_MIN_EST = (xmlChar *)"min_elapsed_sync_time";
-const xmlChar *LIXA_XML_CONFIG_SERVER_MAX_EST = (xmlChar *)"max_elapsed_sync_time";
+const xmlChar *LIXA_XML_CONFIG_SERVER_MIN_EST =
+    (xmlChar *)"min_elapsed_sync_time";
+const xmlChar *LIXA_XML_CONFIG_SERVER_MAX_EST =
+    (xmlChar *)"max_elapsed_sync_time";
+const xmlChar *LIXA_XML_CONFIG_SERVER_LOG_SIZE = (xmlChar *)"log_size";
+const xmlChar *LIXA_XML_CONFIG_SERVER_BUFFER_SIZE =
+    (xmlChar *)"max_buffer_log_size";
 const xmlChar *LIXA_XML_CONFIG_DOMAIN_PROPERTY = (xmlChar *)"domain";
 const xmlChar *LIXA_XML_CONFIG_ADDRESS_PROPERTY = (xmlChar *)"address";
 const xmlChar *LIXA_XML_CONFIG_PORT_PROPERTY = (xmlChar *)"port";
@@ -103,17 +109,18 @@ const xmlChar *LIXA_XML_CONFIG_XA_OPEN_INFO_PROPERTY =
 
 int lixa_config_retrieve_domain(xmlNode *cur_node, int *domain)
 {
-    enum Exception { DOMAIN_NOT_AVAILABLE_ERROR
-                     , INVALID_DOMAIN_ERROR
-                     , NONE } excp;
+    enum Exception {
+        DOMAIN_NOT_AVAILABLE_ERROR,
+        INVALID_DOMAIN_ERROR,
+        NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
 
     xmlChar *attr = NULL;
     
     LIXA_TRACE(("lixa_config_retrieve_domain\n"));
     TRY {
-        if (NULL == (attr = xmlGetProp(cur_node,
-                                       LIXA_XML_CONFIG_DOMAIN_PROPERTY)))
+        if (NULL == (attr = xmlGetProp(
+                         cur_node, LIXA_XML_CONFIG_DOMAIN_PROPERTY)))
             THROW(DOMAIN_NOT_AVAILABLE_ERROR);
         if (!xmlStrcmp(attr, LIXA_XML_CONFIG_DOMAIN_AF_INET_VALUE)) {
             *domain = AF_INET;

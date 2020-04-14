@@ -89,11 +89,11 @@ extern "C" {
      * @param[in] id thread id must assigned
      * @param[in] tpa reference to the thread pipe array
      * @param[in] crash_count reference to the crash counter
-     * @param mmode IN the thread must operate in maintenance mode
+     * @param[in] mmode if TRUE the thread must operate in maintenance mode
      */
     void thread_status_init(struct thread_status_s *ts, int id,
-                            struct thread_pipe_array_s *tpa, int mmode,
-                            long *crash_count);
+                            struct thread_pipe_array_s *tpa,
+                            int mmode, long *crash_count);
 
 
 

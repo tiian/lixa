@@ -88,6 +88,7 @@ int server_manager(struct server_config_s *sc,
     enum Exception { SRVR_RCVR_TBL_NEW_ERROR,
                      SERVER_TRANS_TBL_NEW_ERROR,
                      MALLOC_ERROR,
+                     LIXA_STATE_INIT,
                      THREAD_STATUS_LOAD_FILES_ERROR,
                      THREAD_STATUS_DUMP_ERROR,
                      THREAD_STATUS_CLEAN_FAILED_ERROR,
@@ -124,12 +125,23 @@ int server_manager(struct server_config_s *sc,
             thread_status_init(&(tsa->array[i]), i, tpa, mmode, &crash_count);
             tsa->array[i].min_elapsed_sync_time = sc->min_elapsed_sync_time;
             tsa->array[i].max_elapsed_sync_time = sc->max_elapsed_sync_time;
+            /* initialize the "superfast" state engine if required */
+            if ((SERVER_CONFIG_STATE_ENGINE !=
+                 STATE_ENGINE_TRADITIONAL) && i) {
+                /* skip id=0, the listener thread */
+                if (LIXA_RC_OK != (
+                        ret_cod = lixa_state_init(
+                            &(tsa->array[i].state),
+                            sc->managers.array[i-1].status_file,
+                            sc->log_size, sc->max_buffer_log_size, FALSE)))
+                    THROW(LIXA_STATE_INIT);
+            } /* if ((SERVER_CONFIG_STATE_ENGINE != ... */
             if (i) {
                 /* load status file for thread != listener */
                 if (LIXA_RC_OK != (
                         ret_cod = thread_status_load_files(
                             &(tsa->array[i]),
-                            sc->managers.array[i - 1].status_file, tsds)))
+                            sc->managers.array[i-1].status_file, tsds)))
                     THROW(THREAD_STATUS_LOAD_FILES_ERROR);
                 /* dump the status file if asked */
                 if (tsds->dump) {
@@ -184,6 +196,7 @@ int server_manager(struct server_config_s *sc,
             case MALLOC_ERROR:
                 ret_cod = LIXA_RC_MALLOC_ERROR;
                 break;
+            case LIXA_STATE_INIT:
             case THREAD_STATUS_LOAD_FILES_ERROR:
             case THREAD_STATUS_DUMP_ERROR:
             case THREAD_STATUS_CLEAN_FAILED_ERROR:

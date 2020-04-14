@@ -1,6 +1,8 @@
-Move new state files in the right place, implement parameters for direct write...
+Implement parameters for direct write...  o_direct_  o_dsync_  o_rsync_ o_sync_
 
 Catch @@@ and understand what must be done
+
+Catch all the curr_status and redirect to the right state engine
 
 Fix the bugs emerged by make check
 

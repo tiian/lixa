@@ -574,7 +574,7 @@ extern "C" {
 
     /**
      * Get statistics about the state log file; the number of used bytes is the
-     * sum of @ref offset and @ref reserved
+     * sum of "offset" and "reserved"
      * @param[in] this state log object
      * @param[out] total_size size of the file in bytes
      * @param[out] offset of the first writable page in the underlying file
