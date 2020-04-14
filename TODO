@@ -1,28 +1,8 @@
-Parallel mode has some issues, for example:
-thread_status_insert  calls
-  thread_status_insert_old  calls
-    thread_status_mark_block
-	inside it mark both in the traditional and in the superfast, but the
-	lixa_state_insert_block has not yet been called: it would have been
-	the next call from thread_status_insert after calling
-	thread_status_insert_old...  
-mumble mumble...
-and what happens if
-thread_status_insert: legacy code returned slot=1, new code returned slot=1, returning 1 to the caller
-returns two different slots?
-And what else if the two engines use a state file of different size?!
-Maybe the PARALLEL value is not feasible... thinking about it!
+Move new state files in the right place, implement parameters for direct write...
 
+Catch @@@ and understand what must be done
 
-lixa_state does NOT receive data, 
-thread_status_get_record4update and thread_status_get_record4read
-are pointing to the legacy status: the switch must be implemented to test 
-the new persistence engine
-SERVER_CONFIG_STATE_ENGINE is the global variable that must be polled to get
-the engine operating model
-
-Restore "normal" values in lixa_state_log.h for log files
-Remove thread_status_insert_old
+Fix the bugs emerged by make check
 
 Remove lixa_state_sync_log: it seems useless...
 
@@ -30,11 +10,6 @@ Remove lixa_state_log_rewind: maybe it's useless...
 
 Check restart after state table and log switch; check function
 lixa_state_table_set_last_record_id() is called in the "right way"
-
-To preserve backward compatibility and to check the two persistency engines in
-parallel use this schema:
-- write: write old and copy to new
-- read: read from new and if possible check if new != old
 
 Restore multiple threads in lixad_conf.xml / lixad_conf.xml.in
 

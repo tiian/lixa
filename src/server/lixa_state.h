@@ -398,6 +398,34 @@ extern "C" {
     int lixa_state_delete_block(lixa_state_t *this, uint32_t block_id);
 
 
+    
+    /**
+     * Return the reference to a read only slot of the active state table
+     * @param[in] this state object
+     * @param[in] block_id of the desired block
+     * @return a reference to the desired slot
+     */     
+    static inline const lixa_state_slot_t *lixa_state_get_roslot(
+        const lixa_state_t *this, uint32_t block_id) {
+        return lixa_state_table_get_roslot(&this->tables[this->active_state],
+                                           block_id);
+    }
+
+    
+
+    /**
+     * Return the reference to a read write slot of the active state table
+     * @param[in,out] this state object
+     * @param[in] block_id of the desired block
+     * @return a reference to the desired slot
+     */     
+    static inline lixa_state_slot_t *lixa_state_get_rwslot(
+        lixa_state_t *this, uint32_t block_id) {
+        return lixa_state_table_get_rwslot(&this->tables[this->active_state],
+                                           block_id);
+    }
+
+    
 
     /**
      * Return the state table used before the current one

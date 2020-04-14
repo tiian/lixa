@@ -160,7 +160,6 @@ int thread_status_insert(struct thread_status_s *ts, uint32_t *slot)
     enum Exception {
         INSERT_OLD_ERROR,
         STATE_INSERT_BLOCK_ERROR,
-        INVALID_STATUS,
         NONE
     } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
@@ -169,8 +168,7 @@ int thread_status_insert(struct thread_status_s *ts, uint32_t *slot)
     TRY {
         uint32_t old_slot, new_slot;
         /* call the legacy code */
-        if (SERVER_CONFIG_STATE_ENGINE == STATE_ENGINE_TRADITIONAL ||
-            SERVER_CONFIG_STATE_ENGINE == STATE_ENGINE_PARALLEL)
+        if (SERVER_CONFIG_STATE_ENGINE == STATE_ENGINE_TRADITIONAL)
             if (LIXA_RC_OK != (ret_cod = thread_status_insert_old(
                                    ts, &old_slot)))
                 THROW(INSERT_OLD_ERROR);
@@ -181,22 +179,10 @@ int thread_status_insert(struct thread_status_s *ts, uint32_t *slot)
                 THROW(STATE_INSERT_BLOCK_ERROR);
 
         /* return the slot */
-        switch (SERVER_CONFIG_STATE_ENGINE) {
-            case STATE_ENGINE_TRADITIONAL:
-                *slot = old_slot;
-                break;
-            case STATE_ENGINE_JOURNAL:
-                *slot = new_slot;
-                break;
-            case STATE_ENGINE_PARALLEL:
-                *slot = new_slot;
-                break;
-            case STATE_ENGINE_MIGRATE:
-                *slot = new_slot;
-                break;
-            default:
-                THROW(INVALID_STATUS);
-        } /* switch (SERVER_CONFIG_STATE_ENGINE) */
+        if (STATE_ENGINE_TRADITIONAL == SERVER_CONFIG_STATE_ENGINE)
+            *slot = old_slot;
+        else
+            *slot = new_slot;
         LIXA_TRACE(("thread_status_insert: legacy code returned slot="
                     UINT32_T_FORMAT ", new code returned slot="
                     UINT32_T_FORMAT ", returning " UINT32_T_FORMAT " to "
@@ -207,9 +193,6 @@ int thread_status_insert(struct thread_status_s *ts, uint32_t *slot)
         switch (excp) {
             case INSERT_OLD_ERROR:
             case STATE_INSERT_BLOCK_ERROR:
-                break;
-            case INVALID_STATUS:
-                ret_cod = LIXA_RC_INVALID_STATUS;
                 break;
             case NONE:
                 ret_cod = LIXA_RC_OK;
@@ -441,8 +424,7 @@ int thread_status_delete(struct thread_status_s *ts, uint32_t slot)
     LIXA_TRACE(("thread_status_delete\n"));
     TRY {
         /* call the legacy code */
-        if (SERVER_CONFIG_STATE_ENGINE == STATE_ENGINE_TRADITIONAL ||
-            SERVER_CONFIG_STATE_ENGINE == STATE_ENGINE_PARALLEL)
+        if (SERVER_CONFIG_STATE_ENGINE == STATE_ENGINE_TRADITIONAL)
             if (LIXA_RC_OK != (ret_cod = thread_status_delete_old(ts, slot)))
                 THROW(DELETE_OLD_ERROR);
         /* call the new code introduced by "superfast" */
@@ -1451,8 +1433,7 @@ int thread_status_mark_block(struct thread_status_s *ts,
         if (!(sr->counter & 0x1)) {
             uintptr_t index = block_id;
             /* the traditional way */
-            if (SERVER_CONFIG_STATE_ENGINE == STATE_ENGINE_TRADITIONAL ||
-                SERVER_CONFIG_STATE_ENGINE == STATE_ENGINE_PARALLEL) {
+            if (SERVER_CONFIG_STATE_ENGINE == STATE_ENGINE_TRADITIONAL) {
                 sr->counter++;
                 g_tree_insert(ts->updated_records, (gpointer)index, NULL);
                 LIXA_TRACE(("thread_status_mark_block: inserted index "

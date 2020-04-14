@@ -268,7 +268,12 @@ extern "C" {
      */
     static inline const lixa_state_record_t *thread_status_get_record4read(
         const struct thread_status_s *ts, uint32_t block_id) {
-        return NULL == ts ? NULL : &(ts->curr_status[block_id].sr);
+        if (NULL == ts)
+            return NULL;
+        else if (STATE_ENGINE_TRADITIONAL == SERVER_CONFIG_STATE_ENGINE)
+            return &(ts->curr_status[block_id].sr);
+        else
+            return &(lixa_state_get_roslot(&ts->state, block_id)->sr);
     }
 
 
@@ -284,7 +289,12 @@ extern "C" {
      */
     static inline lixa_state_record_t *thread_status_get_record4update(
         struct thread_status_s *ts, uint32_t block_id) {
-        return NULL == ts ? NULL : &(ts->curr_status[block_id].sr);
+        if (NULL == ts)
+            return NULL;
+        else if (STATE_ENGINE_TRADITIONAL == SERVER_CONFIG_STATE_ENGINE)
+            return &(ts->curr_status[block_id].sr);
+        else
+            return &(lixa_state_get_rwslot(&ts->state, block_id)->sr);
     }
 
 

@@ -165,8 +165,6 @@ int server_config(struct server_config_s *sc,
                 SERVER_CONFIG_STATE_ENGINE = STATE_ENGINE_TRADITIONAL;
             else if (0 == strcasecmp(state_engine_env_var, "JOURNAL"))
                 SERVER_CONFIG_STATE_ENGINE = STATE_ENGINE_JOURNAL;
-            else if (0 == strcasecmp(state_engine_env_var, "PARALLEL"))
-                SERVER_CONFIG_STATE_ENGINE = STATE_ENGINE_PARALLEL;
             else if (0 == strcasecmp(state_engine_env_var, "MIGRATE"))
                 SERVER_CONFIG_STATE_ENGINE = STATE_ENGINE_MIGRATE;
             else

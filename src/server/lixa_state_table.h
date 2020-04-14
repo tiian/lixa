@@ -332,13 +332,26 @@ extern "C" {
     
     
     /**
-     * Return the reference to a slot of the state table
+     * Return the reference to a read only slot of the state table
      * @param[in] this state table object
      * @param[in] block_id of the desired block
      * @return a reference to the desired slot
      */     
-    static inline const lixa_state_slot_t *lixa_state_table_get_slot(
+    static inline const lixa_state_slot_t *lixa_state_table_get_roslot(
         const lixa_state_table_t *this, uint32_t block_id) {
+        return &this->map[block_id];
+    }
+
+
+
+    /**
+     * Return the reference to a read write slot of the state table
+     * @param[in,out] this state table object
+     * @param[in] block_id of the desired block
+     * @return a reference to the desired slot
+     */     
+    static inline lixa_state_slot_t *lixa_state_table_get_rwslot(
+        lixa_state_table_t *this, uint32_t block_id) {
         return &this->map[block_id];
     }
 

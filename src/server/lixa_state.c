@@ -1487,7 +1487,7 @@ int lixa_state_flush_log_records(lixa_state_t *this, int switch_after_write)
                  filled_pages * LIXA_SYSTEM_PAGE_SIZE +
                  pos_in_page * sizeof(struct lixa_state_log_record_s));
             const lixa_state_slot_t *s1 =
-                lixa_state_table_get_slot(
+                lixa_state_table_get_roslot(
                     &this->tables[this->active_state], this->block_ids[r]);
             const lixa_state_record_t *record =
                 lixa_state_slot_get_record(s1);

@@ -290,8 +290,7 @@ void *server_manager_thread(void *void_ts)
                     SHUTDOWN_NULL != ts->shutdown_type) {
                     /* traditional synchronization */
                     if (SERVER_CONFIG_STATE_ENGINE ==
-                        STATE_ENGINE_TRADITIONAL ||
-                        SERVER_CONFIG_STATE_ENGINE == STATE_ENGINE_PARALLEL)
+                        STATE_ENGINE_TRADITIONAL)
                         if (LIXA_RC_OK !=
                             (ret_cod = thread_status_sync_files(ts)))
                             THROW(THREAD_STATUS_SYNC_FILES_ERROR1);
@@ -304,8 +303,7 @@ void *server_manager_thread(void *void_ts)
                     status_sync_init(&ts->status_sync);
                 } else if (delay >= ts->min_elapsed_sync_time) {
                     if (SERVER_CONFIG_STATE_ENGINE ==
-                        STATE_ENGINE_TRADITIONAL ||
-                        SERVER_CONFIG_STATE_ENGINE == STATE_ENGINE_PARALLEL) {
+                        STATE_ENGINE_TRADITIONAL) {
                         /* traditional synchronization:
                            start synchronization only if there is no another
                            thread that's synchronizing its own state file */

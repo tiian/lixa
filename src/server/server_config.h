@@ -59,8 +59,6 @@ enum server_config_state_engine_e {
     STATE_ENGINE_TRADITIONAL,
     /** asynchronous journal */
     STATE_ENGINE_JOURNAL,
-    /** both TRADITIONAL and JOURNAL, debug purpose */
-    STATE_ENGINE_PARALLEL,
     /** migrate from TRADITIONAL to JOURNAL */
     STATE_ENGINE_MIGRATE
 };
