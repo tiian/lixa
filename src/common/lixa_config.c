@@ -83,6 +83,10 @@ const xmlChar *LIXA_XML_CONFIG_SERVER_MIN_EST =
 const xmlChar *LIXA_XML_CONFIG_SERVER_MAX_EST =
     (xmlChar *)"max_elapsed_sync_time";
 const xmlChar *LIXA_XML_CONFIG_SERVER_LOG_SIZE = (xmlChar *)"log_size";
+const xmlChar *LIXA_XML_CONFIG_SERVER_LOG_O_DIRECT = (xmlChar *)"log_o_direct";
+const xmlChar *LIXA_XML_CONFIG_SERVER_LOG_O_DSYNC = (xmlChar *)"log_o_dsync";
+const xmlChar *LIXA_XML_CONFIG_SERVER_LOG_O_RSYNC = (xmlChar *)"log_o_rsync";
+const xmlChar *LIXA_XML_CONFIG_SERVER_LOG_O_SYNC = (xmlChar *)"log_o_sync";
 const xmlChar *LIXA_XML_CONFIG_SERVER_BUFFER_SIZE =
     (xmlChar *)"max_buffer_log_size";
 const xmlChar *LIXA_XML_CONFIG_DOMAIN_PROPERTY = (xmlChar *)"domain";

@@ -2,7 +2,8 @@
 <server 
   pid_file="@EXPANDED_LOCALSTATEDIR@/run.pid"
   min_elapsed_sync_time="0" max_elapsed_sync_time="0"
-  log_size="524288" max_buffer_log_size="131072">
+  log_size="524288" max_buffer_log_size="131072"
+  log_o_direct="1" log_o_dsync="1" log_o_rsync="0" log_o_sync="0">
   <listeners>
     <listener domain="AF_INET" address="127.0.0.1" port="3456"/>
     <listener domain="AF_INET" address="0.0.0.0" port="2345"/>

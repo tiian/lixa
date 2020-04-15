@@ -166,6 +166,22 @@ struct server_config_s
      */
     off_t                                log_size;
     /**
+     * Use O_DIRECT flag for state log file open()
+     */
+    int                                  log_o_direct;
+    /**
+     * Use O_DSYNC flag for state log file open()
+     */
+    int                                  log_o_dsync;
+    /**
+     * Use O_RSYNC flag for state log file open()
+     */
+    int                                  log_o_rsync;
+    /**
+     * Use O_SYNC flag for state log file open()
+     */
+    int                                  log_o_sync;
+    /**
      * Maximum size for buffer logs (bytes): it's an hard limit and it uses
      * RAM allocated by the server manager thread. It's used only by the
      * "superfast" state engine: traditional engine does not use it.

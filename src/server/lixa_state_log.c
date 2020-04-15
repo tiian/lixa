@@ -85,11 +85,11 @@ const char *lixa_state_log_status_string(
 int lixa_state_log_init(lixa_state_log_t *this,
                         const char *pathname,
                         size_t max_buffer_size,
-                        int read_only,
                         int o_direct_bool,
                         int o_dsync_bool,
                         int o_rsync_bool,
-                        int o_sync_bool)
+                        int o_sync_bool,
+                        int read_only)
 {
     enum Exception {
         NULL_OBJECT1,
@@ -104,7 +104,7 @@ int lixa_state_log_init(lixa_state_log_t *this,
     int pte = 0;
     
     LIXA_TRACE(("lixa_state_log_init: pathname='%s', o_direct_bool=%d, "
-                "o_dsync_bool=%d, orsync_bool=%d, osync_bool=%d\n",
+                "o_dsync_bool=%d, o_rsync_bool=%d, o_sync_bool=%d\n",
                 pathname, o_direct_bool, o_dsync_bool, o_rsync_bool,
                 o_sync_bool));
     TRY {

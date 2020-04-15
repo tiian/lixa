@@ -294,6 +294,10 @@ int server_parse(struct server_config_s *sc,
         RETRIEVE_MIN_EST_ERROR,
         RETRIEVE_MAX_EST_ERROR,
         RETRIEVE_LOG_SIZE,
+        RETRIEVE_LOG_O_DIRECT,
+        RETRIEVE_LOG_O_DSYNC,
+        RETRIEVE_LOG_O_RSYNC,
+        RETRIEVE_LOG_O_SYNC,
         RETRIEVE_BUFFER_SIZE,
         PARSE_LISTENER_ERROR,
         PARSE_MANAGER_ERROR,
@@ -401,6 +405,66 @@ int server_parse(struct server_config_s *sc,
                                      sc->log_size));
                     } else if (LIXA_RC_OBJ_NOT_FOUND != ret_cod)
                         THROW(RETRIEVE_LOG_SIZE);
+                    /* retrieve log_o_direct */
+                    if (LIXA_RC_OK == (
+                            ret_cod = lixa_config_retrieve_generic_long(
+                                cur_node, LIXA_XML_CONFIG_SERVER_LOG_O_DIRECT,
+                                &tmp))) {
+                        LIXA_TRACE(("server_parse: parameter '%s' is %ld\n",
+                                    (const char *)
+                                    LIXA_XML_CONFIG_SERVER_LOG_O_DIRECT, tmp));
+                        sc->log_o_direct = tmp ? TRUE : FALSE;
+                        LIXA_SYSLOG((LOG_INFO, LIXA_SYSLOG_LXD026I,
+                                     (const char *)
+                                     LIXA_XML_CONFIG_SERVER_LOG_O_DIRECT,
+                                     (long)sc->log_o_direct));
+                    } else if (LIXA_RC_OBJ_NOT_FOUND != ret_cod)
+                        THROW(RETRIEVE_LOG_O_DIRECT);
+                    /* retrieve log_o_dsync */
+                    if (LIXA_RC_OK == (
+                            ret_cod = lixa_config_retrieve_generic_long(
+                                cur_node, LIXA_XML_CONFIG_SERVER_LOG_O_DSYNC,
+                                &tmp))) {
+                        LIXA_TRACE(("server_parse: parameter '%s' is %ld\n",
+                                    (const char *)
+                                    LIXA_XML_CONFIG_SERVER_LOG_O_DSYNC, tmp));
+                        sc->log_o_dsync = tmp ? TRUE : FALSE;
+                        LIXA_SYSLOG((LOG_INFO, LIXA_SYSLOG_LXD026I,
+                                     (const char *)
+                                     LIXA_XML_CONFIG_SERVER_LOG_O_DSYNC,
+                                     (long)sc->log_o_dsync));
+                    } else if (LIXA_RC_OBJ_NOT_FOUND != ret_cod)
+                        THROW(RETRIEVE_LOG_O_DSYNC);
+                    /* retrieve log_o_rsync */
+                    if (LIXA_RC_OK == (
+                            ret_cod = lixa_config_retrieve_generic_long(
+                                cur_node, LIXA_XML_CONFIG_SERVER_LOG_O_RSYNC,
+                                &tmp))) {
+                        LIXA_TRACE(("server_parse: parameter '%s' is %ld\n",
+                                    (const char *)
+                                    LIXA_XML_CONFIG_SERVER_LOG_O_RSYNC, tmp));
+                        sc->log_o_rsync = tmp ? TRUE : FALSE;
+                        LIXA_SYSLOG((LOG_INFO, LIXA_SYSLOG_LXD026I,
+                                     (const char *)
+                                     LIXA_XML_CONFIG_SERVER_LOG_O_RSYNC,
+                                     (long)sc->log_o_rsync));
+                    } else if (LIXA_RC_OBJ_NOT_FOUND != ret_cod)
+                        THROW(RETRIEVE_LOG_O_RSYNC);
+                    /* retrieve log_o_sync */
+                    if (LIXA_RC_OK == (
+                            ret_cod = lixa_config_retrieve_generic_long(
+                                cur_node, LIXA_XML_CONFIG_SERVER_LOG_O_SYNC,
+                                &tmp))) {
+                        LIXA_TRACE(("server_parse: parameter '%s' is %ld\n",
+                                    (const char *)
+                                    LIXA_XML_CONFIG_SERVER_LOG_O_SYNC, tmp));
+                        sc->log_o_sync = tmp ? TRUE : FALSE;
+                        LIXA_SYSLOG((LOG_INFO, LIXA_SYSLOG_LXD026I,
+                                     (const char *)
+                                     LIXA_XML_CONFIG_SERVER_LOG_O_SYNC,
+                                     (long)sc->log_o_sync));
+                    } else if (LIXA_RC_OBJ_NOT_FOUND != ret_cod)
+                        THROW(RETRIEVE_LOG_O_SYNC);
                     /* retrieve max_buffer_log_size */
                     if (LIXA_RC_OK == (
                             ret_cod = lixa_config_retrieve_generic_long(
@@ -450,6 +514,10 @@ int server_parse(struct server_config_s *sc,
             case RETRIEVE_MIN_EST_ERROR:
             case RETRIEVE_MAX_EST_ERROR:
             case RETRIEVE_LOG_SIZE:
+            case RETRIEVE_LOG_O_DIRECT:
+            case RETRIEVE_LOG_O_DSYNC:
+            case RETRIEVE_LOG_O_RSYNC:
+            case RETRIEVE_LOG_O_SYNC:
             case RETRIEVE_BUFFER_SIZE:
             case PARSE_LISTENER_ERROR:
             case PARSE_MANAGER_ERROR:
@@ -632,6 +700,9 @@ void server_config_init(struct server_config_s *sc,
     sc->min_elapsed_sync_time = sc->max_elapsed_sync_time = 0;
     sc->log_size = 0;
     sc->max_buffer_log_size = 0;
+    /* set to TRUE: they should be OK most of the times, but not very fast */
+    sc->log_o_direct = sc->log_o_dsync = TRUE;
+    sc->log_o_rsync = sc->log_o_sync = FALSE;
     sc->listeners.n = 0;
     sc->listeners.array = NULL;
     sc->managers.n = 0;

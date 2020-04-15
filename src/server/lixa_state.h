@@ -223,13 +223,18 @@ extern "C" {
      *            a log file
      * @param[in] max_buffer_log_size maximum number of bytes that can be used
      *            for the log I/O buffer
+     * @param[in] o_direct_bool activates O_DIRECT POSIX flag for log files
+     * @param[in] o_dsync_bool activates O_DSYNC POSIX flag for log files
+     * @param[in] o_rsync_bool activates O_RSYNC POSIX flag for log files
+     * @param[in] o_sync_bool activates O_SYNC POSIX flag for log files
      * @param[in] read_only must be TRUE if the state will be used only in
      *            read-only mode
      * @return a reason code
      */
     int lixa_state_init(lixa_state_t *this, const char *path_prefix,
                         off_t max_log_size, size_t max_buffer_log_size,
-                        int read_only);
+                        int o_direct_bool, int o_dsync_bool,
+                        int o_rsync_bool, int o_sync_bool, int read_only);
 
 
 

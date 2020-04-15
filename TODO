@@ -1,10 +1,11 @@
-Implement parameters for direct write...  o_direct_  o_dsync_  o_rsync_ o_sync_
 
 Catch @@@ and understand what must be done
 
 Catch all the curr_status and redirect to the right state engine
 
 Fix the bugs emerged by make check
+
+It seems that without O_DIRECT (log_o_direct), ftruncate does not work: understand why and in case remove log_o_direct parameter...
 
 Remove lixa_state_sync_log: it seems useless...
 
@@ -47,6 +48,8 @@ persistency engine
 Can function status_record_create_file removed and its code moved in 
 lixa_state_file_create_new_file?
 
+Document parameters for direct write...  o_direct_  o_dsync_  o_rsync_ o_sync_
+Document parameters log_size and max_buffer_log_size
 Document environment variable LIXA_STATE_ENGINE, see server_config.h
 
 Remove all useless @@@

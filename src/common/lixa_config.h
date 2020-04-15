@@ -124,6 +124,26 @@ extern const xmlChar *LIXA_XML_CONFIG_SERVER_MAX_EST;
 extern const xmlChar *LIXA_XML_CONFIG_SERVER_LOG_SIZE;
 
 /**
+ * Label used to specify "log_o_direct" property in "server" tag
+ */
+extern const xmlChar *LIXA_XML_CONFIG_SERVER_LOG_O_DIRECT;
+
+/**
+ * Label used to specify "log_o_dsync" property in "server" tag
+ */
+extern const xmlChar *LIXA_XML_CONFIG_SERVER_LOG_O_DSYNC;
+
+/**
+ * Label used to specify "log_o_rsync" property in "server" tag
+ */
+extern const xmlChar *LIXA_XML_CONFIG_SERVER_LOG_O_RSYNC;
+
+/**
+ * Label used to specify "log_o_sync" property in "server" tag
+ */
+extern const xmlChar *LIXA_XML_CONFIG_SERVER_LOG_O_SYNC;
+
+/**
  * Label used to specify "max_buffer_log_size" property in "server" tag
  */
 extern const xmlChar *LIXA_XML_CONFIG_SERVER_BUFFER_SIZE;

@@ -133,7 +133,9 @@ int server_manager(struct server_config_s *sc,
                         ret_cod = lixa_state_init(
                             &(tsa->array[i].state),
                             sc->managers.array[i-1].status_file,
-                            sc->log_size, sc->max_buffer_log_size, FALSE)))
+                            sc->log_size, sc->max_buffer_log_size,
+                            sc->log_o_direct, sc->log_o_dsync, sc->log_o_rsync,
+                            sc->log_o_sync, FALSE)))
                     THROW(LIXA_STATE_INIT);
             } /* if ((SERVER_CONFIG_STATE_ENGINE != ... */
             if (i) {
