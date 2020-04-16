@@ -41,14 +41,6 @@ int lixa_state_slot_sync(lixa_state_slot_t *slot)
     
     LIXA_TRACE(("lixa_state_slot_sync\n"));
     TRY {
-        /* @@@ probably useless, to be removed
-        if (slot->counter%2) {
-            slot->counter++;
-        } else {
-            LIXA_TRACE(("lixa_state_slot_sync: WARNING! record %p is "
-                        "already even (it was NOT updated before!)\n", slot));
-        }
-        */
         /* compute the CRC32 signature */
         slot->crc32 = lixa_crc32((const uint8_t *)&slot->sr,
                                  sizeof(lixa_state_record_t));

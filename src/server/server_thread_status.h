@@ -118,10 +118,12 @@ extern "C" {
 
 
     /**
-     * Legacy logic related to @ref thread_status_insert
-     * @@@ This function will be obsolete when "superfast" is completed
+     * Legacy logic related to @ref thread_status_insert: it's used in
+     * TRADITIONAL mode only. This function will be obsolete when "superfast"
+     * will remain the only state engine
      */
-    int thread_status_insert_old(struct thread_status_s *ts, uint32_t *slot);
+    int thread_status_insert_traditional(struct thread_status_s *ts,
+                                         uint32_t *slot);
 
     
 
@@ -139,10 +141,12 @@ extern "C" {
 
     
     /**
-     * Legacy logic related to @ref thread_status_insert
-     * @@@ This function will be obsolete when "superfast" is completed
+     * Legacy logic related to @ref thread_status_delete: it's used in
+     * TRADITIONAL mode only. This function will be obsolete when "superfast"
+     * will remain the only state engine
      */
-    int thread_status_delete_old(struct thread_status_s *ts, uint32_t slot);
+    int thread_status_delete_traditional(struct thread_status_s *ts,
+                                         uint32_t slot);
 
 
 

@@ -1,6 +1,3 @@
-
-Catch @@@ and understand what must be done
-
 Catch all the curr_status and redirect to the right state engine
 
 Fix the bugs emerged by make check

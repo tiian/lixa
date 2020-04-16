@@ -489,14 +489,6 @@ int lixa_state_cold_start(lixa_state_t *this)
                          lixa_state_table_get_pathname(&this->tables[0])));
             THROW(TABLE_CREATE_NEW_FILE1);
         }
-        /* @@@ Is it really useful?!
-        if (LIXA_RC_OK != (
-                ret_cod = (lixa_state_table_sign(&(this->tables[0]))))) {
-            LIXA_SYSLOG((LOG_ERR, LIXA_SYSLOG_LXD045E,
-                         lixa_state_table_get_pathname(&(this->tables[0]))));
-            THROW(TABLE_SYNCHRONIZE);
-        }
-        */
         /* create second state table, but don't sync and close it */
         LIXA_SYSLOG((LOG_INFO, LIXA_SYSLOG_LXD044I,
                      lixa_state_table_get_pathname(&this->tables[1])));

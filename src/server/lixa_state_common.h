@@ -69,21 +69,20 @@ enum lixa_state_flusher_ops_e {
 
 
 /**
- * This struct is the basic type of a status record: it contains two control
- * fields and one payload field.
+ * This union is used to store and retrieve a record from the status file
+ */
+typedef union status_record_u lixa_state_record_t;
+
+
+
+/**
+ * This struct is the basic type of a status record: it contains one control
+ * field and one payload field.
  * THE POSITION OF THE FIELDS MUST NOT BE CHANGED INSIDE THE RECORD.
- * This type will replace the legacy struct status_record_s.
+ * This type will replace the legacy struct status_record_s when only
+ * "superfast" engine will remain
  */
 typedef struct lixa_state_slot_s {
-    /** @@@ should be no more useful, remove it
-     * This field is incremented twice between a couple of sync:
-     * if the value is even, the record is synched
-     * if the value is odd, the record is modified
-     * This is the lifetime:
-     * - increment once for first update after synch
-     * - increment before compute the record digest and successive synch
-    uint32_t                       counter;
-     */
     /**
      * This field contains a control record or a data record, briefly "sr"
      * (Status Record)

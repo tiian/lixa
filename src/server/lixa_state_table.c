@@ -184,9 +184,6 @@ int lixa_state_table_create_new_file(lixa_state_table_t *this,
             lixa_state_slot_t tmp_slot;
 
             memset(&tmp_slot, 0, sizeof(tmp_slot));
-            /* @@@ remove me
-            tmp_slot.counter = 1;
-            */
             if (!i) {
                 /* write control record */
                 tmp_slot.sr.ctrl.magic_number = STATUS_FILE_MAGIC_NUMBER;

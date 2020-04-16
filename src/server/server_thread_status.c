@@ -154,7 +154,7 @@ int thread_status_insert(struct thread_status_s *ts, uint32_t *slot)
         uint32_t old_slot, new_slot;
         /* call the legacy code */
         if (SERVER_CONFIG_STATE_ENGINE == STATE_ENGINE_TRADITIONAL)
-            if (LIXA_RC_OK != (ret_cod = thread_status_insert_old(
+            if (LIXA_RC_OK != (ret_cod = thread_status_insert_traditional(
                                    ts, &old_slot)))
                 THROW(INSERT_OLD_ERROR);
         /* call the new code introduced by "superfast" */
@@ -193,7 +193,8 @@ int thread_status_insert(struct thread_status_s *ts, uint32_t *slot)
 
 
 
-int thread_status_insert_old(struct thread_status_s *ts, uint32_t *slot)
+int thread_status_insert_traditional(struct thread_status_s *ts,
+                                     uint32_t *slot)
 {
     enum Exception {
         OPEN_ERROR,
@@ -213,7 +214,7 @@ int thread_status_insert_old(struct thread_status_s *ts, uint32_t *slot)
     int fd = LIXA_NULL_FD;
     status_record_t *tmp_sra = NULL;
     
-    LIXA_TRACE(("thread_status_insert_old\n"));
+    LIXA_TRACE(("thread_status_insert_traditional\n"));
     TRY {
         status_record_t *csr = ts->curr_status;
         gchar *status_filename = NULL;
@@ -235,13 +236,13 @@ int thread_status_insert_old(struct thread_status_s *ts, uint32_t *slot)
             struct stat fd_stat;
             off_t curr_size, new_size, delta_size, i;
 
-            LIXA_TRACE(("thread_status_insert_old: free block list is "
+            LIXA_TRACE(("thread_status_insert_traditional: free block list is "
                         "empty, status file resize in progres...\n"));
             
             /* open the file for append: we must add new records */
             if (-1 == (fd = open(status_filename, O_RDWR | O_APPEND))) {
-                LIXA_TRACE(("thread_status_insert_old: error while opening "
-                            "status file '%s' (errno=%d)\n",
+                LIXA_TRACE(("thread_status_insert_traditional: error while "
+                            "opening status file '%s' (errno=%d)\n",
                             status_filename, errno));
                 THROW(OPEN_ERROR);
             }
@@ -259,11 +260,11 @@ int thread_status_insert_old(struct thread_status_s *ts, uint32_t *slot)
             delta_size = fd_stat.st_size / sizeof(status_record_t) *
                 STATUS_FILE_DELTA_SIZE / 100;
             new_size = curr_size + delta_size;
-            LIXA_TRACE(("thread_status_insert_old: curr_size = " OFF_T_FORMAT
-                        ", new_size = " OFF_T_FORMAT "\n",
+            LIXA_TRACE(("thread_status_insert_traditional: curr_size = "
+                        OFF_T_FORMAT ", new_size = " OFF_T_FORMAT "\n",
                         curr_size, new_size));
             if (new_size > UINT32_MAX) {
-                LIXA_TRACE(("thread_status_insert_old: new size after "
+                LIXA_TRACE(("thread_status_insert_traditional: new size after "
                             "resizing would exceed " UINT32_T_FORMAT
                             " max value; "
                             "resized to max value only\n", UINT32_MAX));
@@ -280,7 +281,7 @@ int thread_status_insert_old(struct thread_status_s *ts, uint32_t *slot)
                     tmp_sr.sr.data.next_block = 0;
                 else
                     tmp_sr.sr.data.next_block = curr_size + i + 1;
-                LIXA_TRACE(("thread_status_insert_old: new block "
+                LIXA_TRACE(("thread_status_insert_traditional: new block "
                             UINT32_T_FORMAT " (" UINT32_T_FORMAT ") "
                             "next_block = " UINT32_T_FORMAT "\n",
                             i, i + curr_size, tmp_sr.sr.data.next_block));
@@ -297,8 +298,9 @@ int thread_status_insert_old(struct thread_status_s *ts, uint32_t *slot)
             /* update free block list */
             tmp_sra[0].sr.ctrl.first_free_block = curr_size;
             tmp_sra[0].sr.ctrl.number_of_blocks = new_size;
-            LIXA_TRACE(("thread_status_insert_old: status file '%s' mapped at "
-                        "address %p\n", ts->status1_filename, tmp_sra));
+            LIXA_TRACE(("thread_status_insert_traditional: status file '%s' "
+                        "mapped at address %p\n", ts->status1_filename,
+                        tmp_sra));
             *status_is = ts->curr_status = csr = tmp_sra;
 
             /* mark the first record for change */
@@ -317,7 +319,7 @@ int thread_status_insert_old(struct thread_status_s *ts, uint32_t *slot)
         }
 
         /* update pointer */
-        LIXA_TRACE(("thread_status_insert_old: first_free_block = "
+        LIXA_TRACE(("thread_status_insert_traditional: first_free_block = "
                     UINT32_T_FORMAT ", first_used_block = "
                     UINT32_T_FORMAT "\n",
                     csr[0].sr.ctrl.first_free_block,
@@ -330,7 +332,7 @@ int thread_status_insert_old(struct thread_status_s *ts, uint32_t *slot)
         csr[0].sr.ctrl.first_used_block = *slot;
         if (LIXA_RC_OK != (ret_cod = thread_status_mark_block(ts, 0)))
             THROW(THREAD_STATUS_MARK_BLOCK_ERROR4);
-        LIXA_TRACE(("thread_status_insert_old: first_free_block = "
+        LIXA_TRACE(("thread_status_insert_traditional: first_free_block = "
                     UINT32_T_FORMAT ", first_used_block = "
                     UINT32_T_FORMAT ", last inserted next block = "
                     UINT32_T_FORMAT "\n",
@@ -379,18 +381,18 @@ int thread_status_insert_old(struct thread_status_s *ts, uint32_t *slot)
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
         } /* switch (excp) */
         if (NONE != excp) {
-            LIXA_TRACE(("thread_status_insert_old: values before recovery "
-                        "actions excp=%d/ret_cod=%d/errno=%d\n",
+            LIXA_TRACE(("thread_status_insert_traditional: values before "
+                        "recovery actions excp=%d/ret_cod=%d/errno=%d\n",
                         excp, ret_cod, errno));
             if (LIXA_NULL_FD != fd) {
-                LIXA_TRACE(("thread_status_insert_old: closing file "
+                LIXA_TRACE(("thread_status_insert_traditional: closing file "
                             "descriptor %d\n", fd));
                 close(fd);
             }
             
         }
     } /* TRY-CATCH */
-    LIXA_TRACE(("thread_status_insert_old/excp=%d/"
+    LIXA_TRACE(("thread_status_insert_traditional/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
     }
@@ -410,7 +412,8 @@ int thread_status_delete(struct thread_status_s *ts, uint32_t slot)
     TRY {
         /* call the legacy code */
         if (SERVER_CONFIG_STATE_ENGINE == STATE_ENGINE_TRADITIONAL)
-            if (LIXA_RC_OK != (ret_cod = thread_status_delete_old(ts, slot)))
+            if (LIXA_RC_OK != (
+                    ret_cod = thread_status_delete_traditional(ts, slot)))
                 THROW(DELETE_OLD_ERROR);
         /* call the new code introduced by "superfast" */
         if (SERVER_CONFIG_STATE_ENGINE != STATE_ENGINE_TRADITIONAL)
@@ -438,7 +441,7 @@ int thread_status_delete(struct thread_status_s *ts, uint32_t slot)
 
 
 
-int thread_status_delete_old(struct thread_status_s *ts, uint32_t slot)
+int thread_status_delete_traditional(struct thread_status_s *ts, uint32_t slot)
 {
     enum Exception {
         USED_BLOCK_NOT_FOUND,
@@ -454,7 +457,8 @@ int thread_status_delete_old(struct thread_status_s *ts, uint32_t slot)
     } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     
-    LIXA_TRACE(("thread_status_delete_old(slot=" UINT32_T_FORMAT ")\n", slot));
+    LIXA_TRACE(("thread_status_delete_traditional(slot=" UINT32_T_FORMAT
+                ")\n", slot));
     TRY {
         status_record_t *csr = ts->curr_status;
         uint32_t ul; /* used list left block */
@@ -469,7 +473,7 @@ int thread_status_delete_old(struct thread_status_s *ts, uint32_t slot)
         /* find ul and ur positions */
         ul = 0;
         ur = csr[0].sr.ctrl.first_used_block;
-        LIXA_TRACE(("thread_status_delete_old: ul=" UINT32_T_FORMAT
+        LIXA_TRACE(("thread_status_delete_traditional: ul=" UINT32_T_FORMAT
                     ", ur=" UINT32_T_FORMAT "\n", ul, ur));
         while (ur > 0) {
             if (ur == slot)
@@ -477,7 +481,7 @@ int thread_status_delete_old(struct thread_status_s *ts, uint32_t slot)
             ul = ur;
             ur = csr[ur].sr.data.next_block;
 #ifdef LIXA_DEBUG
-            LIXA_TRACE(("thread_status_delete_old: ul=" UINT32_T_FORMAT
+            LIXA_TRACE(("thread_status_delete_traditional: ul=" UINT32_T_FORMAT
                         ", ur=" UINT32_T_FORMAT "\n", ul, ur));
 #endif /* LIXA_DEBUG */
         }
@@ -496,7 +500,7 @@ int thread_status_delete_old(struct thread_status_s *ts, uint32_t slot)
             fr = csr[fr].sr.data.next_block;
         }
 
-        LIXA_TRACE(("thread_status_delete_old: ul=" UINT32_T_FORMAT
+        LIXA_TRACE(("thread_status_delete_traditional: ul=" UINT32_T_FORMAT
                     ", ur=" UINT32_T_FORMAT ", fl=" UINT32_T_FORMAT
                     ", fr=" UINT32_T_FORMAT "\n", ul, ur, fl, fr));
         
@@ -565,7 +569,7 @@ int thread_status_delete_old(struct thread_status_s *ts, uint32_t slot)
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
         } /* switch (excp) */
     } /* TRY-CATCH */
-    LIXA_TRACE(("thread_status_delete_old/excp=%d/"
+    LIXA_TRACE(("thread_status_delete_traditional/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }
