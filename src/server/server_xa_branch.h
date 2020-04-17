@@ -89,8 +89,8 @@ extern "C" {
     static inline int server_xa_branch_is_chained(
         const struct thread_status_s *ts, uint32_t block_id) {
         return
-            0 != ts->curr_status[block_id].sr.data.pld.ph.next_branch_block ||
-            0 != ts->curr_status[block_id].sr.data.pld.ph.prev_branch_block;
+            0 != thread_status_get_record4read(ts, block_id)->data.pld.ph.next_branch_block ||
+            0 != thread_status_get_record4read(ts, block_id)->data.pld.ph.prev_branch_block;
     }
 
     

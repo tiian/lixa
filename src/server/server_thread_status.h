@@ -118,7 +118,7 @@ extern "C" {
 
 
     /**
-     * Legacy logic related to @ref thread_status_insert: it's used in
+     * Legacy logic related to @ref thread_status_insert : it's used in
      * TRADITIONAL mode only. This function will be obsolete when "superfast"
      * will remain the only state engine
      */
@@ -141,7 +141,7 @@ extern "C" {
 
     
     /**
-     * Legacy logic related to @ref thread_status_delete: it's used in
+     * Legacy logic related to @ref thread_status_delete : it's used in
      * TRADITIONAL mode only. This function will be obsolete when "superfast"
      * will remain the only state engine
      */

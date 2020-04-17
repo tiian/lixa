@@ -613,31 +613,35 @@ void thread_status_trace_lists(const status_record_t *csr)
 int thread_status_dump(const struct thread_status_s *ts,
                        const struct ts_dump_spec_s *tsds)
 {
-    enum Exception { ISO_TIMESTAMP_ERROR
-                     , DUMP_HEADER1
-                     , DUMP_RSRMGR1
-                     , DUMP_HEADER2
-                     , DUMP_RSRMGR2
-                     , DUMP_HEADER3
-                     , DUMP_RSRMGR3
-                     , NONE } excp;
+    enum Exception {
+        ISO_TIMESTAMP_ERROR,
+        DUMP_HEADER1,
+        DUMP_RSRMGR1,
+        DUMP_HEADER2,
+        DUMP_RSRMGR2,
+        DUMP_HEADER3,
+        DUMP_RSRMGR3,
+        NONE
+    } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     
     LIXA_TRACE(("thread_status_dump\n"));
     TRY {
-        struct status_record_ctrl_s *first_record =
-            &(ts->curr_status->sr.ctrl);
+        const struct status_record_ctrl_s *first_record =
+            &thread_status_get_record4read(ts, 0)->ctrl;
         char string_date_time[ISO_TIMESTAMP_BUFFER_SIZE];
         uint32_t i;
 
         printf("===================================="
                "====================================\n");
-        if (ts->curr_status == ts->status1)
-            printf("First file ('%s') will be dumped\n",
-                   ts->status1_filename);
-        else 
-            printf("Second file ('%s') will be dumped\n",
-                   ts->status2_filename);
+        if (STATE_ENGINE_TRADITIONAL == SERVER_CONFIG_STATE_ENGINE) {
+            if (ts->curr_status == ts->status1)
+                printf("First file ('%s') will be dumped\n",
+                       ts->status1_filename);
+            else 
+                printf("Second file ('%s') will be dumped\n",
+                       ts->status2_filename);
+        }
         /* dump first record content */
         printf("Magic number is: " UINT32_T_FORMAT " (" UINT32_T_FORMAT
                ")\n", first_record->magic_number, STATUS_FILE_MAGIC_NUMBER);
@@ -667,7 +671,7 @@ int thread_status_dump(const struct thread_status_s *ts,
         if (tsds->seq) {
             for (i=1; i<first_record->number_of_blocks; ++i) {
                 const struct status_record_data_s *record =
-                    &(ts->curr_status[i].sr.data);
+                    &thread_status_get_record4read(ts, i)->data;
                 printf("------------------------------------"
                        "------------------------------------\n");
                 printf("Block: " UINT32_T_FORMAT ", next block in chain: "
@@ -694,10 +698,10 @@ int thread_status_dump(const struct thread_status_s *ts,
         } /* if (tsds->seq) */
 
         if (tsds->free) {
-            i = ts->curr_status[0].sr.ctrl.first_free_block;
+            i = thread_status_get_record4read(ts, 0)->ctrl.first_free_block;
             while (0 != i) {
-                struct status_record_data_s *record =
-                    &(ts->curr_status[i].sr.data);
+                const struct status_record_data_s *record =
+                    &thread_status_get_record4read(ts, i)->data;
                 printf("------------------------------------"
                        "------------------------------------\n");
                 printf("Block: " UINT32_T_FORMAT ", next block in chain: "
@@ -720,15 +724,15 @@ int thread_status_dump(const struct thread_status_s *ts,
                     default:
                         printf("unknown (%d)\n", record->pld.type);
                 }
-                i = ts->curr_status[i].sr.data.next_block;
+                i = thread_status_get_record4read(ts, i)->data.next_block;
             }
         }
         
         if (tsds->used) {
-            i = ts->curr_status[0].sr.ctrl.first_used_block;
+            i = thread_status_get_record4read(ts, 0)->ctrl.first_used_block;
             while (0 != i) {
-                struct status_record_data_s *record =
-                    &(ts->curr_status[i].sr.data);
+                const struct status_record_data_s *record =
+                    &thread_status_get_record4read(ts, i)->data;
                 printf("------------------------------------"
                        "------------------------------------\n");
                 printf("Block: " UINT32_T_FORMAT ", next block in chain: "
@@ -751,7 +755,7 @@ int thread_status_dump(const struct thread_status_s *ts,
                     default:
                         printf("unknown (%d)\n", record->pld.type);
                 }
-                i = ts->curr_status[i].sr.data.next_block;
+                i = thread_status_get_record4read(ts, i)->data.next_block;
             } 
         }
         
@@ -1105,16 +1109,16 @@ int thread_status_recovery(struct thread_status_s *ts,
     LIXA_TRACE(("thread_status_recovery\n"));
     TRY {
         uint32_t i;
-        struct status_record_s *first_block = ts->curr_status;
         
         if (NULL == srt)
             THROW(NULL_SERVER_RECOVERY_TABLE);
         ts->recovery_table = srt;
         
         /* traverse used block list */
-        i = first_block->sr.ctrl.first_used_block;
+        i = thread_status_get_record4read(ts, 0)->ctrl.first_used_block;
         while (i) {
-            struct status_record_data_s *data = &ts->curr_status[i].sr.data;
+            struct status_record_data_s *data =
+                &thread_status_get_record4update(ts, i)->data;
             if (DATA_PAYLOAD_TYPE_RSRMGR == data->pld.type) {
                 LIXA_TRACE(("thread_status_recovery: block # " UINT32_T_FORMAT
                             " is a resource manager state block, "
@@ -1184,12 +1188,11 @@ int thread_status_clean_failed(struct thread_status_s *ts)
     LIXA_TRACE(("thread_status_clean_failed\n"));
     TRY {
         uint32_t i;
-        struct status_record_ctrl_s *first_record =
-            &(ts->curr_status->sr.ctrl);
 
-        for (i=1; i<first_record->number_of_blocks; ++i) {
+        for (i=1; i<thread_status_get_record4read(
+                 ts, 0)->ctrl.number_of_blocks; ++i) {
             struct status_record_data_s *record =
-                &(ts->curr_status[i].sr.data);
+                &thread_status_get_record4update(ts, i)->data;
             if (DATA_PAYLOAD_TYPE_HEADER == record->pld.type &&
                 record->pld.ph.recovery_failed) {
                 lixa_ser_xid_t ser_xid = "";
@@ -1377,7 +1380,7 @@ int thread_status_set_global_recovery(struct thread_status_s *ts,
     LIXA_TRACE(("thread_status_set_global_recovery\n"));
     TRY {
         struct status_record_data_s *data =
-            &(ts->curr_status[block_id].sr.data);
+            &thread_status_get_record4update(ts, block_id)->data;
         data->pld.ph.state.global_recovery = global_recovery;
         if (LIXA_RC_OK != (ret_cod = thread_status_mark_block(ts, block_id)))
             THROW(THREAD_STATUS_MARK_BLOCK_ERROR);
@@ -1418,11 +1421,11 @@ int thread_status_mark_block(struct thread_status_s *ts,
         if (NULL == ts)
             THROW(NULL_OBJECT);
         /* mark the changed block */
-        sr = ts->curr_status + block_id;
-        if (!(sr->counter & 0x1)) {
-            uintptr_t index = block_id;
-            /* the traditional way */
-            if (SERVER_CONFIG_STATE_ENGINE == STATE_ENGINE_TRADITIONAL) {
+        /* the traditional way */
+        if (SERVER_CONFIG_STATE_ENGINE == STATE_ENGINE_TRADITIONAL) {
+            sr = ts->curr_status + block_id;
+            if (!(sr->counter & 0x1)) {
+                uintptr_t index = block_id;
                 sr->counter++;
                 g_tree_insert(ts->updated_records, (gpointer)index, NULL);
                 LIXA_TRACE(("thread_status_mark_block: inserted index "
@@ -1430,11 +1433,11 @@ int thread_status_mark_block(struct thread_status_s *ts,
                             ") in updated records tree\n",
                             index, sr->counter));
             }
+        } else {
             /* the superfast way */
-            if (SERVER_CONFIG_STATE_ENGINE != STATE_ENGINE_TRADITIONAL)
-                if (LIXA_RC_OK != (ret_cod = lixa_state_mark_block(
-                                       &ts->state, block_id)))
-                    THROW(STATE_MARK_BLOCK_ERROR);
+            if (LIXA_RC_OK != (ret_cod = lixa_state_mark_block(
+                                   &ts->state, block_id)))
+                THROW(STATE_MARK_BLOCK_ERROR);
         }
         
         THROW(NONE);

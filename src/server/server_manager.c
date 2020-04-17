@@ -85,18 +85,20 @@ int server_manager(struct server_config_s *sc,
                    const struct ts_dump_spec_s *tsds,
                    const struct ts_recovery_spec_s *tsrs, int mmode)
 {
-    enum Exception { SRVR_RCVR_TBL_NEW_ERROR,
-                     SERVER_TRANS_TBL_NEW_ERROR,
-                     MALLOC_ERROR,
-                     LIXA_STATE_INIT,
-                     THREAD_STATUS_LOAD_FILES_ERROR,
-                     THREAD_STATUS_DUMP_ERROR,
-                     THREAD_STATUS_CLEAN_FAILED_ERROR,
-                     THREAD_STATUS_RECOVERY_ERROR,
-                     XA_BRANCH_RESTART_FIX_BRANCHES_ERROR,
-                     PTHREAD_CREATE_ERROR,
-                     NULL_SERVER_TRANS_TABLE,
-                     NONE } excp;
+    enum Exception {
+        SRVR_RCVR_TBL_NEW_ERROR,
+        SERVER_TRANS_TBL_NEW_ERROR,
+        MALLOC_ERROR,
+        LIXA_STATE_INIT,
+        THREAD_STATUS_LOAD_FILES_ERROR,
+        THREAD_STATUS_DUMP_ERROR,
+        THREAD_STATUS_CLEAN_FAILED_ERROR,
+        THREAD_STATUS_RECOVERY_ERROR,
+        XA_BRANCH_RESTART_FIX_BRANCHES_ERROR,
+        PTHREAD_CREATE_ERROR,
+        NULL_SERVER_TRANS_TABLE,
+        NONE
+    } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
 
     LIXA_TRACE(("server_manager\n"));
@@ -125,27 +127,29 @@ int server_manager(struct server_config_s *sc,
             thread_status_init(&(tsa->array[i]), i, tpa, mmode, &crash_count);
             tsa->array[i].min_elapsed_sync_time = sc->min_elapsed_sync_time;
             tsa->array[i].max_elapsed_sync_time = sc->max_elapsed_sync_time;
-            /* initialize the "superfast" state engine if required */
-            if ((SERVER_CONFIG_STATE_ENGINE !=
-                 STATE_ENGINE_TRADITIONAL) && i) {
-                /* skip id=0, the listener thread */
-                if (LIXA_RC_OK != (
-                        ret_cod = lixa_state_init(
-                            &(tsa->array[i].state),
-                            sc->managers.array[i-1].status_file,
-                            sc->log_size, sc->max_buffer_log_size,
-                            sc->log_o_direct, sc->log_o_dsync, sc->log_o_rsync,
-                            sc->log_o_sync, FALSE)))
-                    THROW(LIXA_STATE_INIT);
-            } /* if ((SERVER_CONFIG_STATE_ENGINE != ... */
             if (i) {
-                /* load status file for thread != listener */
-                if (LIXA_RC_OK != (
-                        ret_cod = thread_status_load_files(
-                            &(tsa->array[i]),
-                            sc->managers.array[i-1].status_file, tsds)))
-                    THROW(THREAD_STATUS_LOAD_FILES_ERROR);
-                /* dump the status file if asked */
+                /* skip id=0, the listener thread */
+                /* initialize the "superfast" state engine if required */
+                if ((SERVER_CONFIG_STATE_ENGINE !=
+                     STATE_ENGINE_TRADITIONAL) && i) {
+                    if (LIXA_RC_OK != (
+                            ret_cod = lixa_state_init(
+                                &(tsa->array[i].state),
+                                sc->managers.array[i-1].status_file,
+                                sc->log_size, sc->max_buffer_log_size,
+                                sc->log_o_direct, sc->log_o_dsync,
+                                sc->log_o_rsync, sc->log_o_sync,
+                                tsds->dump)))
+                        THROW(LIXA_STATE_INIT);
+                } else {
+                    /* initialize the traditional state engine */
+                    if (LIXA_RC_OK != (
+                            ret_cod = thread_status_load_files(
+                                &(tsa->array[i]),
+                                sc->managers.array[i-1].status_file, tsds)))
+                        THROW(THREAD_STATUS_LOAD_FILES_ERROR);
+                } /* if ((SERVER_CONFIG_STATE_ENGINE != ... */
+                /* dump the state file if asked */
                 if (tsds->dump) {
                     if (LIXA_RC_OK != (ret_cod = thread_status_dump(
                                            &(tsa->array[i]), tsds)))
