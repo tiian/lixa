@@ -111,6 +111,7 @@ int lixa_state_table_init(lixa_state_table_t *this,
         /* keep a local copy of the pathname */
         if (NULL == (this->pathname = strdup(pathname)))
             THROW(STRDUP_ERROR);
+        this->read_only = read_only;
         if (read_only)
             this->flags = O_RDONLY;
         else
@@ -271,7 +272,6 @@ int lixa_state_table_open_file(lixa_state_table_t *this)
     LIXA_TRACE(("lixa_state_table_open_file\n"));
     TRY {
         struct stat fd_stat;
-        int read_only;
         enum lixa_state_table_status_e new_status;
         
         if (NULL == this)
@@ -297,12 +297,14 @@ int lixa_state_table_open_file(lixa_state_table_t *this)
         if (0 != fstat(this->fd, &fd_stat))
             THROW(FSTAT_ERROR);
         /* map the file */
-        read_only = this->flags & O_RDONLY;
-        if (NULL == (this->map = mmap(
-                         NULL, fd_stat.st_size,
-                         read_only ? PROT_READ : PROT_READ | PROT_WRITE,
-                         read_only ? MAP_PRIVATE : MAP_SHARED,
-                         this->fd, 0)))
+        if (MAP_FAILED == (
+                this->map = mmap(
+                    NULL, fd_stat.st_size, PROT_READ | PROT_WRITE,
+                    /* @@@ remove me
+                    this->read_only ? PROT_READ : PROT_READ | PROT_WRITE,
+                    */
+                    this->read_only ? MAP_PRIVATE : MAP_SHARED,
+                    this->fd, 0)))
             THROW(MMAP_ERROR);
         LIXA_TRACE(("lixa_state_table_open_file: state table file '%s' mapped "
                     "at address %p\n", this->pathname, this->map));
@@ -664,10 +666,11 @@ int lixa_state_table_map(lixa_state_table_t *this, int read_only)
         if (0 != fstat(this->fd, &fd_stat))
             THROW(FSTAT_ERROR);
         /* map the file */
-        if (NULL == (this->map = mmap(NULL, fd_stat.st_size,
-                                      PROT_READ | PROT_WRITE,
-                                      read_only ? MAP_PRIVATE : MAP_SHARED,
-                                      this->fd, 0)))
+        if (NULL == (this->map =
+                     mmap(NULL, fd_stat.st_size,
+                          PROT_READ | PROT_WRITE,
+                          this->read_only ? MAP_PRIVATE : MAP_SHARED,
+                          this->fd, 0)))
             THROW(MMAP_ERROR);
         LIXA_TRACE(("lixa_state_table_map: state table file '%s' mapped at "
                     "address %p\n", this->pathname, this->map));

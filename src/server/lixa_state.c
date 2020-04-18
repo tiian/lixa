@@ -105,8 +105,6 @@ int lixa_state_init(lixa_state_t *this, const char *path_prefix,
         /* retrieve system page size */
         if (-1 == (LIXA_SYSTEM_PAGE_SIZE = (size_t)sysconf(_SC_PAGESIZE)))
             THROW(INTERNAL_ERROR);
-        this->log_size = log_size;
-        this->max_buffer_log_size = max_buffer_log_size;
         /* compute the number of records per page */
         LIXA_STATE_LOG_RECORDS_PER_PAGE = LIXA_SYSTEM_PAGE_SIZE /
             sizeof(struct lixa_state_log_record_s);
@@ -195,13 +193,16 @@ int lixa_state_init(lixa_state_t *this, const char *path_prefix,
                         LIXA_STATE_LOG_BUFFER_SIZE_DEFAULT));
             max_buffer_log_size = LIXA_STATE_LOG_BUFFER_SIZE_DEFAULT;
         }
+        this->max_buffer_log_size = max_buffer_log_size;
         /* check mas log size, resize if necessary */
-        if (log_size < (off_t)max_buffer_log_size) {
+        if (log_size < LIXA_STATE_LOG_FILE_SIZE_DEFAULT) {
             LIXA_TRACE(("lixa_state_init: log_size (" OFF_T_FORMAT ") is "
-                        "less then max_buffer_log_size (" SIZE_T_FORMAT "), "
-                        "resizing\n", log_size, max_buffer_log_size));
-            log_size = (off_t)max_buffer_log_size;
+                        "less then default (" OFF_T_FORMAT "), "
+                        "resizing\n", log_size,
+                        LIXA_STATE_LOG_FILE_SIZE_DEFAULT));
+            log_size = LIXA_STATE_LOG_FILE_SIZE_DEFAULT;
         }
+        this->log_size = log_size;
         /* max number of records in buffer, config limit */
         this->max_number_of_block_ids = lixa_state_log_buffer2blocks(
             max_buffer_log_size);
@@ -268,7 +269,7 @@ int lixa_state_init(lixa_state_t *this, const char *path_prefix,
                 THROW(COLD_START_ERROR);
         } else {
             if (LIXA_RC_OK != (ret_cod = lixa_state_warm_start(
-                                   this, table_exists, log_exists, FALSE)))
+                                   this, table_exists, log_exists, read_only)))
                 THROW(WARM_START_ERROR);
         }
                     
@@ -564,8 +565,7 @@ int lixa_state_cold_start(lixa_state_t *this)
 
 
 int lixa_state_warm_start(lixa_state_t *this,
-                          const int *table_exists,
-                          const int *log_exists,
+                          const int *table_exists, const int *log_exists,
                           int read_only)
 {
     enum Exception {
@@ -813,9 +813,11 @@ int lixa_state_warm_start(lixa_state_t *this,
 
         /* set current state files */
         this->active_state = last_table;
-        /* force a switch of the state table and the state log */
-        if (LIXA_RC_OK != (ret_cod = lixa_state_switch(this, last_record_id)))
-            THROW(SWITCH_ERROR);
+        if (!read_only)
+            /* force a switch of the state table and the state log */
+            if (LIXA_RC_OK != (
+                    ret_cod = lixa_state_switch(this, last_record_id)))
+                THROW(SWITCH_ERROR);
         
         THROW(NONE);
     } CATCH {

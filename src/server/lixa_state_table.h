@@ -90,6 +90,10 @@ typedef struct lixa_state_table_s {
      */
     enum lixa_state_table_status_e   status;
     /**
+     * The file must be opened in read only mode
+     */
+    int                              read_only;
+    /**
      * File descriptor associated to the underlying file
      */
     int                              fd;

@@ -1,8 +1,5 @@
-Fix lixad --dump=s for JOURNAL mode
-
-Fix the bugs emerged by make check
-
-It seems that without O_DIRECT (log_o_direct), ftruncate does not work: understand why and in case remove log_o_direct parameter...
+Fix the bugs emerged by make check:
+case test 0063 shows corruption after warm restart in crash test!
 
 Remove lixa_state_sync_log: it seems useless...
 

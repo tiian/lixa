@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <server pid_file="@abs_top_builddir@/tests/var/run.pid"
-  min_elapsed_sync_time="10" max_elapsed_sync_time="100">
+  min_elapsed_sync_time="10" max_elapsed_sync_time="100"
+  log_size="524288" max_buffer_log_size="131072"
+  log_o_direct="1" log_o_dsync="0" log_o_rsync="0" log_o_sync="0">
   <listeners>
     <listener domain="AF_INET" address="127.0.0.1" port="2345"/>
   </listeners>

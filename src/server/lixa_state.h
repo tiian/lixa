@@ -270,12 +270,12 @@ extern "C" {
      * @param[in,out] this state object
      * @param[in] table_exists specifies which table files are available
      * @param[in] log_exists specifies which log files are available
-     * @param[in] read_only mode for state inspection from another process
+     * @param[in] read_only if the state tables and the state logs must be
+     *            accessed only in read-write mode (for example --dump)
      * @return a reason code
      */
     int lixa_state_warm_start(lixa_state_t *this,
-                              const int *table_exists,
-                              const int *log_exists,
+                              const int *table_exists, const int *log_exists,
                               int read_only);
 
 
