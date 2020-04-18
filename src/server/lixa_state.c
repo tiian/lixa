@@ -577,8 +577,9 @@ int lixa_state_warm_start(lixa_state_t *this,
         TABLE_SET_STATUS1,
         STATE_TABLE_CLOSE_ERROR,
         TABLE_SET_STATUS2,
-        STATE_LOG_CLOSE_ERROR,
         TABLE_SET_STATUS3,
+        STATE_LOG_CLOSE_ERROR,
+        LOG_SET_STATUS,
         SWITCH_ERROR,
         NONE
     } excp;
@@ -643,7 +644,7 @@ int lixa_state_warm_start(lixa_state_t *this,
                 LIXA_TRACE(("lixa_state_warm_start: state log file '%s' "
                             "contains " OFF_T_FORMAT " valid records: first "
                             "record id is " LIXA_WORD_T_FORMAT " and it was "
-                            "synchronized at %s; second record id is "
+                            "synchronized at %s; last record id is "
                             LIXA_WORD_T_FORMAT " and it was synchronized at %s"
                             "\n",
                             lixa_state_log_get_pathname(&this->logs[i]),
@@ -776,26 +777,37 @@ int lixa_state_warm_start(lixa_state_t *this,
 
         /* switch the status of the tables */
         for (i=0; i<LIXA_STATE_TABLES; ++i) {
-            if (table_exists[i] &&
-                lixa_state_table_get_status(
-                    &this->tables[i]) == STATE_TABLE_OPENED) {
-                if (i == last_table) {
-                    /* switch to used */
-                    if (LIXA_RC_OK != (
-                            ret_cod = lixa_state_table_set_status(
-                                &this->tables[i], STATE_TABLE_USED, FALSE)))
-                        THROW(TABLE_SET_STATUS1);
-                } else {
-                    /* switch to disposed */
-                    if (LIXA_RC_OK != (ret_cod = lixa_state_table_close(
-                                           &this->tables[i])))
-                        THROW(STATE_TABLE_CLOSE_ERROR);
+            if (table_exists[i]) {
+                if (STATE_TABLE_OPENED == lixa_state_table_get_status(
+                        &this->tables[i])) {
+                    /* good tables */
+                    if (i == last_table) {
+                        /* switch to used */
+                        if (LIXA_RC_OK != (
+                                ret_cod = lixa_state_table_set_status(
+                                    &this->tables[i], STATE_TABLE_USED,
+                                    FALSE)))
+                            THROW(TABLE_SET_STATUS1);
+                    } else {
+                        /* switch to disposed */
+                        if (LIXA_RC_OK != (ret_cod = lixa_state_table_close(
+                                               &this->tables[i])))
+                            THROW(STATE_TABLE_CLOSE_ERROR);
+                        if (LIXA_RC_OK != (
+                                ret_cod = lixa_state_table_set_status(
+                                    &this->tables[i], STATE_TABLE_DISPOSED,
+                                    FALSE)))
+                            THROW(TABLE_SET_STATUS2);
+                    } /* if (i == last_table) */
+                } else if (STATE_TABLE_CORRUPTED ==
+                           lixa_state_table_get_status(
+                               &this->tables[i])) {
                     if (LIXA_RC_OK != (
                             ret_cod = lixa_state_table_set_status(
                                 &this->tables[i], STATE_TABLE_DISPOSED,
                                 FALSE)))
-                        THROW(TABLE_SET_STATUS2);
-                }
+                        THROW(TABLE_SET_STATUS3);
+                } /* if (STATE_TABLE_CORRUPTED == */
             } /* if (table_exists[i] && */
             if (log_exists[i] &&
                 lixa_state_log_get_status(
@@ -807,7 +819,7 @@ int lixa_state_warm_start(lixa_state_t *this,
                 if (LIXA_RC_OK != (
                         ret_cod = lixa_state_log_set_status(
                             &this->logs[i], STATE_LOG_DISPOSED, FALSE)))
-                    THROW(TABLE_SET_STATUS3);
+                    THROW(LOG_SET_STATUS);
             } /* if (log_exists[i] && */
         } /* for (i=0; i<LIXA_STATE_TABLES; ++i) */
 
@@ -833,12 +845,13 @@ int lixa_state_warm_start(lixa_state_t *this,
             case LOG_READ_FILE:
             case TABLE_PATCH_SLOT:
             case SWITCH_ERROR:
+            case STATE_LOG_CLOSE_ERROR:
                 break;
             case TABLE_SET_STATUS1:
             case STATE_TABLE_CLOSE_ERROR:
             case TABLE_SET_STATUS2:
-            case STATE_LOG_CLOSE_ERROR:
             case TABLE_SET_STATUS3:
+            case LOG_SET_STATUS:
                 ret_cod = LIXA_RC_INVALID_STATUS;
                 break;
             case NONE:

@@ -423,7 +423,7 @@ int lixa_state_table_check_integrity(lixa_state_table_t *this)
                                    sizeof(lixa_state_record_t));
             if (this->map[i].crc32 != tmp_crc32) {
                 LIXA_TRACE(("lixa_state_table_check_integrity: the CRC of "
-                            "block " UINT32_T_FORMAT "does not match: "
+                            "block " UINT32_T_FORMAT " does not match: "
                             "current=" UINT32_T_XFORMAT ", expected="
                             UINT32_T_XFORMAT "\n", i, tmp_crc32,
                             first_slot->crc32));
@@ -1078,10 +1078,11 @@ int lixa_state_table_set_status(lixa_state_table_t *this,
                 }
                 break;
             case STATE_TABLE_DISPOSED:
-                if (STATE_TABLE_CLOSED != this->status) {
+                if (STATE_TABLE_CLOSED != this->status &&
+                    STATE_TABLE_CORRUPTED != this->status) {
                     LIXA_TRACE(("lixa_state_table_set_status: transition to "
                                 "DISPOSED is acceptable only from "
-                                "CLOSED\n"));
+                                "CLOSED and CORRUPTED\n"));
                     valid = FALSE;
                 }
                 break;
