@@ -1,11 +1,12 @@
-Go on with debugging state table corruption as shown by 
- 65: CT/1.0/2.0 preparing recovery pending           ok
- 66: CT/1.0/2.1 server_recovery (step=8)            ^C
+Go on with debugging of 
+CT/1.0/3.0 preparing recovery pending
 
 
 Reproduce the LIXA_CRASH point of TRADITIONAL in JOURNAL:
 - server_thread_status.c: put around mmap, the same should be done around
   log flushing with test cases duplication :(
+
+Restore original test order in ct.at and testsuite.at
 
 Restore multithread in
 - tests/etc/lixad_conf.xml.in

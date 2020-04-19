@@ -583,8 +583,10 @@ int lixa_state_warm_start(lixa_state_t *this,
         NULL_OBJECT,
         TABLE_OPEN_ERROR,
         CORRUPTED_STATUS_FILE,
+        TABLE_CHECK_INTEGRITY1,
         LOG_READ_FILE,
         TABLE_PATCH_SLOT,
+        TABLE_CHECK_INTEGRITY2,
         TABLE_SET_STATUS1,
         STATE_TABLE_CLOSE_ERROR,
         TABLE_SET_STATUS2,
@@ -704,9 +706,13 @@ int lixa_state_warm_start(lixa_state_t *this,
             last_record_id = lixa_state_table_get_last_record_id(
                 &this->tables[last_table]);
         }
+        /* @@@ remove me */
+        if (LIXA_RC_OK != (ret_cod = lixa_state_table_check_integrity(
+                               &this->tables[last_table])))
+            THROW(TABLE_CHECK_INTEGRITY1);
         /* looping on all logs */
         i = last_table;
-        do { /* looping on all logs using variable i*/
+        do { /* looping on all logs using variable i */
             off_t j=0, prev_j=-1, count=0, num_rec=0;
             struct lixa_state_log_record_s buffer;
             int order;
@@ -785,6 +791,10 @@ int lixa_state_warm_start(lixa_state_t *this,
                                  &this->tables[last_table])));
             i = lixa_state_common_succ_state(i);
         } while (i != last_table);
+        /* @@@ remove me */
+        if (LIXA_RC_OK != (ret_cod = lixa_state_table_check_integrity(
+                               &this->tables[last_table])))
+            THROW(TABLE_CHECK_INTEGRITY2);
 
         /* switch the status of the tables */
         for (i=0; i<LIXA_STATE_TABLES; ++i) {
@@ -853,8 +863,10 @@ int lixa_state_warm_start(lixa_state_t *this,
             case CORRUPTED_STATUS_FILE:
                 ret_cod = LIXA_RC_CORRUPTED_STATUS_FILE;
                 break;
+            case TABLE_CHECK_INTEGRITY1:
             case LOG_READ_FILE:
             case TABLE_PATCH_SLOT:
+            case TABLE_CHECK_INTEGRITY2:
             case SWITCH_ERROR:
             case STATE_LOG_CLOSE_ERROR:
                 break;

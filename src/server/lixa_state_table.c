@@ -1450,10 +1450,6 @@ int lixa_state_table_copy_from(lixa_state_table_t *this,
                     "source={fd=%d,'%s'}\n",
                     this->fd, this->pathname,
                     source->fd, source->pathname));
-        /* @@@ remove me after debugging
-           checking integrity of source table */
-        if (LIXA_RC_OK != (ret_cod = lixa_state_table_check_integrity(this)))
-            THROW(CHECK_INTEGRITY);
         /* retrieve the size of the two state table */
         if (0 != fstat(this->fd, &fd_stat_this))
             THROW(FSTAT_ERROR1);
@@ -1493,6 +1489,10 @@ int lixa_state_table_copy_from(lixa_state_table_t *this,
             THROW(MMAP_ERROR);
         /* copy the content */
         memcpy(this->map, source->map, (size_t)fd_stat_source.st_size);
+        /* @@@ remove me after debugging
+           checking integrity of target table */
+        if (LIXA_RC_OK != (ret_cod = lixa_state_table_check_integrity(this)))
+            THROW(CHECK_INTEGRITY);
         
         THROW(NONE);
     } CATCH {

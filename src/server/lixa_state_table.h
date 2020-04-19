@@ -242,7 +242,8 @@ extern "C" {
      */
     static inline int lixa_state_table_is_full(const lixa_state_table_t *this)
     {
-        return STATE_TABLE_FULL == this->status;
+        return STATE_TABLE_FULL == this->status ||
+            0 == this->map[0].sr.ctrl.first_free_block;
     }
 
 
