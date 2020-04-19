@@ -33,6 +33,7 @@
 
 
 #include "lixa_errors.h"
+#include "lixa_crash.h"
 #include "lixa_state.h"
 #include "lixa_syslog.h"
 #include "lixa_trace.h"
@@ -51,7 +52,11 @@
 int lixa_state_init(lixa_state_t *this, const char *path_prefix,
                     off_t log_size, size_t max_buffer_log_size,
                     int o_direct_bool, int o_dsync_bool,
-                    int o_rsync_bool, int o_sync_bool, int read_only)
+                    int o_rsync_bool, int o_sync_bool, int read_only
+#ifdef _CRASH
+                    , long *crash_count
+#endif
+                    )
 {
     enum Exception {
         NULL_OBJECT1,
@@ -139,6 +144,9 @@ int lixa_state_init(lixa_state_t *this, const char *path_prefix,
         this->table_synchronizer.operation = STATE_FLUSHER_WAIT;
         this->table_synchronizer.to_be_flushed = FALSE;
         this->table_synchronizer.table = NULL;
+#ifdef _CRASH
+        this->table_synchronizer.crash_count = crash_count;
+#endif
         /* activate flusher thread */
         if (0 != (pte = pthread_create(&this->table_synchronizer.thread, NULL,
                                        lixa_state_async_table_flusher,
@@ -157,6 +165,9 @@ int lixa_state_init(lixa_state_t *this, const char *path_prefix,
         this->log_synchronizer.switch_after_write = FALSE;
         this->log_synchronizer.log = NULL;
         this->log_synchronizer.number_of_pages = 0;
+#ifdef _CRASH
+        this->log_synchronizer.crash_count = crash_count;
+#endif
         /* allocate the buffer for I/O */
         this->log_synchronizer.buffer_size = lixa_state_log_blocks2buffer(
             this->size_of_block_ids);
@@ -908,7 +919,8 @@ int lixa_state_shutdown(lixa_state_t *this)
                  * STATE TABLE SECTION
                  */
                 /* flush current state table */
-                if (LIXA_RC_OK != (ret_cod = lixa_state_flush_table(this)))
+                if (LIXA_RC_OK != (ret_cod = lixa_state_flush_table(
+                                       this, TRUE)))
                     THROW(FLUSH_TABLE);
                 /* obtain the lock of the synchronized structure */
                 LIXA_TRACE(("lixa_state_shutdown: waiting for lock on "
@@ -1687,7 +1699,7 @@ int lixa_state_extend_log(lixa_state_t *this)
 
 
 
-int lixa_state_flush_table(lixa_state_t *this)
+int lixa_state_flush_table(lixa_state_t *this, int shutdown)
 {
     enum Exception {
         NULL_OBJECT,
@@ -1701,7 +1713,7 @@ int lixa_state_flush_table(lixa_state_t *this)
     int pte = 0;
     int mutex_locked = FALSE;
     
-    LIXA_TRACE(("lixa_state_flush_table\n"));
+    LIXA_TRACE(("lixa_state_flush_table(shutdown=%d)\n", shutdown));
     TRY {
         /* check object is not null */
         if (NULL == this)
@@ -1735,7 +1747,10 @@ int lixa_state_flush_table(lixa_state_t *this)
         /* ask to table flusher thread to perform the flushing */
         LIXA_TRACE(("lixa_state_flush_table: asking table flusher thread to "
                     "synchronize the memory map with the underlying file\n"));
-        this->table_synchronizer.operation = STATE_FLUSHER_FLUSH;
+        if (shutdown)
+            this->table_synchronizer.operation = STATE_FLUSHER_LAST_FLUSH;
+        else
+            this->table_synchronizer.operation = STATE_FLUSHER_FLUSH;
         this->table_synchronizer.table = &this->tables[this->active_state];
         this->table_synchronizer.to_be_flushed = TRUE;
         if (0 != (pte = pthread_cond_signal(&this->table_synchronizer.cond)))
@@ -1941,7 +1956,7 @@ int lixa_state_switch(lixa_state_t *this, lixa_word_t last_record_id)
             THROW(TABLE_COPY_FROM);
         /* start disk synchronization of current state file using the
            background thread ... */
-        if (LIXA_RC_OK != (ret_cod = lixa_state_flush_table(this)))
+        if (LIXA_RC_OK != (ret_cod = lixa_state_flush_table(this, FALSE)))
             THROW(FLUSH_TABLE);
         /* next state table is switched to USED status */
         if (LIXA_RC_OK != (
@@ -2424,13 +2439,21 @@ void *lixa_state_async_table_flusher(void *data)
                 LIXA_TRACE(("lixa_state_async_table_flusher: condition has "
                             "been signaled\n"));
             }
-            if (STATE_FLUSHER_FLUSH == table_synchronizer->operation) {
+            if (STATE_FLUSHER_FLUSH == table_synchronizer->operation ||
+                STATE_FLUSHER_LAST_FLUSH == table_synchronizer->operation) {
                 /* flush the data to file */
                 if (table_synchronizer->to_be_flushed) {
+                    LIXA_CRASH(LIXA_CRASH_POINT_SERVER_BEFORE_MSYNC,
+                               table_synchronizer->crash_count);
                     /* perform flushing */
-                    if (LIXA_RC_OK != (ret_cod = lixa_state_table_sync_map(
-                                           table_synchronizer->table)))
+                    if (LIXA_RC_OK != (
+                            ret_cod = lixa_state_table_sync_map(
+                                table_synchronizer->table,
+                                STATE_FLUSHER_LAST_FLUSH ==
+                                table_synchronizer->operation)))
                         THROW(TABLE_SYNC_MAP_ERROR);
+                    LIXA_CRASH(LIXA_CRASH_POINT_SERVER_AFTER_MSYNC,
+                               table_synchronizer->crash_count);
                 } else {
                     /* this is an internal error, it should never happen */
                     LIXA_TRACE(("lixa_state_async_table_flusher: internal "

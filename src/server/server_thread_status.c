@@ -151,27 +151,19 @@ int thread_status_insert(struct thread_status_s *ts, uint32_t *slot)
     
     LIXA_TRACE(("thread_status_insert\n"));
     TRY {
-        uint32_t old_slot, new_slot;
         /* call the legacy code */
         if (SERVER_CONFIG_STATE_ENGINE == STATE_ENGINE_TRADITIONAL)
             if (LIXA_RC_OK != (ret_cod = thread_status_insert_traditional(
-                                   ts, &old_slot)))
+                                   ts, slot)))
                 THROW(INSERT_OLD_ERROR);
         /* call the new code introduced by "superfast" */
         if (SERVER_CONFIG_STATE_ENGINE != STATE_ENGINE_TRADITIONAL)
             if (LIXA_RC_OK != (ret_cod = lixa_state_insert_block(
-                                   &ts->state, &new_slot)))
+                                   &ts->state, slot)))
                 THROW(STATE_INSERT_BLOCK_ERROR);
 
-        /* return the slot */
-        if (STATE_ENGINE_TRADITIONAL == SERVER_CONFIG_STATE_ENGINE)
-            *slot = old_slot;
-        else
-            *slot = new_slot;
-        LIXA_TRACE(("thread_status_insert: legacy code returned slot="
-                    UINT32_T_FORMAT ", new code returned slot="
-                    UINT32_T_FORMAT ", returning " UINT32_T_FORMAT " to "
-                    "the caller\n", old_slot, new_slot, *slot));
+        LIXA_TRACE(("thread_status_insert: returned slot=" UINT32_T_FORMAT
+                    "\n", *slot));
         
         THROW(NONE);
     } CATCH {

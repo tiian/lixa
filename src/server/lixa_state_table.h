@@ -364,9 +364,11 @@ extern "C" {
     /**
      * Synchronize the content of the memory map to the underlying file
      * @param[in,out] this state table object
+     * @param[in] last_sync is TRUE for the last synchronization operation that
+     *            must be performed in any case
      * @return a reason code
      */
-    int lixa_state_table_sync_map(lixa_state_table_t *this);
+    int lixa_state_table_sync_map(lixa_state_table_t *this, int last_sync);
 
 
 

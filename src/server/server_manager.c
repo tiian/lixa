@@ -139,7 +139,12 @@ int server_manager(struct server_config_s *sc,
                                 sc->log_size, sc->max_buffer_log_size,
                                 sc->log_o_direct, sc->log_o_dsync,
                                 sc->log_o_rsync, sc->log_o_sync,
-                                tsds->dump)))
+                                tsds->dump
+#ifdef _CRASH
+                                , tsa->array[i].crash_count
+#endif
+                                
+                                                      )))
                         THROW(LIXA_STATE_INIT);
                 } else {
                     /* initialize the traditional state engine */

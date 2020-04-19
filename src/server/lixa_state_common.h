@@ -62,6 +62,8 @@ enum lixa_state_flusher_ops_e {
     STATE_FLUSHER_WAIT = 0,
     /** flush the buffer / mapped pages to the current used file */
     STATE_FLUSHER_FLUSH,
+    /** flush for shutdown: it's the last flush on the object before exiting */
+    STATE_FLUSHER_LAST_FLUSH,
     /** thread termination */
     STATE_FLUSHER_EXIT
 };

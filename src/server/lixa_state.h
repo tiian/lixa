@@ -85,6 +85,12 @@ struct lixa_table_synchronizer_s {
      * Thread used to flush the log files in background (asynchronously)
      */
     pthread_t                           thread;
+#ifdef _CRASH
+    /**
+     * Reference to the counter used for crash simulation feature
+     */
+    long                               *crash_count;
+#endif
 };
 
 
@@ -138,6 +144,12 @@ struct lixa_log_synchronizer_s {
      * Thread used to flush the log files in background (asynchronously)
      */
     pthread_t                         thread;
+#ifdef _CRASH
+    /**
+     * Reference to the counter used for crash simulation feature
+     */
+    long                             *crash_count;
+#endif
 };
 
 
@@ -234,7 +246,11 @@ extern "C" {
     int lixa_state_init(lixa_state_t *this, const char *path_prefix,
                         off_t max_log_size, size_t max_buffer_log_size,
                         int o_direct_bool, int o_dsync_bool,
-                        int o_rsync_bool, int o_sync_bool, int read_only);
+                        int o_rsync_bool, int o_sync_bool, int read_only
+#ifdef _CRASH
+                        , long *crash_count
+#endif
+                        );
 
 
 
@@ -336,9 +352,10 @@ extern "C" {
     /**
      * Start the background flush of the current state table
      * @param[in,out] this state object
+     * @param[in] shutdown must be TRUE if the flushing is asked for shutdown
      * @return a reason code
      */
-    int lixa_state_flush_table(lixa_state_t *this);
+    int lixa_state_flush_table(lixa_state_t *this, int shutdown);
 
 
     

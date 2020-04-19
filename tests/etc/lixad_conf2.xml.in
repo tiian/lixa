@@ -8,7 +8,7 @@
   </listeners>
   <managers>
     <manager status_file="@abs_top_builddir@/tests/var/lixad_status1"/>
-    <manager status_file="@abs_top_builddir@/tests/var/lixad_status2"/>
-    <manager status_file="@abs_top_builddir@/tests/var/lixad_status3"/>
+    <!--manager status_file="@abs_top_builddir@/tests/var/lixad_status2"/-->
+    <!--manager status_file="@abs_top_builddir@/tests/var/lixad_status3"/-->
   </managers>
 </server>

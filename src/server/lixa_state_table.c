@@ -300,9 +300,6 @@ int lixa_state_table_open_file(lixa_state_table_t *this)
         if (MAP_FAILED == (
                 this->map = mmap(
                     NULL, fd_stat.st_size, PROT_READ | PROT_WRITE,
-                    /* @@@ remove me
-                    this->read_only ? PROT_READ : PROT_READ | PROT_WRITE,
-                    */
                     this->read_only ? MAP_PRIVATE : MAP_SHARED,
                     this->fd, 0)))
             THROW(MMAP_ERROR);
@@ -1430,10 +1427,13 @@ int lixa_state_table_copy_from(lixa_state_table_t *this,
 {
     enum Exception {
         NULL_OBJECT,
+        CHECK_INTEGRITY,
         FSTAT_ERROR1,
         FSTAT_ERROR2,
         MUNMAP_ERROR,
         TRUNCATE_ERROR,
+        FSTAT_ERROR3,
+        INTERNAL_ERROR,
         MMAP_ERROR,
         NONE
     } excp;
@@ -1450,6 +1450,10 @@ int lixa_state_table_copy_from(lixa_state_table_t *this,
                     "source={fd=%d,'%s'}\n",
                     this->fd, this->pathname,
                     source->fd, source->pathname));
+        /* @@@ remove me after debugging
+           checking integrity of source table */
+        if (LIXA_RC_OK != (ret_cod = lixa_state_table_check_integrity(this)))
+            THROW(CHECK_INTEGRITY);
         /* retrieve the size of the two state table */
         if (0 != fstat(this->fd, &fd_stat_this))
             THROW(FSTAT_ERROR1);
@@ -1468,15 +1472,24 @@ int lixa_state_table_copy_from(lixa_state_table_t *this,
                 this->map = NULL;
             }
             /* truncate the state file to the desired length, if necessary */
-            if (fd_stat_this.st_size != fd_stat_source.st_size &&
-                0 != ftruncate(this->fd, fd_stat_source.st_size))
-                THROW(TRUNCATE_ERROR);
+            if (fd_stat_this.st_size != fd_stat_source.st_size) {
+                LIXA_TRACE(("lixa_state_table_copy_from: truncating this "
+                            "state table file to " OFF_T_FORMAT " bytes\n",
+                            fd_stat_source.st_size));
+                if (0 != ftruncate(this->fd, fd_stat_source.st_size))
+                    THROW(TRUNCATE_ERROR);
+            }
+            /* retrieve the size again */
+            if (0 != fstat(this->fd, &fd_stat_this))
+                THROW(FSTAT_ERROR3);
+            if (fd_stat_this.st_size != fd_stat_source.st_size)
+                THROW(INTERNAL_ERROR);
         }
         /* map the new state file if necessary */
         if (NULL == this->map &&
-            NULL == (this->map = mmap(NULL, fd_stat_source.st_size,
-                                      PROT_READ | PROT_WRITE,
-                                      MAP_SHARED, this->fd, 0)))
+            MAP_FAILED == (this->map = mmap(NULL, fd_stat_source.st_size,
+                                            PROT_READ | PROT_WRITE,
+                                            MAP_SHARED, this->fd, 0)))
             THROW(MMAP_ERROR);
         /* copy the content */
         memcpy(this->map, source->map, (size_t)fd_stat_source.st_size);
@@ -1487,8 +1500,11 @@ int lixa_state_table_copy_from(lixa_state_table_t *this,
             case NULL_OBJECT:
                 ret_cod = LIXA_RC_NULL_OBJECT;
                 break;
+            case CHECK_INTEGRITY:
+                break;
             case FSTAT_ERROR1:
             case FSTAT_ERROR2:
+            case FSTAT_ERROR3:
                 ret_cod = LIXA_RC_FSTAT_ERROR;
                 break;
             case MUNMAP_ERROR:
@@ -1496,6 +1512,9 @@ int lixa_state_table_copy_from(lixa_state_table_t *this,
                 break;
             case TRUNCATE_ERROR:
                 ret_cod = LIXA_RC_TRUNCATE_ERROR;
+                break;
+            case INTERNAL_ERROR:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
                 break;
             case MMAP_ERROR:
                 ret_cod = LIXA_RC_MMAP_ERROR;
@@ -1514,7 +1533,7 @@ int lixa_state_table_copy_from(lixa_state_table_t *this,
 
 
 
-int lixa_state_table_sync_map(lixa_state_table_t *this)
+int lixa_state_table_sync_map(lixa_state_table_t *this, int last_sync)
 {
     enum Exception {
         NULL_OBJECT,
@@ -1539,7 +1558,8 @@ int lixa_state_table_sync_map(lixa_state_table_t *this)
             THROW(NULL_OBJECT);
         
         /* set the new status of the object */
-        if (LIXA_RC_OK != (ret_cod = lixa_state_table_set_status(
+        if (!last_sync &&
+            LIXA_RC_OK != (ret_cod = lixa_state_table_set_status(
                                this, STATE_TABLE_SYNCH, FALSE)))
             THROW(TABLE_SET_STATUS1);
 
@@ -1580,7 +1600,8 @@ int lixa_state_table_sync_map(lixa_state_table_t *this)
                          fd_stat.st_size, this->pathname));
         }
         /* set to CLOSED the status of this table */
-        if (LIXA_RC_OK != (ret_cod = lixa_state_table_set_status(
+        if (!last_sync &&
+            LIXA_RC_OK != (ret_cod = lixa_state_table_set_status(
                                this, STATE_TABLE_CLOSED, FALSE)))
             THROW(TABLE_SET_STATUS2);
         
