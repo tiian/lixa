@@ -189,10 +189,14 @@ int lixa_state_log_shutdown(lixa_state_log_t *this)
         if (NULL == this)
             THROW(NULL_OBJECT);
 
-        /* close the file descriptor */
-        if (-1 == close(this->fd)) {
-            THROW(CLOSE_ERROR);
-        }
+        if (LIXA_NULL_FD != this->fd) {
+            LIXA_TRACE(("lixa_state_log_shutdown: closing fd=%d, '%s'\n",
+                        this->fd, this->pathname));
+            /* close the file descriptor */
+            if (-1 == close(this->fd)) {
+                THROW(CLOSE_ERROR);
+            }
+        } /* if (LIXA_NULL_FD != this->fd) */
                 
         THROW(NONE);
     } CATCH {

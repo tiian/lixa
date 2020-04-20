@@ -1,5 +1,7 @@
 Go on with debugging of 
-CT/1.0/3.0 preparing recovery pending
+  2: CT/1.2/0.0 server_xa_end (step=8)               ok
+  3: CT/1.2/0.1 server_xa_end (step=8)               FAILED (ct_1_2.at:80)
+
 
 
 Reproduce the LIXA_CRASH point of TRADITIONAL in JOURNAL:

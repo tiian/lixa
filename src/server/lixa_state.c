@@ -691,8 +691,10 @@ int lixa_state_warm_start(lixa_state_t *this,
                 lixa_state_table_get_last_sync(&this->tables[succ]));
             if (order < 0)
                 last_table = succ;
+            else if (last_table == -1)
+                last_table = i; 
             else
-                last_table = i;
+                break; /* youngest already reached */
         } /* for (i=0; i<LIXA_STATE_TABLES; ++i) */
         if (last_table < 0) {
             LIXA_SYSLOG((LOG_ERR, LIXA_SYSLOG_LXD073E));
