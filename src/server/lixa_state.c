@@ -615,22 +615,27 @@ int lixa_state_warm_start(lixa_state_t *this,
                 if (LIXA_RC_OK != (ret_cod = lixa_state_table_open_file(
                                        &this->tables[i])))
                     THROW(TABLE_OPEN_ERROR);
-                lixa_utils_iso_timestamp(
-                    lixa_state_table_get_last_sync(
-                        &this->tables[i]), iso_timestamp1,
+                if (STATE_TABLE_OPENED ==
+                    lixa_state_table_get_status(&this->tables[i])) {
+                    lixa_utils_iso_timestamp(
+                        lixa_state_table_get_last_sync(
+                            &this->tables[i]), iso_timestamp1,
                         sizeof(iso_timestamp1));
-                LIXA_SYSLOG((LOG_INFO, LIXA_SYSLOG_LXD071I,
-                             lixa_state_table_get_pathname(&this->tables[i]),
-                             iso_timestamp1,
-                             lixa_state_table_get_last_record_id(
-                                 &this->tables[i])));
-                LIXA_TRACE(("lixa_state_warm_start: state table file '%s' was "
-                            "synchronized at %s and is aligned with record id "
-                            LIXA_WORD_T_FORMAT "\n",
-                            lixa_state_table_get_pathname(&this->tables[i]),
-                            iso_timestamp1,
-                            lixa_state_table_get_last_record_id(
-                                &this->tables[i])));
+                    LIXA_SYSLOG((LOG_INFO, LIXA_SYSLOG_LXD071I,
+                                 lixa_state_table_get_pathname(
+                                     &this->tables[i]),
+                                 iso_timestamp1,
+                                 lixa_state_table_get_last_record_id(
+                                     &this->tables[i])));
+                    LIXA_TRACE(("lixa_state_warm_start: state table file '%s' "
+                                "was synchronized at %s and is aligned with "
+                                "record id " LIXA_WORD_T_FORMAT "\n",
+                                lixa_state_table_get_pathname(
+                                    &this->tables[i]),
+                                iso_timestamp1,
+                                lixa_state_table_get_last_record_id(
+                                    &this->tables[i])));
+                } /* if (STATE_TABLE_OPENED == */
             } /* if (table_exists[i]) */
             if (log_exists[i]) {
                 if (LIXA_RC_OK != (ret_cod = lixa_state_log_open_file(
@@ -679,6 +684,8 @@ int lixa_state_warm_start(lixa_state_t *this,
                 lixa_state_table_get_status(&this->tables[i]) !=
                 STATE_TABLE_OPENED)
                 continue;
+            if (last_table == -1)
+                last_table = i;
             succ = lixa_state_common_succ_state(i);
             if (!table_exists[succ] ||
                 lixa_state_table_get_status(&this->tables[succ]) !=
@@ -691,8 +698,10 @@ int lixa_state_warm_start(lixa_state_t *this,
                 lixa_state_table_get_last_sync(&this->tables[succ]));
             if (order < 0)
                 last_table = succ;
+            /* @@@ remove me
             else if (last_table == -1)
-                last_table = i; 
+                last_table = i;
+            */
             else
                 break; /* youngest already reached */
         } /* for (i=0; i<LIXA_STATE_TABLES; ++i) */

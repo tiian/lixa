@@ -502,13 +502,14 @@ int lixa_state_table_sync_block(lixa_state_table_t *this,
     TRY {
         if (NULL == this)
             THROW(NULL_OBJECT);
+        /* @@@ remove me
         if (LIXA_RC_OK != (
                 ret_cod = lixa_state_slot_sync(&this->map[block_id])))
             THROW(STATE_SLOT_SYNC);
         LIXA_TRACE(("lixa_state_table_sync_block: block_id=" UINT32_T_FORMAT
                     ", CRC32=" UINT32_T_XFORMAT "\n", block_id,
                     lixa_state_slot_get_crc32(&this->map[block_id])));
-        
+        */
         THROW(NONE);
     } CATCH {
         switch (excp) {
@@ -899,8 +900,10 @@ int lixa_state_table_extend(lixa_state_table_t *this,
         /* update free block list */
         this->map[0].sr.ctrl.first_free_block = curr_size;
         this->map[0].sr.ctrl.number_of_blocks = new_size;
+        /* @@@ remove me
         if (LIXA_RC_OK != (ret_cod = lixa_state_slot_sync(&this->map[0])))
             THROW(STATE_SLOT_SYNC);
+        */
         LIXA_TRACE(("lixa_state_table_extend: state table file '%s' of "
                     OFF_T_FORMAT " bytes mapped at address %p\n",
                     this->pathname, fd_stat.st_size, this->map));
@@ -1195,12 +1198,14 @@ int lixa_state_table_insert_block(lixa_state_table_t *this,
                     this->map[0].sr.ctrl.first_free_block,
                     this->map[0].sr.ctrl.first_used_block,
                     this->map[*block_id].sr.data.next_block));
+        /* @@@ remove me
         if (LIXA_RC_OK != (
                 ret_cod = lixa_state_slot_sync(&this->map[*block_id])))
             THROW(STATE_SLOT_SYNC1);
         if (LIXA_RC_OK != (
                 ret_cod = lixa_state_slot_sync(&this->map[0])))
             THROW(STATE_SLOT_SYNC2);
+        */
 #ifdef LIXA_DEBUG
         lixa_state_slot_trace_lists(this->map);
 #endif /* LIXA_DEBUG */
@@ -1324,23 +1329,29 @@ int lixa_state_table_delete_block(lixa_state_table_t *this,
                 this->map[ur].sr.data.next_block;
             tmp = 0;
             g_array_append_val(changed_block_ids, tmp);
+            /* @@@ remove me
             if (LIXA_RC_OK != (
                     ret_cod = lixa_state_slot_sync(&this->map[0])))
                 THROW(STATE_SLOT_SYNC1);
+            */
         } else {
             /* central or last block in used block list */
             this->map[ul].sr.data.next_block =
                 this->map[ur].sr.data.next_block;
             g_array_append_val(changed_block_ids, ul);
+            /* @@@ remove me
             if (LIXA_RC_OK != (
                     ret_cod = lixa_state_slot_sync(&this->map[ul])))
                 THROW(STATE_SLOT_SYNC2);
+            */
         }
         this->map[ur].sr.data.next_block = 0;
         g_array_append_val(changed_block_ids, ur);
+        /* @@@ remove me
         if (LIXA_RC_OK != (
                 ret_cod = lixa_state_slot_sync(&this->map[ur])))
             THROW(STATE_SLOT_SYNC3);
+        */
 
         /* insert block in free block list */
         if (fl == 0) {
@@ -1349,28 +1360,36 @@ int lixa_state_table_delete_block(lixa_state_table_t *this,
                 /* list is not empty */
                 this->map[ur].sr.data.next_block = fr;
                 g_array_append_val(changed_block_ids, ur);
+                /* @@@ remove me
                 if (LIXA_RC_OK != (
                         ret_cod = lixa_state_slot_sync(&this->map[ur])))
                     THROW(STATE_SLOT_SYNC4);
+                */
             }
             this->map[0].sr.ctrl.first_free_block = ur;
             tmp = 0;
             g_array_append_val(changed_block_ids, tmp);
+            /* @@@ remove me
             if (LIXA_RC_OK != (
                     ret_cod = lixa_state_slot_sync(&this->map[0])))
                 THROW(STATE_SLOT_SYNC5);
+            */
         } else {
             /* insertion happens in the middle or at list tail */
             this->map[ur].sr.data.next_block = fr;
             g_array_append_val(changed_block_ids, ur);
+            /* @@@ remove me
             if (LIXA_RC_OK != (
                     ret_cod = lixa_state_slot_sync(&this->map[ur])))
                 THROW(STATE_SLOT_SYNC6);
+            */
             this->map[fl].sr.data.next_block = ur;
             g_array_append_val(changed_block_ids, fl);
+            /* @@@ remove me
             if (LIXA_RC_OK != (
                     ret_cod = lixa_state_slot_sync(&this->map[fl])))
                 THROW(STATE_SLOT_SYNC7);
+            */
         }
         
 #ifdef LIXA_DEBUG
@@ -1490,10 +1509,10 @@ int lixa_state_table_copy_from(lixa_state_table_t *this,
         /* copy the content */
         memcpy(this->map, source->map, (size_t)fd_stat_source.st_size);
         /* @@@ remove me after debugging
-           checking integrity of target table */
+           checking integrity of target table
         if (LIXA_RC_OK != (ret_cod = lixa_state_table_check_integrity(this)))
             THROW(CHECK_INTEGRITY);
-        
+        */
         THROW(NONE);
     } CATCH {
         switch (excp) {
@@ -1539,8 +1558,8 @@ int lixa_state_table_sync_map(lixa_state_table_t *this, int last_sync)
         NULL_OBJECT,
         TABLE_SET_STATUS1,
         GETTIMEOFDAY_ERROR,
-        STATE_TABLE_SLOT_SYNC_ERROR,
         FSTAT_ERROR,
+        STATE_TABLE_SLOT_SYNC_ERROR,
         MSYNC_ERROR,
         TABLE_SET_STATUS2,
         NONE
@@ -1553,6 +1572,7 @@ int lixa_state_table_sync_map(lixa_state_table_t *this, int last_sync)
         lixa_timer_t timer;
         long duration;
         lixa_state_slot_t *slot;
+        uint32_t i;
         
         if (NULL == this)
             THROW(NULL_OBJECT);
@@ -1568,8 +1588,6 @@ int lixa_state_table_sync_map(lixa_state_table_t *this, int last_sync)
         if (LIXA_RC_OK != (ret_cod = gettimeofday(
                                &slot->sr.ctrl.last_sync, NULL)))
             THROW(GETTIMEOFDAY_ERROR);
-        if (LIXA_RC_OK != (ret_cod = lixa_state_slot_sync(slot)))
-            THROW(STATE_TABLE_SLOT_SYNC_ERROR);
         
         if (0 != fstat(this->fd, &fd_stat))
             THROW(FSTAT_ERROR);
@@ -1577,6 +1595,13 @@ int lixa_state_table_sync_map(lixa_state_table_t *this, int last_sync)
         LIXA_TRACE(("lixa_state_table_sync_map: SYNCHING "
                     OFF_T_FORMAT " bytes to file '%s'\n", fd_stat.st_size,
                     this->pathname));
+        
+        /* synchronize all slots */
+        for (i=0; i<fd_stat.st_size/sizeof(lixa_state_slot_t); ++i) {
+            slot = &this->map[i];
+            if (LIXA_RC_OK != (ret_cod = lixa_state_slot_sync(slot)))
+                THROW(STATE_TABLE_SLOT_SYNC_ERROR);
+        }
         
         lixa_timer_start(&timer);
         if (0 != msync(this->map, fd_stat.st_size, MS_SYNC))
@@ -1655,9 +1680,11 @@ int lixa_state_table_set_last_record_id(lixa_state_table_t *this,
         if (NULL == this)
             THROW(NULL_OBJECT);
         this->map[0].sr.ctrl.last_record_id = last_record_id;
+        /* @@@ remove me
         if (LIXA_RC_OK != (
                 ret_cod = lixa_state_slot_sync(&this->map[0])))
             THROW(STATE_SLOT_SYNC);
+        */
         
         THROW(NONE);
     } CATCH {

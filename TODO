@@ -1,3 +1,8 @@
+Removed many lixa_state_slot_sync, but now it does not work anymore: 
+understand why! The patch after restart does not create a consistent file and
+it seems strange because patching re-creare the crc...
+
+
 Go on with debugging of 
   2: CT/1.2/0.0 server_xa_end (step=8)               ok
   3: CT/1.2/0.1 server_xa_end (step=8)               FAILED (ct_1_2.at:80)
