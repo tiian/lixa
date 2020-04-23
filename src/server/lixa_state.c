@@ -583,10 +583,9 @@ int lixa_state_warm_start(lixa_state_t *this,
         NULL_OBJECT,
         TABLE_OPEN_ERROR,
         CORRUPTED_STATUS_FILE,
-        TABLE_CHECK_INTEGRITY1,
         LOG_READ_FILE,
         TABLE_PATCH_SLOT,
-        TABLE_CHECK_INTEGRITY2,
+        TABLE_CHECK_INTEGRITY,
         TABLE_SET_STATUS1,
         STATE_TABLE_CLOSE_ERROR,
         TABLE_SET_STATUS2,
@@ -698,10 +697,6 @@ int lixa_state_warm_start(lixa_state_t *this,
                 lixa_state_table_get_last_sync(&this->tables[succ]));
             if (order < 0)
                 last_table = succ;
-            /* @@@ remove me
-            else if (last_table == -1)
-                last_table = i;
-            */
             else
                 break; /* youngest already reached */
         } /* for (i=0; i<LIXA_STATE_TABLES; ++i) */
@@ -717,10 +712,7 @@ int lixa_state_warm_start(lixa_state_t *this,
             last_record_id = lixa_state_table_get_last_record_id(
                 &this->tables[last_table]);
         }
-        /* @@@ remove me */
-        if (LIXA_RC_OK != (ret_cod = lixa_state_table_check_integrity(
-                               &this->tables[last_table])))
-            THROW(TABLE_CHECK_INTEGRITY1);
+        
         /* looping on all logs */
         i = last_table;
         do { /* looping on all logs using variable i */
@@ -802,10 +794,10 @@ int lixa_state_warm_start(lixa_state_t *this,
                                  &this->tables[last_table])));
             i = lixa_state_common_succ_state(i);
         } while (i != last_table);
-        /* @@@ remove me */
+        /* check the table is OK */
         if (LIXA_RC_OK != (ret_cod = lixa_state_table_check_integrity(
                                &this->tables[last_table])))
-            THROW(TABLE_CHECK_INTEGRITY2);
+            THROW(TABLE_CHECK_INTEGRITY);
 
         /* switch the status of the tables */
         for (i=0; i<LIXA_STATE_TABLES; ++i) {
@@ -874,10 +866,9 @@ int lixa_state_warm_start(lixa_state_t *this,
             case CORRUPTED_STATUS_FILE:
                 ret_cod = LIXA_RC_CORRUPTED_STATUS_FILE;
                 break;
-            case TABLE_CHECK_INTEGRITY1:
             case LOG_READ_FILE:
             case TABLE_PATCH_SLOT:
-            case TABLE_CHECK_INTEGRITY2:
+            case TABLE_CHECK_INTEGRITY:
             case SWITCH_ERROR:
             case STATE_LOG_CLOSE_ERROR:
                 break;
@@ -2138,7 +2129,6 @@ int lixa_state_mark_block(lixa_state_t *this, uint32_t block_id)
     enum Exception {
         NULL_OBJECT,
         BUFFER_OVERFLOW,
-        STATE_TABLE_SYNC_BLOCK_ERROR,
         TABLE_SET_STATUS_ERROR,
         LOG_SET_STATUS_ERROR,
         CHECK_LOG_ACTIONS_ERROR,
@@ -2175,11 +2165,6 @@ int lixa_state_mark_block(lixa_state_t *this, uint32_t block_id)
         /* keep track of the passed block_id */
         if (!already_in_array)
             this->block_ids[this->number_of_block_ids++] = block_id;
-        /* sign the block in the state table */
-        if (LIXA_RC_OK != (
-                ret_cod = lixa_state_table_sync_block(
-                    &this->tables[this->active_state], block_id)))
-            THROW(STATE_TABLE_SYNC_BLOCK_ERROR);
         /* check if there is a state table and/or log that can be put in
            DISPOSED state */
         for (j1=0; j1<LIXA_STATE_TABLES; ++j1) {
@@ -2231,7 +2216,6 @@ int lixa_state_mark_block(lixa_state_t *this, uint32_t block_id)
             case BUFFER_OVERFLOW:
                 ret_cod = LIXA_RC_BUFFER_OVERFLOW;
                 break;
-            case STATE_TABLE_SYNC_BLOCK_ERROR:
             case TABLE_SET_STATUS_ERROR:
             case LOG_SET_STATUS_ERROR:
             case CHECK_LOG_ACTIONS_ERROR:

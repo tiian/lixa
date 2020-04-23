@@ -172,17 +172,6 @@ extern "C" {
 
     
     /**
-     * Synchronize (and sign) a block in the state table
-     * @param[in,out] this state table object
-     * @param[in] block_id to be signed
-     * @return a reason code
-     */
-    int lixa_state_table_sync_block(lixa_state_table_t *this,
-                                    uint32_t block_id);
-
-
-    
-    /**
      * Put the state table object in "closed" status
      * @param[in,out] this state table object
      * @return a reason code
