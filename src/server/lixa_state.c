@@ -1512,6 +1512,8 @@ int lixa_state_flush_log_records(lixa_state_t *this, int switch_after_write)
         /* reset the buffer */
         memset(this->log_synchronizer.buffer, 0,
                number_of_pages * LIXA_SYSTEM_PAGE_SIZE);
+        LIXA_CRASH(LIXA_CRASH_POINT_SERVER_BLOCK_COPY,
+                   this->log_synchronizer.crash_count);
         /* loop on the number of records */
         pos_in_page = 0;
         filled_pages = 0;

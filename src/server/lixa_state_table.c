@@ -847,9 +847,9 @@ int lixa_state_table_extend(lixa_state_table_t *this,
         if (0 != fstat(this->fd, &fd_stat))
             THROW(FSTAT_ERROR2);
         /* map the state table file again */
-        if (NULL == (this->map = mmap(NULL, fd_stat.st_size,
-                                      PROT_READ | PROT_WRITE, MAP_SHARED,
-                                      this->fd, 0)))
+        if (MAP_FAILED == (this->map = mmap(NULL, fd_stat.st_size,
+                                            PROT_READ | PROT_WRITE, MAP_SHARED,
+                                            this->fd, 0)))
             THROW(MMAP_ERROR);
         /* update free block list */
         this->map[0].sr.ctrl.first_free_block = curr_size;
@@ -1587,6 +1587,10 @@ int lixa_state_table_patch_slot(lixa_state_table_t *this,
 {
     enum Exception {
         NULL_OBJECT,
+        FSTAT_ERROR,
+        MUNMAP_ERROR,
+        TRUNCATE_ERROR,
+        MMAP_ERROR,
         STATE_SLOT_SYNC,
         NONE
     } excp;
@@ -1595,8 +1599,36 @@ int lixa_state_table_patch_slot(lixa_state_table_t *this,
     LIXA_TRACE(("lixa_state_table_patch_slot(block_id=" UINT32_T_FORMAT ")\n",
                 block_id));
     TRY {
+        struct stat fd_stat;
+        uint32_t curr_size, new_size;
+        
         if (NULL == this || NULL == sr)
             THROW(NULL_OBJECT);
+        
+        /* retrieve current size */
+        if (0 != fstat(this->fd, &fd_stat))
+            THROW(FSTAT_ERROR);
+        /* check the file is big enough... */
+        curr_size = fd_stat.st_size / sizeof(lixa_state_slot_t);
+        if (block_id >= curr_size)
+            new_size = block_id+1;
+        else
+            new_size = curr_size;
+        /* if necessary, extend the file */
+        if (new_size != curr_size) {
+            if (0 != munmap(this->map, fd_stat.st_size))
+                THROW(MUNMAP_ERROR);
+            this->map = NULL;
+            /* extend the file */
+            if (0 != ftruncate(this->fd, new_size*sizeof(lixa_state_slot_t)))
+                THROW(TRUNCATE_ERROR);
+            /* map the state table file again */
+            if (MAP_FAILED == (
+                    this->map = mmap(NULL, fd_stat.st_size,
+                                     PROT_READ | PROT_WRITE, MAP_SHARED,
+                                     this->fd, 0)))
+                THROW(MMAP_ERROR);
+        }
         /* replacing the content */
         memcpy(&this->map[block_id].sr, sr, sizeof(lixa_state_record_t));
         /* resyncing the CRC of the record */
@@ -1609,6 +1641,18 @@ int lixa_state_table_patch_slot(lixa_state_table_t *this,
         switch (excp) {
             case NULL_OBJECT:
                 ret_cod = LIXA_RC_NULL_OBJECT;
+                break;
+            case FSTAT_ERROR:
+                ret_cod = LIXA_RC_FSTAT_ERROR;
+                break;
+            case TRUNCATE_ERROR:
+                ret_cod = LIXA_RC_TRUNCATE_ERROR;
+                break;
+            case MUNMAP_ERROR:
+                ret_cod = LIXA_RC_MUNMAP_ERROR;
+                break;
+            case MMAP_ERROR:
+                ret_cod = LIXA_RC_MMAP_ERROR;
                 break;
             case STATE_SLOT_SYNC:
                 break;
