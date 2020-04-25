@@ -524,8 +524,8 @@ int lixa_msg_trace_prepare(const struct lixa_msg_s *msg)
                         LIXA_TRACE(("lixa_msg_trace_prepare: body["
                                     "%s[%s[%s=%d,%s=0x%lx,"
                                     "%s=%d,%s=%d,%s=%d]]]\n",
-                                    LIXA_XML_MSG_TAG_XA_FORGET_EXECS,
-                                    LIXA_XML_MSG_TAG_XA_FORGET_EXEC,
+                                    LIXA_XML_MSG_TAG_XA_PREPARE_EXECS,
+                                    LIXA_XML_MSG_TAG_XA_PREPARE_EXEC,
                                     LIXA_XML_MSG_PROP_RMID,
                                     xa_prepare_exec->rmid,
                                     LIXA_XML_MSG_PROP_FLAGS,

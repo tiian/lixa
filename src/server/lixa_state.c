@@ -1417,6 +1417,7 @@ int lixa_state_flush_log_records(lixa_state_t *this, int switch_after_write)
         BUFFER_OVERFLOW1,
         BUFFER_OVERFLOW2,
         GETTIMEOFDAY_ERROR,
+        TABLE_SYNC_SLOT,
         INTERNAL_ERROR,
         FILE_SET_RESERVED,
         LOG_SET_STATUS,
@@ -1553,6 +1554,16 @@ int lixa_state_flush_log_records(lixa_state_t *this, int switch_after_write)
                 (const byte_t *)log_record,
                 sizeof(struct lixa_state_log_record_s));
             */
+            
+            /* @@@ does it work?!
+               synchronize the slot in the state table: this is a "soft"
+               synchronization that mimic the behaviour of the TRADITIONAL
+               engine when a software crash (lixad) happens, but the operating
+               system survives */
+            if (LIXA_RC_OK != (ret_cod = lixa_state_table_sync_slot(
+                                   &this->tables[this->active_state],
+                                   this->block_ids[r])))
+                THROW(TABLE_SYNC_SLOT);
             pos_in_page++;
             if (pos_in_page % LIXA_STATE_LOG_RECORDS_PER_PAGE == 0) {
                 pos_in_page = 0;
@@ -1624,6 +1635,8 @@ int lixa_state_flush_log_records(lixa_state_t *this, int switch_after_write)
                 break;
             case GETTIMEOFDAY_ERROR:
                 ret_cod = LIXA_RC_GETTIMEOFDAY_ERROR;
+                break;
+            case TABLE_SYNC_SLOT:
                 break;
             case INTERNAL_ERROR:
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
@@ -2452,8 +2465,6 @@ void *lixa_state_async_table_flusher(void *data)
                 STATE_FLUSHER_LAST_FLUSH == table_synchronizer->operation) {
                 /* flush the data to file */
                 if (table_synchronizer->to_be_flushed) {
-                    LIXA_CRASH(LIXA_CRASH_POINT_SERVER_BEFORE_MSYNC,
-                               table_synchronizer->crash_count);
                     /* perform flushing */
                     if (LIXA_RC_OK != (
                             ret_cod = lixa_state_table_sync_map(
@@ -2461,8 +2472,6 @@ void *lixa_state_async_table_flusher(void *data)
                                 STATE_FLUSHER_LAST_FLUSH ==
                                 table_synchronizer->operation)))
                         THROW(TABLE_SYNC_MAP_ERROR);
-                    LIXA_CRASH(LIXA_CRASH_POINT_SERVER_AFTER_MSYNC,
-                               table_synchronizer->crash_count);
                 } else {
                     /* this is an internal error, it should never happen */
                     LIXA_TRACE(("lixa_state_async_table_flusher: internal "
@@ -2601,6 +2610,8 @@ void *lixa_state_async_log_flusher(void *data)
             if (STATE_FLUSHER_FLUSH == log_synchronizer->operation) {
                 /* flush the data to file */
                 if (log_synchronizer->to_be_flushed) {
+                    LIXA_CRASH(LIXA_CRASH_POINT_SERVER_BEFORE_MSYNC,
+                               log_synchronizer->crash_count);
                     if (LIXA_RC_OK != (
                             ret_cod = lixa_state_log_write(
                                 log_synchronizer->log,
@@ -2608,6 +2619,8 @@ void *lixa_state_async_log_flusher(void *data)
                                 log_synchronizer->number_of_pages,
                                 log_synchronizer->switch_after_write)))
                         THROW(LOG_FILE_WRITE_ERROR);
+                    LIXA_CRASH(LIXA_CRASH_POINT_SERVER_AFTER_MSYNC,
+                               log_synchronizer->crash_count);
                 } else {
                     /* this is an internal error, it should never happen */
                     LIXA_TRACE(("lixa_state_async_log_flusher: internal "

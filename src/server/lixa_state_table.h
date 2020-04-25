@@ -410,6 +410,16 @@ extern "C" {
                                     const lixa_state_record_t *sr);
 
     
+    /**
+     * Synchronize (and sign) a slot in the state table
+     * @param[in,out] this state table object
+     * @param[in] block_id of the slot to be signed
+     * @return a reason code
+     */
+    int lixa_state_table_sync_slot(lixa_state_table_t *this,
+                                   uint32_t block_id);
+
+    
     
 #ifdef __cplusplus
 }

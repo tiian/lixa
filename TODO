@@ -1,3 +1,10 @@
+Test again everything but CT: if yes, remove the comment @@@ does it work,
+else think about removing call to lixa_state_table_sync_slot
+
+CT: the client get error at different time due to server async journal :) :(
+
+Rename LIXA_CRASH_POINT_SERVER_BEFORE_MSYNC with BEFORE_SYNC, more generic if used even with journal
+
 Crash tests related to synchronization must be completely reviewed for 
 MODE=JOURNAL because there's no direct way to force lixa_state switch and/or
 lixa_state flush for state table and state log...
