@@ -206,7 +206,7 @@ int lixa_state_table_create_new_file(lixa_state_table_t *this,
             if (sizeof(tmp_slot) != write(
                     this->fd, &tmp_slot, sizeof(tmp_slot)))
                 THROW(WRITE_ERROR);
-        }
+        } /* for (i = 0; i < number_of_blocks; ++i) */
         /* set new status */
         if (LIXA_RC_OK != (ret_cod = lixa_state_table_set_status(
                                this, STATE_TABLE_FORMATTED, FALSE)))
@@ -1550,6 +1550,7 @@ int lixa_state_table_set_last_record_id(lixa_state_table_t *this,
 {
     enum Exception {
         NULL_OBJECT,
+        STATE_SLOT_SYNC,
         NONE
     } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
@@ -1560,12 +1561,17 @@ int lixa_state_table_set_last_record_id(lixa_state_table_t *this,
         if (NULL == this)
             THROW(NULL_OBJECT);
         this->map[0].sr.ctrl.last_record_id = last_record_id;
+        if (LIXA_RC_OK != (
+                ret_cod = lixa_state_slot_sync(&this->map[0])))
+            THROW(STATE_SLOT_SYNC);
         
         THROW(NONE);
     } CATCH {
         switch (excp) {
             case NULL_OBJECT:
                 ret_cod = LIXA_RC_NULL_OBJECT;
+                break;
+            case STATE_SLOT_SYNC:
                 break;
             case NONE:
                 ret_cod = LIXA_RC_OK;

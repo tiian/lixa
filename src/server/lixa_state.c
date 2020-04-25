@@ -1418,6 +1418,7 @@ int lixa_state_flush_log_records(lixa_state_t *this, int switch_after_write)
         BUFFER_OVERFLOW2,
         GETTIMEOFDAY_ERROR,
         TABLE_SYNC_SLOT,
+        TABLE_SET_LAST_RECORD_ID,
         INTERNAL_ERROR,
         FILE_SET_RESERVED,
         LOG_SET_STATUS,
@@ -1441,6 +1442,7 @@ int lixa_state_flush_log_records(lixa_state_t *this, int switch_after_write)
         struct timeval timestamp;
         lixa_timer_t timer;
         long duration;
+        lixa_word_t last_record_id = 0;
 
         if (NULL == this)
             THROW(NULL_OBJECT);
@@ -1555,11 +1557,11 @@ int lixa_state_flush_log_records(lixa_state_t *this, int switch_after_write)
                 sizeof(struct lixa_state_log_record_s));
             */
             
-            /* @@@ does it work?!
-               synchronize the slot in the state table: this is a "soft"
+            /* synchronize the slot in the state table: this is a "soft"
                synchronization that mimic the behaviour of the TRADITIONAL
                engine when a software crash (lixad) happens, but the operating
                system survives */
+            last_record_id = log_record->id;
             if (LIXA_RC_OK != (ret_cod = lixa_state_table_sync_slot(
                                    &this->tables[this->active_state],
                                    this->block_ids[r])))
@@ -1570,6 +1572,12 @@ int lixa_state_flush_log_records(lixa_state_t *this, int switch_after_write)
                 filled_pages++;
             }
         } /* for (r=0; r<number_of_records_to_be_flushed; ++r) */
+        /* update the last_record_id in the state table */
+        if (0 != last_record_id &&
+            LIXA_RC_OK != (ret_cod = lixa_state_table_set_last_record_id(
+                               &this->tables[this->active_state],
+                               last_record_id)))
+            THROW(TABLE_SET_LAST_RECORD_ID);
         /* ask to flusher thread to perform the flushing */
         LIXA_TRACE(("lixa_state_flush_log_records: asking flusher thread to "
                     "flush the buffer to file (switch_after_write=%d)\n",
@@ -1637,6 +1645,7 @@ int lixa_state_flush_log_records(lixa_state_t *this, int switch_after_write)
                 ret_cod = LIXA_RC_GETTIMEOFDAY_ERROR;
                 break;
             case TABLE_SYNC_SLOT:
+            case TABLE_SET_LAST_RECORD_ID:
                 break;
             case INTERNAL_ERROR:
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
