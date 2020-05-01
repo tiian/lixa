@@ -471,10 +471,12 @@ int lixa_state_cold_start(lixa_state_t *this)
         NULL_OBJECT,
         UNLINK_ERROR1,
         TABLE_CREATE_NEW_FILE1,
-        TABLE_MAP,
+        TABLE_MAP1,
+        FLUSH_TABLE,
         TABLE_SYNCHRONIZE,
         UNLINK_ERROR2,
         TABLE_CREATE_NEW_FILE2,
+        TABLE_MAP2,
         UNLINK_ERROR3,
         LOG_CREATE_NEW_FILE,
         NONE
@@ -501,6 +503,17 @@ int lixa_state_cold_start(lixa_state_t *this)
                          lixa_state_table_get_pathname(&this->tables[0])));
             THROW(TABLE_CREATE_NEW_FILE1);
         }
+        if (LIXA_RC_OK != (
+                ret_cod = (lixa_state_table_map(&this->tables[0], FALSE)))) {
+            LIXA_SYSLOG((LOG_ERR, LIXA_SYSLOG_LXD057E,
+                         lixa_state_table_get_pathname(&this->tables[0])));
+            THROW(TABLE_MAP1);
+        }
+        /* set current state files */
+        this->active_state = 0;
+        /* flush and then close first state table */
+        if (LIXA_RC_OK != (ret_cod = lixa_state_flush_table(this, FALSE)))
+            THROW(FLUSH_TABLE);
         /* create second state table, but don't sync and close it */
         LIXA_SYSLOG((LOG_INFO, LIXA_SYSLOG_LXD044I,
                      lixa_state_table_get_pathname(&this->tables[1])));
@@ -520,7 +533,7 @@ int lixa_state_cold_start(lixa_state_t *this)
                 ret_cod = (lixa_state_table_map(&this->tables[1], FALSE)))) {
             LIXA_SYSLOG((LOG_ERR, LIXA_SYSLOG_LXD057E,
                          lixa_state_table_get_pathname(&this->tables[1])));
-            THROW(TABLE_MAP);
+            THROW(TABLE_MAP2);
         }
         /* create second state log */
         LIXA_SYSLOG((LOG_INFO, LIXA_SYSLOG_LXD047I,
@@ -556,8 +569,10 @@ int lixa_state_cold_start(lixa_state_t *this)
                 ret_cod = LIXA_RC_UNLINK_ERROR;
                 break;
             case TABLE_CREATE_NEW_FILE1:
+            case TABLE_MAP1:
+            case FLUSH_TABLE:
             case TABLE_CREATE_NEW_FILE2:
-            case TABLE_MAP:
+            case TABLE_MAP2:
             case TABLE_SYNCHRONIZE:
             case LOG_CREATE_NEW_FILE:
                 break;
@@ -1934,6 +1949,7 @@ int lixa_state_switch(lixa_state_t *this, lixa_word_t last_record_id)
     enum Exception {
         NULL_OBJECT,
         TABLE_CREATE_NEW_FILE,
+        TABLE_MAP,
         SET_LAST_RECORD_ID,
         SET_STATUS1,
         SET_STATUS2,
@@ -1955,6 +1971,9 @@ int lixa_state_switch(lixa_state_t *this, lixa_word_t last_record_id)
         /* check object is not null */
         if (NULL == this)
             THROW(NULL_OBJECT);
+        LIXA_TRACE(("lixa_state_switch: switching from state table %d to "
+                    "table %d\n", this->active_state,
+                    lixa_state_get_next_state(this)));
         /* has next state table to be created and formatted? */
         if (STATE_TABLE_UNDEFINED == lixa_state_table_get_status(
                 &this->tables[lixa_state_get_next_state(this)])) {
@@ -1963,9 +1982,18 @@ int lixa_state_switch(lixa_state_t *this, lixa_word_t last_record_id)
                         &this->tables[lixa_state_get_next_state(this)],
                         LIXA_STATE_TABLE_INIT_SIZE)))
                 THROW(TABLE_CREATE_NEW_FILE);
+            /* @@@ remove me
+            if (LIXA_RC_OK != (
+                    ret_cod = (
+                        lixa_state_table_map(
+                            &this->tables[lixa_state_get_next_state(this)],
+                            FALSE)))) {
+                THROW(TABLE_MAP);
+            }
+            */
         }
-        /* put in state table header a reference to the last record that has
-           been for sure flushed by the state log */
+        /* put in current state table header a reference to the last record
+         * that has been for sure flushed by the state log */
         if (LIXA_RC_OK != (
                 ret_cod = lixa_state_table_set_last_record_id(
                     &this->tables[this->active_state], last_record_id)))
@@ -1985,9 +2013,6 @@ int lixa_state_switch(lixa_state_t *this, lixa_word_t last_record_id)
                     STATE_TABLE_COPY_TARGET, FALSE)))
             THROW(SET_STATUS2);
         /* copy to target (next) from source (current) */
-        LIXA_TRACE(("lixa_state_switch: copy content from table %d to "
-                    "table %d\n", this->active_state,
-                    lixa_state_get_next_state(this)));
         if (LIXA_RC_OK != (ret_cod = lixa_state_table_copy_from(
                                &this->tables[lixa_state_get_next_state(this)],
                                &this->tables[this->active_state])))
@@ -2039,6 +2064,8 @@ int lixa_state_switch(lixa_state_t *this, lixa_word_t last_record_id)
             case NULL_OBJECT:
                 ret_cod = LIXA_RC_NULL_OBJECT;
                 break;
+            case TABLE_CREATE_NEW_FILE:
+            case TABLE_MAP:
             case SET_LAST_RECORD_ID:
             case SET_STATUS1:
             case SET_STATUS2:
@@ -2153,6 +2180,7 @@ int lixa_state_mark_block(lixa_state_t *this, uint32_t block_id)
     enum Exception {
         NULL_OBJECT,
         BUFFER_OVERFLOW,
+        TABLE_SYNC_SLOT,
         TABLE_SET_STATUS_ERROR,
         LOG_SET_STATUS_ERROR,
         CHECK_LOG_ACTIONS_ERROR,
@@ -2180,12 +2208,19 @@ int lixa_state_mark_block(lixa_state_t *this, uint32_t block_id)
                         this->size_of_block_ids));
             THROW(BUFFER_OVERFLOW);
         }
-        /* check if block_id is already in array */
+        /* check if block_id is already in array: this linear search could
+           be improved using a tree instead of an array, but the optimization
+           dependes on the real size of the list... */
         for (i=0; i<this->number_of_block_ids; ++i)
             if (this->block_ids[i] == block_id) {
                 already_in_array = TRUE;                
                 break;
             }
+        /* synchronize CRC32 in the event of soft crash and restart */
+        if (LIXA_RC_OK != (ret_cod = lixa_state_table_sync_slot(
+                               &this->tables[this->active_state],
+                               block_id)))
+            THROW(TABLE_SYNC_SLOT);
         /* keep track of the passed block_id */
         if (!already_in_array)
             this->block_ids[this->number_of_block_ids++] = block_id;
@@ -2240,6 +2275,7 @@ int lixa_state_mark_block(lixa_state_t *this, uint32_t block_id)
             case BUFFER_OVERFLOW:
                 ret_cod = LIXA_RC_BUFFER_OVERFLOW;
                 break;
+            case TABLE_SYNC_SLOT:
             case TABLE_SET_STATUS_ERROR:
             case LOG_SET_STATUS_ERROR:
             case CHECK_LOG_ACTIONS_ERROR:

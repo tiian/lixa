@@ -247,6 +247,11 @@
  * socket has been closed
  */
 #define LIXA_RC_MSG_TIMEOUT_SOCKET_CLOSED       -32
+/**
+ * The magic number in the state file is not valid for the current version of
+ * the state engine
+ */
+#define LIXA_RC_INVALID_MAGIC_NUMBER            -33
 
 
 

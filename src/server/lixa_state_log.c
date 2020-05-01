@@ -196,6 +196,7 @@ int lixa_state_log_shutdown(lixa_state_log_t *this)
             if (-1 == close(this->fd)) {
                 THROW(CLOSE_ERROR);
             }
+            this->fd = LIXA_NULL_FD;
         } /* if (LIXA_NULL_FD != this->fd) */
                 
         THROW(NONE);

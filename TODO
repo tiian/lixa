@@ -1,21 +1,22 @@
+8: XTA/8.1/4.1 automatic recovery                  FAILED (xta_8_1.at:203)
+
+Restart checking after overall signature add...
+
+ 47: CT/1.0/3.0 preparing recovery pending           ok
+ 48: CT/1.0/3.1 server_recovery (step=24)            FAILED (ct_1_0.at:308)
+
 CT: the client get error at different time due to server async journal :) :( and it's a random behaviour, because async!!!
 
-Rename LIXA_CRASH_POINT_SERVER_BEFORE_MSYNC with BEFORE_SYNC, more generic if used even with journal
+Create new case tests in journal node, scratching the last state table file
+and forcing restart from previous table and log instead of from last table
 
-Crash tests related to synchronization must be completely reviewed for 
-MODE=JOURNAL because there's no direct way to force lixa_state switch and/or
-lixa_state flush for state table and state log...
+Rename LIXA_CRASH_POINT_SERVER_BEFORE_MSYNC with BEFORE_SYNC, more generic if used even with journal
 
 LIXA_CRASH_POINT_SERVER_BLOCK_COPY in copy blocks for journal
 
 LIXA_CRASH_POINT_SERVER_BEFORE_WRITE
 LIXA_CRASH_POINT_SERVER_AFTER_WRITE
 to be put in lixa_state_async_log_flusher and to be implemented in the case tests
-
-
-Reproduce the LIXA_CRASH point of TRADITIONAL in JOURNAL:
-- server_thread_status.c: put around mmap, the same should be done around
-  log flushing with test cases duplication :(
 
 Restore original test order in ct.at and testsuite.at
 

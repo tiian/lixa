@@ -72,33 +72,40 @@ struct status_record_ctrl_s
      * It's the signature of the first 4 bytes and can be used
      * by "file" utility to discover a file is a lixa status file
      */
-    uint32_t magic_number;
+    uint32_t       magic_number;
     /**
      * Used to distinguish status files produced and used by different
      * versions of the software
      */
-    uint32_t level;
+    uint32_t       level;
     /**
-     * Timestamp (seconds and microseconds) of the last sync operation
+     * TRADITIONAL engine: timestamp (seconds and microseconds) of the last
+     * sync operation <br>
+     * JOURNAL engine: timestamp (seconds and microseconds) of the last update
      */
     struct timeval last_sync;
     /**
      * Last record ID persisted in the state log
      */
-    lixa_word_t last_record_id;
+    lixa_word_t    last_record_id;
+    /**
+     * Overall checksum: checksum of all checksums; used only with
+     * JOURNAL mode (superfast engine)
+     */
+    uint32_t       checksum;
     /**
      * The total number of blocks kept by the status file. The control block
-     * itself (block_id = 0) is computed.
+     * itself (block_id = 0) is computed as well.
      */
-    uint32_t number_of_blocks;
+    uint32_t       number_of_blocks;
     /**
      * First record of the used blocks chain (0 means the chain is empty)
      */
-    uint32_t first_used_block;
+    uint32_t       first_used_block;
     /**
      * First record of the free blocks chain (0 means the chain is empty)
      */
-    uint32_t first_free_block;
+    uint32_t       first_free_block;
 };
 
 

@@ -1,5 +1,15 @@
 LOG:
-
+	   1.9.0 Added new state engine for the state server (lixad)
+		 Set a new environment variable to choose the state engine
+		 export LIXA_STATE_ENGINE=TRADITIONAL
+		 for the traditional state engine (default),
+		 export LIXA_STATE_ENGINE=JOURNAL
+		 for the new journal based state engine.
+		 New capabilities of the state engine:
+		 - RPO=0 in the event of lixad crash, for any reason, but
+		   Linux operating system survival
+		 - 2 order of magnitude smaller latency in comparison with the
+		   traditional state engine
 2019-05-12 1.7.8 Added (client) connection timeout; default value = 5000 ms
 		 A new error message (LXC034E) is sent to the syslog in the
 		 event that the client doesn't get a reply before timeout

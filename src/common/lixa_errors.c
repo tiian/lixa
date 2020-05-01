@@ -155,6 +155,9 @@ const char *lixa_strerror(int ret_cod)
         case LIXA_RC_MSG_TIMEOUT_SOCKET_CLOSED:
             return "ERROR: a message has not been received before timeout "
                 "expiration and the TCP socket has been closed";
+        case LIXA_RC_INVALID_MAGIC_NUMBER:
+            return "ERROR: the magic number in the state file is not valid "
+                "for the current version of the state engine";
         case LIXA_RC_RM_ERROR:
             return "ERROR: generic errof for a Resource Manager operation";
         case LIXA_RC_TX_FAIL:

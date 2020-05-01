@@ -207,6 +207,7 @@ int lixa_state_table_create_new_file(lixa_state_table_t *this,
                     this->fd, &tmp_slot, sizeof(tmp_slot)))
                 THROW(WRITE_ERROR);
         } /* for (i = 0; i < number_of_blocks; ++i) */
+
         /* set new status */
         if (LIXA_RC_OK != (ret_cod = lixa_state_table_set_status(
                                this, STATE_TABLE_FORMATTED, FALSE)))
@@ -273,6 +274,7 @@ int lixa_state_table_open_file(lixa_state_table_t *this)
     TRY {
         struct stat fd_stat;
         enum lixa_state_table_status_e new_status;
+        uint32_t number_of_slots;
         
         if (NULL == this)
             THROW(NULL_OBJECT);
@@ -296,6 +298,7 @@ int lixa_state_table_open_file(lixa_state_table_t *this)
         /* retrieve file size */
         if (0 != fstat(this->fd, &fd_stat))
             THROW(FSTAT_ERROR);
+        number_of_slots = fd_stat.st_size/sizeof(lixa_state_slot_t);
         /* map the file */
         if (MAP_FAILED == (
                 this->map = mmap(
@@ -304,8 +307,9 @@ int lixa_state_table_open_file(lixa_state_table_t *this)
                     this->fd, 0)))
             THROW(MMAP_ERROR);
         LIXA_TRACE(("lixa_state_table_open_file: state table file '%s' mapped "
-                    "at address %p\n", this->pathname, this->map));
-
+                    "at address %p, number_of_slots=" UINT32_T_FORMAT "\n",
+                    this->pathname, this->map, number_of_slots));
+            
         /* analyze the content */
         ret_cod = lixa_state_table_check_integrity(this);
         if (LIXA_RC_OK == ret_cod)
@@ -359,7 +363,10 @@ int lixa_state_table_check_integrity(lixa_state_table_t *this)
 {
     enum Exception {
         NULL_OBJECT,
+        INVALID_MAGIC_NUMBER,
         CRC_DOES_NOT_MATCH1,
+        REFRESH_CHECKSUMS,
+        OVERALL_CRC_DOES_NOT_MATCH,
         CRC_DOES_NOT_MATCH2,
         DAMAGED_CHAINS,
         NONE
@@ -380,13 +387,6 @@ int lixa_state_table_check_integrity(lixa_state_table_t *this)
         first_slot = &this->map[0];
         tmp_crc32 = lixa_crc32((const uint8_t *)&first_slot->sr,
                                sizeof(lixa_state_record_t));
-        if (tmp_crc32 != first_slot->crc32) {
-            LIXA_TRACE(("lixa_state_table_check_integrity: the CRC of the "
-                        "first block does not match: current=" UINT32_T_XFORMAT
-                        ", expected=" UINT32_T_XFORMAT "\n", tmp_crc32,
-                        first_slot->crc32));
-            THROW(CRC_DOES_NOT_MATCH1);
-        }
         LIXA_TRACE(("lixa_state_table_check_integrity:"
                     " first block content:\n"));
         LIXA_TRACE(("lixa_state_table_check_integrity:"
@@ -403,6 +403,9 @@ int lixa_state_table_check_integrity(lixa_state_table_t *this)
                     "   [last_record_id] = " LIXA_WORD_T_FORMAT "\n",
                     first_slot->sr.ctrl.last_record_id));
         LIXA_TRACE(("lixa_state_table_check_integrity:"
+                    "   [checksum] = " UINT32_T_XFORMAT "\n",
+                    first_slot->sr.ctrl.checksum));
+        LIXA_TRACE(("lixa_state_table_check_integrity:"
                     "   [number_of_blocks] = " UINT32_T_FORMAT "\n",
                     first_slot->sr.ctrl.number_of_blocks));
         LIXA_TRACE(("lixa_state_table_check_integrity:"
@@ -411,6 +414,31 @@ int lixa_state_table_check_integrity(lixa_state_table_t *this)
         LIXA_TRACE(("lixa_state_table_check_integrity:"
                     "   [first_free_block] = " UINT32_T_FORMAT "\n",
                     first_slot->sr.ctrl.first_free_block));
+        if (STATUS_FILE_MAGIC_NUMBER != first_slot->sr.ctrl.magic_number) {
+            LIXA_TRACE(("lixa_state_table_check_integrity: invalid magic "
+                        "number, it should be " UINT32_T_FORMAT "\n",
+                        STATUS_FILE_MAGIC_NUMBER));
+            THROW(INVALID_MAGIC_NUMBER);
+        }
+        if (tmp_crc32 != first_slot->crc32) {
+            LIXA_TRACE(("lixa_state_table_check_integrity: the CRC of the "
+                        "first block does not match: computed="
+                        UINT32_T_XFORMAT ", in file=" UINT32_T_XFORMAT "\n",
+                        tmp_crc32, first_slot->crc32));
+            THROW(CRC_DOES_NOT_MATCH1);
+        }
+        /* refresh the overall checksum */
+        if (LIXA_RC_OK != (ret_cod = lixa_state_table_refresh_checksums(
+                               this, first_slot->sr.ctrl.number_of_blocks)))
+            THROW(REFRESH_CHECKSUMS);
+        if (first_slot->sr.ctrl.checksum != this->checksums[0]) {
+            LIXA_TRACE(("lixa_state_table_check_integrity: the overall CRC "
+                        "does not match: current=" UINT32_T_XFORMAT
+                        ", expected=" UINT32_T_XFORMAT "\n",
+                        this->checksums[0],
+                        first_slot->sr.ctrl.checksum));
+            THROW(OVERALL_CRC_DOES_NOT_MATCH);
+        }   
         /* check data blocks */
         for (i=1; i<first_slot->sr.ctrl.number_of_blocks; ++i) {
             LIXA_TRACE(("lixa_state_table_check_integrity: checking block # "
@@ -468,10 +496,16 @@ int lixa_state_table_check_integrity(lixa_state_table_t *this)
             case NULL_OBJECT:
                 ret_cod = LIXA_RC_NULL_OBJECT;
                 break;
+            case INVALID_MAGIC_NUMBER:
+                ret_cod = LIXA_RC_INVALID_MAGIC_NUMBER;
+                break;
             case CRC_DOES_NOT_MATCH1:
+            case OVERALL_CRC_DOES_NOT_MATCH:
             case CRC_DOES_NOT_MATCH2:
             case DAMAGED_CHAINS:
                 ret_cod = LIXA_RC_OBJ_CORRUPTED;
+                break;
+            case REFRESH_CHECKSUMS:
                 break;
             case NONE:
                 ret_cod = LIXA_RC_OK;
@@ -547,6 +581,10 @@ int lixa_state_table_shutdown(lixa_state_table_t *this)
 {
     enum Exception {
         NULL_OBJECT,
+        STATE_SLOT_SYNC_ERROR1,
+        REFRESH_CHECKSUMS,
+        STATE_SLOT_SYNC_ERROR2,
+        MUNMAP_ERROR,
         CLOSE_ERROR,
         NONE
     } excp;
@@ -554,14 +592,55 @@ int lixa_state_table_shutdown(lixa_state_table_t *this)
     
     LIXA_TRACE(("lixa_state_table_shutdown\n"));
     TRY {
+        uint32_t i;
+        lixa_state_slot_t *slot;
+        
         if (NULL == this)
             THROW(NULL_OBJECT);
-
+                
+        /* unmap the table */
+        if (NULL != this->map) {
+            /*
+             * This synchronization allows a restart with RPO=0 in the event
+             * that proper shutdown is asked
+             */
+            /* synchronize all slots but the first one */
+            for (i=1; i<this->map[0].sr.ctrl.number_of_blocks; ++i) {
+                if (LIXA_RC_OK != (
+                        ret_cod = lixa_state_slot_sync(&this->map[i])))
+                    THROW(STATE_SLOT_SYNC_ERROR1);
+            }
+            /* refresh the array with the checksums */
+            if (LIXA_RC_OK != (
+                    ret_cod = lixa_state_table_refresh_checksums(
+                        this, this->map[0].sr.ctrl.number_of_blocks)))
+                THROW(REFRESH_CHECKSUMS);
+            /* update the overall checksum */
+            if (this->map[0].sr.ctrl.checksum != this->checksums[0]) {
+                this->map[0].sr.ctrl.checksum = this->checksums[0];
+                /* synchronize the first slot */
+                slot = &this->map[0];
+                if (LIXA_RC_OK != (ret_cod = lixa_state_slot_sync(slot)))
+                    THROW(STATE_SLOT_SYNC_ERROR2);
+            }
+            /* unmap the file */
+            LIXA_TRACE(("lixa_state_table_shutdown: unmapping fd=%d, "
+                        "from %p\n", this->fd, this->map));
+            if (0 != munmap(this->map, this->map[0].sr.ctrl.number_of_blocks
+                            * sizeof(lixa_state_slot_t)))
+                THROW(MUNMAP_ERROR);
+            this->map = NULL;
+        }
         /* close the file descriptor */
-        if (-1 == close(this->fd)) {
-            LIXA_SYSLOG((LOG_ERR, LIXA_SYSLOG_LXD046E,
-                         lixa_state_table_get_pathname(this)));
-            THROW(CLOSE_ERROR);
+        if (LIXA_NULL_FD != this->fd) {
+            LIXA_TRACE(("lixa_state_table_shutdown: closing fd=%d, '%s'\n",
+                        this->fd, this->pathname));
+            if (-1 == close(this->fd)) {
+                LIXA_SYSLOG((LOG_ERR, LIXA_SYSLOG_LXD046E,
+                             lixa_state_table_get_pathname(this)));
+                THROW(CLOSE_ERROR);
+            }
+            this->fd = LIXA_NULL_FD;
         }
         
         THROW(NONE);
@@ -569,6 +648,13 @@ int lixa_state_table_shutdown(lixa_state_table_t *this)
         switch (excp) {
             case NULL_OBJECT:
                 ret_cod = LIXA_RC_NULL_OBJECT;
+                break;
+            case STATE_SLOT_SYNC_ERROR1:
+            case REFRESH_CHECKSUMS:
+            case STATE_SLOT_SYNC_ERROR2:
+                break;
+            case MUNMAP_ERROR:
+                ret_cod = LIXA_RC_MUNMAP_ERROR;
                 break;
             case CLOSE_ERROR:
                 ret_cod = LIXA_RC_CLOSE_ERROR;
@@ -597,6 +683,8 @@ int lixa_state_table_map(lixa_state_table_t *this, int read_only)
         INVALID_STATUS,
         FSTAT_ERROR,
         MMAP_ERROR,
+        REFRESH_CHECKSUMS,
+        SYNC_SLOT,
         SET_STATUS,
         NONE
     } excp;
@@ -605,6 +693,7 @@ int lixa_state_table_map(lixa_state_table_t *this, int read_only)
     LIXA_TRACE(("lixa_state_table_map\n"));
     TRY {
         struct stat fd_stat;
+        uint32_t number_of_slots;
         
         if (NULL == this)
             THROW(NULL_OBJECT);
@@ -618,6 +707,7 @@ int lixa_state_table_map(lixa_state_table_t *this, int read_only)
         /* retrieve file size */
         if (0 != fstat(this->fd, &fd_stat))
             THROW(FSTAT_ERROR);
+        number_of_slots = fd_stat.st_size/sizeof(lixa_state_slot_t);
         /* map the file */
         if (NULL == (this->map =
                      mmap(NULL, fd_stat.st_size,
@@ -626,13 +716,23 @@ int lixa_state_table_map(lixa_state_table_t *this, int read_only)
                           this->fd, 0)))
             THROW(MMAP_ERROR);
         LIXA_TRACE(("lixa_state_table_map: state table file '%s' mapped at "
-                    "address %p\n", this->pathname, this->map));
-
+                    "address %p, number_of_slots=" UINT32_T_FORMAT "\n",
+                    this->pathname, this->map, number_of_slots));
+        /* refresh the array with the checksums */
+        if (LIXA_RC_OK != (ret_cod = lixa_state_table_refresh_checksums(
+                               this, number_of_slots)))
+            THROW(REFRESH_CHECKSUMS);
+        /* refresh the CRC of the first block */
+        if (this->map[0].sr.ctrl.checksum != this->checksums[0]) {
+            this->map[0].sr.ctrl.checksum = this->checksums[0];
+            if (LIXA_RC_OK != (ret_cod = lixa_state_table_sync_slot(this, 0)))
+                THROW(SYNC_SLOT);
+        }
         /* move status to USED */
         if (LIXA_RC_OK != (ret_cod = lixa_state_table_set_status(
                                this, STATE_TABLE_USED, FALSE)))
             THROW(SET_STATUS);
-        
+
         THROW(NONE);
     } CATCH {
         switch (excp) {
@@ -648,6 +748,8 @@ int lixa_state_table_map(lixa_state_table_t *this, int read_only)
             case MMAP_ERROR:
                 ret_cod = LIXA_RC_MMAP_ERROR;
                 break;
+            case REFRESH_CHECKSUMS:
+            case SYNC_SLOT:
             case SET_STATUS:
                 break;
             case NONE:
@@ -727,6 +829,8 @@ int lixa_state_table_clean(lixa_state_table_t *this)
         /* release allocated memory */
         if (NULL != this->pathname)
             free(this->pathname);
+        if (NULL != this->checksums)
+            free(this->checksums);
         /* reset everything, bye bye... */
         memset(this, 0, sizeof(lixa_state_table_t));
         
@@ -765,6 +869,7 @@ int lixa_state_table_extend(lixa_state_table_t *this,
         WRITE_ERROR,
         FSTAT_ERROR2,
         MMAP_ERROR,
+        REFRESH_CHECKSUMS,
         SET_STATUS2,
         NONE
     } excp;
@@ -855,8 +960,14 @@ int lixa_state_table_extend(lixa_state_table_t *this,
         this->map[0].sr.ctrl.first_free_block = curr_size;
         this->map[0].sr.ctrl.number_of_blocks = new_size;
         LIXA_TRACE(("lixa_state_table_extend: state table file '%s' of "
-                    OFF_T_FORMAT " bytes mapped at address %p\n",
-                    this->pathname, fd_stat.st_size, this->map));
+                    OFF_T_FORMAT " bytes mapped at address %p, "
+                    "number_of_slots=" UINT32_T_FORMAT "\n",
+                    this->pathname, fd_stat.st_size, this->map,
+                    this->map[0].sr.ctrl.number_of_blocks));
+        /* refresh overall checksum */
+        if (LIXA_RC_OK != (ret_cod = lixa_state_table_refresh_checksums(
+                               this, this->map[0].sr.ctrl.number_of_blocks)))
+            THROW(REFRESH_CHECKSUMS);       
         /* first block must be marked for change */
         tmp_block_id = 0;
         g_array_append_val(changed_block_ids, tmp_block_id);
@@ -903,6 +1014,7 @@ int lixa_state_table_extend(lixa_state_table_t *this,
             case MMAP_ERROR:
                 ret_cod = LIXA_RC_MMAP_ERROR;
                 break;
+            case REFRESH_CHECKSUMS:
             case SET_STATUS2:
                 break;
             case NONE:
@@ -1341,6 +1453,7 @@ int lixa_state_table_copy_from(lixa_state_table_t *this,
         FSTAT_ERROR3,
         INTERNAL_ERROR,
         MMAP_ERROR,
+        REFRESH_CHECKSUMS,
         NONE
     } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
@@ -1395,6 +1508,11 @@ int lixa_state_table_copy_from(lixa_state_table_t *this,
             THROW(MMAP_ERROR);
         /* copy the content */
         memcpy(this->map, source->map, (size_t)fd_stat_source.st_size);
+        /* refresh the array with the checksums */
+        if (LIXA_RC_OK != (ret_cod = lixa_state_table_refresh_checksums(
+                               this, fd_stat_source.st_size/
+                               sizeof(lixa_state_slot_t))))
+            THROW(REFRESH_CHECKSUMS);
         
         THROW(NONE);
     } CATCH {
@@ -1419,6 +1537,8 @@ int lixa_state_table_copy_from(lixa_state_table_t *this,
             case MMAP_ERROR:
                 ret_cod = LIXA_RC_MMAP_ERROR;
                 break;
+            case REFRESH_CHECKSUMS:
+                break;
             case NONE:
                 ret_cod = LIXA_RC_OK;
                 break;
@@ -1440,7 +1560,10 @@ int lixa_state_table_sync_map(lixa_state_table_t *this, int last_sync)
         TABLE_SET_STATUS1,
         GETTIMEOFDAY_ERROR,
         FSTAT_ERROR,
-        STATE_TABLE_SLOT_SYNC_ERROR,
+        OBJ_CORRUPTED,
+        STATE_SLOT_SYNC_ERROR1,
+        REFRESH_CHECKSUMS,
+        STATE_SLOT_SYNC_ERROR2,
         MSYNC_ERROR,
         TABLE_SET_STATUS2,
         NONE
@@ -1468,21 +1591,42 @@ int lixa_state_table_sync_map(lixa_state_table_t *this, int last_sync)
         slot = &this->map[0];
         if (LIXA_RC_OK != (ret_cod = gettimeofday(
                                &slot->sr.ctrl.last_sync, NULL)))
-            THROW(GETTIMEOFDAY_ERROR);
-        
+            THROW(GETTIMEOFDAY_ERROR); 
         if (0 != fstat(this->fd, &fd_stat))
             THROW(FSTAT_ERROR);
+
+        if (fd_stat.st_size/sizeof(lixa_state_slot_t) !=
+            this->map[0].sr.ctrl.number_of_blocks) {
+            LIXA_TRACE(("lixa_state_table_sync_map: file '%s' is " OFF_T_FORMAT
+                        " bytes long, but map is of " UINT32_T_FORMAT
+                        " slots (" OFF_T_FORMAT " bytes)\n",
+                        this->pathname, fd_stat.st_size,
+                        this->map[0].sr.ctrl.number_of_blocks,
+                        (off_t)this->map[0].sr.ctrl.number_of_blocks*
+                        sizeof(lixa_state_slot_t)));
+            THROW(OBJ_CORRUPTED);
+        }
         
         LIXA_TRACE(("lixa_state_table_sync_map: SYNCHING "
                     OFF_T_FORMAT " bytes to file '%s'\n", fd_stat.st_size,
                     this->pathname));
         
-        /* synchronize all slots */
-        for (i=0; i<fd_stat.st_size/sizeof(lixa_state_slot_t); ++i) {
+        /* synchronize all slots but the first one */
+        for (i=1; i<this->map[0].sr.ctrl.number_of_blocks; ++i) {
             slot = &this->map[i];
             if (LIXA_RC_OK != (ret_cod = lixa_state_slot_sync(slot)))
-                THROW(STATE_TABLE_SLOT_SYNC_ERROR);
+                THROW(STATE_SLOT_SYNC_ERROR1);
         }
+        /* refresh the array with the checksums */
+        if (LIXA_RC_OK != (ret_cod = lixa_state_table_refresh_checksums(
+                               this, this->map[0].sr.ctrl.number_of_blocks)))
+            THROW(REFRESH_CHECKSUMS);
+        /* update the overall checksum */
+        this->map[0].sr.ctrl.checksum = this->checksums[0];
+        /* synchronize the first slot */
+        slot = &this->map[0];
+        if (LIXA_RC_OK != (ret_cod = lixa_state_slot_sync(slot)))
+            THROW(STATE_SLOT_SYNC_ERROR2);
         
         lixa_timer_start(&timer);
         if (0 != msync(this->map, fd_stat.st_size, MS_SYNC))
@@ -1523,10 +1667,15 @@ int lixa_state_table_sync_map(lixa_state_table_t *this, int last_sync)
             case GETTIMEOFDAY_ERROR:
                 ret_cod = LIXA_RC_GETTIMEOFDAY_ERROR;
                 break;
-            case STATE_TABLE_SLOT_SYNC_ERROR:
+            case STATE_SLOT_SYNC_ERROR1:
+            case REFRESH_CHECKSUMS:
+            case STATE_SLOT_SYNC_ERROR2:
                 break;
             case FSTAT_ERROR:
                 ret_cod = LIXA_RC_FSTAT_ERROR;
+                break;
+            case OBJ_CORRUPTED:
+                ret_cod = LIXA_RC_OBJ_CORRUPTED;
                 break;
             case MSYNC_ERROR:
                 ret_cod = LIXA_RC_MSYNC_ERROR;
@@ -1550,6 +1699,7 @@ int lixa_state_table_set_last_record_id(lixa_state_table_t *this,
 {
     enum Exception {
         NULL_OBJECT,
+        GETTIMEOFDAY_ERROR,
         STATE_SLOT_SYNC,
         NONE
     } excp;
@@ -1558,11 +1708,17 @@ int lixa_state_table_set_last_record_id(lixa_state_table_t *this,
     LIXA_TRACE(("lixa_state_table_set_last_record_id(last_record_id="
                 LIXA_WORD_T_FORMAT ")\n", last_record_id));
     TRY {
+        struct timeval timestamp;
+        
         if (NULL == this)
             THROW(NULL_OBJECT);
+        /* retrieve the current timestamp */
+        if (0 != gettimeofday(&timestamp, NULL))
+            THROW(GETTIMEOFDAY_ERROR);
         this->map[0].sr.ctrl.last_record_id = last_record_id;
+        this->map[0].sr.ctrl.last_sync = timestamp;
         if (LIXA_RC_OK != (
-                ret_cod = lixa_state_slot_sync(&this->map[0])))
+                ret_cod = lixa_state_table_sync_slot(this, 0)))
             THROW(STATE_SLOT_SYNC);
         
         THROW(NONE);
@@ -1570,6 +1726,9 @@ int lixa_state_table_set_last_record_id(lixa_state_table_t *this,
         switch (excp) {
             case NULL_OBJECT:
                 ret_cod = LIXA_RC_NULL_OBJECT;
+                break;
+            case GETTIMEOFDAY_ERROR:
+                ret_cod = LIXA_RC_GETTIMEOFDAY_ERROR;
                 break;
             case STATE_SLOT_SYNC:
                 break;
@@ -1597,6 +1756,7 @@ int lixa_state_table_patch_slot(lixa_state_table_t *this,
         MUNMAP_ERROR,
         TRUNCATE_ERROR,
         MMAP_ERROR,
+        REFRESH_CHECKSUMS,
         STATE_SLOT_SYNC,
         NONE
     } excp;
@@ -1634,12 +1794,16 @@ int lixa_state_table_patch_slot(lixa_state_table_t *this,
                                      PROT_READ | PROT_WRITE, MAP_SHARED,
                                      this->fd, 0)))
                 THROW(MMAP_ERROR);
+            /* refresh the array with the checksums */
+            if (LIXA_RC_OK != (ret_cod = lixa_state_table_refresh_checksums(
+                                   this, new_size)))
+                THROW(REFRESH_CHECKSUMS);
         }
         /* replacing the content */
         memcpy(&this->map[block_id].sr, sr, sizeof(lixa_state_record_t));
         /* resyncing the CRC of the record */
         if (LIXA_RC_OK != (
-                ret_cod = lixa_state_slot_sync(&this->map[block_id])))
+                ret_cod = lixa_state_table_sync_slot(this, block_id)))
             THROW(STATE_SLOT_SYNC);
         
         THROW(NONE);
@@ -1660,6 +1824,7 @@ int lixa_state_table_patch_slot(lixa_state_table_t *this,
             case MMAP_ERROR:
                 ret_cod = LIXA_RC_MMAP_ERROR;
                 break;
+            case REFRESH_CHECKSUMS:
             case STATE_SLOT_SYNC:
                 break;
             case NONE:
@@ -1681,7 +1846,9 @@ int lixa_state_table_sync_slot(lixa_state_table_t *this,
 {
     enum Exception {
         NULL_OBJECT,
-        STATE_SLOT_SYNC,
+        STATE_SLOT_SYNC1,
+        REFRESH_CHECKSUMS,
+        STATE_SLOT_SYNC2,
         NONE
     } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
@@ -1693,10 +1860,36 @@ int lixa_state_table_sync_slot(lixa_state_table_t *this,
             THROW(NULL_OBJECT);
         if (LIXA_RC_OK != (
                 ret_cod = lixa_state_slot_sync(&this->map[block_id])))
-            THROW(STATE_SLOT_SYNC);
+            THROW(STATE_SLOT_SYNC1);
+        /* re-compute the overall checksum if block_id is not 0 */
+        if (block_id) {
+            /* allocate the checksums array if null */
+            if (NULL == this->checksums &&
+                LIXA_RC_OK != (
+                    ret_cod = lixa_state_table_refresh_checksums(
+                        this, this->map[0].sr.ctrl.number_of_blocks)))
+                THROW(REFRESH_CHECKSUMS);       
+            this->checksums[block_id] =
+                lixa_state_slot_get_crc32(&this->map[block_id]);
+            this->checksums[0] = lixa_crc32(
+                (const uint8_t *)(this->checksums+1),
+                (this->map[0].sr.ctrl.number_of_blocks - 1) *
+                sizeof(uint32_t));
+            if (this->map[0].sr.ctrl.checksum != this->checksums[0]) {
+                this->map[0].sr.ctrl.checksum = this->checksums[0];
+                /* re-compute first block checksum */
+                if (LIXA_RC_OK != (
+                        ret_cod = lixa_state_slot_sync(&this->map[0])))
+                    THROW(STATE_SLOT_SYNC2);
+            }
+        } /* if (block_id) */
         LIXA_TRACE(("lixa_state_table_sync_slot: block_id=" UINT32_T_FORMAT
-                    ", CRC32=" UINT32_T_XFORMAT "\n", block_id,
-                    lixa_state_slot_get_crc32(&this->map[block_id])));
+                    ", slot CRC32=" UINT32_T_XFORMAT ", new overall CRC32="
+                    UINT32_T_XFORMAT ", first block CRC32=" UINT32_T_XFORMAT
+                    "\n", block_id,
+                    lixa_state_slot_get_crc32(&this->map[block_id]),
+                    this->map[0].sr.ctrl.checksum,
+                    this->map[0].crc32));
         
         THROW(NONE);
     } CATCH {
@@ -1704,7 +1897,9 @@ int lixa_state_table_sync_slot(lixa_state_table_t *this,
             case NULL_OBJECT:
                 ret_cod = LIXA_RC_NULL_OBJECT;
                 break;
-            case STATE_SLOT_SYNC:
+            case STATE_SLOT_SYNC1:
+            case REFRESH_CHECKSUMS:
+            case STATE_SLOT_SYNC2:
                 break;
             case NONE:
                 ret_cod = LIXA_RC_OK;
@@ -1717,3 +1912,59 @@ int lixa_state_table_sync_slot(lixa_state_table_t *this,
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }
+
+
+
+int lixa_state_table_refresh_checksums(lixa_state_table_t *this,
+                                       uint32_t number_of_slots)
+{
+    enum Exception {
+        NULL_OBJECT,
+        REALLOC_ERROR,
+        NONE
+    } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    
+    LIXA_TRACE(("lixa_state_table_refresh_checksums(number_of_slots="
+                UINT32_T_FORMAT ")\n", number_of_slots));
+    TRY {
+        uint32_t i;
+        
+        if (NULL == this)
+            THROW(NULL_OBJECT);
+        /* realloc works only if necessary :) */
+        if (NULL == (this->checksums = (uint32_t *)realloc(
+                         this->checksums, number_of_slots * sizeof(uint32_t))))
+            THROW(REALLOC_ERROR);
+        /* copy all the CRCs but slot 0 */
+        for (i=1; i<number_of_slots; ++i)
+            this->checksums[i] = lixa_state_slot_get_crc32(&this->map[i]);
+        /* put in the first position the overall CRC */
+        this->checksums[0] = lixa_crc32(
+            (const uint8_t *)&this->checksums[1],
+            (number_of_slots - 1) * sizeof(uint32_t));
+        LIXA_TRACE(("lixa_state_table_refresh_checksums: checksum of "
+                    "checksums is " UINT32_T_XFORMAT "\n",
+                    this->checksums[0]));
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case NULL_OBJECT:
+                ret_cod = LIXA_RC_NULL_OBJECT;
+                break;
+            case REALLOC_ERROR:
+                ret_cod = LIXA_RC_REALLOC_ERROR;
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("lixa_state_table_refresh_checksums/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+

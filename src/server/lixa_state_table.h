@@ -109,6 +109,11 @@ typedef struct lixa_state_table_s {
      * Memory map associated to the underlying file
      */
     lixa_state_slot_t               *map;
+    /**
+     * Array with the checksum of every slot in the map; position 0 contains
+     * the overall checksum (checksum of checksums)
+     */
+    uint32_t                        *checksums;
 } lixa_state_table_t;
 
 
@@ -420,6 +425,19 @@ extern "C" {
                                    uint32_t block_id);
 
     
+
+    /**
+     * Refresh all the checksums of the state table and compute the overall
+     * CRC; it automatically reallocate the array if the number of slots
+     * changed
+     * @param[in,out] this state table object
+     * @param[in] number_of_slots in the state table
+     * @return a reason code     
+     */
+    int lixa_state_table_refresh_checksums(lixa_state_table_t *this,
+                                            uint32_t number_of_slots);
+
+
     
 #ifdef __cplusplus
 }
