@@ -145,7 +145,26 @@ AT_CLEANUP
 
 AT_SETUP([XTA Java/8.0/4.1 automatic recovery])
 AT_CHECK([if test "$LIXA_XTA_JAVA" != "yes"; then exit 77; fi])
-# recover previous prepared transaction and delete rows from tables
+# recover previous prepared transaction: TRADITIONAL state engine misses the
+# committed back state and requires a further commit; JOURNAL state engine saves
+# it and requires nothing
+if test "$LIXA_STATE_ENGINE" = "JOURNAL" -o "$LIXA_STATE_ENGINE" = "MIGRATE"
+then
+AT_DATA([monkey1s.conf],
+[[# monkey R.M. config
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_commit/0
+]])
+AT_DATA([monkey2s.conf],
+[[# monkey R.M. config
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_commit/0
+]])
+else
 AT_DATA([monkey1s.conf],
 [[# monkey R.M. config
 xa_commit/-4
@@ -162,6 +181,7 @@ xa_end/0
 xa_prepare/0
 xa_commit/0
 ]])
+fi
 AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027; lixa_test_exec.sh noreset start case4100 1 0 2 2>&1], [0], [ignore], [ignore])
 # stop the LIXA state server
 AT_CHECK([lixa_test_exec.sh noreset stop true], [0], [ignore], [ignore])
@@ -189,7 +209,24 @@ AT_CLEANUP
 
 AT_SETUP([XTA Java/8.0/5.1 automatic recovery])
 AT_CHECK([if test "$LIXA_XTA_JAVA" != "yes"; then exit 77; fi])
-# recover previous prepared transaction and delete rows from tables
+# recover previous prepared transaction: TRADITIONAL state engine misses the
+# rolled back state and requires a further rollback; JOURNAL state engine saves
+# it and requires nothing
+if test "$LIXA_STATE_ENGINE" = "JOURNAL" -o "$LIXA_STATE_ENGINE" = "MIGRATE"
+then
+AT_DATA([monkey1s.conf],
+[[# monkey R.M. config
+xa_start/0
+xa_end/0
+xa_rollback/0
+]])
+AT_DATA([monkey2s.conf],
+[[# monkey R.M. config
+xa_start/0
+xa_end/0
+xa_rollback/0
+]])
+else
 AT_DATA([monkey1s.conf],
 [[# monkey R.M. config
 xa_rollback/-4
@@ -204,6 +241,7 @@ xa_start/0
 xa_end/0
 xa_rollback/0
 ]])
+fi
 AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027; lixa_test_exec.sh noreset start case4100 0 0 2 2>&1], [0], [ignore], [ignore])
 # stop the LIXA state server
 AT_CHECK([lixa_test_exec.sh noreset stop true], [0], [ignore], [ignore])

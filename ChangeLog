@@ -7,7 +7,11 @@ LOG:
 		 for the new journal based state engine.
 		 New capabilities of the state engine:
 		 - RPO=0 in the event of lixad crash, for any reason, but
-		   Linux operating system survival
+		   Linux operating system survival (this new behaviour 
+		   eliminate most of the un-necessary rollback/commit during
+		   the recovery phase and
+		   requested by the traditional state server to the 
+		   applications due to the lack of the last data)
 		 - 2 order of magnitude smaller latency in comparison with the
 		   traditional state engine
 2019-05-12 1.7.8 Added (client) connection timeout; default value = 5000 ms

@@ -191,6 +191,19 @@ AT_CHECK([if test "$LIXA_XTA" = "no"; then exit 77; fi])
 # start the LIXA state server
 AT_CHECK([lixa_test_exec.sh noreset start true], [0], [ignore], [ignore])
 # start the XTA Application Program and suspend the transaction
+# recover previous prepared transaction: TRADITIONAL state engine misses the
+# committed state and requires a further commit; JOURNAL state engine saves
+# it and requires nothing
+if test "$LIXA_STATE_ENGINE" = "JOURNAL" -o "$LIXA_STATE_ENGINE" = "MIGRATE"
+then
+AT_DATA([monkey1s.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_close/0
+]])
+else
 AT_DATA([monkey1s.conf],
 [[# monkey R.M. config
 xa_open/0
@@ -200,6 +213,7 @@ xa_start/0
 xa_end/0
 xa_close/0
 ]])
+fi
 AT_CHECK([export LIXA_PROFILE=CASE_PROF_0038 ; lixa_test_exec.sh noreset none case0102 0 1 1 0 0 $TESTS_TMP_FILE1 2>&1], [0], [ignore], [ignore])
 # start the XTA Application Program and resume the transaction
 AT_DATA([monkey1s.conf],
@@ -244,6 +258,19 @@ AT_CHECK([if test "$LIXA_XTA" = "no"; then exit 77; fi])
 # start the LIXA state server
 AT_CHECK([lixa_test_exec.sh noreset start true], [0], [ignore], [ignore])
 # start the XTA Application Program and suspend the transaction
+# recover previous prepared transaction: TRADITIONAL state engine misses the
+# rolled back state and requires a further rollback; JOURNAL state engine saves
+# it and requires nothing
+if test "$LIXA_STATE_ENGINE" = "JOURNAL" -o "$LIXA_STATE_ENGINE" = "MIGRATE"
+then
+AT_DATA([monkey1s.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_close/0
+]])
+else
 AT_DATA([monkey1s.conf],
 [[# monkey R.M. config
 xa_open/0
@@ -253,6 +280,7 @@ xa_start/0
 xa_end/0
 xa_close/0
 ]])
+fi
 AT_CHECK([export LIXA_PROFILE=CASE_PROF_0038 ; lixa_test_exec.sh noreset none case0102 0 1 1 0 0 $TESTS_TMP_FILE1 2>&1], [0], [ignore], [ignore])
 # start the XTA Application Program and resume the transaction
 AT_DATA([monkey1s.conf],
