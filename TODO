@@ -1,17 +1,12 @@
- 15: XTA Java/8.1/2.0 server_xa_end_8                ok
- 16: XTA Java/8.1/3.0 server_xa_prepare_8            FAILED (xta_java_8_1.at:82)
-
-
-
-Restart checking after overall signature add...
-
- 47: CT/1.0/3.0 preparing recovery pending           ok
- 48: CT/1.0/3.1 server_recovery (step=24)            FAILED (ct_1_0.at:308)
+ 35: CT/1.10/1.1 crash after 2-nd msync              ok
+ 36: CT/1.10/2.0 crash after 3-rd msync              FAILED (ct_1_10.at:216)
 
 CT: the client get error at different time due to server async journal :) :( and it's a random behaviour, because async!!!
 
 Create new case tests in journal node, scratching the last state table file
 and forcing restart from previous table and log instead of from last table
+
+Test everything even with the traditional state engine
 
 Rename LIXA_CRASH_POINT_SERVER_BEFORE_MSYNC with BEFORE_SYNC, more generic if used even with journal
 

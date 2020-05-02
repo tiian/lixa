@@ -1117,7 +1117,7 @@ xaoclose: rtn 0
       </section>
     </section>
     <section>
-      <title>An example with Remote configuration (Instant Client) and Pro*C</title>
+      <title>An example with remote configuration (Instant Client) and Pro*C</title>
       <note><para>
 	This example has been tested using Red Hat Enterprise Linux 7.3
 	and Oracle Instant Client 12.1

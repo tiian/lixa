@@ -303,10 +303,16 @@ xa_close/0
 # this client forces server crash in server_recovery_8; the client must stop
 # with TX_FAIL
 AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; export LIXA_CRASH_POINT=25 ; lixa_test_exec.sh noreset start case0022 1 -7], [0], [ignore], [ignore])
+# TRADITIONAL state engine misses the recovered state and requires a new
+# recovery; JOURNAL state engine saves the recovered state and requires
+# nothing
+if test "$LIXA_STATE_ENGINE" != "JOURNAL" -a "$LIXA_STATE_ENGINE" != "MIGRATE"
+then
 # this client forces server crash in server_recovery_8 again; the client must 
 # stop with TX_FAIL
 AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; export LIXA_CRASH_POINT=25 ; lixa_test_exec.sh noreset start case0022 1 -7], [0], [ignore], [ignore])
 # this client checks the server restarts fine and run
 AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh noreset recycle case0035 commit 0 0], [0], [ignore], [ignore])
+fi
 AT_CLEANUP
 

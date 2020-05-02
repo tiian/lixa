@@ -210,6 +210,54 @@ AT_CLEANUP
 
 AT_SETUP([CT/1.5/2.1 crash before 3-rd block copy])
 AT_CHECK([if test "$LIXA_CRASH" = "no"; then exit 77; fi])
+# recover previous prepared transaction: TRADITIONAL state engine misses the
+# prepared state and requires a rollback; JOURNAL state engine saves
+# it and requires a commit!
+if test "$LIXA_STATE_ENGINE" = "JOURNAL" -o "$LIXA_STATE_ENGINE" = "MIGRATE"
+then
+AT_DATA([monkey1s.conf],
+[[# monkey R.M. config
+xa_open/0
+# this commit terminates the previous transaction
+xa_commit/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_commit/0
+xa_close/0
+]])
+AT_DATA([monkey2s.conf],
+[[# monkey R.M. config
+xa_open/0
+# this commit terminates the previous transaction
+xa_commit/0
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_commit/0
+xa_close/0
+]])
+AT_DATA([monkey1d.conf],
+[[# monkey R.M. config
+xa_open/0
+# this commit terminates the previous transaction
+xa_commit/0
+xa_end/0
+xa_prepare/0
+xa_commit/0
+xa_close/0
+]])
+AT_DATA([monkey2d.conf],
+[[# monkey R.M. config
+xa_open/0
+# this commit terminates the previous transaction
+xa_commit/0
+xa_end/0
+xa_prepare/0
+xa_commit/0
+xa_close/0
+]])
+else
 AT_DATA([monkey1s.conf],
 [[# monkey R.M. config
 xa_open/0
@@ -252,5 +300,6 @@ xa_prepare/0
 xa_commit/0
 xa_close/0
 ]])
+fi
 AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh noreset recycle case0035 commit 0 0], [0], [ignore], [ignore])
 AT_CLEANUP
