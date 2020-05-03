@@ -1,13 +1,12 @@
-Traditional engine error
-1009: XTA Java/8.2/2.2 server_xa_prepare_24,count=1   ok
-1010: XTA Java/8.2/2.3 automatic recovery             FAILED (xta_java_8_2.at:231)
+CT 1.6/1.1 sometimes 1.6/1.0 crashes with an invalid block 0 and restart from
+log does not provide anything because the crash happens before log
+synchronization...
+Is it acceptable? How to test it?!
 
 Create new case tests in journal node, scratching the last state table file
 and forcing restart from previous table and log instead of from last table
 
-Test everything even with the traditional state engine
-
-Rename LIXA_CRASH_POINT_SERVER_BEFORE_MSYNC with BEFORE_SYNC, more generic if used even with journal
+Change Copyright: it's still 2009-2019
 
 Implement auto-migration from old state files to new state tables:
 - if cold start & state files exists => migrate and switch
@@ -17,8 +16,6 @@ Implement auto-migration from old state files to new state tables:
 Document parameters for direct write...  o_direct_  o_dsync_  o_rsync_ o_sync_
 Document parameters log_size and max_buffer_log_size
 Document environment variable LIXA_STATE_ENGINE, see server_config.h
-
-Change Copyright: it's still 2009-2019
 
 Clean memory leaks by mean of valgrind
 

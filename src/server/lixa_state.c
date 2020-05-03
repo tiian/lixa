@@ -2360,6 +2360,50 @@ int lixa_state_delete_block(lixa_state_t *this, uint32_t block_id)
 
 
 
+int lixa_state_dump(const lixa_state_t *this)
+{
+    enum Exception {
+        NULL_OBJECT,
+        NONE
+    } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    
+    LIXA_TRACE(("lixa_state_dump\n"));
+    TRY {
+        int i;
+        if (NULL == this)
+            THROW(NULL_OBJECT);
+
+        printf("State tables and logs (* = active)\n");
+        for (i=0; i<LIXA_STATE_TABLES; ++i) {
+            printf("[%c] State table # %d: '%s'\n",
+                   i == this->active_state ? '*' : ' ', i,
+                   lixa_state_table_get_pathname(&this->tables[i]));
+            printf("[%c] State log   # %d: '%s'\n",
+                   i == this->active_state ? '*' : ' ', i,
+                   lixa_state_log_get_pathname(&this->logs[i]));
+        }
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case NULL_OBJECT:
+                ret_cod = LIXA_RC_NULL_OBJECT;
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("lixa_state_dump/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
+
 void *lixa_state_async_table_flusher(void *data)
 {
     enum Exception {
@@ -2552,7 +2596,7 @@ void *lixa_state_async_log_flusher(void *data)
             if (STATE_FLUSHER_FLUSH == log_synchronizer->operation) {
                 /* flush the data to file */
                 if (log_synchronizer->to_be_flushed) {
-                    LIXA_CRASH(LIXA_CRASH_POINT_SERVER_BEFORE_MSYNC,
+                    LIXA_CRASH(LIXA_CRASH_POINT_SERVER_BEFORE_SYNC,
                                log_synchronizer->crash_count);
                     if (LIXA_RC_OK != (
                             ret_cod = lixa_state_log_write(
@@ -2561,7 +2605,7 @@ void *lixa_state_async_log_flusher(void *data)
                                 log_synchronizer->number_of_pages,
                                 log_synchronizer->switch_after_write)))
                         THROW(LOG_FILE_WRITE_ERROR);
-                    LIXA_CRASH(LIXA_CRASH_POINT_SERVER_AFTER_MSYNC,
+                    LIXA_CRASH(LIXA_CRASH_POINT_SERVER_AFTER_SYNC,
                                log_synchronizer->crash_count);
                 } else {
                     /* this is an internal error, it should never happen */

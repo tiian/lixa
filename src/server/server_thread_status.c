@@ -606,6 +606,7 @@ int thread_status_dump(const struct thread_status_s *ts,
                        const struct ts_dump_spec_s *tsds)
 {
     enum Exception {
+        LIXA_STATE_DUMP,
         ISO_TIMESTAMP_ERROR,
         DUMP_HEADER1,
         DUMP_RSRMGR1,
@@ -633,7 +634,9 @@ int thread_status_dump(const struct thread_status_s *ts,
             else 
                 printf("Second file ('%s') will be dumped\n",
                        ts->status2_filename);
-        }
+        } else if (LIXA_RC_OK != (ret_cod = lixa_state_dump(&ts->state)))
+            THROW(LIXA_STATE_DUMP);
+        
         /* dump first record content */
         printf("Magic number is: " UINT32_T_FORMAT " (" UINT32_T_FORMAT
                ")\n", first_record->magic_number, STATUS_FILE_MAGIC_NUMBER);
@@ -754,6 +757,7 @@ int thread_status_dump(const struct thread_status_s *ts,
         THROW(NONE);
     } CATCH {
         switch (excp) {
+            case LIXA_STATE_DUMP:
             case ISO_TIMESTAMP_ERROR:
                 break;
             case DUMP_HEADER1:
@@ -1497,7 +1501,7 @@ int thread_status_sync_files(struct thread_status_s *ts)
             THROW(STATUS_RECORD_CHECK_INTEGRITY_ERROR);
 #endif /* LIXA_DEBUG */
         LIXA_TRACE(("thread_status_sync_files: before msync\n"));
-        LIXA_CRASH(LIXA_CRASH_POINT_SERVER_BEFORE_MSYNC,
+        LIXA_CRASH(LIXA_CRASH_POINT_SERVER_BEFORE_SYNC,
                    thread_status_get_crash_count(ts));
         
         if (-1 == msync(ts->curr_status,
@@ -1506,7 +1510,7 @@ int thread_status_sync_files(struct thread_status_s *ts)
             THROW(MSYNC_ERROR);
         
         LIXA_TRACE(("thread_status_sync_files: after first msync\n"));
-        LIXA_CRASH(LIXA_CRASH_POINT_SERVER_AFTER_MSYNC,
+        LIXA_CRASH(LIXA_CRASH_POINT_SERVER_AFTER_SYNC,
                    thread_status_get_crash_count(ts));
         
         /* current status file can become the baseline, discover and process

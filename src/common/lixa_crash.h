@@ -227,13 +227,13 @@
  */
 #define LIXA_CRASH_POINT_SERVER_BLOCK_COPY        41
 /**
- * The server crashes before msync
+ * The server crashes before sync
  */
-#define LIXA_CRASH_POINT_SERVER_BEFORE_MSYNC      42
+#define LIXA_CRASH_POINT_SERVER_BEFORE_SYNC       42
 /**
- * The server crashes after msync
+ * The server crashes after sync
  */
-#define LIXA_CRASH_POINT_SERVER_AFTER_MSYNC       43
+#define LIXA_CRASH_POINT_SERVER_AFTER_SYNC        43
 
 
 

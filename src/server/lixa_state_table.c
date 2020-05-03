@@ -449,7 +449,7 @@ int lixa_state_table_check_integrity(lixa_state_table_t *this)
             if (this->map[i].crc32 != tmp_crc32) {
                 LIXA_TRACE(("lixa_state_table_check_integrity: the CRC of "
                             "block " UINT32_T_FORMAT " does not match: "
-                            "current=" UINT32_T_XFORMAT ", expected="
+                            "computed=" UINT32_T_XFORMAT ", in file="
                             UINT32_T_XFORMAT "\n", i, tmp_crc32,
                             first_slot->crc32));
                 THROW(CRC_DOES_NOT_MATCH2);
@@ -1884,7 +1884,7 @@ int lixa_state_table_sync_slot(lixa_state_table_t *this,
             }
         } /* if (block_id) */
         LIXA_TRACE(("lixa_state_table_sync_slot: block_id=" UINT32_T_FORMAT
-                    ", slot CRC32=" UINT32_T_XFORMAT ", new overall CRC32="
+                    ", slot CRC32=" UINT32_T_XFORMAT ", overall CRC32="
                     UINT32_T_XFORMAT ", first block CRC32=" UINT32_T_XFORMAT
                     "\n", block_id,
                     lixa_state_slot_get_crc32(&this->map[block_id]),

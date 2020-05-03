@@ -463,6 +463,15 @@ extern "C" {
     }
 
 
+
+    /**
+     * Dump to stdout major lixa state information
+     * @param[in] this state object
+     * @return a reason code
+     */
+    int lixa_state_dump(const lixa_state_t *this);
+
+    
     
     /**
      * Entry point of the flusher thread for state tables
