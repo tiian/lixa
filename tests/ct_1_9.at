@@ -211,9 +211,14 @@ xa_prepare/-3
 xa_rollback/0
 xa_close/0
 ]])
-# this client forces server crash in server_manager_pollout; the client must 
-# stop with TX_FAIL
+# this client forces server crash in server_manager_pollout; the client must
+# stop with TX_FAIL (TRADITIONAL engine) or TX_ROLLBACK (JOURNAL engine)
+if test "$LIXA_STATE_ENGINE" = "JOURNAL" -o "$LIXA_STATE_ENGINE" = "MIGRATE"
+then
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; export LIXA_CRASH_POINT=42 ; export LIXA_CRASH_COUNT=2 ; export LIXA_SYNC_NODELAY=yes ; lixa_test_exec.sh noreset start case0035 commit 5 -2], [5], [ignore], [ignore])
+else
 AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; export LIXA_CRASH_POINT=42 ; export LIXA_CRASH_COUNT=2 ; export LIXA_SYNC_NODELAY=yes ; lixa_test_exec.sh noreset start case0035 commit 5 -7], [5], [ignore], [ignore])
+fi
 AT_CLEANUP
 
 AT_SETUP([CT/1.9/2.1 crash before 3-rd msync])

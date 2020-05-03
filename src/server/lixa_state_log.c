@@ -985,61 +985,6 @@ int lixa_state_log_set_reserved(lixa_state_log_t *this, off_t reserved)
 
 
 
-int lixa_state_log_rewind(lixa_state_log_t *this)
-{
-    enum Exception {
-        NULL_OBJECT,
-        PTHREAD_MUTEX_LOCK_ERROR,
-        PTHREAD_MUTEX_UNLOCK_ERROR,
-        NONE
-    } excp;
-    int pte = 0;
-    int ret_cod = LIXA_RC_INTERNAL_ERROR;
-    
-    LIXA_TRACE(("lixa_state_log_rewind\n"));
-    TRY {
-        /* check the object is not null */
-        if (NULL == this)
-            THROW(NULL_OBJECT);
-        
-        /* synchronize on mutex */
-        if (0 != (pte = pthread_mutex_lock(&this->file_synchronizer.mutex)))
-            THROW(PTHREAD_MUTEX_LOCK_ERROR);
-        /* check consistency */
-        this->file_synchronizer.offset = 0;
-        this->file_synchronizer.reserved = 0;
-        /* unlock the mutex */
-        if (0 != (pte = pthread_mutex_unlock(
-                      &this->file_synchronizer.mutex)))
-            THROW(PTHREAD_MUTEX_UNLOCK_ERROR);
-        
-        THROW(NONE);
-    } CATCH {
-        switch (excp) {
-            case NULL_OBJECT:
-                ret_cod = LIXA_RC_NULL_OBJECT;
-                break;
-            case PTHREAD_MUTEX_LOCK_ERROR:
-                ret_cod = LIXA_RC_PTHREAD_MUTEX_LOCK_ERROR;
-                break;
-            case PTHREAD_MUTEX_UNLOCK_ERROR:
-                ret_cod = LIXA_RC_PTHREAD_MUTEX_UNLOCK_ERROR;
-                break;
-            case NONE:
-                ret_cod = LIXA_RC_OK;
-                break;
-            default:
-                ret_cod = LIXA_RC_INTERNAL_ERROR;
-        } /* switch (excp) */
-    } /* TRY-CATCH */
-    LIXA_TRACE(("lixa_state_log_rewind/excp=%d/"
-                "ret_cod=%d/pthreaderror=%d/errno=%d\n", excp, ret_cod, pte,
-                errno));
-    return ret_cod;
-}
-
-
-
 int lixa_state_log_write(lixa_state_log_t *this, const void *buffer,
                          size_t number_of_pages, int switch_after_write)
 {

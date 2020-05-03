@@ -1850,100 +1850,6 @@ int lixa_state_flush_table(lixa_state_t *this, int shutdown)
 
 
 
-int lixa_state_sync_log(lixa_state_t *this)
-{
-    enum Exception {
-        NULL_OBJECT,
-        PTHREAD_MUTEX_LOCK_ERROR,
-        PTHREAD_COND_WAIT_ERROR,
-        PTHREAD_COND_SIGNAL_ERROR,
-        PTHREAD_MUTEX_UNLOCK_ERROR,
-        NONE
-    } excp;
-    int ret_cod = LIXA_RC_INTERNAL_ERROR;
-    int pte = 0;
-    int mutex_locked = FALSE;
-    
-    LIXA_TRACE(("lixa_state_sync_log\n"));
-    TRY {
-        /* check object is not null */
-        if (NULL == this)
-            THROW(NULL_OBJECT);
-        
-        /* acquire the lock of the synchronized structure */
-        if (0 != (pte = pthread_mutex_lock(&this->log_synchronizer.mutex))) {
-            THROW(PTHREAD_MUTEX_LOCK_ERROR);
-        } else
-            mutex_locked = TRUE;
-        /* this synchronization is necessary to avoid overlapping a previous
-           flusher execution, under normal condition it must be very fast */
-        if (this->log_synchronizer.to_be_flushed) {
-            lixa_timer_t timer;
-            long duration;
-            
-            LIXA_TRACE(("lixa_state_sync_log: WAITING on condition...\n"));
-            lixa_timer_start(&timer);
-            if (0 != (pte = pthread_cond_wait(
-                          &this->log_synchronizer.cond,
-                          &this->log_synchronizer.mutex)))
-                THROW(PTHREAD_COND_WAIT_ERROR);
-            lixa_timer_stop(&timer);
-            duration = lixa_timer_get_diff(&timer)/1000;
-            LIXA_SYSLOG((LOG_NOTICE, LIXA_SYSLOG_LXD062N, duration));
-            LIXA_TRACE(("lixa_state_sync_log: condition has been "
-                        "signaled, total wait time is %ld ms\n", duration));
-        }
-        /* ask to log flusher thread to perform the flushing */
-        LIXA_TRACE(("lixa_state_sync_log: asking log flusher thread to "
-                    "synchronize the buffer content to the underlying "
-                    "file\n"));
-        this->log_synchronizer.operation = STATE_FLUSHER_FLUSH;
-        this->log_synchronizer.log = &this->logs[this->active_state];
-        this->log_synchronizer.to_be_flushed = TRUE;
-        if (0 != (pte = pthread_cond_signal(&this->log_synchronizer.cond)))
-            THROW(PTHREAD_COND_SIGNAL_ERROR);
-        if (0 != (pte = pthread_mutex_unlock(
-                      &this->log_synchronizer.mutex))) {
-            THROW(PTHREAD_MUTEX_UNLOCK_ERROR);
-        } else
-            mutex_locked = FALSE;
-        
-        THROW(NONE);
-    } CATCH {
-        switch (excp) {
-            case NULL_OBJECT:
-                ret_cod = LIXA_RC_NULL_OBJECT;
-                break;
-            case PTHREAD_MUTEX_LOCK_ERROR:
-                ret_cod = LIXA_RC_PTHREAD_MUTEX_LOCK_ERROR;
-                break;
-            case PTHREAD_COND_WAIT_ERROR:
-                ret_cod = LIXA_RC_PTHREAD_COND_WAIT_ERROR;
-                break;
-            case PTHREAD_COND_SIGNAL_ERROR:
-                ret_cod = LIXA_RC_PTHREAD_COND_SIGNAL_ERROR;
-                break;
-            case PTHREAD_MUTEX_UNLOCK_ERROR:
-                ret_cod = LIXA_RC_PTHREAD_MUTEX_UNLOCK_ERROR;
-                break;
-            case NONE:
-                ret_cod = LIXA_RC_OK;
-                break;
-            default:
-                ret_cod = LIXA_RC_INTERNAL_ERROR;
-        } /* switch (excp) */
-        /* restore mutex in the event of error */
-        if (mutex_locked)
-            pthread_mutex_unlock(&this->log_synchronizer.mutex);
-    } /* TRY-CATCH */
-    LIXA_TRACE(("lixa_state_sync_log/excp=%d/"
-                "ret_cod=%d/pthreaderror=%d/errno=%d\n", excp, ret_cod, pte,
-                errno));
-    return ret_cod;
-}
-
-
-
 int lixa_state_switch(lixa_state_t *this, lixa_word_t last_record_id)
 {
     enum Exception {
@@ -1982,15 +1888,6 @@ int lixa_state_switch(lixa_state_t *this, lixa_word_t last_record_id)
                         &this->tables[lixa_state_get_next_state(this)],
                         LIXA_STATE_TABLE_INIT_SIZE)))
                 THROW(TABLE_CREATE_NEW_FILE);
-            /* @@@ remove me
-            if (LIXA_RC_OK != (
-                    ret_cod = (
-                        lixa_state_table_map(
-                            &this->tables[lixa_state_get_next_state(this)],
-                            FALSE)))) {
-                THROW(TABLE_MAP);
-            }
-            */
         }
         /* put in current state table header a reference to the last record
          * that has been for sure flushed by the state log */

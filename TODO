@@ -1,7 +1,6 @@
- 35: CT/1.10/1.1 crash after 2-nd msync              ok
- 36: CT/1.10/2.0 crash after 3-rd msync              FAILED (ct_1_10.at:216)
-
-CT: the client get error at different time due to server async journal :) :( and it's a random behaviour, because async!!!
+Traditional engine error
+1009: XTA Java/8.2/2.2 server_xa_prepare_24,count=1   ok
+1010: XTA Java/8.2/2.3 automatic recovery             FAILED (xta_java_8_2.at:231)
 
 Create new case tests in journal node, scratching the last state table file
 and forcing restart from previous table and log instead of from last table
@@ -10,64 +9,14 @@ Test everything even with the traditional state engine
 
 Rename LIXA_CRASH_POINT_SERVER_BEFORE_MSYNC with BEFORE_SYNC, more generic if used even with journal
 
-LIXA_CRASH_POINT_SERVER_BLOCK_COPY in copy blocks for journal
-
-LIXA_CRASH_POINT_SERVER_BEFORE_WRITE
-LIXA_CRASH_POINT_SERVER_AFTER_WRITE
-to be put in lixa_state_async_log_flusher and to be implemented in the case tests
-
-Restore original test order in ct.at and testsuite.at
-
-Restore multithread in
-- tests/etc/lixad_conf.xml.in
-- tests/etc/lixad_conf2.xml.in
-
-Remove lixa_state_sync_log: it seems useless...
-
-Remove lixa_state_log_rewind: maybe it's useless...
-
-Check restart after state table and log switch; check function
-lixa_state_table_set_last_record_id() is called in the "right way"
-
-Restore multiple threads in lixad_conf.xml / lixad_conf.xml.in
-
-To clean up the code, a pointer to sr (union status_record_u) must be returned
-because counter and digest are internal fields. The type might be renamed in
-the future to lixa_state_table_record:
-union status_record_u --> lixa_state_table_record_t functional point of view, it contains the relevant data
-struct status_record_s --> lixa_state_table_slot_t physical point of view, it contains the relevant data and some control data
-
-Rework status_record_insert and status_record_delete
-
-Turn on again log file management in function thread_status_mark_block in file
-server_thread_status.c, look at @@@@ (4)
-
-Remove inclusion of "server_status.h" from "lixa_state_table.c"
-
 Implement auto-migration from old state files to new state tables:
 - if cold start & state files exists => migrate and switch
 - if cold start & state files does not exist => cold start new state tables
 - if warm start => ignore old state files
 
-Remove field "single_page" from lixa_state_log_t : it was used only for file
-formatting
-
-lixa_state_log objects are not destroyed when the server stops
-
-Create case test for different scenario restart:
-- verify lixa_state_analyze takes the right decision for all possible cases
-
-Remove from struct thread_status_s the useless fields related to the old
-persistency engine
-
-Can function status_record_create_file removed and its code moved in 
-lixa_state_file_create_new_file?
-
 Document parameters for direct write...  o_direct_  o_dsync_  o_rsync_ o_sync_
 Document parameters log_size and max_buffer_log_size
 Document environment variable LIXA_STATE_ENGINE, see server_config.h
-
-Remove all useless @@@
 
 Change Copyright: it's still 2009-2019
 
@@ -76,9 +25,6 @@ Clean memory leaks by mean of valgrind
 Introduce a clean up policy in lixa_state_table_copy_from(): all the failed
 transactions that are older than T1 and all the recovery pending transactions 
 that are older than T2 will not be copied in the target state table
-
-Improving the state file synchronization elapsed time is now a priority to
-avoid annoying connection timeout errors!!!
 
 Review command line help description for options -d and -D of lixat: they are not clear
 

@@ -53,7 +53,7 @@ int main(int argc, char *argv[])
     TXINFO info;
     int commit;
     int exit_point;
-    int test_rc;
+    int test_rc, test_rc2;
 
     if (argc < 4) {
         fprintf(stderr, "%s: at least three options must be specified\n",
@@ -70,7 +70,10 @@ int main(int argc, char *argv[])
         exit (1);
     }
     exit_point = (int)strtol(argv[2], NULL, 0);
-    test_rc = (int)strtol(argv[3], NULL, 0);
+    test_rc = test_rc2 = (int)strtol(argv[3], NULL, 0);
+    /* the last parameter is optional */
+    if (argc == 5)
+        test_rc2 = (int)strtol(argv[4], NULL, 0);
     
     printf("%s| starting (%s/%d/%d)...\n", pgm, argv[1], exit_point, test_rc);
     printf("%s| tx_open(): %d\n", pgm, rc = tx_open());
@@ -115,8 +118,8 @@ int main(int argc, char *argv[])
         printf("%s| tx_commit(): %d\n", pgm, rc = tx_commit());
     else
         printf("%s| tx_rollback(): %d\n", pgm, rc = tx_rollback());
-    if (TX_OK != test_rc && 5 == exit_point)
-        assert(test_rc == rc);
+    if ((TX_OK != test_rc || TX_OK != test_rc2) && 5 == exit_point)
+        assert(test_rc == rc || test_rc2 == rc);
     else
         assert(TX_OK == rc);
     if (5 == exit_point)

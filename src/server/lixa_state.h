@@ -360,15 +360,6 @@ extern "C" {
 
     
     /**
-     * Start the background sync of the current state log
-     * @param[in,out] this state object
-     * @return a reason code
-     */
-    int lixa_state_sync_log(lixa_state_t *this);
-    
-
-
-    /**
      * Synchronize the current state table and log files: flush log and switch
      * both table and log
      * @param[in,out] this state object

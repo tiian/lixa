@@ -529,17 +529,6 @@ extern "C" {
 
 
     /**
-     * Rewind the state log file for reuse; this function is a reset of the
-     * offset and reserved quantities to allow a complete reuse of an existent
-     * log file
-     * @param[in,out] this state log object
-     * @return a reason code
-     */     
-    int lixa_state_log_rewind(lixa_state_log_t *this);
-
-
-    
-    /**
      * Return the offset of the first writable page in the underlying file
      */
     static inline off_t lixa_state_log_get_offset(lixa_state_log_t *this)
