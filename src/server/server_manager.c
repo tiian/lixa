@@ -322,7 +322,7 @@ void *server_manager_thread(void *void_ts)
                     if (SERVER_CONFIG_STATE_ENGINE != STATE_ENGINE_TRADITIONAL)
                         if (LIXA_RC_OK !=
                             (ret_cod = lixa_state_sync(
-                                &ts->state, TRUE, FALSE)))
+                                &ts->state, TRUE, FALSE, TRUE)))
                             THROW(LIXA_STATE_SYNC_ERROR1);
                     status_sync_init(&ts->status_sync);
                 } else if (delay >= ts->min_elapsed_sync_time) {
@@ -343,8 +343,9 @@ void *server_manager_thread(void *void_ts)
                         STATE_ENGINE_TRADITIONAL) {
                         /* "superfast" synchronization:
                            can be started in any case */
-                        if (LIXA_RC_OK != (ret_cod = lixa_state_sync(
-                                               &ts->state, TRUE, FALSE)))
+                        if (LIXA_RC_OK !=
+                            (ret_cod = lixa_state_sync(
+                                &ts->state, TRUE, FALSE, FALSE)))
                             THROW(LIXA_STATE_SYNC_ERROR2);
                         status_sync_init(&ts->status_sync);
                     } /* "superfast" synchronization branch */

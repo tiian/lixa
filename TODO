@@ -1,7 +1,8 @@
-CT 1.6/1.1 sometimes 1.6/1.0 crashes with an invalid block 0 and restart from
-log does not provide anything because the crash happens before log
-synchronization...
-Is it acceptable? How to test it?!
+ 63: CT/1.2/0.0 server_xa_end (step=8)               ok
+ 64: CT/1.2/0.1 server_xa_end (step=8)               FAILED (ct_1_2.at:80)
+It seems it manage xa_end crash better than before!
+
+Restore multithread in etc/lixad_conf.xml.in
 
 Create new case tests in journal node, scratching the last state table file
 and forcing restart from previous table and log instead of from last table
@@ -15,6 +16,9 @@ Implement auto-migration from old state files to new state tables:
 
 Document parameters for direct write...  o_direct_  o_dsync_  o_rsync_ o_sync_
 Document parameters log_size and max_buffer_log_size
+Document new meaning of max_elapsed_sync_time: if 0, synchronous log; just
+1 ms can decrease the latency by 33%; higher values can decrease latency even
+more
 Document environment variable LIXA_STATE_ENGINE, see server_config.h
 
 Clean memory leaks by mean of valgrind

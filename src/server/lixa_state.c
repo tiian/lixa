@@ -1014,8 +1014,9 @@ int lixa_state_shutdown(lixa_state_t *this)
                  * STATE LOG SECTION
                  */
                 /* flush current state log */
-                if (LIXA_RC_OK != (ret_cod =
-                                   lixa_state_flush_log_records(this, TRUE)))
+                if (LIXA_RC_OK != (
+                        ret_cod = lixa_state_flush_log_records(
+                            this, TRUE, TRUE)))
                     THROW(FLUSH_LOG_RECORDS);
                 /* obtain the lock of the synchronized structure */
                 LIXA_TRACE(("lixa_state_shutdown: waiting for lock on "
@@ -1423,12 +1424,13 @@ int lixa_state_check_log_actions(lixa_state_t *this, int *must_flush,
 
 
 
-int lixa_state_flush_log_records(lixa_state_t *this, int switch_after_write)
+int lixa_state_flush_log_records(lixa_state_t *this, int switch_after_write,
+                                 int synchronous)
 {
     enum Exception {
         NULL_OBJECT,
         PTHREAD_MUTEX_LOCK_ERROR,
-        PTHREAD_COND_WAIT_ERROR,
+        PTHREAD_COND_WAIT_ERROR1,
         BUFFER_OVERFLOW1,
         BUFFER_OVERFLOW2,
         GETTIMEOFDAY_ERROR,
@@ -1440,14 +1442,15 @@ int lixa_state_flush_log_records(lixa_state_t *this, int switch_after_write)
         STATE_LOG_EXTEND,
         PTHREAD_COND_SIGNAL_ERROR,
         PTHREAD_MUTEX_UNLOCK_ERROR,
+        PTHREAD_COND_WAIT_ERROR2,
         NONE
     } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     int pte = 0;
     int mutex_locked = FALSE;
     
-    LIXA_TRACE(("lixa_state_flush_log_records(switch_after_write=%d)\n",
-                switch_after_write));
+    LIXA_TRACE(("lixa_state_flush_log_records(switch_after_write=%d, "
+                "synchronous=%d)\n", switch_after_write, synchronous));
     TRY {
         size_t number_of_pages;
         size_t number_of_pages_in_buffer;
@@ -1478,7 +1481,7 @@ int lixa_state_flush_log_records(lixa_state_t *this, int switch_after_write)
             if (0 != (pte = pthread_cond_wait(
                           &this->log_synchronizer.cond,
                           &this->log_synchronizer.mutex)))
-                THROW(PTHREAD_COND_WAIT_ERROR);
+                THROW(PTHREAD_COND_WAIT_ERROR1);
         }
         lixa_timer_stop(&timer);
         duration = lixa_timer_get_diff(&timer)/1000;
@@ -1631,10 +1634,24 @@ int lixa_state_flush_log_records(lixa_state_t *this, int switch_after_write)
         
         if (0 != (pte = pthread_cond_signal(&this->log_synchronizer.cond)))
             THROW(PTHREAD_COND_SIGNAL_ERROR);
+        
+        if (synchronous) {
+            /* wait synchronization end */
+            LIXA_TRACE(("lixa_state_flush_log_records: waiting on condition "
+                        "for child thread completion...\n"));
+            if (0 != (pte = pthread_cond_wait(
+                          &this->log_synchronizer.cond,
+                          &this->log_synchronizer.mutex)))
+                THROW(PTHREAD_COND_WAIT_ERROR2);
+            LIXA_TRACE(("lixa_state_flush_log_records: ...waking up after "
+                        "child thread completion!\n"));
+        } /* if (synchronous) */
+        
         if (0 != (pte = pthread_mutex_unlock(&this->log_synchronizer.mutex))) {
             THROW(PTHREAD_MUTEX_UNLOCK_ERROR);
         } else
             mutex_locked = FALSE;
+           
         /* reset block_ids */
         this->number_of_block_ids = 0;
         memset(this->block_ids, 0,
@@ -1649,7 +1666,8 @@ int lixa_state_flush_log_records(lixa_state_t *this, int switch_after_write)
             case PTHREAD_MUTEX_LOCK_ERROR:
                 ret_cod = LIXA_RC_PTHREAD_MUTEX_LOCK_ERROR;
                 break;
-            case PTHREAD_COND_WAIT_ERROR:
+            case PTHREAD_COND_WAIT_ERROR1:
+            case PTHREAD_COND_WAIT_ERROR2:
                 ret_cod = LIXA_RC_PTHREAD_COND_WAIT_ERROR;
                 break;
             case BUFFER_OVERFLOW1:
@@ -1987,7 +2005,8 @@ int lixa_state_switch(lixa_state_t *this, lixa_word_t last_record_id)
 
 
 
-int lixa_state_sync(lixa_state_t *this, int must_flush, int must_switch)
+int lixa_state_sync(lixa_state_t *this, int must_flush, int must_switch,
+                    int synchronous_log)
 {
     enum Exception {
         NULL_OBJECT,
@@ -2000,8 +2019,9 @@ int lixa_state_sync(lixa_state_t *this, int must_flush, int must_switch)
     } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     
-    LIXA_TRACE(("lixa_state_sync(must_flush=%d, must_switch=%d)\n",
-                must_flush, must_switch));
+    LIXA_TRACE(("lixa_state_sync(must_flush=%d, must_switch=%d, "
+                "synchronous_log=%d)\n",
+                must_flush, must_switch, synchronous_log));
     TRY {
         lixa_word_t last_record_id;
         
@@ -2024,7 +2044,7 @@ int lixa_state_sync(lixa_state_t *this, int must_flush, int must_switch)
                 /* flush state log file */
                 LIXA_TRACE(("lixa_state_sync: flush records\n"));
                 if (LIXA_RC_OK != (ret_cod = lixa_state_flush_log_records(
-                                       this, must_switch)))
+                                       this, must_switch, synchronous_log)))
                     THROW(FLUSH_LOG_RECORDS_ERROR1);
                 /* retrieve the id of the last record in the current log state
                    file: it will be written in the state table in the event of
@@ -2042,7 +2062,7 @@ int lixa_state_sync(lixa_state_t *this, int must_flush, int must_switch)
             /* flush the state log if necessary */
             LIXA_TRACE(("lixa_state_sync: flush records\n"));
             if (LIXA_RC_OK != (ret_cod = lixa_state_flush_log_records(
-                                   this, must_switch)))
+                                   this, must_switch, synchronous_log)))
                 THROW(FLUSH_LOG_RECORDS_ERROR2);
         } /* if (must_flush && must_switch) */
         
@@ -2160,7 +2180,7 @@ int lixa_state_mark_block(lixa_state_t *this, uint32_t block_id)
             THROW(CHECK_LOG_ACTIONS_ERROR);
         /* synchronize the state table and log files if necessary */
         if (LIXA_RC_OK != (ret_cod = lixa_state_sync(
-                               this, must_flush, must_switch)))
+                               this, must_flush, must_switch, FALSE)))
             THROW(STATE_SYNC_ERROR);
         
         THROW(NONE);

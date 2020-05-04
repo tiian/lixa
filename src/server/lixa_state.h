@@ -333,10 +333,12 @@ extern "C" {
      * @param[in,out] this state object
      * @param[in] switch_after_write boolean flag to ask for log switching
      *            after log flushing
+     * @param[in] synchronous boolean flag to ask for log synchronous flushing
      * @return a reason code
      */
     int lixa_state_flush_log_records(lixa_state_t *this,
-                                     int switch_after_write);
+                                     int switch_after_write,
+                                     int synchronous);
 
 
 
@@ -365,9 +367,12 @@ extern "C" {
      * @param[in,out] this state object
      * @param[in] must_flush the state log file to disk
      * @param[in] must_switch both the state log file and the state table file
+     * @param[in] synchronous_log boolean flag to ask for log synchronous
+     *            flushing
      * @return a reason code
      */
-    int lixa_state_sync(lixa_state_t *this, int must_flush, int must_switch);
+    int lixa_state_sync(lixa_state_t *this, int must_flush, int must_switch,
+                        int synchronous_log);
     
 
 
