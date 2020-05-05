@@ -1,6 +1,4 @@
- 63: CT/1.2/0.0 server_xa_end (step=8)               ok
- 64: CT/1.2/0.1 server_xa_end (step=8)               FAILED (ct_1_2.at:80)
-It seems it manage xa_end crash better than before!
+Full test again.
 
 Restore multithread in etc/lixad_conf.xml.in
 

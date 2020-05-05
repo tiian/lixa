@@ -1848,6 +1848,7 @@ int lixa_state_table_sync_slot(lixa_state_table_t *this,
         NULL_OBJECT,
         STATE_SLOT_SYNC1,
         REFRESH_CHECKSUMS,
+        GETTIMEOFDAY_ERROR,
         STATE_SLOT_SYNC2,
         NONE
     } excp;
@@ -1877,6 +1878,10 @@ int lixa_state_table_sync_slot(lixa_state_table_t *this,
                 sizeof(uint32_t));
             if (this->map[0].sr.ctrl.checksum != this->checksums[0]) {
                 this->map[0].sr.ctrl.checksum = this->checksums[0];
+                /* update last_sync */
+                if (LIXA_RC_OK != (ret_cod = gettimeofday(
+                                       &this->map[0].sr.ctrl.last_sync, NULL)))
+                    THROW(GETTIMEOFDAY_ERROR);
                 /* re-compute first block checksum */
                 if (LIXA_RC_OK != (
                         ret_cod = lixa_state_slot_sync(&this->map[0])))
@@ -1900,6 +1905,9 @@ int lixa_state_table_sync_slot(lixa_state_table_t *this,
             case STATE_SLOT_SYNC1:
             case REFRESH_CHECKSUMS:
             case STATE_SLOT_SYNC2:
+                break;
+            case GETTIMEOFDAY_ERROR:
+                ret_cod = LIXA_RC_GETTIMEOFDAY_ERROR;
                 break;
             case NONE:
                 ret_cod = LIXA_RC_OK;

@@ -465,7 +465,7 @@ public class case4106 {
                     tx.commit(false);
                 } catch (XtaException e) {
                     System.err.println("Tx.commit() returned " +
-                                       reply + e.getReturnCode() + "(" +
+                                       reply + e.getReturnCode() + " (" +
                                        e.getMessage() + ")");
                     e.printStackTrace();
                     switch (e.getReturnCode()) {
@@ -487,7 +487,7 @@ public class case4106 {
                     tx.rollback();
                 } catch (XtaException e) {
                     System.err.println("Tx.rollback() returned " +
-                                       reply + e.getReturnCode() + "(" +
+                                       reply + e.getReturnCode() + " (" +
                                        e.getMessage() + ")");
                     e.printStackTrace();
                     System.exit(11);
@@ -524,7 +524,7 @@ public class case4106 {
                 tx.branch(xidString);
             } catch (XtaException e1) {
                 System.err.println(
-                    "Tx.branch() returned " + e1.getReturnCode() + "(" +
+                    "Tx.branch() returned " + e1.getReturnCode() + " (" +
                     e1.getMessage() + ")");
                 e1.printStackTrace();
                 System.exit(3);
@@ -543,7 +543,7 @@ public class case4106 {
                 } catch (XtaException e1) {
                     System.err.println(
                             "Tx.commit() (first phase) returned " +
-                            e1.getReturnCode() + "(" +
+                            e1.getReturnCode() + " (" +
                             e1.getMessage() + ")");
                     e1.printStackTrace();
                     if (e1.getReturnCode() == ErrorCodes.LIXA_RC_TX_ROLLBACK)
@@ -560,7 +560,7 @@ public class case4106 {
                 } catch (XtaException e1) {
                     System.err.println(
                         "Tx.commit() (second phase) returned " +
-                        e1.getReturnCode() + "(" +
+                        e1.getReturnCode() + " (" +
                         e1.getMessage() + ")");
                     e1.printStackTrace();
                     switch (e1.getReturnCode()) {
@@ -582,7 +582,7 @@ public class case4106 {
                     tx.rollback();
                 } catch (XtaException e1) {
                     System.err.println("Tx.rollback() returned " +
-                                       e1.getReturnCode() + "(" +
+                                       e1.getReturnCode() + " (" +
                                        e1.getMessage() + ")");
                     e1.printStackTrace();
                     System.exit(12);

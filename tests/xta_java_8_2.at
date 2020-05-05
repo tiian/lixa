@@ -119,6 +119,22 @@ xa_end/0
 xa_prepare/0
 xa_commit/0
 ]])
+# JOURNAL state engine saves previous xa_end, and asks for a "safety rollback"
+# TRADITIONAL state engine crashes before saving xa_end, and requires
+# nothing
+if test "$LIXA_STATE_ENGINE" = "JOURNAL" -o "$LIXA_STATE_ENGINE" = "MIGRATE"
+then
+AT_DATA([monkey2s.conf],
+[[# monkey R.M. config
+# recovery rollback: resource manager should reply XAER_NOTA because the
+# xa_prepare was not called
+xa_rollback/-4
+xa_start/0
+xa_end/0
+xa_prepare/0
+xa_commit/0
+]])
+else
 AT_DATA([monkey2s.conf],
 [[# monkey R.M. config
 xa_start/0
@@ -126,6 +142,7 @@ xa_end/0
 xa_prepare/0
 xa_commit/0
 ]])
+fi
 AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027 ; lixa_test_group.sh insert], [125], [ignore], [ignore])
 AT_CHECK([rm fifo_request], [0], [ignore], [ignore])
 AT_CHECK([rm fifo_reply], [0], [ignore], [ignore])

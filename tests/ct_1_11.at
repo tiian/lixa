@@ -52,6 +52,25 @@ AT_CLEANUP
 
 AT_SETUP([CT/1.11/1.1 crash before 2-nd block copy])
 AT_CHECK([if test "$LIXA_CRASH" = "no"; then exit 77; fi])
+# JOURNAL state engine saves previous xa_end, and asks for a commit (due to
+# xa_end in single phase)
+# TRADITIONAL state engine crashes before saving xa_end, and requires
+# nothing
+if test "$LIXA_STATE_ENGINE" = "JOURNAL" -o "$LIXA_STATE_ENGINE" = "MIGRATE"
+then
+AT_DATA([monkey1s.conf],
+[[# monkey R.M. config
+xa_open/0
+# recovery commit asked by the transaction manager, but the resource manager
+# should reply XAER_NOTA due to single phase commit interrupted before xa_commit
+#
+xa_commit/-4
+xa_start/0
+xa_end/0
+xa_commit/0
+xa_close/0
+]])
+else
 AT_DATA([monkey1s.conf],
 [[# monkey R.M. config
 xa_open/0
@@ -60,6 +79,7 @@ xa_end/0
 xa_commit/0
 xa_close/0
 ]])
+fi
 AT_CHECK([export LIXA_PROFILE=CASE_PROF_0007 ; lixa_test_exec.sh noreset recycle case0035 commit 0 0], [0], [ignore], [ignore])
 AT_CLEANUP
 
@@ -112,6 +132,25 @@ AT_CLEANUP
 
 AT_SETUP([CT/1.11/3.1 crash before 2-nd block copy])
 AT_CHECK([if test "$LIXA_CRASH" = "no"; then exit 77; fi])
+# JOURNAL state engine saves previous xa_end, and asks for a rollback (due to
+# xa_end that announced a future rollback)
+# TRADITIONAL state engine crashes before saving xa_end, and requires
+# nothing
+if test "$LIXA_STATE_ENGINE" = "JOURNAL" -o "$LIXA_STATE_ENGINE" = "MIGRATE"
+then
+AT_DATA([monkey1s.conf],
+[[# monkey R.M. config
+xa_open/0
+# recovery rollback asked by the transaction manager, but the resource manager
+# should reply XAER_NOTA due to single phase commit interrupted before
+# xa_rollback
+xa_rollback/-4
+xa_start/0
+xa_end/0
+xa_rollback/0
+xa_close/0
+]])
+else
 AT_DATA([monkey1s.conf],
 [[# monkey R.M. config
 xa_open/0
@@ -120,6 +159,7 @@ xa_end/0
 xa_rollback/0
 xa_close/0
 ]])
+fi
 AT_CHECK([export LIXA_PROFILE=CASE_PROF_0007 ; lixa_test_exec.sh noreset recycle case0035 rollback 0 0], [0], [ignore], [ignore])
 AT_CLEANUP
 
