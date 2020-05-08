@@ -600,6 +600,7 @@ int lixa_state_warm_start(lixa_state_t *this,
         CORRUPTED_STATUS_FILE,
         LOG_READ_FILE,
         TABLE_PATCH_SLOT,
+        TABLE_SET_LAST_RECORD_ID,
         TABLE_CHECK_INTEGRITY,
         TABLE_SET_STATUS1,
         STATE_TABLE_CLOSE_ERROR,
@@ -809,6 +810,10 @@ int lixa_state_warm_start(lixa_state_t *this,
                                  &this->tables[last_table])));
             i = lixa_state_common_succ_state(i);
         } while (i != last_table);
+        /* set last record id on the patched table file */
+        if (LIXA_RC_OK != (ret_cod = lixa_state_table_set_last_record_id(
+                               &this->tables[last_table], last_record_id)))
+            THROW(TABLE_SET_LAST_RECORD_ID);
         /* check the table is OK */
         if (LIXA_RC_OK != (ret_cod = lixa_state_table_check_integrity(
                                &this->tables[last_table])))
@@ -883,6 +888,7 @@ int lixa_state_warm_start(lixa_state_t *this,
                 break;
             case LOG_READ_FILE:
             case TABLE_PATCH_SLOT:
+            case TABLE_SET_LAST_RECORD_ID:
             case TABLE_CHECK_INTEGRITY:
             case SWITCH_ERROR:
             case STATE_LOG_CLOSE_ERROR:

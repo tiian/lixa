@@ -39,6 +39,7 @@ EXTRA_DIST = bug.at bug_2944441.at bug_2983464.at env_var.at \
 	ct_1_0.at ct_1_1.at ct_1_2.at ct_1_3.at ct_1_4.at ct_1_5.at \
 	ct_1_6.at ct_1_7.at ct_1_8.at ct_1_9.at ct_1_10.at ct_1_11.at \
 	ct_1_12.at ct_1_13.at \
+	ct_2_0.at \
 	memory.at oracle.at.in ibmdb2.at postgresql.at mysql.at xid.at \
 	package.m4 mysql_postgresql.at webspheremq.at lixa-config.at.in \
 	lixavsr.at.in \
@@ -133,6 +134,7 @@ $(TESTSUITE): $(srcdir)/testsuite.at \
 		$(srcdir)/ct_1_8.at $(srcdir)/ct_1_9.at \
 		$(srcdir)/ct_1_10.at $(srcdir)/ct_1_11.at \
 		$(srcdir)/ct_1_12.at $(srcdir)/ct_1_13.at \
+		$(srcdir)/ct_2_0.at \
 		$(srcdir)/xta.at $(srcdir)/xta_config.at \
 		$(srcdir)/xta_1.at $(srcdir)/xta_2.at \
 		$(srcdir)/xta_3.at $(srcdir)/xta_4.at \

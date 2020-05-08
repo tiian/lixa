@@ -1,5 +1,7 @@
 # Crash test specific test cases
 
+m4_include([ct_2_0.at])
+
 m4_include([ct_0_0.at])
 m4_include([ct_0_1.at])
 m4_include([ct_0_2.at])
