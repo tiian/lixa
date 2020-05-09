@@ -1,7 +1,8 @@
-AT_BANNER([Soft server side crash (xa_end/xa_prepare/xa_commit/xa_forget)])
+AT_BANNER([Hard server side crash (xa_end/xa_prepare/xa_commit/xa_forget)])
 
-AT_SETUP([CT/1.2/0.0 server_xa_end (step=8)])
+AT_SETUP([CT/2.2/0.0 server_xa_end (step=8)])
 AT_CHECK([if test "$LIXA_CRASH" = "no"; then exit 77; fi])
+AT_CHECK([if test "$LIXA_STATE_ENGINE" != "JOURNAL" -a "$LIXA_STATE_ENGINE" != "MIGRATE"; then exit 77; fi])
 AT_DATA([monkey1s.conf],
 [[# monkey R.M. config
 xa_open/0
@@ -39,58 +40,13 @@ xa_close/0
 # this client forces server crash in server_xa_end_8; the client must stop
 # with TX_FAIL
 AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; export LIXA_CRASH_POINT=30 ; lixa_test_exec.sh reset start case0035 commit 5 -7], [5], [ignore], [ignore])
+# this step damages the second state table files
+AT_CHECK([lixa_damage_files.sh], [0], [ignore], [ignore])
 AT_CLEANUP
 
-AT_SETUP([CT/1.2/0.1 server_xa_end (step=8)])
+AT_SETUP([CT/2.2/0.1 server_xa_end (step=8)])
 AT_CHECK([if test "$LIXA_CRASH" = "no"; then exit 77; fi])
-# JOURNAL state engine saves previous xa_end, and asks for a "safety rollback"
-# TRADITIONAL state engine crashes before saving xa_end, and requires
-# nothing
-if test "$LIXA_STATE_ENGINE" = "JOURNAL" -o "$LIXA_STATE_ENGINE" = "MIGRATE"
-then
-AT_DATA([monkey1s.conf],
-[[# monkey R.M. config
-xa_open/0
-# recovery rollback
-xa_rollback/0
-xa_start/0
-xa_end/0
-xa_prepare/0
-xa_commit/0
-xa_close/0
-]])
-AT_DATA([monkey2s.conf],
-[[# monkey R.M. config
-xa_open/0
-# recovery rollback
-xa_rollback/0
-xa_start/0
-xa_end/0
-xa_prepare/0
-xa_commit/0
-xa_close/0
-]])
-AT_DATA([monkey1d.conf],
-[[# monkey R.M. config
-xa_open/0
-# recovery rollback
-xa_rollback/0
-xa_end/0
-xa_prepare/0
-xa_commit/0
-xa_close/0
-]])
-AT_DATA([monkey2d.conf],
-[[# monkey R.M. config
-xa_open/0
-# recovery rollback
-xa_rollback/0
-xa_end/0
-xa_prepare/0
-xa_commit/0
-xa_close/0
-]])
-else
+AT_CHECK([if test "$LIXA_STATE_ENGINE" != "JOURNAL" -a "$LIXA_STATE_ENGINE" != "MIGRATE"; then exit 77; fi])
 AT_DATA([monkey1s.conf],
 [[# monkey R.M. config
 xa_open/0
@@ -125,12 +81,12 @@ xa_prepare/0
 xa_commit/0
 xa_close/0
 ]])
-fi
 AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh noreset recycle case0035 commit 0 0], [0], [ignore], [ignore])
 AT_CLEANUP
 
-AT_SETUP([CT/1.2/1.0 server_xa_prepare (step=8)])
+AT_SETUP([CT/2.2/1.0 server_xa_prepare (step=8)])
 AT_CHECK([if test "$LIXA_CRASH" = "no"; then exit 77; fi])
+AT_CHECK([if test "$LIXA_STATE_ENGINE" != "JOURNAL" -a "$LIXA_STATE_ENGINE" != "MIGRATE"; then exit 77; fi])
 AT_DATA([monkey1s.conf],
 [[# monkey R.M. config
 xa_open/0
@@ -167,59 +123,14 @@ xa_close/0
 ]])
 # this client forces server crash in server_xa_prepare_8; the client must stop
 # with TX_FAIL
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; export LIXA_CRASH_POINT=32 ; export LIXA_SYNC_NODELAY=yes ; lixa_test_exec.sh noreset start case0035 commit 5 -7], [5], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; export LIXA_CRASH_POINT=32 ; export LIXA_SYNC_NODELAY=yes ; lixa_test_exec.sh reset start case0035 commit 5 -7], [5], [ignore], [ignore])
+# this step damages the second state table files
+AT_CHECK([lixa_damage_files.sh], [0], [ignore], [ignore])
 AT_CLEANUP
 
-AT_SETUP([CT/1.2/1.1 server_xa_prepare (step=8)])
+AT_SETUP([CT/2.2/1.1 server_xa_prepare (step=8)])
 AT_CHECK([if test "$LIXA_CRASH" = "no"; then exit 77; fi])
-# recover previous prepared transaction: TRADITIONAL state engine misses the
-# prepared state and requires a rollback; JOURNAL state engine saves
-# it and requires a commit!
-if test "$LIXA_STATE_ENGINE" = "JOURNAL" -o "$LIXA_STATE_ENGINE" = "MIGRATE"
-then
-AT_DATA([monkey1s.conf],
-[[# monkey R.M. config
-xa_open/0
-# this commit terminates the previous transaction
-xa_commit/0
-xa_start/0
-xa_end/0
-xa_prepare/0
-xa_commit/0
-xa_close/0
-]])
-AT_DATA([monkey2s.conf],
-[[# monkey R.M. config
-xa_open/0
-# this commit terminates the previous transaction
-xa_commit/0
-xa_start/0
-xa_end/0
-xa_prepare/0
-xa_commit/0
-xa_close/0
-]])
-AT_DATA([monkey1d.conf],
-[[# monkey R.M. config
-xa_open/0
-# this commit terminates the previous transaction
-xa_commit/0
-xa_end/0
-xa_prepare/0
-xa_commit/0
-xa_close/0
-]])
-AT_DATA([monkey2d.conf],
-[[# monkey R.M. config
-xa_open/0
-# this commit terminates the previous transaction
-xa_commit/0
-xa_end/0
-xa_prepare/0
-xa_commit/0
-xa_close/0
-]])
-else
+AT_CHECK([if test "$LIXA_STATE_ENGINE" != "JOURNAL" -a "$LIXA_STATE_ENGINE" != "MIGRATE"; then exit 77; fi])
 AT_DATA([monkey1s.conf],
 [[# monkey R.M. config
 xa_open/0
@@ -262,12 +173,12 @@ xa_prepare/0
 xa_commit/0
 xa_close/0
 ]])
-fi
 AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh noreset recycle case0035 commit 0 0], [0], [ignore], [ignore])
 AT_CLEANUP
 
-AT_SETUP([CT/1.2/2.0 server_xa_commit (step=8)])
+AT_SETUP([CT/2.2/2.0 server_xa_commit (step=8)])
 AT_CHECK([if test "$LIXA_CRASH" = "no"; then exit 77; fi])
+AT_CHECK([if test "$LIXA_STATE_ENGINE" != "JOURNAL" -a "$LIXA_STATE_ENGINE" != "MIGRATE"; then exit 77; fi])
 AT_DATA([monkey1s.conf],
 [[# monkey R.M. config
 xa_open/0
@@ -305,51 +216,14 @@ xa_close/0
 # this client forces server crash in server_xa_commit_8; the client ends
 # without errors because the last messages are sent asynchronously, but the
 # server missed xa_commit return codes and xa_close message
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; export LIXA_CRASH_POINT=33 ; export LIXA_SYNC_NODELAY=yes ; lixa_test_exec.sh noreset start case0035 commit 0 0], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; export LIXA_CRASH_POINT=33 ; export LIXA_SYNC_NODELAY=yes ; lixa_test_exec.sh reset start case0035 commit 0 0], [0], [ignore], [ignore])
+# this step damages the second state table files
+AT_CHECK([lixa_damage_files.sh], [0], [ignore], [ignore])
 AT_CLEANUP
 
-AT_SETUP([CT/1.2/2.1 server_xa_commit (step=8)])
+AT_SETUP([CT/2.2/2.1 server_xa_commit (step=8)])
 AT_CHECK([if test "$LIXA_CRASH" = "no"; then exit 77; fi])
-# recover previous prepared transaction: TRADITIONAL state engine misses the
-# committed state and requires a commit; JOURNAL state engine saves
-# it and requires nothing
-if test "$LIXA_STATE_ENGINE" = "JOURNAL" -o "$LIXA_STATE_ENGINE" = "MIGRATE"
-then
-AT_DATA([monkey1s.conf],
-[[# monkey R.M. config
-xa_open/0
-xa_start/0
-xa_end/0
-xa_prepare/0
-xa_commit/0
-xa_close/0
-]])
-AT_DATA([monkey2s.conf],
-[[# monkey R.M. config
-xa_open/0
-xa_start/0
-xa_end/0
-xa_prepare/0
-xa_commit/0
-xa_close/0
-]])
-AT_DATA([monkey1d.conf],
-[[# monkey R.M. config
-xa_open/0
-xa_end/0
-xa_prepare/0
-xa_commit/0
-xa_close/0
-]])
-AT_DATA([monkey2d.conf],
-[[# monkey R.M. config
-xa_open/0
-xa_end/0
-xa_prepare/0
-xa_commit/0
-xa_close/0
-]])
-else
+AT_CHECK([if test "$LIXA_STATE_ENGINE" != "JOURNAL" -a "$LIXA_STATE_ENGINE" != "MIGRATE"; then exit 77; fi])
 AT_DATA([monkey1s.conf],
 [[# monkey R.M. config
 xa_open/0
@@ -392,12 +266,12 @@ xa_prepare/0
 xa_commit/0
 xa_close/0
 ]])
-fi
 AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh noreset recycle case0035 commit 0 0], [0], [ignore], [ignore])
 AT_CLEANUP
 
-AT_SETUP([CT/1.2/3.0 server_xa_forget (step=8)])
+AT_SETUP([CT/2.2/3.0 server_xa_forget (step=8)])
 AT_CHECK([if test "$LIXA_CRASH" = "no"; then exit 77; fi])
+AT_CHECK([if test "$LIXA_STATE_ENGINE" != "JOURNAL" -a "$LIXA_STATE_ENGINE" != "MIGRATE"; then exit 77; fi])
 AT_DATA([monkey1s.conf],
 [[# monkey R.M. config
 xa_open/0
@@ -436,51 +310,14 @@ xa_close/0
 # this client forces server crash in server_xa_forget_8; the client ends
 # without errors because the last messages are sent asynchronously, but the
 # server missed xa_commit return codes and xa_close message
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; export LIXA_CRASH_POINT=34 ; export LIXA_SYNC_NODELAY=yes ; lixa_test_exec.sh noreset start case0035 commit 0 0], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; export LIXA_CRASH_POINT=34 ; export LIXA_SYNC_NODELAY=yes ; lixa_test_exec.sh reset start case0035 commit 0 0], [0], [ignore], [ignore])
+# this step damages the second state table files
+AT_CHECK([lixa_damage_files.sh], [0], [ignore], [ignore])
 AT_CLEANUP
 
-AT_SETUP([CT/1.2/3.1 server_xa_forget (step=8)])
+AT_SETUP([CT/2.2/3.1 server_xa_forget (step=8)])
 AT_CHECK([if test "$LIXA_CRASH" = "no"; then exit 77; fi])
-# recover previous prepared transaction: TRADITIONAL state engine misses the
-# committed state and requires a commit; JOURNAL state engine saves
-# it and requires nothing
-if test "$LIXA_STATE_ENGINE" = "JOURNAL" -o "$LIXA_STATE_ENGINE" = "MIGRATE"
-then
-AT_DATA([monkey1s.conf],
-[[# monkey R.M. config
-xa_open/0
-xa_start/0
-xa_end/0
-xa_prepare/0
-xa_commit/0
-xa_close/0
-]])
-AT_DATA([monkey2s.conf],
-[[# monkey R.M. config
-xa_open/0
-xa_start/0
-xa_end/0
-xa_prepare/0
-xa_commit/0
-xa_close/0
-]])
-AT_DATA([monkey1d.conf],
-[[# monkey R.M. config
-xa_open/0
-xa_end/0
-xa_prepare/0
-xa_commit/0
-xa_close/0
-]])
-AT_DATA([monkey2d.conf],
-[[# monkey R.M. config
-xa_open/0
-xa_end/0
-xa_prepare/0
-xa_commit/0
-xa_close/0
-]])
-else
+AT_CHECK([if test "$LIXA_STATE_ENGINE" != "JOURNAL" -a "$LIXA_STATE_ENGINE" != "MIGRATE"; then exit 77; fi])
 AT_DATA([monkey1s.conf],
 [[# monkey R.M. config
 xa_open/0
@@ -517,13 +354,12 @@ AT_DATA([monkey2d.conf],
 [[# monkey R.M. config
 xa_open/0
 # this is a recovery pending commit; the resource manager already committed
-xa_commit/-7
+xa_commit/-4
 xa_end/0
 xa_prepare/0
 xa_commit/0
 xa_close/0
 ]])
-fi
 AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh noreset recycle case0035 commit 0 0], [0], [ignore], [ignore])
 AT_CLEANUP
 
