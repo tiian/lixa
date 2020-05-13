@@ -1,12 +1,5 @@
 # Crash test specific test cases
 
-m4_include([ct_2_6.at])
-m4_include([ct_2_5.at])
-m4_include([ct_2_4.at])
-m4_include([ct_2_3.at])
-m4_include([ct_2_2.at])
-m4_include([ct_2_0.at])
-
 m4_include([ct_0_0.at])
 m4_include([ct_0_1.at])
 m4_include([ct_0_2.at])
@@ -31,4 +24,18 @@ m4_include([ct_1_10.at])
 m4_include([ct_1_11.at])
 m4_include([ct_1_12.at])
 m4_include([ct_1_13.at])
+
+m4_include([ct_2_0.at])
+m4_include([ct_2_2.at])
+m4_include([ct_2_3.at])
+m4_include([ct_2_4.at])
+m4_include([ct_2_5.at])
+m4_include([ct_2_6.at])
+m4_include([ct_2_7.at])
+m4_include([ct_2_8.at])
+m4_include([ct_2_9.at])
+m4_include([ct_2_10.at])
+m4_include([ct_2_11.at])
+m4_include([ct_2_12.at])
+m4_include([ct_2_13.at])
 

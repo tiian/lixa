@@ -1,4 +1,4 @@
-AT_BANNER([Hard server side crash before msync (two phase commit)])
+AT_BANNER([Hard server side crash before sync (two phase commit)])
 
 AT_SETUP([CT/2.6/0.0 crash before 1-st sync])
 AT_CHECK([if test "$LIXA_CRASH" = "no"; then exit 77; fi])

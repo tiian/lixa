@@ -1,0 +1,68 @@
+AT_BANNER([Hard server side crash before block copy (one phase commit)])
+
+AT_SETUP([CT/2.11/0.0 crash before 1-st block copy])
+AT_CHECK([if test "$LIXA_CRASH" = "no"; then exit 77; fi])
+AT_CHECK([if test "$LIXA_STATE_ENGINE" != "JOURNAL" -a "$LIXA_STATE_ENGINE" != "MIGRATE"; then exit 77; fi])
+AT_DATA([monkey1s.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_commit/0
+xa_close/0
+]])
+# this client forces server crash in server_manager_pollout; the client must 
+# stop with TX_FAIL
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0007 ; export LIXA_CRASH_POINT=41 ; export LIXA_CRASH_COUNT=1 ; export LIXA_SYNC_NODELAY=yes ; lixa_test_exec.sh reset start case0035 commit 5 -7], [5], [ignore], [ignore])
+# this step damages second and third state table files
+AT_CHECK([lixa_damage_files.sh], [0], [ignore], [ignore])
+AT_CLEANUP
+
+AT_SETUP([CT/2.11/0.1 crash before 1-st block copy])
+AT_CHECK([if test "$LIXA_CRASH" = "no"; then exit 77; fi])
+AT_CHECK([if test "$LIXA_STATE_ENGINE" != "JOURNAL" -a "$LIXA_STATE_ENGINE" != "MIGRATE"; then exit 77; fi])
+AT_DATA([monkey1s.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_commit/0
+xa_close/0
+]])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0007 ; lixa_test_exec.sh noreset recycle case0035 commit 0 0], [0], [ignore], [ignore])
+AT_CLEANUP
+
+AT_BANNER([Hard server side crash before block copy (one phase rollback)])
+
+AT_SETUP([CT/2.11/2.0 crash before 1-st block copy])
+AT_CHECK([if test "$LIXA_CRASH" = "no"; then exit 77; fi])
+AT_CHECK([if test "$LIXA_STATE_ENGINE" != "JOURNAL" -a "$LIXA_STATE_ENGINE" != "MIGRATE"; then exit 77; fi])
+AT_DATA([monkey1s.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_rollback/0
+xa_close/0
+]])
+# this client forces server crash in server_manager_pollout; the client must 
+# stop with TX_FAIL
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0007 ; export LIXA_CRASH_POINT=41 ; export LIXA_CRASH_COUNT=1 ; export LIXA_SYNC_NODELAY=yes ; lixa_test_exec.sh reset start case0035 rollback 5 -7], [5], [ignore], [ignore])
+# this step damages second and third state table files
+AT_CHECK([lixa_damage_files.sh], [0], [ignore], [ignore])
+AT_CLEANUP
+
+AT_SETUP([CT/2.11/2.1 crash before 1-st block copy])
+AT_CHECK([if test "$LIXA_CRASH" = "no"; then exit 77; fi])
+AT_CHECK([if test "$LIXA_STATE_ENGINE" != "JOURNAL" -a "$LIXA_STATE_ENGINE" != "MIGRATE"; then exit 77; fi])
+AT_DATA([monkey1s.conf],
+[[# monkey R.M. config
+xa_open/0
+xa_start/0
+xa_end/0
+xa_rollback/0
+xa_close/0
+]])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0007 ; lixa_test_exec.sh noreset recycle case0035 rollback 0 0], [0], [ignore], [ignore])
+AT_CLEANUP
+

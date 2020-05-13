@@ -1,7 +1,8 @@
-AT_BANNER([Server side crash before sync (two phase rollback)])
+AT_BANNER([Hard server side crash after sync (two phase rollback)])
 
-AT_SETUP([CT/1.9/0.0 crash before 1-st sync])
+AT_SETUP([CT/2.10/0.0 crash after 1-st sync])
 AT_CHECK([if test "$LIXA_CRASH" = "no"; then exit 77; fi])
+AT_CHECK([if test "$LIXA_STATE_ENGINE" != "JOURNAL" -a "$LIXA_STATE_ENGINE" != "MIGRATE"; then exit 77; fi])
 AT_DATA([monkey1s.conf],
 [[# monkey R.M. config
 xa_open/0
@@ -38,11 +39,14 @@ xa_close/0
 ]])
 # this client forces server crash in server_manager_pollout; the client must 
 # stop with TX_FAIL
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; export LIXA_CRASH_POINT=42 ; export LIXA_CRASH_COUNT=1 ; export LIXA_SYNC_NODELAY=yes ; lixa_test_exec.sh reset start case0035 commit 5 -7], [5], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; export LIXA_CRASH_POINT=43 ; export LIXA_CRASH_COUNT=1 ; export LIXA_SYNC_NODELAY=yes ; lixa_test_exec.sh reset start case0035 commit 5 -7], [5], [ignore], [ignore])
+# this step damages second and third state table files
+AT_CHECK([lixa_damage_files.sh], [0], [ignore], [ignore])
 AT_CLEANUP
 
-AT_SETUP([CT/1.9/0.1 crash before 1-st sync])
+AT_SETUP([CT/2.10/0.1 crash after 1-st sync])
 AT_CHECK([if test "$LIXA_CRASH" = "no"; then exit 77; fi])
+AT_CHECK([if test "$LIXA_STATE_ENGINE" != "JOURNAL" -a "$LIXA_STATE_ENGINE" != "MIGRATE"; then exit 77; fi])
 AT_DATA([monkey1s.conf],
 [[# monkey R.M. config
 xa_open/0
@@ -88,8 +92,9 @@ xa_close/0
 AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh noreset recycle case0035 commit 5 -2], [5], [ignore], [ignore])
 AT_CLEANUP
 
-AT_SETUP([CT/1.9/1.0 crash before 2-nd sync])
+AT_SETUP([CT/2.10/1.0 crash after 2-nd sync])
 AT_CHECK([if test "$LIXA_CRASH" = "no"; then exit 77; fi])
+AT_CHECK([if test "$LIXA_STATE_ENGINE" != "JOURNAL" -a "$LIXA_STATE_ENGINE" != "MIGRATE"; then exit 77; fi])
 AT_DATA([monkey1s.conf],
 [[# monkey R.M. config
 xa_open/0
@@ -124,13 +129,16 @@ xa_prepare/-3
 xa_rollback/0
 xa_close/0
 ]])
-# this client forces server crash in server_manager_pollout; the client must
+# this client forces server crash in server_manager_pollout; the client must 
 # stop with TX_FAIL
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; export LIXA_CRASH_POINT=42 ; export LIXA_CRASH_COUNT=2 ; export LIXA_SYNC_NODELAY=yes ; lixa_test_exec.sh noreset start case0035 commit 5 -7], [5], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; export LIXA_CRASH_POINT=43 ; export LIXA_CRASH_COUNT=2 ; export LIXA_SYNC_NODELAY=yes ; lixa_test_exec.sh reset start case0035 commit 5 -7], [5], [ignore], [ignore])
+# this step damages second and third state table files
+AT_CHECK([lixa_damage_files.sh], [0], [ignore], [ignore])
 AT_CLEANUP
 
-AT_SETUP([CT/1.9/1.1 crash before 2-nd sync])
+AT_SETUP([CT/2.10/1.1 crash after 2-nd sync])
 AT_CHECK([if test "$LIXA_CRASH" = "no"; then exit 77; fi])
+AT_CHECK([if test "$LIXA_STATE_ENGINE" != "JOURNAL" -a "$LIXA_STATE_ENGINE" != "MIGRATE"; then exit 77; fi])
 AT_DATA([monkey1s.conf],
 [[# monkey R.M. config
 xa_open/0

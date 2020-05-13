@@ -1,6 +1,6 @@
-AT_BANNER([Server side crash before msync (two phase commit)])
+AT_BANNER([Server side crash before sync (two phase commit)])
 
-AT_SETUP([CT/1.6/0.0 crash before 1-st msync])
+AT_SETUP([CT/1.6/0.0 crash before 1-st sync])
 AT_CHECK([if test "$LIXA_CRASH" = "no"; then exit 77; fi])
 AT_DATA([monkey1s.conf],
 [[# monkey R.M. config
@@ -41,7 +41,7 @@ xa_close/0
 AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; export LIXA_CRASH_POINT=42 ; export LIXA_CRASH_COUNT=1 ; export LIXA_SYNC_NODELAY=yes ; lixa_test_exec.sh reset start case0035 commit 5 -7], [5], [ignore], [ignore])
 AT_CLEANUP
 
-AT_SETUP([CT/1.6/0.1 crash before 1-st msync])
+AT_SETUP([CT/1.6/0.1 crash before 1-st sync])
 AT_CHECK([if test "$LIXA_CRASH" = "no"; then exit 77; fi])
 AT_DATA([monkey1s.conf],
 [[# monkey R.M. config
@@ -88,7 +88,7 @@ xa_close/0
 AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; lixa_test_exec.sh noreset recycle case0035 commit 0 0], [0], [ignore], [ignore])
 AT_CLEANUP
 
-AT_SETUP([CT/1.6/1.0 crash before 2-nd msync])
+AT_SETUP([CT/1.6/1.0 crash before 2-nd sync])
 AT_CHECK([if test "$LIXA_CRASH" = "no"; then exit 77; fi])
 AT_DATA([monkey1s.conf],
 [[# monkey R.M. config
@@ -136,7 +136,7 @@ AT_CHECK([export LIXA_PROFILE=CASE_PROF_0002 ; export LIXA_CRASH_POINT=42 ; expo
 fi
 AT_CLEANUP
 
-AT_SETUP([CT/1.6/1.1 crash before 2-nd msync])
+AT_SETUP([CT/1.6/1.1 crash before 2-nd sync])
 AT_CHECK([if test "$LIXA_CRASH" = "no"; then exit 77; fi])
 AT_DATA([monkey1s.conf],
 [[# monkey R.M. config
