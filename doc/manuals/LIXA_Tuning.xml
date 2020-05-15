@@ -1,20 +1,84 @@
 <chapter xml:id="Tuning"
 	 xmlns:xlink="http://www.w3.org/1999/xlink">
   <title>Tuning</title>
-  <para>
-    This chapter contains some tricks you may use to optimize the performance
-    of your LIXA installation.
-  </para>
   <section>
-    <title>Overview</title>
+    <title>Introduction</title>
     <para>
-      On the LIXA state server side, there are basically 3 elements you can 
-      tune in your installation:
-      state file disk assignment, number of server threads, 
-      min and max elapsed synchronization time.
+      This chapter contains imformation useful to obtain the best performance
+      of the LIXA state server (<command>lixad</command>) in your environment.
+      As explained in <xref linkend="Configuring_the_server"/> the server
+      provide some configuration parameters that can be tuned.
+    </para>
+    <para>
+      There are basically two tuning paths:
+      <itemizedlist mark='bullet'>
+	<listitem><para>
+	  number of server threads: the level of internal parallelism can be
+	  tuned according with the number of available CPUs
+	</para></listitem>
+	<listitem><para>
+	  disk performance: several parameters are available to find the best
+	  trade off between performance and reliability
+	</para></listitem>
+      </itemizedlist>
+      The two tuning paths are typically not fully independent: increasing the
+      number of server threads increases the pressure to the disk(s) and vice
+      versa.
     </para>
     <section>
-      <title>State file disk assignment</title>
+      <title>Number of server threads</title>
+      <para>
+	The LIXA state server is a multi-threaded process with one network
+	listener and many <quote>managers</quote>; every manager runs
+	in a dedicated thread. Choosing the optimal number of threads requires
+	some trials: following the <quote>just work</quote> concept
+	the default configuration specifies 3 threads, but your 
+	installation might perform better using a different number (in the
+	below paragraphs you can collect some hints).
+      </para>
+      <note><para>
+	If you use the <emphasis>journal based</emphasis> state engine, 
+	<command>lixad</command> will start 3 different POSIX threads for every
+	server thread; if you use the <emphasis>traditional</emphasis> state
+	engine, <command>lixad</command> will start a single POSIX thread for
+	every server thread.
+      </para></note>
+      <para>
+	Refer to <xref linkend="Configuring_the_server"/> for information about
+	how to specify the number of server threads.
+      </para>
+    </section>
+    <section>
+      <title>Disk performance</title>
+      <para>
+	To get the best IO performance, <command>lixad</command> provides 3
+	complementary strategies:
+	<itemizedlist mark='bullet'>
+	  <listitem><para>
+	    scattering IO through different disks: every server thread points
+	    its own set of state files, if your system provides independent
+	    disks, you can assign them to different server threads
+	  </para></listitem>
+	  <listitem><para>
+	    choosing the state engine type: two state engines,
+	    <emphasis>traditional</emphasis> and
+	    <emphasis>journal based</emphasis>; the first has
+	    a proven track of reliability because it has been deployed in
+	    production environments since 2009 while the latter is a new
+	    engine released in 2020 and provides amazingly low latency
+	  </para></listitem>
+	  <listitem><para>
+	    configuring the state engine: depending on the previous choice,
+	    different options are available to optimize the performance of
+	    the state engine
+	  </para></listitem>
+	</itemizedlist>
+
+      </para>
+    </section>
+  </section>
+  <section>
+    <title>@@@ Disk performance</title>
       <para>
 	As explained in <xref linkend="Configuring_the_server"/> every
 	manager inside the LIXA state server uses a specific path for
@@ -27,19 +91,6 @@
 	configuration specifies a path like
 	<filename>/opt/lixa/var/...</filename>
 	but you should change it if your system had indipendent disks.
-      </para>
-    </section>
-    <section>
-      <title>Number of server threads</title>
-      <para>
-	The LIXA state server is a multi-threaded process with one network
-	listener and many <quote>managers</quote>; every manager runs
-	in a dedicated thread. Choosing the optimal number of threads is
-	not an easy task: following the <quote>just work</quote> concept
-	the default configuration specifies 3 threads, but your own 
-	installation could necessitate a quite different value for optimal
-	performances (in the following paragraphs you could pick-up 
-	some information).
       </para>
     </section>
     <section>
@@ -71,7 +122,6 @@
 	  a server crash without extra performance benefits.
 	</para>
       </important>
-    </section>
   </section>
   <section xml:id="Tuning_example">
     <title>A tuning example</title>

@@ -1,9 +1,4 @@
-Change Copyright: it's still 2009-2019
-
-Implement auto-migration from old state files to new state tables:
-- if cold start & state files exists => migrate and switch
-- if cold start & state files does not exist => cold start new state tables
-- if warm start => ignore old state files
+Restart from LIXA_Tuning.xml @@@
 
 Document parameters for direct write...  o_direct_  o_dsync_  o_rsync_ o_sync_
 Document parameters log_size and max_buffer_log_size
@@ -12,13 +7,16 @@ Document new meaning of max_elapsed_sync_time: if 0, synchronous log; just
 more
 Document environment variable LIXA_STATE_ENGINE, see server_config.h
 
+Implement auto-migration from old state files to new state tables:
+- if cold start & state files exists => migrate and switch
+- if cold start & state files does not exist => cold start new state tables
+- if warm start => ignore old state files
+
 Clean memory leaks by mean of valgrind
 
 Introduce a clean up policy in lixa_state_table_copy_from(): all the failed
 transactions that are older than T1 and all the recovery pending transactions 
 that are older than T2 will not be copied in the target state table
-
-Review command line help description for options -d and -D of lixat: they are not clear
 
 **********
 

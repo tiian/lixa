@@ -1,3 +1,14 @@
+Release: 1.9.0 (Tester: Tiian; Test purpose: non regression test of the new
+journal based state engine)
+Date: 2019-05-15
+Configuration for Ubuntu: ./configure --enable-crash --with-docbook --with-mysql --with-mysql-jdbc=/usr/share/java/mysql.jar --with-postgresql --with-postgresql-jdbc=/opt/postgresql/postgresql.jar --with-oracle-include=/opt/oracle/instantclient_12_1/sdk/include/ --with-oracle-lib=/opt/oracle/instantclient_12_1/ --with-oracle-jdbc=/opt/oracle/OJDBC-Full/ojdbc7.jar
+- LIXA_STATE_ENGINE=JOURNAL
+- LIXA_STATE_ENGINE=TRADITIONAL
+
+Ubuntu 14.04	|x86_64	|virtual (KVM)	|3 vCPU
+
+------------------------------------------------------------------------------
+
 Release: 1.7.8 (Tester: Tiian; Test purpose: non regression test after many fixed bugs)
 Date: 2019-05-12
 Configuration for Ubuntu: ./configure --enable-crash --with-docbook --with-mysql --with-mysql-jdbc=/usr/share/java/mysql.jar --with-postgresql --with-postgresql-jdbc=/opt/postgresql/postgresql.jar --with-oracle-include=/opt/oracle/instantclient_12_1/sdk/include/ --with-oracle-lib=/opt/oracle/instantclient_12_1/ --with-oracle-jdbc=/opt/oracle/OJDBC-Full/ojdbc7.jar

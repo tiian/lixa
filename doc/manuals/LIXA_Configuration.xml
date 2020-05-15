@@ -241,8 +241,7 @@
   <section>
     <title>Configuring LIXA components</title>
     <para>
-      The picture below emphasizes the LIXA components that must be configured
-      in a simple scenario:
+      The picture below shows the LIXA components that must be configured:
     </para>
     <figure xml:id="config6">
       <title>The LIXA components and the necessary configuration files</title>
@@ -305,7 +304,7 @@
 	  </para></listitem>
 	  <listitem><para>
 	      the <emphasis>managers</emphasis> section specifies how many
-	      parallel threads must be activated to serve the LIXA clients
+	      server threads must be activated to serve the LIXA clients
 	  </para></listitem>
 	</itemizedlist>
       </para>
@@ -315,7 +314,9 @@
 &lt;?xml version="1.0" encoding="UTF-8" ?&gt;
   &lt;server 
     pid_file="/opt/lixa/var/run.pid"
-    min_elapsed_sync_time="0" max_elapsed_sync_time="0"&gt;
+    min_elapsed_sync_time="0" max_elapsed_sync_time="0"
+    log_size="524288" max_buffer_log_size="131072"
+    log_o_direct="1" log_o_dsync="0" log_o_rsync="0" log_o_sync="0"&gt;
   &lt;listeners&gt;
     &lt;listener domain="AF_INET" address="127.0.0.1" port="3456"/&gt;
     &lt;listener domain="AF_INET" address="0.0.0.0" port="2345"/&gt;
@@ -338,27 +339,60 @@
 	  </para></listitem>
 	  <listitem><para>
 	      <parameter>min_elapsed_sync_time</parameter>: minimum time
-	      expressed in millisecond interleaving a state file 
-	      synchronization request and the start of the synchronization
-	      operation; every manager (thread) uses its own clock 
+	      expressed in millisecond between a request for file
+	      synchronization and the start of the synchronization
+	      operation; use 0 to obtain the lowest RPO (Recovery Point
+	      Objective), use higher values to obtain higher performances of
+	      the server
 	  </para></listitem>
 	  <listitem><para>
 	      <parameter>max_elapsed_sync_time</parameter>: maximum time
-	      expressed in millisecond interleaving a state file 
-	      synchronization request and the start of the synchronization
-	      operation; every manager (thread) uses its own clock.
+	      expressed in millisecond between a request for file
+	      synchronization and the start of the synchronization
+	      operation; use 0 to obtain the lowest RPO (Recovery Point
+	      Objective), use higher values to obtain higher performances of
+	      the server
 	      <parameter>max_elapsed_sync_time</parameter> can not be less 
 	      than <parameter>min_elapsed_sync_time</parameter>;
-	      see <xref linkend="Tuning"/> for more information about these
-	      parameters.
 	  </para></listitem>
 	  <listitem><para>
-	      <parameter>listener</parameter>: the server can activate one 
-	      or more
-	      listeners; most of the times one listener is sufficient, but if
-	      you want to use only a subset of the IP addresses defined at
-	      the operating system level, you have to configure a dedicated
-	      listener for every desired address
+	      <parameter>log_size</parameter>: maximum desired size for
+	      state log files used by the <emphasis>journal</emphasis> based
+	      state engine, it does not apply to traditional state engine; it
+	      must be considered a soft limit: if necessary, the state engine
+	      can expand it. The lower the storage performance, the higher
+	      the space necessary for the log files
+	  </para></listitem>
+	  <listitem><para>
+	      <parameter>max_buffer_log_size</parameter>: maximum desired size
+	      in RAM for log buffering, it does not apply to traditional state
+	      engine; it's a hard limit. A large buffer can alleviate the
+	      issue deriving by a slow storage
+	  </para></listitem>
+	  <listitem><para>
+	      <parameter>log_o_direct</parameter>: boolean value (1 or 0) to
+	      activate/deactivate the O_DIRECT flag for log files, the flag
+	      is described in open(2) man page, it does not apply to
+	      the traditional state engine
+	  </para></listitem>
+	  <listitem><para>
+	      <parameter>log_o_dsync</parameter>: boolean value (1 or 0) to
+	      activate/deactivate the O_DSYNC flag for log files, the flag
+	      is described in open(2) man page, it does not apply to
+	      the traditional state engine
+	  </para></listitem>
+	  <listitem><para>
+	      <parameter>log_o_rsync</parameter>: boolean value (1 or 0) to
+	      activate/deactivate the O_RSYNC flag for log files, the flag
+	      is described in open(2) man page, it does not apply to
+	      the traditional state engine and it's currently of no relevance
+	      for Linux
+	  </para></listitem>
+	  <listitem><para>
+	      <parameter>log_o_sync</parameter>: boolean value (1 or 0) to
+	      activate/deactivate the O_SYNC flag for log files, the flag
+	      is described in open(2) man page, it does not apply to
+	      the traditional state engine
 	  </para></listitem>
 	  <listitem><para>
 	      <parameter>domain</parameter>: the type of socket must be used to
@@ -390,46 +424,66 @@
 	      create the status files (a couple) for a manager; 
 	      this generally is
 	      a persistent and reliable storage device like a RAID partition.
-	      The string specified by the tag <parameter>status_file</parameter>
+	      The string specified by the tag
+	      <parameter>status_file</parameter>
 	      is used as a prefix: every manager (thread) creates two files
 	      with the same prefix and different suffixes.
 	  </para></listitem>
 	</itemizedlist>
       </para>
       <section xml:id="Delayed_synchronization_effects">
-	<title>Delayed synchronization effects</title>
+	<title>Synchronization parameters</title>
 	<para>
 	  Parameters
-	  <parameter>min_elapsed_sync_time</parameter> and
-	  <parameter>max_elapsed_sync_time</parameter>
-	  have a great relevance with the performance of the LIXA system
-	  as explained in <xref linkend="Tuning"/> but they have a relevance
-	  with system robustness as well:
+	  <parameter>min_elapsed_sync_time</parameter>,
+	  <parameter>max_elapsed_sync_time</parameter>,
+	  <parameter>log_size</parameter>,
+	  <parameter>max_buffer_log_size</parameter>,
+	  <parameter>log_o_direct</parameter>,
+	  <parameter>log_o_dsync</parameter>,
+	  <parameter>log_o_rsync</parameter>, and
+	  <parameter>log_o_sync</parameter>
+	  plays a fundamental role in reliability and performance of the LIXA
+	  state server.
+	  The provided default values are valid for general
+	  purpose scenarios, for advanced use cases, refer to the dedicated
+	  <xref linkend="Tuning"/> section.
+	</para>
+      </section>
+      <section xml:id="Journal_based_state_engine">
+	<title>Configuring the state engine</title>
+	<para>
+	  Before version 1.9.0, the state engine was based on memory mapped
+	  files flushed through <function>msync(2)</function>. Even if the
+	  solution proved to be robust, it requires a very fast, in term of
+	  IOPS, storage subsystem to perform well.
 	</para>
 	<para>
-	  <emphasis>
-	    the higher the delay between the time a client ask a disk
-	    synchronization and the time the state server performs it
-	    (<parameter>min_elapsed_sync_time</parameter>), the higher
-	    the chance the disk status files will not contain the correct
-	    state for some transactions if the state server crashes.
-	  </emphasis>
+	  Version 1.9.0 introduces a new alternative state engine based on a
+	  much more sophisticated technology that uses log files and
+	  asynchronous IO. The new state engine has been designed to provide
+	  sub-millisecond transaction time even in presence of common
+	  storage subsystems.
+	  <important><para>
+	    The new journal based state engine passes all the test cases, but
+	    it's a fresh new piece of software and it can contain unknown bugs.
+	    Activate it in a production environment only
+	    <emphasis>after appropriate testing has been performed</emphasis>.
+	  </para></important>
 	</para>
 	<para>
-	  The risk is not related to data corruption: data integrity is
-	  guaranteed by the Resource Managers your Application Programs use.
-	  The risk is some <quote>prepared/recovery pending</quote>
-	  transactions will not automatically recovered
-	  (see <xref linkend="Automatic_recovery_concepts"/>) by LIXA
-	  infrastructure; those transactions will need
-	  manual recovery (see <xref linkend="Manual_cold_recovery"/>).
-	</para>
-	<para>
-	  <emphasis>
-	    During the interval between state server crash and
-	    manual recovery your Resource Managers will keep some locks on
-	    data: this could be the real damage for your application.
-	  </emphasis>
+	  To switch from <emphasis>traditional</emphasis> to
+	  <emphasis>journal</emphasis> state engine use the
+	  <varname>LIXA_STATE_SERVER</varname> environment variable before
+	  starting <command>lixad</command> state server. 
+	  To use the journal state engine:
+	  <screen>
+$ export LIXA_STATE_ENGINE=JOURNAL
+	  </screen>
+	  to use the traditional state engine (default):
+	  <screen>
+$ export LIXA_STATE_ENGINE=TRADITIONAL
+	  </screen>
 	</para>
       </section>
     </section>

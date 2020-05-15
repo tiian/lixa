@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2019, Christian Ferrari <tiian@users.sourceforge.net>
+ * Copyright (c) 2009-2020, Christian Ferrari <tiian@users.sourceforge.net>
  * All rights reserved.
  *
  * This file is part of LIXA.
@@ -67,10 +67,10 @@ static GOptionEntry entries[] =
     { "open-close", 'o', 0, G_OPTION_ARG_NONE, &open_close, "Execute tx_open & tx_close for every transaction [benchmark only]", NULL },
     { "csv", 's', 0, G_OPTION_ARG_NONE, &csv, "Send result to stdout using CSV format [benchmark only]", NULL },
     { "clients", 'l', 0, G_OPTION_ARG_INT, &clients, "Number of clients (threads) will stress the state server [benchmark only]", NULL },
-    { "medium-delay", 'd', 0, G_OPTION_ARG_INT, &medium_delay, "Medium (random) delay between TX functions [benchmark only]", NULL },
-    { "delta-delay", 'D', 0, G_OPTION_ARG_INT, &delta_delay, "Delta (random) delay between TX functions [benchmark only]", NULL },
-    { "medium-processing", 'p', 0, G_OPTION_ARG_INT, &medium_processing, "Medium (random) delay introduced by Resource Managers operations between tx_begin and tx_commit/tx_rollback [benchmark only]", NULL },
-    { "delta-processing", 'P', 0, G_OPTION_ARG_INT, &delta_processing, "Delta (random) delay introduced by Resource Managers operations between tx_begin and tx_commit/tx_rollback [benchmark only]", NULL },
+    { "medium-delay", 'd', 0, G_OPTION_ARG_INT, &medium_delay, "Average time (expressed in us) used by the Application Program between two TX calls [benchmark only]", NULL },
+    { "delta-delay", 'D', 0, G_OPTION_ARG_INT, &delta_delay, "Delta (random) rime (expressed in us) used by the Application Program between two TX calls [benchmark only]", NULL },
+    { "medium-processing", 'p', 0, G_OPTION_ARG_INT, &medium_processing, "Average time (expressed in us) used by Resource Managers between tx_begin and tx_commit/tx_rollback [benchmark only]", NULL },
+    { "delta-processing", 'P', 0, G_OPTION_ARG_INT, &delta_processing, "Delta (random) time (expressed in us) used by Resource Managers between tx_begin and tx_commit/tx_rollback [benchmark only]", NULL },
     { NULL }
 };
 
