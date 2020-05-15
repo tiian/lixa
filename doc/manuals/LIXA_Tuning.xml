@@ -73,28 +73,85 @@
 	    the state engine
 	  </para></listitem>
 	</itemizedlist>
-
       </para>
     </section>
   </section>
   <section>
-    <title>@@@ Disk performance</title>
+    <title>Scattering IO through different disks</title>
+    <para>
+      As explained in <xref linkend="Configuring_the_server"/> every
+      manager inside the LIXA state server uses a specific path for
+      its status files. If you specify path associated to independent
+      disks, you will obtain I/O independence for every the LIXA
+      server thread.
+    </para>
+    <para>
+      The path specified can be a directory name (it must terminate with a
+      slash) or the prefix of a file name. Different server threads must
+      specify different paths.
+    </para>
+  </section>
+  <section>
+    <title>Choosing the state engine type</title>
+    <para>
+      <emphasis>Journal based</emphasis> state engine has been designed to
+      replace the <emphasis>traditional</emphasis> state engine and, on the
+      long term, the latter might be removed from the state server. 
+      From a performance point of view, there's no chance for the traditional
+      engine to compete against the new journal one; nevertheless, due to the
+      proven robustness, it's expected the usage of the traditional state
+      engine will continue for some time, especially when high performance
+      is not a must.
+    </para>
+    <para>
+      Independently from the chosen state engine, some common concept requires
+      understanding to operate an aware choice.
+    </para>
+    <para>
+      First of all, the LIXA state server does not persist the data used by
+      the Application Program, it only persists the state of the transactions.
+      In the event that the state of a transaction is not preserved, you
+      don't miss the data, but the state of the transaction that was
+      manipulating the data.
+      The direct consequence of the previous statement is that: in the worst
+      case, if LIXA state server miss the state of the transaction, you have
+      to rollback or commit the transaction manually. This is obviously not a
+      situation you want to frequently have in your normal operations and this
+      is why LIXA state server provides the highest level of resiliency.
+    </para>
+    <para>
+      If you want to be 100% sure you don't miss the state of the transaction,
+      you must be 100% sure that the state of the transaction has been
+      recorded in a durable way, typically in some storage device.
+      Writing storage, even the fastest storage, is still a quite slow
+      operation in comparison with other communication and computing
+      operations. 
+      Very high performance storage can provide write latency below 1ms, but
+      in a typical production environment, having 5ms write latency to the
+      storage subsystem can be considered a good scenario.
+      Incredibly enough, 5ms are a huge time for contemporary computing and
+      contemporary networking.
+    </para>
+    <para>
+      To make a long story short, this is a typical trade-off between speed
+      and safety: the faster you go, the less safe you can be.
+      In a real case scenario, 100% safety is unlikely to be the best choice:
+      it's capped by the technology limits and it risks to unnecessarily slow
+      down your whole system. 
+    </para>
+    <para>
+      The good news is that the LIXA state engines, both journal and
+      traditional, provide parameters to tune the behavior.
+    </para>
+    <section>
+      <title>Tuning the journal state engine</title>
       <para>
-	As explained in <xref linkend="Configuring_the_server"/> every
-	manager inside the LIXA state server uses a specific path for
-	its status files. If you specified path associated to independent
-	disks, you should obtain the best I/O performance for the LIXA
-	state server.
-      </para>
-      <para>
-	Following the <quote>just work</quote> concept the default 
-	configuration specifies a path like
-	<filename>/opt/lixa/var/...</filename>
-	but you should change it if your system had indipendent disks.
+	The journal state engine provides two levels of @@@
       </para>
     </section>
-    <section>
-      <title>Minimum and maximum elapsed synchronization time</title>
+  </section>
+  <section>
+    <title>Minimum and maximum elapsed synchronization time</title>
       <para>
 	Starting with version 0.7.2 you can configure two parameters:
 	<parameter>min_elapsed_sync_time</parameter> and 
