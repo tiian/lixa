@@ -146,39 +146,237 @@
     <section>
       <title>Tuning the journal state engine</title>
       <para>
-	The journal state engine provides two levels of @@@
+	The journal state engine provides two levels of resilience with two
+	different Recovery Point Objectives depending on the type of crash
+	encountered by the LIXA state server.
       </para>
+      <section>
+	<title>Soft crash RPO</title>
+	<para>
+	  A <emphasis>soft crash</emphasis> is a crash that happens to the
+	  LIXA state server process (<command>lixad</command>), but it does not
+	  break the operating system. Common examples are:
+	  <itemizedlist mark='bullet'>
+	    <listitem><para>
+	      killing <command>lixad</command>
+	    </para></listitem>
+	    <listitem><para>
+	      <command>lixad</command> crashes due to some unexpected reason
+	    </para></listitem>
+	  </itemizedlist>
+	  In the event of a <emphasis>soft crash</emphasis>, the restart
+	  usually happens from the last active state table file without any
+	  data miss. As a consequence, when restart from the last active
+	  state table succeeds, the RPO is zero and there's no transaction
+	  state missing.
+	</para>
+      </section>
+      <section>
+	<title>Hard crash RPO</title>
+	<para>
+	  A <emphasis>hard crash</emphasis> is a crash related to the
+	  operating system or a damage to state table files. Common examples
+	  are:
+	  <itemizedlist mark='bullet'>
+	    <listitem><para>
+	      operating system / hypervisor crashes
+	    </para></listitem>
+	    <listitem><para>
+	      hardware failure
+	    </para></listitem>
+	    <listitem><para>
+	      disk content corruption
+	    </para></listitem>
+	  </itemizedlist>
+	  In the event of a <emphasis>hard crash</emphasis>, the restart
+	  happens from the last consistent active state table file plus all
+	  the available consistent state log records.
+	</para>
+	<para>
+	  Due to different strategies of log flushing, the corresponding RPO
+	  can be greater than zero.
+	</para>
+      </section>
+      <section>
+	<title>Impact of parameter <parameter>min_elapsed_sync_time</parameter></title>
+	<para>
+	  The parameter fixes the minimum delay between the need of a
+	  transaction state flushing and the start of the I/O operation:
+	  <itemizedlist mark='bullet'>
+	    <listitem><para>
+	      a low value slows down the <command>lixad</command> server
+	      due to frequent asking for log flushing
+	    </para></listitem>
+	    <listitem><para>
+	      a value greater than zero increases the RPO for 
+	      <emphasis>hard crash</emphasis> by the same amount
+	    </para></listitem>
+	    <listitem><para>
+	      to have a guaranteed RPO=0 in the event of
+	      <emphasis>hard crash</emphasis>, this parameter must be set to
+	      zero
+	    </para></listitem>
+	  </itemizedlist>
+	</para>
+      </section>
+      <section>
+	<title>Impact of parameter <parameter>max_elapsed_sync_time</parameter></title>
+	<para>
+	  The parameter fixes the maximum delay between the need of a
+	  transaction state flushing and the start of the I/O operation:
+	  <itemizedlist mark='bullet'>
+	    <listitem><para>
+	      a low value slows down the <command>lixad</command> server
+	      due to frequent asking for log flushing
+	    </para></listitem>
+	    <listitem><para>
+	      a value greater than zero increases the RPO for 
+	      <emphasis>hard crash</emphasis> by the same amount
+	    </para></listitem>
+	    <listitem><para>
+	      to have a guaranteed RPO=0 in the event of
+	      <emphasis>hard crash</emphasis>, this parameter must be set to
+	      zero
+	    </para></listitem>
+	  </itemizedlist>
+	  The parameter must be greater or equal to
+	  <parameter>min_elapsed_sync_time</parameter>: if both are set to
+	  value zero, state log file is flushed as soon as a transaction needs
+	  to persist a new state.
+	</para>
+      </section>
+      <section>
+	<title>Impact of parameter <parameter>log_size</parameter></title>
+	<para>
+	  The parameter specifies the desired amount of disk space that must
+	  be used of every state log file. A state log file can be switched
+	  only when the previous state table synchronization has been
+	  completed. In presence of slow disks, a larger value can be helpful
+	  to obtain better performances.
+	</para>
+	<para>
+	  The parameter has no direct impact on RPO.
+	</para>
+      </section>
+      <section>
+	<title>Impact of parameter <parameter>max_buffer_log_size</parameter></title>
+	<para>
+	  The parameter specifies the quantity of RAM used as buffer for
+	  log writing: under some circumstances, higher values can improve
+	  performances.
+	</para>
+	<para>
+	  The parameter has no direct impact on RPO.
+	</para>
+      </section>
+      <section>
+	<title>Impact of parameters <parameter>log_o_*</parameter></title>
+	<para>
+	  The parameters specify the corresponding flags that must be used for
+	  state log files; as a general rule, 
+	  <parameter>log_o_direct="1"</parameter> (O_DIRECT) is faster than
+	  <parameter>log_o_dsync="1"</parameter> (O_DSYNC) and
+	  <parameter>log_o_dsync="1"</parameter> (O_DSYNC) is faster than
+	  <parameter>log_o_sync="1"</parameter> (O_SYNC).
+	</para>
+	<important><para>
+	  As a general rule, only <parameter>log_o_sync=1</parameter> in
+	  association with 
+	  <parameter>min_elapsed_sync_time="0"</parameter> and
+	  <parameter>max_elapsed_sync_time="0"</parameter> provides RPO=0
+	  in the event of <emphasis>hard crash</emphasis>.
+	</para></important>
+	<para>
+	  In real life scenarios, depending on the characteristics of the
+	  storage subsystem, less restrictive options can be used.
+	  The best configuration requires further investigation about the
+	  specific hardware configuration.
+	</para>
+	<note><para>
+	  Parameters <parameter>log_o_*</parameter> can be uses together, for
+	  example you can specify both <parameter>log_o_direct="1"</parameter> 
+	  and <parameter>log_o_dsync="1"</parameter> to combine the effects of
+	  O_DIRECT and O_DSYNC flags for log I/O.
+	</para></note>
+      </section>
     </section>
-  </section>
-  <section>
-    <title>Minimum and maximum elapsed synchronization time</title>
+    <section>
+      <title>Tuning the traditional state engine</title>
       <para>
-	Starting with version 0.7.2 you can configure two parameters:
-	<parameter>min_elapsed_sync_time</parameter> and 
-	<parameter>max_elapsed_sync_time</parameter>. 
-	In the previous versions these parameters was implicitly set to 0.
+	The traditional state engine provides a single level of resilience
+	and no difference among types of crash encountered by the LIXA state
+	server.
       </para>
-      <para>
-	Setting them to <quote>0</quote> will dramatically reduce the
-	probability a synchronization operation can be shared by two or more
-	client sessions (LIXA transaction managers). Setting them to a value
-	greater than zero
-	will increase the likelihood a synchronization operation
-	batches a lot of requests.
-      </para>
+    <para>
+      Only two parameters can be configured, the others are ignored:
+      <parameter>min_elapsed_sync_time</parameter> and 
+      <parameter>max_elapsed_sync_time</parameter>. 
+    </para>
+    <section>
+      <title>Impact of parameter <parameter>min_elapsed_sync_time</parameter></title>
+	<para>
+	  The parameter fixes the minimum delay between the need of a
+	  transaction state flushing and the start of the memory map sync
+	  operation:
+	  <itemizedlist mark='bullet'>
+	    <listitem><para>
+	      a low value slows down the <command>lixad</command> server
+	      due to frequent asking for map syncing
+	    </para></listitem>
+	    <listitem><para>
+	      a value greater than zero increases the RPO by the same amount
+	    </para></listitem>
+	    <listitem><para>
+	      to have a guaranteed RPO=0 this parameter must be set to
+	      zero
+	    </para></listitem>
+	  </itemizedlist>
+	</para>
+      </section>
+      <section>
+	<title>Impact of parameter <parameter>max_elapsed_sync_time</parameter></title>
+	<para>
+	  The parameter fixes the maximum delay between the need of a
+	  transaction state flushing and the start of the memory map sync:
+	  <itemizedlist mark='bullet'>
+	    <listitem><para>
+	      a low value slows down the <command>lixad</command> server
+	      due to frequent asking for map syncing
+	    </para></listitem>
+	    <listitem><para>
+	      a value greater than zero increases the RPO by the same amount
+	    </para></listitem>
+	    <listitem><para>
+	      to have a guaranteed RPO=0 this parameter must be set to
+	      zero
+	    </para></listitem>
+	  </itemizedlist>
+	  The parameter must be greater or equal to
+	  <parameter>min_elapsed_sync_time</parameter>: if both are set to
+	  value zero, memory map is synchronized as soon as a transaction needs
+	  to persist a new state.
+	</para>
+      </section>
+    </section>
+    <section>
+      <title>Balancing performance and resilience</title>
       <important>
 	<para>
-	  The higher the value of these parameters, the higher the chance
+	  The higher the value of RPO, the higher the chance
 	  you will have to perform manual recovery in the case of a server
 	  crash (manual recovery is explained in 
 	  <xref linkend="Manual_cold_recovery"/>).
 	</para>
 	<para>
-	  <emphasis>Do not use too high values:</emphasis> you will increase
-	  the likelihood of a long and tiring manual recovery phase after
-	  a server crash without extra performance benefits.
+	  On the other hand, don't force RPO=0 if you don't have clear evidence
+	  that you need it: depending on your business requirements and your 
+	  hardware configuration, especially
+	  if you use the <emphasis>journal based state engine</emphasis>, the
+	  need for RPO=0 might be not necessary: as you will see in the next
+	  section, the performance benefit could be huge.
 	</para>
       </important>
+    </section>
   </section>
   <section xml:id="Tuning_example">
     <title>A tuning example</title>
