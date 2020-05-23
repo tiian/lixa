@@ -104,6 +104,7 @@ Ubuntu          Basic           make gcc libglib2.0-dev libxml2-dev uuid-dev pkg
 Ubuntu		MySQL		mysql-server libmysqlclient-dev
 Ubuntu		PostgreSQL	postgresql libpq-dev
 Ubuntu          GnuCOBOL	open-cobol
+Ubuntu		C++		g++
 CentOS          Basic           gcc glib2-devel libxml2-devel libuuid-devel autoconf net-tools
 CentOS		MySQL		mysql-server/mariadb-server mysql-devel/mariadb-devel
 CentOS		PostgreSQL	postgresql postgresql-server postgresql-devel
@@ -113,7 +114,8 @@ Ubuntu		Python		swig python-dev python-setuptools
 Ubuntu		Python3		swig python3-dev python3-setuptools
 RHEL 7.5	Python		swig python-devel 
 
-Ubuntu		Java		default-jdk rng-tools libmysql-java
+Ubuntu <= 18.04	Java		default-jdk rng-tools libmysql-java
+Ubuntu 20.04	Java		default-jdk rng-tools libmariadb-java
 CentOS 7.x	Java		API java-1.8.0-openjdk* rng-tools
 				mysql-connector-java
 

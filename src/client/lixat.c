@@ -46,34 +46,6 @@
 
 
 
-/* default command line options */
-static gboolean commit = FALSE;
-static gboolean rollback = FALSE;
-static gboolean print_version = FALSE;
-static gboolean benchmark = FALSE;
-static gboolean open_close = FALSE;
-static gboolean csv = FALSE;
-static gint clients = 10;
-static gint medium_delay = 1000;
-static gint delta_delay = 500;
-static gint medium_processing = 100000;
-static gint delta_processing = 50000;
-static GOptionEntry entries[] =
-{
-    { "commit", 'c', 0, G_OPTION_ARG_NONE, &commit, "Perform commit transaction(s)", NULL },
-    { "rollback", 'r', 0, G_OPTION_ARG_NONE, &rollback, "Perform rollback transaction(s)", NULL },
-    { "version", 'v', 0, G_OPTION_ARG_NONE, &print_version, "Print package info and exit", NULL },
-    { "benchmark", 'b', 0, G_OPTION_ARG_NONE, &benchmark, "Perform benchmark execution", NULL },
-    { "open-close", 'o', 0, G_OPTION_ARG_NONE, &open_close, "Execute tx_open & tx_close for every transaction [benchmark only]", NULL },
-    { "csv", 's', 0, G_OPTION_ARG_NONE, &csv, "Send result to stdout using CSV format [benchmark only]", NULL },
-    { "clients", 'l', 0, G_OPTION_ARG_INT, &clients, "Number of clients (threads) will stress the state server [benchmark only]", NULL },
-    { "medium-delay", 'd', 0, G_OPTION_ARG_INT, &medium_delay, "Average time (expressed in us) used by the Application Program between two TX calls [benchmark only]", NULL },
-    { "delta-delay", 'D', 0, G_OPTION_ARG_INT, &delta_delay, "Delta (random) rime (expressed in us) used by the Application Program between two TX calls [benchmark only]", NULL },
-    { "medium-processing", 'p', 0, G_OPTION_ARG_INT, &medium_processing, "Average time (expressed in us) used by Resource Managers between tx_begin and tx_commit/tx_rollback [benchmark only]", NULL },
-    { "delta-processing", 'P', 0, G_OPTION_ARG_INT, &delta_processing, "Delta (random) time (expressed in us) used by Resource Managers between tx_begin and tx_commit/tx_rollback [benchmark only]", NULL },
-    { NULL }
-};
-
 /*
  * T[0]: tx_open() timing
  * T[1]: tx_begin() timing
@@ -86,9 +58,42 @@ static GOptionEntry entries[] =
 #define MAX_CLIENTS 100
 
 /* Number of cycles executed during warm-up */
-#define WARM_UP_CYCLES  10
+#define WARMUP_CYCLES  10
 /* Number of cycles executed during benchmark */
 #define BENCH_CYCLES   100
+
+
+
+/* default command line options */
+static gboolean commit = FALSE;
+static gboolean rollback = FALSE;
+static gboolean print_version = FALSE;
+static gboolean benchmark = FALSE;
+static gboolean open_close = FALSE;
+static gboolean csv = FALSE;
+static gint clients = 10;
+static gint medium_delay = 1000;
+static gint delta_delay = 500;
+static gint medium_processing = 100000;
+static gint delta_processing = 50000;
+static gint warmup_cycles = WARMUP_CYCLES;
+static gint bench_cycles = BENCH_CYCLES;
+static GOptionEntry entries[] =
+{
+    { "commit", 'c', 0, G_OPTION_ARG_NONE, &commit, "Perform commit transaction(s)", NULL },
+    { "rollback", 'r', 0, G_OPTION_ARG_NONE, &rollback, "Perform rollback transaction(s)", NULL },
+    { "version", 'v', 0, G_OPTION_ARG_NONE, &print_version, "Print package info and exit", NULL },
+    { "benchmark", 'b', 0, G_OPTION_ARG_NONE, &benchmark, "Perform benchmark execution", NULL },
+    { "open-close", 'o', 0, G_OPTION_ARG_NONE, &open_close, "Execute tx_open & tx_close for every transaction [benchmark only]", NULL },
+    { "csv", 's', 0, G_OPTION_ARG_NONE, &csv, "Send result to stdout using CSV format [benchmark only]", NULL },
+    { "clients", 'l', 0, G_OPTION_ARG_INT, &clients, "Number of clients (threads) will stress the state server [benchmark only]", NULL },
+    { "medium-delay", 'd', 0, G_OPTION_ARG_INT, &medium_delay, "Average time (expressed in us) used by the Application Program between two TX calls [benchmark only]", NULL },
+    { "delta-delay", 'D', 0, G_OPTION_ARG_INT, &delta_delay, "Delta (random) time (expressed in us) used by the Application Program between two TX calls [benchmark only]", NULL },
+    { "medium-processing", 'p', 0, G_OPTION_ARG_INT, &medium_processing, "Average time (expressed in us) used by Resource Managers between tx_begin and tx_commit/tx_rollback [benchmark only]", NULL },
+    { "delta-processing", 'P', 0, G_OPTION_ARG_INT, &delta_processing, "Delta (random) time (expressed in us) used by Resource Managers between tx_begin and tx_commit/tx_rollback [benchmark only]", NULL },
+    { "bench-cycles", 'C', 0, G_OPTION_ARG_INT, &bench_cycles, "Number of trasanctions to be executed by a client [benchmark only]", NULL },
+    { NULL }
+};
 
 
 
@@ -116,7 +121,7 @@ int exec_benchmark(void);
 /* single client benchmark */
 gpointer perform_benchmark(gpointer data);
 /* compute aggregate statistics */
-void compute_statistics(thread_parameters_t *tp);
+void compute_statistics(thread_parameters_t *tp, long total_time);
 
 
 
@@ -178,6 +183,12 @@ int main(int argc, char *argv[])
                 delta_processing);
         delta_processing = 1;
     }
+    if (bench_cycles < 1) {
+        fprintf(stderr, "bench_cycles (%d) can not be <1, fixed to 1\n",
+                bench_cycles);
+        bench_cycles = 1;
+    }
+    warmup_cycles = bench_cycles / WARMUP_CYCLES + 1;
     
     if (!benchmark) {
         /* perform one shot test execution */
@@ -233,6 +244,8 @@ int exec_benchmark(void)
     thread_parameters_t parameters[MAX_CLIENTS];
     GThread *threads[MAX_CLIENTS];
     gint i;
+    lixa_timer_t timer;
+    long total_time;
     
     fprintf(stderr, "Benchmark mode activated; execution parameters are:\n"
             "Number of clients (threads): %d\n"
@@ -251,7 +264,7 @@ int exec_benchmark(void)
     fprintf(stderr, "Warming up ");
     for (i=0; i<clients; ++i) {
         parameters[i].client_number = i;
-        parameters[i].cycles = WARM_UP_CYCLES;
+        parameters[i].cycles = warmup_cycles;
         threads[i] = g_thread_new(
             "", perform_benchmark, (gpointer *)&(parameters[i]));
         if (NULL == threads[i]) {
@@ -269,9 +282,11 @@ int exec_benchmark(void)
 
     /* measurement phase */
     fprintf(stderr, "Measuring  ");
+    /* starting timer */
+    lixa_timer_start(&timer); 
     for (i=0; i<clients; ++i) {
         parameters[i].client_number = i;
-        parameters[i].cycles = BENCH_CYCLES;
+        parameters[i].cycles = bench_cycles;
         threads[i] = g_thread_new(
             "", perform_benchmark, (gpointer *)&(parameters[i]));
         if (NULL == threads[i]) {
@@ -285,9 +300,12 @@ int exec_benchmark(void)
             g_thread_join(threads[i]);
         }
     }
+    /* stopping timer */
+    lixa_timer_stop(&timer);
     fprintf(stderr, "\n");
     
-    compute_statistics(parameters);
+    total_time = lixa_timer_get_diff(&timer);
+    compute_statistics(parameters, total_time);
     return 0;
 }
 
@@ -420,10 +438,10 @@ gpointer perform_benchmark(gpointer data)
 
 
 
-void compute_statistics(thread_parameters_t *tp)
+void compute_statistics(thread_parameters_t *tp, long total_time)
 {
     int c, s;
-    double N, sum, sum2, avg, std_dev;
+    double N, sum, sum2, avg, std_dev, tps;
 
     if (csv) {
         printf(" clients,tx_open,,tx_begin,,");
@@ -432,10 +450,12 @@ void compute_statistics(thread_parameters_t *tp)
         else
             printf("tx_rollback,,");
         printf("tx_close\n");
-        printf(" N,avg,std,avg,std,avg,std,avg,std\n");
-        printf("%d,", clients);
+        printf(" N,avg,std,avg,std,avg,std,avg,std,tps\n");
+        printf("%d, ", clients);
     }
-    
+
+    tps = (double)clients * (double)tp[0].cycles * (double)1000000 /
+        (double)total_time;
     for (s=0; s<NUMBER_OF_SAMPLES; ++s) {
         sum = sum2 = avg = std_dev = 0.0;
         for (c=0; c<clients; ++c) {
@@ -468,10 +488,12 @@ void compute_statistics(thread_parameters_t *tp)
                     fprintf(stderr, "Internal error: s=%d\n", s);
                     exit(1);
             }
-            printf("avg=%7.3f ms,\tstd_dev=%7.3f ms\n", avg, std_dev);
+            printf("avg=%1.3f ms,\tstd_dev=%1.3f ms\n", avg, std_dev);
         } else
-            printf("%7.3f,%7.3f,", avg, std_dev);
-    }
-    if (csv)
-        printf("\n");
+            printf("%1.3f, %1.3f, ", avg, std_dev);
+    } /* for (s=0; s<NUMBER_OF_SAMPLES; ++s) */
+    if (!csv)
+        printf("tx/sec:\t\t%1.3f tps\n", tps);
+    else
+        printf("%1.3f\n", tps);
 }

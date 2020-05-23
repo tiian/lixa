@@ -12,8 +12,11 @@ LOG:
 		   the recovery phase and
 		   requested by the traditional state server to the 
 		   applications due to the lack of the last data)
-		 - 2 order of magnitude smaller latency in comparison with the
-		   traditional state engine
+		 - 1 or 2 orders of magnitude smaller latency in comparison
+		   with the traditional state engine (the slower the storage,
+		   the higher the improvement)
+		 New parameter "-C" / "--bench-cycles" in utility lixat; new
+		 "transaction per seconds" statistic.
 2019-05-12 1.7.8 Added (client) connection timeout; default value = 5000 ms
 		 A new error message (LXC034E) is sent to the syslog in the
 		 event that the client doesn't get a reply before timeout
