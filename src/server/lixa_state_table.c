@@ -315,9 +315,11 @@ int lixa_state_table_open_file(lixa_state_table_t *this)
         if (LIXA_RC_OK == ret_cod)
             new_status = STATE_TABLE_OPENED;
         else if (LIXA_RC_OBJ_CORRUPTED == ret_cod ||
-                 LIXA_RC_INVALID_MAGIC_NUMBER == ret_cod)
+                 LIXA_RC_INVALID_MAGIC_NUMBER == ret_cod) {
             new_status = STATE_TABLE_CORRUPTED;
-        else
+            LIXA_SYSLOG((LOG_WARNING, LIXA_SYSLOG_LXD079W,
+                         lixa_state_table_get_pathname(this)));
+        } else
             THROW(CHECK_INTEGRITY);
         
         /* move status to OPENED */

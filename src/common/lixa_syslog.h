@@ -305,6 +305,8 @@
     "long and it will be furtherly extended: the soft limit of " OFF_T_FORMAT \
     " bytes is too low for the current workload and in respect of the " \
     "actual storage performance"
+#define LIXA_SYSLOG_LXD079W "LXD079W table '%s' is corrupted and " \
+    "it can not be a base state for warm restart"
 
 
 
