@@ -392,6 +392,7 @@ void *server_manager_thread(void *void_ts)
                 }
                 if (ts->poll_array[i].revents &
                     (POLLERR | POLLHUP | POLLNVAL)) {
+                    /* @@@ old version, remove me after some time 2020-05-24
                     if ((ts->poll_array[i].revents & POLLERR) ||
                         (ts->poll_array[i].revents & POLLHUP)) {
                         found_fd++;
@@ -409,6 +410,15 @@ void *server_manager_thread(void *void_ts)
                                     ", fd=%d\n", i, ts->poll_array[i].fd));
                         THROW(NETWORK_EVENT_ERROR);
                     }
+                    */
+                    found_fd++;
+                    LIXA_TRACE(("server_manager_thread: hang-up event, "
+                                "the client broke the connection\n"));
+                    if (LIXA_RC_OK != (
+                            ret_cod = server_manager_drop_client(
+                                ts, i)))
+                        THROW(DROP_CLIENT_ERROR);
+                    connection_closed = TRUE;
                 } else if (ts->poll_array[i].revents & POLLIN) {
                     found_fd++;
                     if (!i) {
@@ -673,15 +683,16 @@ int server_manager_pollin_ctrl(struct thread_status_s *ts, int fd)
 
 int server_manager_pollin_data(struct thread_status_s *ts, size_t slot_id)
 {
-    enum Exception { DROP_CLIENT_ERROR,
-                     CONNECTION_CLOSED,
-                     INTERNAL_ERROR,
-                     MALLOC_ERROR,
-                     THREAD_SWITCH,
-                     XML_PROC,
-                     DROP_CLIENT_ERROR2,
-                     MSG_RETRIEVE_ERROR,
-                     NONE } excp;
+    enum Exception {
+        DROP_CLIENT_ERROR,
+        CONNECTION_CLOSED,
+        INTERNAL_ERROR,
+        MALLOC_ERROR,
+        THREAD_SWITCH,
+        XML_PROC,
+        DROP_CLIENT_ERROR2,
+        MSG_RETRIEVE_ERROR,
+        NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
 
     LIXA_TRACE(("server_manager_pollin_data\n"));

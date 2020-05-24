@@ -1,12 +1,8 @@
-Stress again with export LIXA_TRACE_MASK=0x0C:
-	LIXA_TRACE_MOD_SERVER_LISTENER
-	LIXA_TRACE_MOD_SERVER_MANAGER
-It seems POLLNVAL is received when a fd is re-used for another thread and the
-first one has not yet been notified.
-In stderr, look at "descriptor 36":
-2020-05-24 17:21:52.174206 [3938/140390519006976] server_manager_add_poll: added file descriptor 36 at position 2
-2020-05-24 17:21:52.225304 [3938/140390493828864] server_manager_add_poll: added file descriptor 36 at position 26
-notice they are 2 different threads.
+Find a match that crashes the lixad; this 
+/opt/lixa/bin/lixat -b -p 500 -P 250 -l 100 -C 10000
+generates this error:
+May 24 20:58:27 ubuntu003 lixad[13969]: LXD018C internal thread id=2 raised unexpected exception (server_manager_thread: excp=10,ret_cod=-13,errno=11); immediate shutdown will terminate the server
+
 
 Restart from LIXA_Tuning.xml @@@
 
