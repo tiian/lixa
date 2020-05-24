@@ -1,3 +1,13 @@
+Stress again with export LIXA_TRACE_MASK=0x0C:
+	LIXA_TRACE_MOD_SERVER_LISTENER
+	LIXA_TRACE_MOD_SERVER_MANAGER
+It seems POLLNVAL is received when a fd is re-used for another thread and the
+first one has not yet been notified.
+In stderr, look at "descriptor 36":
+2020-05-24 17:21:52.174206 [3938/140390519006976] server_manager_add_poll: added file descriptor 36 at position 2
+2020-05-24 17:21:52.225304 [3938/140390493828864] server_manager_add_poll: added file descriptor 36 at position 26
+notice they are 2 different threads.
+
 Restart from LIXA_Tuning.xml @@@
 
 Document parameters for direct write...  o_direct_  o_dsync_  o_rsync_ o_sync_

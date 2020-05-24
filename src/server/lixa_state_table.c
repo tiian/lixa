@@ -314,7 +314,8 @@ int lixa_state_table_open_file(lixa_state_table_t *this)
         ret_cod = lixa_state_table_check_integrity(this);
         if (LIXA_RC_OK == ret_cod)
             new_status = STATE_TABLE_OPENED;
-        else if (LIXA_RC_OBJ_CORRUPTED == ret_cod)
+        else if (LIXA_RC_OBJ_CORRUPTED == ret_cod ||
+                 LIXA_RC_INVALID_MAGIC_NUMBER == ret_cod)
             new_status = STATE_TABLE_CORRUPTED;
         else
             THROW(CHECK_INTEGRITY);
