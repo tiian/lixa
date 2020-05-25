@@ -160,8 +160,9 @@ int lixa_msg_retrieve(int fd, int timeout,
         if (1 == ready_fd) {
             LIXA_TRACE(("lixa_msg_retrieve: poll returned 0x%x for fd %d\n",
                         fds[0].revents, fds[0].fd));
-            if ((POLLHUP | POLLERR) & fds[0].revents) {
-                LIXA_TRACE(("lixa_msg_retrieve: POLLHUP/POLLERR...\n"));
+            if ((POLLHUP | POLLERR | POLLNVAL) & fds[0].revents) {
+                LIXA_TRACE(("lixa_msg_retrieve: POLLHUP/POLLERR/"
+                            "POLLNVAL...\n"));
                 THROW(POLLHUP_POLLERR);
             }
         } else if (0 == ready_fd) {

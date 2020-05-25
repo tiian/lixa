@@ -2,7 +2,8 @@ Find a match that crashes the lixad; this
 /opt/lixa/bin/lixat -b -p 500 -P 250 -l 100 -C 10000
 generates this error:
 May 24 20:58:27 ubuntu003 lixad[13969]: LXD018C internal thread id=2 raised unexpected exception (server_manager_thread: excp=10,ret_cod=-13,errno=11); immediate shutdown will terminate the server
-
+even with new POLLNVAL handling in server_manager_thread.
+Test it again with the new change in lixa_msg_retrieve.c:163
 
 Restart from LIXA_Tuning.xml @@@
 
