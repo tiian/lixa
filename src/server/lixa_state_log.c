@@ -558,7 +558,8 @@ int lixa_state_log_reuse(lixa_state_log_t *this)
 
 
 
-int lixa_state_log_create_new_file(lixa_state_log_t *this, void *single_page)
+int lixa_state_log_create_new_file(lixa_state_log_t *this, void *single_page,
+                                   off_t log_size)
 {
     enum Exception {
         NULL_OBJECT,
@@ -598,9 +599,11 @@ int lixa_state_log_create_new_file(lixa_state_log_t *this, void *single_page)
             THROW(PTHREAD_MUTEX_LOCK_ERROR);
         } else
             mutex_locked = TRUE;
-        if (0 == ftruncate(this->fd, LIXA_STATE_LOG_FILE_SIZE_DEFAULT))
-            this->file_synchronizer.total_size =
-                LIXA_STATE_LOG_FILE_SIZE_DEFAULT;
+        log_size = log_size / LIXA_SYSTEM_PAGE_SIZE * LIXA_SYSTEM_PAGE_SIZE;
+        if (log_size < LIXA_STATE_LOG_FILE_SIZE_DEFAULT)
+            log_size = LIXA_STATE_LOG_FILE_SIZE_DEFAULT;
+        if (0 == ftruncate(this->fd, log_size))
+            this->file_synchronizer.total_size = log_size;
         else
             THROW(TRUNCATE_ERROR);
         /* move the file pointer at the beginning */

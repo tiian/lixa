@@ -293,7 +293,7 @@ if test "$LIXA_XTA_PYTHON" = "yes"
 then
 	# Check Python availability
 	m4_include(m4include/ax_python_devel.m4)
-	AX_PYTHON_DEVEL([">= '2.7'"])
+	AX_PYTHON_DEVEL([>= '2.7'])
 
 	# Check SWIG availability
 	m4_include(m4include/ax_pkg_swig.m4)

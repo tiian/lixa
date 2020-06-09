@@ -176,7 +176,7 @@ typedef struct lixa_state_s {
      */
     /**
      * Size of a state log file, typically retrieved from
-     * configuration. It's a "soft limit" that can be exceed if necessary
+     * configuration. It's a "soft limit" that can be exceeded if necessary
      */
     off_t                             log_size;
     /**

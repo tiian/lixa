@@ -1,9 +1,33 @@
+Investigate why journal is switched soo frequently:
+
+lixa_state.c:1385 is not convincing me: log file is not extended even if it's
+small in comparison with the configured size... if possible, it must be 
+extended because it's much more faster than switching it (and the table).
+
 Find a match that crashes the lixad; this 
 /opt/lixa/bin/lixat -b -p 500 -P 250 -l 100 -C 10000
 generates this error:
 May 24 20:58:27 ubuntu003 lixad[13969]: LXD018C internal thread id=2 raised unexpected exception (server_manager_thread: excp=10,ret_cod=-13,errno=11); immediate shutdown will terminate the server
 even with new POLLNVAL handling in server_manager_thread.
-Test it again with the new change in lixa_msg_retrieve.c:163
+even with new POLLNVAL handling in lixa_msg_receive.
+
+This config seems to "incentivate" the error:
+  min_elapsed_sync_time="0" max_elapsed_sync_time="10"
+  log_size="52428800" max_buffer_log_size="13107200"
+  log_o_direct="1" log_o_dsync="0" log_o_rsync="0" log_o_sync="0">
+
+
+Sometimes there's even this message very near the previous one:
+May 25 20:15:56 ubuntu003 lixad[9391]: LXD058N father thread waited table flusher thread for 41 ms; storage is not properly tuned for the real workload
+Some ideas:
+It seems to happen after many interactions: dump the content of the state to
+check how many "dirty" transactions are inside it.
+Check the log switch: it seems to switch too many times.
+*** Implement a new type of trace for exit function only to trace every exit,
+exit with warnings/errors, exit with errors *** A new macro that call
+lixa_trace if necessary. This would be useful to catch the stacktrace when
+a more aggressive tracing is not possible in production. Add a new env var
+to specify it like LIXA_STACK_TRACE=ALL|WARNINGS|ERRORS
 
 Restart from LIXA_Tuning.xml @@@
 

@@ -299,10 +299,11 @@ extern "C" {
      * @param[in,out] this current state file object
      * @param[in,out] single_page of memory that's page aligned and that can
      *                be used for buffering
+     * @param[in] log_size in bytes of the log state file
      * @return a reason code
      */
     int lixa_state_log_create_new_file(lixa_state_log_t *this,
-                                       void *single_page);
+                                       void *single_page, off_t log_size);
 
 
 

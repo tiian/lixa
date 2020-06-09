@@ -544,7 +544,8 @@ int lixa_state_cold_start(lixa_state_t *this)
             THROW(UNLINK_ERROR3);
         if (LIXA_RC_OK != (ret_cod = (
                                lixa_state_log_create_new_file(
-                                   &this->logs[1], this->single_page)))) {
+                                   &this->logs[1], this->single_page,
+                                   this->log_size)))) {
             LIXA_SYSLOG((LOG_ERR, LIXA_SYSLOG_LXD048E,
                          lixa_state_log_get_pathname(&this->logs[1])));
             THROW(LOG_CREATE_NEW_FILE);
@@ -1964,7 +1965,7 @@ int lixa_state_switch(lixa_state_t *this, lixa_word_t last_record_id)
             if (LIXA_RC_OK != (
                     ret_cod = lixa_state_log_create_new_file(
                         &this->logs[lixa_state_get_next_state(this)],
-                        this->single_page)))
+                        this->single_page, this->log_size)))
                 THROW(LOG_CREATE_NEW_FILE);
         } else /* reuse next state log */
             if (LIXA_RC_OK != (
