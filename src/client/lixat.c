@@ -46,14 +46,6 @@
 
 
 
-/*
- * T[0]: tx_open() timing
- * T[1]: tx_begin() timing
- * T[2]: tx_commit()/tx_rollback() timing
- * T[3]: tx_close timing
- */
-#define NUMBER_OF_SAMPLES 4
-
 /* Maximum number of clients */
 #define MAX_CLIENTS 100
 
@@ -107,7 +99,6 @@ struct timings_s {
 struct thread_parameters_s {
     int              client_number;
     int              cycles; /* number of cycles to perform */
-    struct timings_s timings[NUMBER_OF_SAMPLES];
     double          *open;
     double          *begin;
     double          *comrol; /* commit / rollback */
@@ -360,16 +351,11 @@ int exec_benchmark(void)
 gpointer perform_benchmark(gpointer data)
 {
     thread_parameters_t *tp;
-    int c, s, rc;
+    int c, rc;
     long diff = 0;
     lixa_timer_t t2;
 
     tp = (thread_parameters_t *)data;
-    /* reset measures */
-    for (s=0; s<NUMBER_OF_SAMPLES; ++s) {
-        tp->timings[s].sum = tp->timings[s].avg = tp->timings[s].sum2 =
-            tp->timings[s].std_dev = 0.0;
-    }
     /* perform cycles */
     for (c=0; c<tp->cycles; ++c) {
         if (c+1 == tp->cycles*tp->client_number/clients)
@@ -389,14 +375,6 @@ gpointer perform_benchmark(gpointer data)
             }
             diff = lixa_timer_get_diff(&t2);
             tp->open[c] = (double)diff/1000;
-            if (c == 0) {
-                tp->timings[0].sum = (double)diff;
-                tp->timings[0].sum2 = (double)diff * (double)diff;
-                tp->timings[0].std_dev = 0;
-            } else {
-                tp->timings[0].sum += (double)diff;
-                tp->timings[0].sum2 += (double)diff * (double)diff;
-            }
         }
         /* application program delay */
         lixa_micro_sleep(
@@ -411,14 +389,6 @@ gpointer perform_benchmark(gpointer data)
         }
         diff = lixa_timer_get_diff(&t2);
         tp->begin[c] = (double)diff/1000;
-        if (c == 0) {
-            tp->timings[1].sum = (double)diff;
-            tp->timings[1].sum2 = (double)diff * (double)diff;
-            tp->timings[1].std_dev = 0;
-        } else {
-            tp->timings[1].sum += (double)diff;
-            tp->timings[1].sum2 += (double)diff * (double)diff;
-        }
         /* resource manager delay */
         lixa_micro_sleep(
             (long)(medium_processing + random()%(delta_processing*2) -
@@ -445,14 +415,6 @@ gpointer perform_benchmark(gpointer data)
         }
         diff = lixa_timer_get_diff(&t2);
         tp->comrol[c] = (double)diff/1000;
-        if (c == 0) {
-            tp->timings[2].sum = (double)diff;
-            tp->timings[2].sum2 = (double)diff * (double)diff;
-            tp->timings[2].std_dev = 0;
-        } else {
-            tp->timings[2].sum += (double)diff;
-            tp->timings[2].sum2 += (double)diff * (double)diff;
-        }
         /* application program delay */
         lixa_micro_sleep(
             (long)(medium_delay + random()%(delta_delay*2) - delta_delay));
@@ -468,14 +430,6 @@ gpointer perform_benchmark(gpointer data)
             }
             diff = lixa_timer_get_diff(&t2);
             tp->close[c] = (double)diff/1000;
-            if ((open_close && c == 0) || (!open_close && c == tp->cycles-1)) {
-                tp->timings[3].sum = (double)diff;
-                tp->timings[3].sum2 = (double)diff * (double)diff;
-                tp->timings[3].std_dev = 0;
-            } else if (open_close) {
-                tp->timings[3].sum += (double)diff;
-                tp->timings[3].sum2 += (double)diff * (double)diff;
-            }
         }
         
         /* application program delay */
@@ -501,8 +455,7 @@ int compare(const void *a, const void *b) {
 
 void compute_statistics(thread_parameters_t *tp, long total_time)
 {
-    int c, s;
-    double N, sum, sum2, avg, std_dev, tps;
+    double tps;
 
     /* sort the arrays with metrics */
     qsort(open_array, clients*bench_cycles, sizeof(double), compare);
@@ -510,79 +463,15 @@ void compute_statistics(thread_parameters_t *tp, long total_time)
     qsort(comrol_array, clients*bench_cycles, sizeof(double), compare);
     qsort(close_array, clients*bench_cycles, sizeof(double), compare);
     
-    if (csv) {
-        printf("clients,,");
-        if (open_close)
-            printf("tx_open,,");
-        printf("tx_begin,,");
-        if (commit)
-            printf("tx_commit,,");
-        else
-            printf("tx_rollback,,");
-        if (open_close)
-            printf("tx_close");
-        printf("\n");
-        printf("N,samples,");
-        if (open_close)
-            printf("avg,std,");
-        printf("avg,std,avg,std,");
-        if (open_close)
-            printf("avg,std,");
-        printf("tps\n");
-        printf("%d, %d, ", clients, clients*bench_cycles);
-    }
-
     tps = (double)clients * (double)tp[0].cycles * (double)1000000 /
         (double)total_time;
-    for (s=0; s<NUMBER_OF_SAMPLES; ++s) {
-        sum = sum2 = avg = std_dev = 0.0;
-        for (c=0; c<clients; ++c) {
-            sum += tp[c].timings[s].sum;
-            sum2 += tp[c].timings[s].sum2;
-        }
-        if (!open_close && (s==0 || s==3))
-            N = (double)clients;
-        else
-            N = (double)clients * (double)tp[0].cycles;
-        
-        /* timing stats in ms instead of us */
-        avg = sum / N / 1000;
-        std_dev = sqrt(N*sum2 - sum*sum) / N / 1000;
-        if (!csv) {
-            switch (s) {
-                case 0: if (open_close) printf("tx_open():\t");
-                    break;
-                case 1: printf("tx_begin():\t");
-                    break;
-                case 2:
-                    if (commit)
-                        printf("tx_commit():\t");
-                    else
-                        printf("tx_rollback():\t");
-                    break;
-                case 3: if (open_close) printf("tx_close():\t");
-                    break;
-                default:
-                    fprintf(stderr, "Internal error: s=%d\n", s);
-                    exit(1);
-            }
-            if ((s == 0 && open_close) || s == 1 || s == 2 ||
-                (s == 3 && open_close))
-                printf("avg=%1.3f ms,\tstd_dev=%1.3f ms\n", avg, std_dev);
-        } else
-            if ((s == 0 && open_close) || s == 1 || s == 2 ||
-                (s == 3 && open_close))
-                printf("%1.3f, %1.3f, ", avg, std_dev);
-    } /* for (s=0; s<NUMBER_OF_SAMPLES; ++s) */
     if (!csv)
         printf("tx/sec:\t\t%1.3f tps\n", tps);
-    else
-        printf("%1.3f\n", tps);
 
     /* New reporting */
     if (csv) {
         /* header 1 */
-        printf("clients,,");
+        printf(" clients,,");
         if (open_close)
             printf("tx_open,,,,,,,,");
         printf("tx_begin,,,,,,,,");
@@ -594,7 +483,7 @@ void compute_statistics(thread_parameters_t *tp, long total_time)
             printf("tx_close,,,,,,,,");
         printf("tps\n");
         /* header 2 */
-        printf("N,samples,");
+        printf(" N,samples,");
         if (open_close)
             printf("min,50th%%,75th%%,85th%%,90th%%,95th%%,98th%%,max,");
         printf("min,50th%%,75th%%,85th%%,90th%%,95th%%,98th%%,max,");
