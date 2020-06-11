@@ -11,9 +11,10 @@ May 24 20:58:27 ubuntu003 lixad[13969]: LXD018C internal thread id=2 raised unex
 even with new POLLNVAL handling in server_manager_thread.
 even with new POLLNVAL handling in lixa_msg_receive.
 
-This config seems to "incentivate" the error:
+This config seems to "incentivate" the error: the larger the buffer, the slower
+the write operation
   min_elapsed_sync_time="0" max_elapsed_sync_time="10"
-  log_size="52428800" max_buffer_log_size="13107200"
+  log_size="524288000" max_buffer_log_size="131072000"
   log_o_direct="1" log_o_dsync="0" log_o_rsync="0" log_o_sync="0">
 
 
