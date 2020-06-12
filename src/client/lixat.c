@@ -89,13 +89,6 @@ static GOptionEntry entries[] =
 
 
 
-struct timings_s {
-    double sum; /* sum of the values until now */
-    double avg; /* average value */
-    double sum2; /* sum of the square values until now */
-    double std_dev; /* standard deviation of the values until now */
-};
-
 struct thread_parameters_s {
     int              client_number;
     int              cycles; /* number of cycles to perform */
@@ -103,6 +96,7 @@ struct thread_parameters_s {
     double          *begin;
     double          *comrol; /* commit / rollback */
     double          *close;
+    double          *total; /* open + begin + commit/rollback + close */
 };
 
 typedef struct thread_parameters_s thread_parameters_t;
@@ -125,6 +119,7 @@ double *open_array;
 double *begin_array;
 double *comrol_array;
 double *close_array;
+double *total_array;
 
 
 
@@ -269,7 +264,8 @@ int exec_benchmark(void)
     if (NULL == (open_array = calloc(clients*bench_cycles, sizeof(double))) ||
         NULL == (begin_array = calloc(clients*bench_cycles, sizeof(double))) ||
         NULL == (comrol_array = calloc(clients*bench_cycles, sizeof(double))) ||
-        NULL == (close_array = calloc(clients*bench_cycles, sizeof(double)))) {
+        NULL == (close_array = calloc(clients*bench_cycles, sizeof(double))) ||
+        NULL == (total_array = calloc(clients*bench_cycles, sizeof(double)))) {
         fprintf(stderr, "Error while allocating arrays\n");
         exit(1);
     }    
@@ -282,6 +278,7 @@ int exec_benchmark(void)
         parameters[i].begin = begin_array + i*bench_cycles;
         parameters[i].comrol = comrol_array + i*bench_cycles;
         parameters[i].close = close_array + i*bench_cycles;
+        parameters[i].total = total_array + i*bench_cycles;
         threads[i] = g_thread_new(
             "", perform_benchmark, (gpointer *)&(parameters[i]));
         if (NULL == threads[i]) {
@@ -304,6 +301,7 @@ int exec_benchmark(void)
             begin_array[i*bench_cycles+j] = 0.0;
             comrol_array[i*bench_cycles+j] = 0.0;
             close_array[i*bench_cycles+j] = 0.0;
+            total_array[i*bench_cycles+j] = 0.0;
         }
             
     /* measurement phase */
@@ -317,6 +315,7 @@ int exec_benchmark(void)
         parameters[i].begin = begin_array + i*bench_cycles;
         parameters[i].comrol = comrol_array + i*bench_cycles;
         parameters[i].close = close_array + i*bench_cycles;
+        parameters[i].total = total_array + i*bench_cycles;
         threads[i] = g_thread_new(
             "", perform_benchmark, (gpointer *)&(parameters[i]));
         if (NULL == threads[i]) {
@@ -342,6 +341,7 @@ int exec_benchmark(void)
     free(begin_array);
     free(comrol_array);
     free(close_array);
+    free(total_array);
     
     return 0;
 }
@@ -375,7 +375,8 @@ gpointer perform_benchmark(gpointer data)
             }
             diff = lixa_timer_get_diff(&t2);
             tp->open[c] = (double)diff/1000;
-        }
+        } else
+            tp->open[c] = 0.0;
         /* application program delay */
         lixa_micro_sleep(
             (long)(medium_delay + random()%(delta_delay*2) - delta_delay));
@@ -430,7 +431,10 @@ gpointer perform_benchmark(gpointer data)
             }
             diff = lixa_timer_get_diff(&t2);
             tp->close[c] = (double)diff/1000;
-        }
+        } else
+            tp->close[c] = 0.0;
+        tp->total[c] = tp->open[c] + tp->begin[c] + tp->comrol[c] +
+            tp->close[c];
         
         /* application program delay */
         lixa_micro_sleep(
@@ -462,6 +466,7 @@ void compute_statistics(thread_parameters_t *tp, long total_time)
     qsort(begin_array, clients*bench_cycles, sizeof(double), compare);
     qsort(comrol_array, clients*bench_cycles, sizeof(double), compare);
     qsort(close_array, clients*bench_cycles, sizeof(double), compare);
+    qsort(total_array, clients*bench_cycles, sizeof(double), compare);
     
     tps = (double)clients * (double)tp[0].cycles * (double)1000000 /
         (double)total_time;
@@ -481,6 +486,7 @@ void compute_statistics(thread_parameters_t *tp, long total_time)
             printf("tx_rollback,,,,,,,,");
         if (open_close)
             printf("tx_close,,,,,,,,");
+        printf("total,,,,,,,,");
         printf("tps\n");
         /* header 2 */
         printf(" N,samples,");
@@ -490,6 +496,7 @@ void compute_statistics(thread_parameters_t *tp, long total_time)
         printf("min,50th%%,75th%%,85th%%,90th%%,95th%%,98th%%,max,");
         if (open_close)
             printf("min,50th%%,75th%%,85th%%,90th%%,95th%%,98th%%,max,");
+        printf("min,50th%%,75th%%,85th%%,90th%%,95th%%,98th%%,max,");
         printf("tps\n");
         /* data */
         printf("%d, %d, ", clients, clients*bench_cycles);
@@ -537,6 +544,16 @@ void compute_statistics(thread_parameters_t *tp, long total_time)
                    close_array[clients*bench_cycles*98/100],
                    close_array[clients*bench_cycles-1]);
         }
+        /* total time statistics */
+        printf("%1.3f, %1.3f, %1.3f, %1.3f, %1.3f, %1.3f, %1.3f, %1.3f, ",
+               total_array[0],
+               total_array[clients*bench_cycles*50/100],
+               total_array[clients*bench_cycles*75/100],
+               total_array[clients*bench_cycles*85/100],
+               total_array[clients*bench_cycles*90/100],
+               total_array[clients*bench_cycles*95/100],
+               total_array[clients*bench_cycles*98/100],
+               total_array[clients*bench_cycles-1]);
         printf("%1.3f\n", tps);
     } else {
         if (open_close) {
@@ -594,6 +611,18 @@ void compute_statistics(thread_parameters_t *tp, long total_time)
                    close_array[clients*bench_cycles*98/100],
                    close_array[clients*bench_cycles-1]);
         }
+        printf("total():\t");
+        printf("min=%1.3fms \t50th%%=%1.3fms \t75th%%=%1.3fms "
+               "\t85th%%=%1.3fms \t90th%%=%1.3fms \t95th%%=%1.3fms "
+               "\t98th%%=%1.3fms \tmax=%1.3fms\n",
+               total_array[0],
+               total_array[clients*bench_cycles*50/100],
+               total_array[clients*bench_cycles*75/100],
+               total_array[clients*bench_cycles*85/100],
+               total_array[clients*bench_cycles*90/100],
+               total_array[clients*bench_cycles*95/100],
+               total_array[clients*bench_cycles*98/100],
+               total_array[clients*bench_cycles-1]);
     }
     
 }
