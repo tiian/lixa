@@ -399,6 +399,7 @@ manual_sources = LIXA.xml \
 	LIXA_Preface.xml \
 	LIXA_Recovery.xml \
 	LIXA_Tuning.xml \
+	LIXA_Troubleshooting.xml \
 	LIXA_App_RM_Config.xml
 
 doc_DATA = *.html

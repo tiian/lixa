@@ -33,6 +33,7 @@
   <xi:include href="LIXA_Recovery.xml"/>
   <xi:include href="LIXA_In_Depth.xml"/>
   <xi:include href="LIXA_Tuning.xml"/>
+  <xi:include href="LIXA_Troubleshooting.xml"/>
   <xi:include href="LIXA_Bibliography.xml"/>
   <xi:include href="LIXA_App_RM_Config.xml"/>
 </book>

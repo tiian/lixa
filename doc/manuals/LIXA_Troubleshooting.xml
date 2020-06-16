@@ -1,0 +1,52 @@
+<chapter xml:id="Troubleshooting"
+         xmlns:xlink="http://www.w3.org/1999/xlink">
+  <title>Troubleshooting</title>
+  <para>
+    This chapter documents some errors that can happen in LIXA environments.
+  </para>
+  <section>
+    <title>Client Side Errors</title>
+    <section>
+      <title>Too many TIME_WAIT sockets</title>
+      <para>
+	If your Application Program starts many short transactions, you can
+	exhaust the number of ephemeral ports that can be used to create
+	TCP/IP connections.
+      </para>
+      <para>
+	A typicaly simptom is <function>tx_open()</function> returning error
+	code -7.
+	To inspect it a little more, you can activate the tracing using
+	LIXA_TRACE_MASK=0x4000. Here is the typical error you can catch in the
+	trace:
+	<screen>
+2020-06-16 20:19:29.922380 [5786/139620897502976] client_connect/excp=2/ret_cod=-138/errno=99
+	</screen>
+	where "ret_cod=-138" is associated to <function>connect()</function>
+	Linux function and "errno=99" means "EADDRNOTAVAIL".
+      </para>
+      <para>
+	The number of sockets in TIME_WAIT state can be checked with:
+	<screen>
+$ netstat -unta | grep TIME_WAIT | wc -l
+14018
+	</screen>
+      </para>
+      <para>
+	To workaround this issue, you can tell the Linux kernel to reuse
+	sockets in TIME_WAIT state adding the following row
+	<screen>
+net.ipv4.tcp_tw_reuse=1
+	</screen>
+	to file <filename>/etc/sysctl.conf</filename>
+      </para>
+      <important>
+	<para>
+	  Telling the Linux kernel to reuse sockets in TIME_WAIT state is
+	  not without consequences: please read the related documentation and
+	  use it at your own risk.
+	</para>
+      </important>
+    </section>
+  </section>
+</chapter>
