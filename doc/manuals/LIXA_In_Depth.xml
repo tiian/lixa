@@ -169,6 +169,13 @@ Dec  4 18:22:49 ubuntu lixad[6697]: LXD006N server terminated activities
 		<entry>persistent state</entry>
 	      </row>
 	      <row>
+		<entry>LIXA_TRACE_MOD_XTA</entry>
+		<entry>0x00000020</entry>
+		<entry><systemitem class="library">lixac</systemitem>
+		  (client library)</entry>
+		<entry>XA Transaction API (XTA) functions</entry>
+	      </row>
+	      <row>
 		<entry>LIXA_TRACE_MOD_SERVER_XA</entry>
 		<entry>0x00000040</entry>
 		<entry><command>lixad</command> (state server)</entry>
@@ -186,6 +193,12 @@ Dec  4 18:22:49 ubuntu lixad[6697]: LXD006N server terminated activities
 		<entry><command>lixad</command> (state server)</entry>
 		<entry>logic necessary to answer the client recovery 
 		  calls</entry>
+	      </row>
+	      <row>
+		<entry>LIXA_TRACE_MOD_SERVER_FSM</entry>
+		<entry>0x00000200</entry>
+		<entry><command>lixad</command> (state server)</entry>
+		<entry>server FSM (finite state machine) functions</entry>
 	      </row>
 	      <row>
 		<entry>LIXA_TRACE_MOD_CLIENT_TX</entry>
@@ -251,6 +264,19 @@ Dec  4 18:22:49 ubuntu lixad[6697]: LXD006N server terminated activities
 		<entry><systemitem class="library">lixac</systemitem>
 		  (client library)</entry>
 		<entry>generic client functions</entry>
+	      </row>
+	      <row>
+		<entry>LIXA_TRACE_MOD_CLIENT_TPM</entry>
+		<entry>0x00100000</entry>
+		<entry><systemitem class="library">lixac</systemitem>
+		  (client library)</entry>
+		<entry>client TPM functions</entry>
+	      </row>
+	      <row>
+		<entry>LIXA_TRACE_MOD_SERVER_TPM</entry>
+		<entry>0x00200000</entry>
+		<entry><command>lixad</command> (state server)</entry>
+		<entry>server TPM functions</entry>
 	      </row>
 	      <row>
 		<entry>LIXA_TRACE_MOD_COMMON_CONFIG</entry>
