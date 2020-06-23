@@ -111,6 +111,10 @@ int exec_benchmark(void);
 gpointer perform_benchmark(gpointer data);
 /* compute aggregate statistics */
 void compute_statistics(thread_parameters_t *tp, long total_time);
+/* compute average value */
+double compute_average(const double *array, int n);
+/* compute std dev value */
+double compute_stddev(const double *array, int n, double average);
 
 
 
@@ -460,6 +464,8 @@ int compare(const void *a, const void *b) {
 void compute_statistics(thread_parameters_t *tp, long total_time)
 {
     double tps;
+    double average;
+    double stddev;
 
     /* sort the arrays with metrics */
     qsort(open_array, clients*bench_cycles, sizeof(double), compare);
@@ -478,151 +484,229 @@ void compute_statistics(thread_parameters_t *tp, long total_time)
         /* header 1 */
         printf(" clients,,");
         if (open_close)
-            printf("tx_open,,,,,,,,");
-        printf("tx_begin,,,,,,,,");
+            printf("tx_open,,,,,,,,,,,");
+        printf("tx_begin,,,,,,,,,,,");
         if (commit)
-            printf("tx_commit,,,,,,,,");
+            printf("tx_commit,,,,,,,,,,,");
         else
-            printf("tx_rollback,,,,,,,,");
+            printf("tx_rollback,,,,,,,,,,,");
         if (open_close)
-            printf("tx_close,,,,,,,,");
-        printf("total,,,,,,,,");
+            printf("tx_close,,,,,,,,,,,");
+        printf("total,,,,,,,,,,,");
         printf("tps\n");
         /* header 2 */
         printf(" N,samples,");
         if (open_close)
-            printf("min,50th%%,75th%%,85th%%,90th%%,95th%%,98th%%,max,");
-        printf("min,50th%%,75th%%,85th%%,90th%%,95th%%,98th%%,max,");
-        printf("min,50th%%,75th%%,85th%%,90th%%,95th%%,98th%%,max,");
+            printf("min,25th%%,50th%%,75th%%,85th%%,90th%%,95th%%,98th%%,"
+                   "max,avg,sd,");
+        printf("min,25th%%,50th%%,75th%%,85th%%,90th%%,95th%%,98th%%,max,"
+               "avg,sd,");
+        printf("min,25th%%,50th%%,75th%%,85th%%,90th%%,95th%%,98th%%,max,"
+               "avg,sd,");
         if (open_close)
-            printf("min,50th%%,75th%%,85th%%,90th%%,95th%%,98th%%,max,");
-        printf("min,50th%%,75th%%,85th%%,90th%%,95th%%,98th%%,max,");
+            printf("min,25th%%,50th%%,75th%%,85th%%,90th%%,95th%%,98th%%,max,"
+                   "avg,sd,");
+        printf("min,25th%%,50th%%,75th%%,85th%%,90th%%,95th%%,98th%%,max,"
+               "avg,sd,");
         printf("tps\n");
         /* data */
         printf("%d, %d, ", clients, clients*bench_cycles);
         if (open_close) {
             /* open statistics */
-            printf("%1.3f, %1.3f, %1.3f, %1.3f, %1.3f, %1.3f, %1.3f, %1.3f, ",
+            average = compute_average(open_array, clients*bench_cycles);
+            stddev = compute_stddev(open_array, clients*bench_cycles, average);
+            printf("%1.3f, %1.3f, %1.3f, %1.3f, %1.3f, %1.3f, %1.3f, %1.3f, "
+                   "%1.3f, %1.3f, %1.3f, ",
                    open_array[0],
+                   open_array[clients*bench_cycles*25/100],
                    open_array[clients*bench_cycles*50/100],
                    open_array[clients*bench_cycles*75/100],
                    open_array[clients*bench_cycles*85/100],
                    open_array[clients*bench_cycles*90/100],
                    open_array[clients*bench_cycles*95/100],
                    open_array[clients*bench_cycles*98/100],
-                   open_array[clients*bench_cycles-1]);
+                   open_array[clients*bench_cycles-1],
+                   average, stddev);
         }
         /* begin statistics */
-        printf("%1.3f, %1.3f, %1.3f, %1.3f, %1.3f, %1.3f, %1.3f, %1.3f, ",
+        average = compute_average(begin_array, clients*bench_cycles);
+        stddev = compute_stddev(begin_array, clients*bench_cycles, average);
+        printf("%1.3f, %1.3f, %1.3f, %1.3f, %1.3f, %1.3f, %1.3f, %1.3f, "
+               "%1.3f, %1.3f, %1.3f, ",
                begin_array[0],
+               begin_array[clients*bench_cycles*25/100],
                begin_array[clients*bench_cycles*50/100],
                begin_array[clients*bench_cycles*75/100],
                begin_array[clients*bench_cycles*85/100],
                begin_array[clients*bench_cycles*90/100],
                begin_array[clients*bench_cycles*95/100],
                begin_array[clients*bench_cycles*98/100],
-               begin_array[clients*bench_cycles-1]);
+               begin_array[clients*bench_cycles-1],
+               average, stddev);
         /* commit/rollback statistics */
-        printf("%1.3f, %1.3f, %1.3f, %1.3f, %1.3f, %1.3f, %1.3f, %1.3f, ",
+        average = compute_average(comrol_array, clients*bench_cycles);
+        stddev = compute_stddev(comrol_array, clients*bench_cycles, average);
+        printf("%1.3f, %1.3f, %1.3f, %1.3f, %1.3f, %1.3f, %1.3f, %1.3f, "
+               "%1.3f, %1.3f, %1.3f, ",
                comrol_array[0],
+               comrol_array[clients*bench_cycles*25/100],
                comrol_array[clients*bench_cycles*50/100],
                comrol_array[clients*bench_cycles*75/100],
                comrol_array[clients*bench_cycles*85/100],
                comrol_array[clients*bench_cycles*90/100],
                comrol_array[clients*bench_cycles*95/100],
                comrol_array[clients*bench_cycles*98/100],
-               comrol_array[clients*bench_cycles-1]);
+               comrol_array[clients*bench_cycles-1],
+               average, stddev);
+        average = compute_average(close_array, clients*bench_cycles);
+        stddev = compute_stddev(close_array, clients*bench_cycles, average);
         if (open_close) {
             /* close statistics */
-            printf("%1.3f, %1.3f, %1.3f, %1.3f, %1.3f, %1.3f, %1.3f, %1.3f, ",
+            printf("%1.3f, %1.3f, %1.3f, %1.3f, %1.3f, %1.3f, %1.3f, %1.3f, "
+                   "%1.3f, %1.3f, %1.3f, ",
                    close_array[0],
+                   close_array[clients*bench_cycles*25/100],
                    close_array[clients*bench_cycles*50/100],
                    close_array[clients*bench_cycles*75/100],
                    close_array[clients*bench_cycles*85/100],
                    close_array[clients*bench_cycles*90/100],
                    close_array[clients*bench_cycles*95/100],
                    close_array[clients*bench_cycles*98/100],
-                   close_array[clients*bench_cycles-1]);
+                   close_array[clients*bench_cycles-1],
+                   average, stddev);
         }
         /* total time statistics */
-        printf("%1.3f, %1.3f, %1.3f, %1.3f, %1.3f, %1.3f, %1.3f, %1.3f, ",
+        average = compute_average(total_array, clients*bench_cycles);
+        stddev = compute_stddev(total_array, clients*bench_cycles, average);
+        printf("%1.3f, %1.3f, %1.3f, %1.3f, %1.3f, %1.3f, %1.3f, %1.3f, "
+               "%1.3f, %1.3f, %1.3f, ",
                total_array[0],
+               total_array[clients*bench_cycles*25/100],
                total_array[clients*bench_cycles*50/100],
                total_array[clients*bench_cycles*75/100],
                total_array[clients*bench_cycles*85/100],
                total_array[clients*bench_cycles*90/100],
                total_array[clients*bench_cycles*95/100],
                total_array[clients*bench_cycles*98/100],
-               total_array[clients*bench_cycles-1]);
+               total_array[clients*bench_cycles-1],
+               average, stddev);
         printf("%1.3f\n", tps);
     } else {
         if (open_close) {
+            average = compute_average(open_array, clients*bench_cycles);
+            stddev = compute_stddev(open_array, clients*bench_cycles, average);
             printf("tx_open():\t");
-            printf("min=%1.3fms \t50th%%=%1.3fms \t75th%%=%1.3fms "
-                   "\t85th%%=%1.3fms \t90th%%=%1.3fms \t95th%%=%1.3fms "
-                   "\t98th%%=%1.3fms \tmax=%1.3fms\n",
+            printf("min=%1.3fms \t25th%%=%1.3fms \t50th%%=%1.3fms "
+                   "\t75th%%=%1.3fms \t85th%%=%1.3fms \t90th%%=%1.3fms "
+                   "\t95th%%=%1.3fms \t98th%%=%1.3fms \tmax=%1.3fms "
+                   "\tavg=%1.3fms \tsd=%1.3fms\n",
                    open_array[0],
+                   open_array[clients*bench_cycles*25/100],
                    open_array[clients*bench_cycles*50/100],
                    open_array[clients*bench_cycles*75/100],
                    open_array[clients*bench_cycles*85/100],
                    open_array[clients*bench_cycles*90/100],
                    open_array[clients*bench_cycles*95/100],
                    open_array[clients*bench_cycles*98/100],
-                   open_array[clients*bench_cycles-1]);
+                   open_array[clients*bench_cycles-1],
+                   average, stddev);
         }
+        average = compute_average(begin_array, clients*bench_cycles);
+        stddev = compute_stddev(begin_array, clients*bench_cycles, average);
         printf("tx_begin():\t");
-        printf("min=%1.3fms \t50th%%=%1.3fms \t75th%%=%1.3fms "
-               "\t85th%%=%1.3fms \t90th%%=%1.3fms \t95th%%=%1.3fms "
-               "\t98th%%=%1.3fms \tmax=%1.3fms\n",
+        printf("min=%1.3fms \t25th%%=%1.3fms \t50th%%=%1.3fms "
+               "\t75th%%=%1.3fms \t85th%%=%1.3fms \t90th%%=%1.3fms "
+               "\t95th%%=%1.3fms \t98th%%=%1.3fms \tmax=%1.3fms "
+               "\tavg=%1.3fms \tsd=%1.3fms\n",
                begin_array[0],
+               begin_array[clients*bench_cycles*25/100],
                begin_array[clients*bench_cycles*50/100],
                begin_array[clients*bench_cycles*75/100],
                begin_array[clients*bench_cycles*85/100],
                begin_array[clients*bench_cycles*90/100],
                begin_array[clients*bench_cycles*95/100],
                begin_array[clients*bench_cycles*98/100],
-               begin_array[clients*bench_cycles-1]);
+               begin_array[clients*bench_cycles-1],
+               average, stddev);
         if (commit)
             printf("tx_commit():\t");
         else
             printf("tx_rollback():\t");
-        printf("min=%1.3fms \t50th%%=%1.3fms \t75th%%=%1.3fms "
-               "\t85th%%=%1.3fms \t90th%%=%1.3fms \t95th%%=%1.3fms "
-               "\t98th%%=%1.3fms \tmax=%1.3fms\n",
+        average = compute_average(comrol_array, clients*bench_cycles);
+        stddev = compute_stddev(comrol_array, clients*bench_cycles, average);
+        printf("min=%1.3fms \t25th%%=%1.3fms \t50th%%=%1.3fms "
+               "\t75th%%=%1.3fms \t85th%%=%1.3fms \t90th%%=%1.3fms "
+               "\t95th%%=%1.3fms \t98th%%=%1.3fms \tmax=%1.3fms "
+               "\tavg=%1.3fms \tsd=%1.3fms\n",
                comrol_array[0],
+               comrol_array[clients*bench_cycles*25/100],
                comrol_array[clients*bench_cycles*50/100],
                comrol_array[clients*bench_cycles*75/100],
                comrol_array[clients*bench_cycles*85/100],
                comrol_array[clients*bench_cycles*90/100],
                comrol_array[clients*bench_cycles*95/100],
                comrol_array[clients*bench_cycles*98/100],
-               comrol_array[clients*bench_cycles-1]);
+               comrol_array[clients*bench_cycles-1],
+               average, stddev);
         if (open_close) {
+            average = compute_average(close_array, clients*bench_cycles);
+            stddev = compute_stddev(close_array, clients*bench_cycles,
+                                    average);
             printf("tx_close():\t");
-            printf("min=%1.3fms \t50th%%=%1.3fms \t75th%%=%1.3fms "
-                   "\t85th%%=%1.3fms \t90th%%=%1.3fms \t95th%%=%1.3fms "
-                   "\t98th%%=%1.3fms \tmax=%1.3fms\n",
+            printf("min=%1.3fms \t25th%%=%1.3fms \t50th%%=%1.3fms "
+                   "\t75th%%=%1.3fms \t85th%%=%1.3fms \t90th%%=%1.3fms "
+                   "\t95th%%=%1.3fms \t98th%%=%1.3fms \tmax=%1.3fms "
+                   "\tavg=%1.3fms \tsd=%1.3fms\n",
                    close_array[0],
+                   close_array[clients*bench_cycles*25/100],
                    close_array[clients*bench_cycles*50/100],
                    close_array[clients*bench_cycles*75/100],
                    close_array[clients*bench_cycles*85/100],
                    close_array[clients*bench_cycles*90/100],
                    close_array[clients*bench_cycles*95/100],
                    close_array[clients*bench_cycles*98/100],
-                   close_array[clients*bench_cycles-1]);
+                   close_array[clients*bench_cycles-1],
+                   average, stddev);
         }
+        average = compute_average(total_array, clients*bench_cycles);
+        stddev = compute_stddev(total_array, clients*bench_cycles, average);
         printf("total():\t");
-        printf("min=%1.3fms \t50th%%=%1.3fms \t75th%%=%1.3fms "
-               "\t85th%%=%1.3fms \t90th%%=%1.3fms \t95th%%=%1.3fms "
-               "\t98th%%=%1.3fms \tmax=%1.3fms\n",
+        printf("min=%1.3fms \t25th%%=%1.3fms \t50th%%=%1.3fms "
+               "\t75th%%=%1.3fms \t85th%%=%1.3fms \t90th%%=%1.3fms "
+               "\t95th%%=%1.3fms \t98th%%=%1.3fms \tmax=%1.3fms "
+               "\tavg=%1.3fms \tsd=%1.3fms\n",
                total_array[0],
+               total_array[clients*bench_cycles*25/100],
                total_array[clients*bench_cycles*50/100],
                total_array[clients*bench_cycles*75/100],
                total_array[clients*bench_cycles*85/100],
                total_array[clients*bench_cycles*90/100],
                total_array[clients*bench_cycles*95/100],
                total_array[clients*bench_cycles*98/100],
-               total_array[clients*bench_cycles-1]);
+               total_array[clients*bench_cycles-1],
+               average, stddev);
     }
     
+}
+
+
+
+double compute_average(const double *array, int n)
+{
+    int i;
+    double sum = 0;
+    for (i=0; i<n; ++i)
+        sum += array[i];
+    return sum / (double)n;
+}
+
+
+
+double compute_stddev(const double *array, int n, double average)
+{
+    int i;
+    double sum2 = 0;
+    for (i=0; i<n; ++i)
+        sum2 += (array[i] - average) * (array[i] - average);
+    return sqrt(sum2 / (double)n);
 }
