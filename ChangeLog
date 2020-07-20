@@ -1,5 +1,5 @@
 LOG:
-	   1.9.0 Added new state engine for the state server (lixad)
+2020-07-20 1.9.0 Added new state engine for the state server (lixad)
 		 Set a new environment variable to choose the state engine
 		 export LIXA_STATE_ENGINE=TRADITIONAL
 		 for the traditional state engine (default),
@@ -12,9 +12,8 @@ LOG:
 		   the recovery phase and
 		   requested by the traditional state server to the 
 		   applications due to the lack of the last data)
-		 - 1 or 2 orders of magnitude smaller latency in comparison
-		   with the traditional state engine (the slower the storage,
-		   the higher the improvement)
+		 - lower latency in comparison with the traditional state 
+		   engine (the slower the storage, the higher the improvement)
 		 New parameter "-C" / "--bench-cycles" in utility lixat; new
 		 "transaction per seconds" statistic; new format for all the
 		 statistics.

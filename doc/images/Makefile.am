@@ -28,12 +28,7 @@ png_images = LIXA_Configuration_1.png  LIXA_Configuration_4.png \
 	LIXA_Development_12.png LIXA_Development_13.png \
 	LIXA_Development_15.png \
 	LIXA_Recovery_01.png LIXA_Recovery_02.png LIXA_Recovery_03.png \
-	LIXA_In_Depth_01.png LIXA_In_Depth_02.png LIXA_In_Depth_03.png \
-	LIXA_Tuning_01.png LIXA_Tuning_02.png \
-	LIXA_Tuning_03.png LIXA_Tuning_04.png \
-	LIXA_Tuning_05.png LIXA_Tuning_06.png \
-	LIXA_Tuning_07.png LIXA_Tuning_08.png \
-	LIXA_Tuning_09.png LIXA_Tuning_10.png
+	LIXA_In_Depth_01.png LIXA_In_Depth_02.png LIXA_In_Depth_03.png
 
 svg_images = LIXA_Development_XTA_01.svg LIXA_Development_XTA_02.svg \
 	LIXA_Development_XTA_03.svg LIXA_Development_XTA_04.svg \

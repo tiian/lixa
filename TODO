@@ -1,8 +1,7 @@
-Investigate why journal is switched soo frequently:
-
-lixa_state.c:1385 is not convincing me: log file is not extended even if it's
-small in comparison with the configured size... if possible, it must be 
-extended because it's much more faster than switching it (and the table).
+Under very high workload the state server stops with a controlled shutdown;
+tracing is not viable because with active tracing the workload is lower and the
+issue does not happen.
+Investigate the topic as described below.
 
 Find a match that crashes the lixad; this 
 /opt/lixa/bin/lixat -b -p 500 -P 250 -l 100 -C 10000
@@ -10,6 +9,8 @@ generates this error:
 May 24 20:58:27 ubuntu003 lixad[13969]: LXD018C internal thread id=2 raised unexpected exception (server_manager_thread: excp=10,ret_cod=-13,errno=11); immediate shutdown will terminate the server
 even with new POLLNVAL handling in server_manager_thread.
 even with new POLLNVAL handling in lixa_msg_receive.
+
+Sometimes, interrupting the benchmark, lixad through an exception, even with default paratemeters
 
 This config seems to "incentivate" the error: the larger the buffer, the slower
 the write operation

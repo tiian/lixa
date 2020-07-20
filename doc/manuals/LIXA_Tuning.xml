@@ -34,7 +34,7 @@
 	some trials: following the <quote>just work</quote> concept
 	the default configuration specifies 3 threads, but your 
 	installation might perform better using a different number (in the
-	below paragraphs you can collect some hints).
+	next paragraphs you can collect some hints).
       </para>
       <note><para>
 	If you use the <emphasis>journal based</emphasis> state engine, 
@@ -90,16 +90,30 @@
       slash) or the prefix of a file name. Different server threads must
       specify different paths.
     </para>
+    <important><para>
+      This approach provided benefits in the age of physical servers with RAID
+      disk array controllers and spinning disks, but is no more actual for many
+      storage configurations. In some configurations, like for example
+      Microsoft Azure public cloud, the number of IOPS (Input Output
+      Operations Per Second) depends on the type and the size of the virtual
+      block device; the
+      same applies to some enterprise storage system for on-premises
+      datacenters. This optimization strategy is valuable only if many small
+      disks support an higher number of IOPS in comparison with a single large
+      disk.
+    </para></important>
   </section>
   <section>
     <title>Choosing the state engine type</title>
     <para>
       <emphasis>Journal based</emphasis> state engine has been designed to
-      replace the <emphasis>traditional</emphasis> state engine and, on the
-      long term, the latter might be removed from the state server. 
-      From a performance point of view, there's no chance for the traditional
-      engine to compete against the new journal one; nevertheless, due to the
-      proven robustness, it's expected the usage of the traditional state
+      provide a better alternative to the <emphasis>traditional</emphasis>
+      state engine. 
+      From a performance point of view, the <emphasis>journal based</emphasis>
+      state engine provides better results in most situations; nevertheless,
+      due to the
+      proven robustness, it's expected the usage of the
+      <emphasis>traditional</emphasis> state
       engine will continue for some time, especially when high performance
       is not a must.
     </para>
@@ -283,7 +297,7 @@
 	  As a general rule, only <parameter>log_o_sync=1</parameter> in
 	  association with 
 	  <parameter>min_elapsed_sync_time="0"</parameter> and
-	  <parameter>max_elapsed_sync_time="0"</parameter> provides RPO=0
+	  <parameter>max_elapsed_sync_time="0"</parameter> guarantees RPO=0
 	  in the event of <emphasis>hard crash</emphasis>.
 	</para></important>
 	<para>
@@ -308,9 +322,10 @@
 	server.
       </para>
     <para>
-      Only two parameters can be configured, the others are ignored:
+      Only two parameters can be configured: 
       <parameter>min_elapsed_sync_time</parameter> and 
-      <parameter>max_elapsed_sync_time</parameter>. 
+      <parameter>max_elapsed_sync_time</parameter> while the others are
+      ignored.
     </para>
     <section>
       <title>Impact of parameter <parameter>min_elapsed_sync_time</parameter></title>
@@ -360,520 +375,80 @@
     </section>
     <section>
       <title>Balancing performance and resilience</title>
-      <important>
-	<para>
-	  The higher the value of RPO, the higher the chance
-	  you will have to perform manual recovery in the case of a server
-	  crash (manual recovery is explained in 
-	  <xref linkend="Manual_cold_recovery"/>).
-	</para>
-	<para>
-	  On the other hand, don't force RPO=0 if you don't have clear evidence
-	  that you need it: depending on your business requirements and your 
-	  hardware configuration, especially
-	  if you use the <emphasis>journal based state engine</emphasis>, the
-	  need for RPO=0 might be not necessary: as you will see in the next
-	  section, the performance benefit could be huge.
-	</para>
-      </important>
-    </section>
-  </section>
-  <section xml:id="Tuning_example">
-    <title>A tuning example</title>
-    <para>
-      This section explains a tuning example you can use as a starting point
-      to develop your own tuning strategy.
-    </para>
-    <para>
-      The utility program <command>lixat</command>, introduced in
-      <xref linkend="Starting_test_utility"/> can be used as a benchmark tool
-      specifying <parameter>-b</parameter> 
-      (<parameter>--benchmark</parameter>) option.
-      The available command options can be retrieved with
-      <parameter>--help</parameter>:
-      <screen>
-tiian@ubuntu:~$ /opt/lixa/bin/lixat --help
-Usage:
-  lixat [OPTION...] - LIXA test utility
-
-Help Options:
-  -?, --help                  Show help options
-
-Application Options:
-  -c, --commit                Perform a commit transaction
-  -r, --rollback              Perform a rollback transaction
-  -v, --version               Print package info and exit
-  -b, --benchmark             Perform benchmark execution
-  -o, --open-close            Execute tx_open &amp; tx_close for every transaction [benchmark only]
-  -s, --csv                   Send result to stdout using CSV format [benchmark only]
-  -l, --clients               Number of clients (threads) will stress the state server [benchmark only]
-  -d, --medium-delay          Medium (random) delay between TX functions [benchmark only]
-  -D, --delta-delay           Delta (random) delay between TX functions [benchmark only]
-  -p, --medium-processing     Medium (random) delay introduced by Resource Managers operations between tx_begin and tx_commit/tx_rollback [benchmark only]
-  -P, --delta-processing      Delta (random) delay introduced by Resource Managers operations between tx_begin and tx_commit/tx_rollback [benchmark only]
-      </screen>
-      These are the interesting options in benchmark mode:
-      <itemizedlist mark='bullet'>
-	<listitem><para>
-	    commit transactions (<parameter>-c</parameter> or
-	    <parameter>--commit</parameter>)
-	</para></listitem>
-	<listitem><para>
-	    rollback transactions (<parameter>-r</parameter> or
-	    <parameter>--rollback</parameter>)
-	</para></listitem>
-	<listitem><para>
-	    one couple of <function>tx_open()/tx_close()</function> for every
-	    transaction (<parameter>-o</parameter> or
-	    <parameter>--open-close</parameter>); alternatively only one
-	    couple of <function>tx_open()/tx_close()</function> will be used
-	    for all the transactions (<function>tx_open()/tx_begin()/tx_commit()/tx_begin()/tx_commit()/.../tx_close()</function>)
-	</para></listitem>
-	<listitem><para>
-	    number of clients connected to the LIXA state server
-	    (<parameter>-l</parameter> or <parameter>--clients</parameter>)
-	</para></listitem>
-	<listitem><para>
-	    delay introduced by Application Program logic between 
-	    <function>tx_*</function> functions (
-	    <parameter>-d, --medium-delay, -D, --delta-delay</parameter>)
-	</para></listitem>
-	<listitem><para>
-	    delay introduced by Resource Managers logic between
-	    <function>tx_begin</function> and <function>tx_commit</function>
-	    (or <function>tx_rollback</function>) functions (
-	    <parameter>-p, --medium-processing, -P, --delta-processing</parameter>)
-	</para></listitem>
-      </itemizedlist>
-    </para>
-    <section>
-      <title><command>lixat</command> benchmark behavior</title>
       <para>
-	This is a sketch of <command>lixat</command> algorithm when
-	<parameter>-o</parameter> or <parameter>--open-close</parameter>
-	option is specified:
-	<screen>
-loop (1..100)
-    sleep(random[d-D/2, d+D/2])
-    tx_open()
-    sleep(random[d-D/2, d+D/2])
-    tx_begin()
-    sleep(random[p-P/2, p+P/2])
-    tx_commit()
-    sleep(random[d-D/2, d+D/2])
-    tx_close()
-    sleep(random[d-D/2, d+D/2])
-end loop
-	</screen>
-	With default delays the sleeping pauses are the following:
-	<screen>
-sleep(random[d-D/2, d+D/2]) --&gt; [500, 1500] microseconds
-sleep(random[p-P/2, p+P/2]) --&gt;  [50, 150]  milliseconds	  
-	</screen>
-        without <parameter>-o</parameter> or 
-	<parameter>--open-close</parameter> option <command>lixat</command>
-	does not
-	call <function>tx_open()/tx_close()</function> for every cycle and
-	the algorithm becomes the following one:
-	<screen>
-tx_open()
-loop (1..100)
-    sleep(random[d-D/2, d+D/2])
-    sleep(random[d-D/2, d+D/2])
-    tx_begin()
-    sleep(random[p-P/2, p+P/2])
-    tx_commit()
-    sleep(random[d-D/2, d+D/2])
-    sleep(random[d-D/2, d+D/2])
-end loop
-tx_close()
-	</screen>
+	The higher the value of RPO, the higher the chance
+	you will have to perform manual recovery in the case of a server
+	crash (manual recovery is explained in 
+	<xref linkend="Manual_cold_recovery"/>).
       </para>
       <para>
-	Using <parameter>--open-close</parameter> parameter you will simulate 
-	an Application Program that creates and destroy the transactional
-	environment for every transaction.
+	On the other hand, don't force RPO=0 if you don't have clear evidence
+	that you need it: depending on your business requirements and your 
+	hardware configuration, especially
+	if you use the <emphasis>journal based state engine</emphasis>, the
+	need for RPO=0 might be not necessary.
+	<link xlink:href="https://www.tiian.org/lixa/">LIXA web site</link>
+	contains detailed performance analysis of a couple of possible
+	deployment models: refers to the following links to figure out how the
+	performances are influenced by the configuration parameters.
       </para>
       <para>
-	Omitting <parameter>--open-close</parameter> parameter you will 
-	simulate an Application Program that reuses the transactional
-	environment for 100 transactions.
+	The <link xlink:href="https://www.tiian.org/lixa/performances/performances.html">first architecture</link> applies to traditional environments with
+	monolithic applications distributed in different tiers: the
+	Application Program and the LIXA state server run in different
+	virtual machines. The figures show that the highest the RPO, the
+	lowest the total latency introduced by LIXA in managing
+	distributed transactions.
       </para>
       <para>
-	Your Application Program could live in the middle, 
-	<command>lixat</command> can help you to figure out two different 
-	theoretical scenarios.
-      </para>
-      <para>
-	A shell command you can use to measure the performance of LIXA for
-	10, 20, 30, ... 100 clients is the following one:
-	<screen>
-for l in 10 20 30 40 50 60 70 80 90 100 ; do /opt/lixa/bin/lixat -b -s -l $l ; done | grep -v '^ ' > /tmp/bench_result.csv
-	</screen>
+	The <link xlink:href="https://www.tiian.org/lixa/performances/performances_2.html">second architecture</link> applies to microservices environments
+	with a sidecar approach, typical of Kubernetes deployments: the
+	Application Program and the LIXA state server run in the same
+	virtual machine (and in the same pod in a Kubernetes configuration).
+	Even for this type of architecture the figures show that the highest
+	the RPO, the lowest the total latency introduced by LIXA in managing
+	distributed transactions. Furtherly, this second type of architecture
+	exhibits a lower latency than the first type.
       </para>
     </section>
     <section>
-      <title>Tuning example hardware characteristics</title>
+      <title>Conclusions</title>
       <para>
-	This is the output of <filename>/proc/cpuinfo</filename> executed
-	in the system hosting <command>lixad</command> state server:
-	<screen>
-	  processor: 0
-	  vendor_id: GenuineIntel
-	  cpu family: 15
-	  model: 2
-	  model name: Intel(R) Celeron(R) CPU 2.40GHz
-	  stepping: 9
-	  cpu MHz: 2405.521
-	  cache size: 128 KB
-	  fdiv_bug: no
-	  hlt_bug: no
-	  f00f_bug: no
-	  coma_bug: no
-	  fpu: yes
-	  fpu_exception: yes
-	  cpuid level: 2
-	  wp: yes
-	  flags: fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush dts acpi mmx fxsr sse sse2 ss ht tm pbe up pebs bts cid xtpr
-	  bogomips: 4811.04
-	  clflush size: 64
-	</screen>
-	This is the output of <filename>/proc/cpuinfo</filename> executed
-	in the system hosting <command>lixat</command> benchmark process:
-	<screen>
-	  processor: 0
-	  vendor_id: GenuineIntel
-	  cpu family: 6
-	  model: 23
-	  model name: Genuine Intel(R) CPU           U7300  @ 1.30GHz
-	  stepping: 10
-	  cpu MHz: 800.000
-	  cache size: 3072 KB
-	  physical id: 0
-	  siblings: 2
-	  core id: 0
-	  cpu cores: 2
-	  apicid: 0
-	  initial apicid: 0
-	  fpu: yes
-	  fpu_exception: yes
-	  cpuid level: 13
-	  wp: yes
-	  flags: fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush dts acpi mmx fxsr sse sse2 ss ht tm pbe syscall nx lm constant_tsc arch_perfmon pebs bts rep_good aperfmperf pni dtes64 monitor ds_cpl vmx est tm2 ssse3 cx16 xtpr pdcm sse4_1 xsave lahf_lm tpr_shadow vnmi flexpriority
-	  bogomips: 2593.73
-	  clflush size: 64
-	  cache_alignment: 64
-	  address sizes: 36 bits physical, 48 bits virtual
-	  power management:
-
-	  processor: 1
-	  vendor_id: GenuineIntel
-	  cpu family: 6
-	  model: 23
-	  model name: Genuine Intel(R) CPU           U7300  @ 1.30GHz
-	  stepping: 10
-	  cpu MHz: 800.000
-	  cache size: 3072 KB
-	  physical id: 0
-	  siblings: 2
-	  core id: 1
-	  cpu cores: 2
-	  apicid: 1
-	  initial apicid: 1
-	  fpu: yes
-	  fpu_exception: yes
-	  cpuid level: 13
-	  wp: yes
-	  flags: fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush dts acpi mmx fxsr sse sse2 ss ht tm pbe syscall nx lm constant_tsc arch_perfmon pebs bts rep_good aperfmperf pni dtes64 monitor ds_cpl vmx est tm2 ssse3 cx16 xtpr pdcm sse4_1 xsave lahf_lm tpr_shadow vnmi flexpriority
-	  bogomips: 2593.50
-	  clflush size: 64
-	  cache_alignment: 64
-	  address sizes: 36 bits physical, 48 bits virtual
-	  power management:
-	</screen>
-      </para>
-      <para>
-	From the above specs you can guess these are not powerful 
-	<quote>server systems</quote>. The systems are connected with a
-	100 Mbit/s connection with an average latency of 95 microseconds:
-	<screen>
---- 192.168.10.2 ping statistics ---
-50 packets transmitted, 50 received, 0% packet loss, time 48997ms
-rtt min/avg/max/mdev = 0.133/0.190/0.226/0.024 ms
-	</screen>
-      </para>
-    </section>
-    <section>
-      <title>Results obtained with <parameter>--open-close</parameter> parameter</title>
-      <note>
-	<para>
-	  All the tests saturated the CPU of the host executing 
-	  <command>lixad</command> state server for the higher values of
-	  connected clients.
-	</para>
-      </note>
-      <para>
-	The first picture shows the elapsed time associated to
-	<function>tx_open()</function> increases quite linearly with the 
-	number of connected clients. A <command>lixad</command> state server 
-	configured with 3 managers
-	(threads), <parameter>min_elapsed_sync_time=20</parameter> and
-	<parameter>max_elapsed_sync_time=100</parameter> exploits the best
-	scalability (purple line); a <command>lixad</command> state server 
-	configured with 3 managers,
-	<parameter>min_elapsed_sync_time=10</parameter> and
-	<parameter>max_elapsed_sync_time=50</parameter> shows a scalability
-	very near to the best (light green line).
-	<emphasis>The second one is a more robust configuration and should
-	  be preferred</emphasis>.
-      </para>
-      <figure xml:id="tuning_01">
-	<title>Elapsed time of tx_open() when the Application Program 
-	  uses a couple of tx_open()/tx_close() for every 
-	  couple of tx_begin()/tx_commit()</title>
-	<mediaobject>
-	  <imageobject>
-	    <imagedata fileref="../images/LIXA_Tuning_01.png"/>
-	  </imageobject>
-	</mediaobject>
-      </figure>
-      <para>
-	A completely different behavior is shown by
-	<function>tx_begin(), tx_commit(), tx_close()</function> functions:
-	the best scalability is obtained with 1 manager (thread), 
-	<parameter>min_elapsed_sync_time=20</parameter> and
-	<parameter>max_elapsed_sync_time=100</parameter>
-	(yellow line); a quite optimal
-	performance can be obtained with 1 manager (thread), 
-	<parameter>min_elapsed_sync_time=10</parameter> and
-	<parameter>max_elapsed_sync_time=50</parameter> (orange line). 
-	The second 
-	configuration should be preferred because it's more robust than the
-	first one. Using more threads does not give any benefit for these
-	three functions.
-      </para>
-      <figure xml:id="tuning_02">
-	<title>Elapsed time of tx_begin() when the Application Program 
-	  uses a couple of tx_open()/tx_close() for every 
-	  couple of tx_begin()/tx_commit()</title>
-	<mediaobject>
-	  <imageobject>
-	    <imagedata fileref="../images/LIXA_Tuning_02.png"/>
-	  </imageobject>
-	</mediaobject>
-      </figure>
-      <figure xml:id="tuning_03">
-	<title>Elapsed time of tx_commit() when the Application Program 
-	  uses a couple of tx_open()/tx_close() for every 
-	  couple of tx_begin()/tx_commit()</title>
-	<mediaobject>
-	  <imageobject>
-	    <imagedata fileref="../images/LIXA_Tuning_03.png"/>
-	  </imageobject>
-	</mediaobject>
-      </figure>
-      <figure xml:id="tuning_04">
-	<title>Elapsed time of tx_close() when the Application Program 
-	  uses a couple of tx_open()/tx_close() for every 
-	  couple of tx_begin()/tx_commit()</title>
-	<mediaobject>
-	  <imageobject>
-	    <imagedata fileref="../images/LIXA_Tuning_04.png"/>
-	  </imageobject>
-	</mediaobject>
-      </figure>
-      <para>
-	In the last chart 
-	you may note the aggregated values for all the transactions
-	(100 transactions, the elapsed time is now expressed in seconds):
-	the purple line (best configuration for <function>tx_open()</function>)
-	is the best overall configuration. This time too, there are many
-	performance equivalent configurations:
+	LIXA configuration parameters allow fine tuning of the state engine; in
+	a real life environment, apply the following guidelines:
 	<itemizedlist mark='bullet'>
 	  <listitem><para>
-	      3 managers (thread), 
-	      <parameter>min_elapsed_sync_time=20</parameter> and
-	      <parameter>max_elapsed_sync_time=100</parameter>
-	      (purple line)
+	    use default configuration for
+	    <emphasis>traditional state engine</emphasis>, if you want to be
+	    conservative, or <emphasis>journal based state engine</emphasis>,
+	    if you want to be innovative
 	  </para></listitem>
 	  <listitem><para>
-	      3 managers (thread), 
-	      <parameter>min_elapsed_sync_time=10</parameter> and
-	      <parameter>max_elapsed_sync_time=50</parameter>	      
-	      (light green line)
+	    choose the proper deployment architecture: "client/server" or
+	    "colocated" depending on your application architecture
 	  </para></listitem>
 	  <listitem><para>
-	      2 managers (thread), 
-	      <parameter>min_elapsed_sync_time=10</parameter> and
-	      <parameter>max_elapsed_sync_time=50</parameter>	      
-	      (red line)
+	    in the event of scalability issues, you need to manager a huge
+	    number of
+	    Transactions per Second, split the workload in several 
+	    LIXA state servers that work indipendently
 	  </para></listitem>
 	  <listitem><para>
-	      1 managers (thread), 
-	      <parameter>min_elapsed_sync_time=10</parameter> and
-	      <parameter>max_elapsed_sync_time=50</parameter>	      
-	      (orange line)
-	  </para></listitem>
-	</itemizedlist>
-	The second configuration of the above list (light green) could be 
-	considered the
-	best from an overall performance point of view and from a safety
-	point of view: the minimum elapsed synchronization time is 
-	10 milliseconds.
-      </para>
-      <figure xml:id="tuning_05">
-	<title>Overall elapsed time when the Application Program 
-	  uses a couple of tx_open()/tx_close() for every 
-	  couple of tx_begin()/tx_commit()</title>
-	<mediaobject>
-	  <imageobject>
-	    <imagedata fileref="../images/LIXA_Tuning_05.png"/>
-	  </imageobject>
-	</mediaobject>
-      </figure>
-    </section>
-    <section>
-      <title>Results obtained without <parameter>--open-close</parameter> parameter</title>
-      <note>
-	<para>
-	  All the tests saturated the CPU of the host executing 
-	  <command>lixad</command> state server for the higher values of
-	  connected clients.
-	</para>
-      </note>
-      <para>
-	Avoiding a lot of <function>tx_open()/tx_close()</function> the
-	behavior of the system is quite different. It's interesting to note
-	the system has two distinct modes:
-	<itemizedlist mark='bullet'>
-	  <listitem><para>
-	      in the range [10,50] clients the scalability is quite linear 
-	      if you adopt a super safe configuration with 
-	      <parameter>min_elapsed_sync_time=0</parameter> and
-	      <parameter>max_elapsed_sync_time=0</parameter>
+	    in the event of latency issues, you need a very low latency,
+	    understand if an higher RPO fits your requirements; if no,
+	    split the workload in several LIXA state servers that work
+	    indipendently: the figures show that the latency is strictly
+	    correlated with the number of Transactions per Second managed by
+	    the state server
 	  </para></listitem>
 	  <listitem><para>
-	      in the range [10,50] clients the scalability is
-	      <quote>superlinear</quote>
-	      <footnote>
-		<para>
-		  <function>tx_begin(), tx_commit(), tx_close()</function>
-		  response times change very few when the number of clients
-		  rises
-		</para>
-	      </footnote>
-	      if you adopt an asynchronous
-	      conifiguration with 
-	      <parameter>min_elapsed_sync_time=10</parameter> and
-	      <parameter>max_elapsed_sync_time=50</parameter>
-	      or higher values
-	  </para></listitem>
-	  <listitem><para>
-	      in the range [60,100] clients the system tends to saturate
-	      and the <quote>superlinear</quote> characteristic is vanishing;
-	      neverthless, asynchronous configurations exploit lower
-	      response time than synchronous ones
+	    if you use the
+	    <emphasis>journal based state engine</emphasis>, monitor syslog
+	    messages: the engine generates useful messages if the storage
+	    configuration is not optimized
 	  </para></listitem>
 	</itemizedlist>
       </para>
-      <figure xml:id="tuning_06">
-	<title>Elapsed time of tx_open() when the Application Program 
-	  uses a couple of tx_open()/tx_close() for a 
-	  batch of tx_begin()/tx_commit()</title>
-	<mediaobject>
-	  <imageobject>
-	    <imagedata fileref="../images/LIXA_Tuning_06.png"/>
-	  </imageobject>
-	</mediaobject>
-      </figure>
-      <figure xml:id="tuning_07">
-	<title>Elapsed time of tx_begin() when the Application Program 
-	  uses a couple of tx_open()/tx_close() for a 
-	  batch of tx_begin()/tx_commit()</title>
-	<mediaobject>
-	  <imageobject>
-	    <imagedata fileref="../images/LIXA_Tuning_07.png"/>
-	  </imageobject>
-	</mediaobject>
-      </figure>
-      <figure xml:id="tuning_08">
-	<title>Elapsed time of tx_commit() when the Application Program 
-	  uses a couple of tx_open()/tx_close() for a 
-	  batch of tx_begin()/tx_commit()</title>
-	<mediaobject>
-	  <imageobject>
-	    <imagedata fileref="../images/LIXA_Tuning_08.png"/>
-	  </imageobject>
-	</mediaobject>
-      </figure>
-      <figure xml:id="tuning_09">
-	<title>Elapsed time of tx_close() when the Application Program 
-	  uses a couple of tx_open()/tx_close() for a 
-	  batch of tx_begin()/tx_commit()</title>
-	<mediaobject>
-	  <imageobject>
-	    <imagedata fileref="../images/LIXA_Tuning_09.png"/>
-	  </imageobject>
-	</mediaobject>
-      </figure>
-      <para>
-	The last chart shows the average elapsed time spent for 
-	<function>tx_*</function> functions by 100 transactions.
-	The best performace is obtained with the less safe configuration:
-	<parameter>min_elapsed_sync_time=20</parameter> and
-	<parameter>max_elapsed_sync_time=100</parameter>
-	(purple, cyan and yellow lines).
-	The intermediate performance is obtained with the intermediate
-	configuration:
-	<parameter>min_elapsed_sync_time=10</parameter> and
-	<parameter>max_elapsed_sync_time=50</parameter>
-	(dark yellow, red and orange lines).
-	The worst performance is obtained with the safest configuration:
-	<parameter>min_elapsed_sync_time=0</parameter> and
-	<parameter>max_elapsed_sync_time=0</parameter>
-	(green, light green and blue lines).
-      </para>
-      <figure xml:id="tuning_10">
-	<title>Overall elapsed time when the Application Program 
-	  uses a couple of tx_open()/tx_close() for a 
-	  batch of tx_begin()/tx_commit()</title>
-	<mediaobject>
-	  <imageobject>
-	    <imagedata fileref="../images/LIXA_Tuning_10.png"/>
-	  </imageobject>
-	</mediaobject>
-      </figure>
-      <section>
-	<title>Conclusions</title>
-	<para>
-	  The LIXA project gives you some parameters you can change to tune
-	  your installation and get the best performance.
-	  There is not a magic recipe you can adopt, but there are some
-	  rules of thumb:
-	  <itemizedlist mark='bullet'>
-	    <listitem><para>
-		if possible, avoid the usage of 
-		<function>tx_open()/tx_close()</function> for every 
-		transaction: if your business logic could batch more than
-		one transaction inside the same session, your overall
-		response time would be lower
-	    </para></listitem>
-	    <listitem><para>
-		delayed disk synchronization will help you in obtaining
-		better performance with the same hardware, but introducing
-		too high delays will not give you extra performance
-	    </para></listitem>
-	    <listitem><para>
-		delay disk synchronization introduce the risk to perform
-		manual recovery as explained in
-		<xref linkend="Delayed_synchronization_effects"/>.
-	    </para></listitem>
-	  </itemizedlist>
-	  Write your own test program, with real Resource Managers,
-	  and measure it: with a test environment you would be able to
-	  fine tune your own installation.
-	</para>
-      </section>
     </section>
   </section>
 </chapter>
