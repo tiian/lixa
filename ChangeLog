@@ -1,4 +1,9 @@
 LOG:
+	   1.9.1 Added a new environment variable LIXA_STACK_TRACE to activate
+		 stack tracing: use it in production environment that can not
+		 tolerate standard tracing due to the too big number of
+		 produced messages.
+
 2020-07-20 1.9.0 Added new state engine for the state server (lixad)
 		 Set a new environment variable to choose the state engine
 		 export LIXA_STATE_ENGINE=TRADITIONAL
@@ -17,6 +22,7 @@ LOG:
 		 New parameter "-C" / "--bench-cycles" in utility lixat; new
 		 "transaction per seconds" statistic; new format for all the
 		 statistics.
+
 2019-05-12 1.7.8 Added (client) connection timeout; default value = 5000 ms
 		 A new error message (LXC034E) is sent to the syslog in the
 		 event that the client doesn't get a reply before timeout

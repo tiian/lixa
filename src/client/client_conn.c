@@ -148,6 +148,7 @@ int client_connect(client_status_t *cs,
     } /* TRY-CATCH */
     LIXA_TRACE(("client_connect/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 

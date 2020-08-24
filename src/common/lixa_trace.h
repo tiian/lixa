@@ -26,17 +26,34 @@
 #ifdef HAVE_STDIO_H
 # include <stdio.h>
 #endif /* HAVE_STDIO_H */
-
-
 #include <errno.h>
-#include <lixa_defines.h>
+
+
+
+#include "lixa_defines.h"
 
 
 
 /**
- * Name of the environment variable must be used to set the trace mask
+ * Name of the environment variable that must be used to set the trace mask
  */
-#define LIXA_TRACE_MASK_ENV_VAR    "LIXA_TRACE_MASK"
+#define LIXA_TRACE_MASK_ENV_VAR         "LIXA_TRACE_MASK"
+/**
+ * Name of the environment variable that must be used to activate stack trace
+ */
+#define LIXA_TRACE_STACK_ENV_VAR        "LIXA_STACK_TRACE"
+/**
+ * Value string for environment variable LIXA_STACK_TRACE
+ */
+#define LIXA_TRACE_STACK_VALUE_ERRORS   "ERRORS"
+/**
+ * Value string for environment variable LIXA_STACK_TRACE
+ */
+#define LIXA_TRACE_STACK_VALUE_WARNINGS "WARNINGS"
+/**
+ * Value string for environment variable LIXA_STACK_TRACE
+ */
+#define LIXA_TRACE_STACK_VALUE_ALL      "ALL"
 
 
 
@@ -230,6 +247,51 @@ extern unsigned long lixa_trace_mask;
 #endif /* _TRACE */
 
 
+
+/**
+ * LIXA_TRACE_STACK macro is used to compile stack trace messages only if
+ * _TRACE macro is defined;
+ * stack trace message is printed only if the severity of ret_cod matches the
+ * value of the environment variable
+ */
+#ifdef _TRACE
+# define LIXA_TRACE_STACK() ( \
+        (STACK_TRACE_ALL == lixa_trace_stack_value) || \
+        (STACK_TRACE_ONLY_ERRORS == lixa_trace_stack_value && \
+         ret_cod < 0) || \
+        (STACK_TRACE_WARNINGS_AND_ERRORS == lixa_trace_stack_value && \
+         ret_cod != 0) ? \
+        lixa_trace_stack(__func__, excp, ret_cod, lixa_strerror(ret_cod), \
+                         errno) : 0)
+#else
+# define LIXA_TRACE_STACK()
+#endif
+
+
+
+/**
+ * Which functions will be stack traced (enum, type)
+ */
+enum lixa_trace_stack_value_e {
+    /** don't produce stack trace messages */
+    STACK_TRACE_NONE,
+    /** produce stack trace messages only in the event of errors */
+    STACK_TRACE_ONLY_ERRORS,
+    /** produce stack trace messages in the event of errors and warnings */
+    STACK_TRACE_WARNINGS_AND_ERRORS,
+    /** produce stack trace messages in any condition */
+    STACK_TRACE_ALL
+};
+
+
+
+/**
+ * Which functions will be stack traced (variable, value)
+ */
+extern enum lixa_trace_stack_value_e lixa_trace_stack_value;
+
+
+
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
@@ -274,6 +336,16 @@ extern "C" {
                               lixa_word_t size, FILE *out_stream);
 
 
+    
+    /**
+     * Send a trace message for stack tracing
+     */
+    void lixa_trace_stack(const char *function_name, int exception,
+                          int ret_cod, const char *ret_cod_text,
+                          int error);
+
+
+    
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

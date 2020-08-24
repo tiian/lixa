@@ -55,6 +55,7 @@ int lixa_trace_initialized = FALSE;
 
 unsigned long lixa_trace_mask = 0;
 
+enum lixa_trace_stack_value_e lixa_trace_stack_value;
 
 
 /**
@@ -73,12 +74,26 @@ void lixa_trace_init(void)
         return;
     g_mutex_lock(&lixa_trace_mutex);
     if (!lixa_trace_initialized) {
-        /* retrieve environemnt variable */
+        /* retrieve environemnt variables */
+        /* trace mask environment variable: */
         if (getenv(LIXA_TRACE_MASK_ENV_VAR) != NULL)
             lixa_trace_mask = strtoul(
                 getenv(LIXA_TRACE_MASK_ENV_VAR), NULL, 0);
         else
             lixa_trace_mask = 0x0;
+        /* stack trace environment variable: */
+        lixa_trace_stack_value = STACK_TRACE_NONE;
+        if (getenv(LIXA_TRACE_STACK_ENV_VAR) != NULL) {
+            if (0 == strcmp(getenv(LIXA_TRACE_STACK_ENV_VAR),
+                            LIXA_TRACE_STACK_VALUE_ALL))
+                lixa_trace_stack_value = STACK_TRACE_ALL;
+            else if (0 == strcmp(getenv(LIXA_TRACE_STACK_ENV_VAR),
+                                 LIXA_TRACE_STACK_VALUE_WARNINGS))
+                lixa_trace_stack_value = STACK_TRACE_WARNINGS_AND_ERRORS;
+            else if (0 == strcmp(getenv(LIXA_TRACE_STACK_ENV_VAR),
+                                 LIXA_TRACE_STACK_VALUE_ERRORS))
+                lixa_trace_stack_value = STACK_TRACE_ONLY_ERRORS;
+        } /* if (getenv(LIXA_STACK_TRACE_ENV_VAR) != NULL) */
         lixa_trace_initialized = TRUE;
     }
     /* remove the lock from mutex */
@@ -126,6 +141,7 @@ void lixa_trace(const char *fmt, ...)
 #endif
     va_end(args);
 }
+
 
 
 void lixa_trace_hex_data(const char *prefix, const byte_t *data,
@@ -207,3 +223,38 @@ void lixa_trace_text_data(const char *prefix, const byte_t *data,
 
 
 
+void lixa_trace_stack(const char *function_name, int exception,
+                      int ret_cod, const char *ret_cod_text,
+                      int error)
+{
+    struct tm broken_time;
+    struct timeval tv;
+
+    gettimeofday(&tv, NULL);
+    localtime_r(&tv.tv_sec, &broken_time);
+    g_mutex_lock(&lixa_trace_mutex);
+    /* default header */
+    fprintf(stderr,
+            "{ "
+            "\"date\": \"%4.4d-%2.2d-%2.2d\", "
+            "\"time\": \"%2.2d:%2.2d:%2.2d.%6.6d\", "
+            "\"process_id\": " PID_T_FORMAT ", "
+            "\"thread_id\": " PTHREAD_T_FORMAT ", "
+            "\"function_name\": \"%s\", "
+            "\"exception\": %d, "
+            "\"return_code\": %d, "
+            "\"return_code_text\": \"%s\", "
+            "\"errno\": %d, "
+            "\"errno_text\": \"%s\" "
+            "}\n",
+            broken_time.tm_year + 1900, broken_time.tm_mon + 1,
+            broken_time.tm_mday, broken_time.tm_hour,
+            broken_time.tm_min, broken_time.tm_sec, (int)tv.tv_usec,
+            getpid(), pthread_self(), function_name, exception, ret_cod,
+            ret_cod_text, error, strerror(error));
+# ifdef LIXA_DEBUG
+    fflush(stderr);
+#endif
+    /* remove the lock from mutex */
+    g_mutex_unlock(&lixa_trace_mutex);
+}

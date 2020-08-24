@@ -1064,6 +1064,7 @@ int lixa_tx_open(int *txrc, int mmode)
         } /* TRY-CATCH */
     LIXA_TRACE(("lixa_tx_open/TX_*=%d/excp=%d/"
                 "ret_cod=%d/errno=%d\n", *txrc, excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 

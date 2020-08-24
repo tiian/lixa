@@ -1,3 +1,5 @@
+Put LIXA_TRACE_STACK() at the end of every function!
+
 Under very high workload the state server stops with a controlled shutdown;
 tracing is not viable because with active tracing the workload is lower and the
 issue does not happen.
