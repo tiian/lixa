@@ -113,6 +113,7 @@ xta_java_xa_resource_t *xta_java_xa_resource_new(
     } /* TRY-CATCH */
     LIXA_TRACE(("xta_java_xa_resource_new/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return this;
 }
 
@@ -161,6 +162,7 @@ void xta_java_xa_resource_delete(xta_java_xa_resource_t *xa_resource)
     } /* TRY-CATCH */
     LIXA_TRACE(("xta_java_xa_resource_delete/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return;
 }
 
@@ -250,6 +252,7 @@ int xta_java_xa_resource_init(xta_java_xa_resource_t *xa_resource,
     } /* TRY-CATCH */
     LIXA_TRACE(("xta_java_xa_resource_init/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -280,6 +283,7 @@ void xta_java_xa_resource_clean(xta_java_xa_resource_t *xa_resource)
     } /* TRY-CATCH */
     LIXA_TRACE(("xta_java_xa_resource_clean/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return;
 }
 
@@ -340,6 +344,7 @@ int xta_java_xa_resource_rc(JNIEnv *env)
     } /* TRY-CATCH */
     LIXA_TRACE(("xta_java_xa_resource_rc/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -396,6 +401,7 @@ int xta_java_resource_set_xid(xta_java_xa_resource_t *res,
     } /* TRY-CATCH */
     LIXA_TRACE(("xta_java_resource_set_xid/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -473,6 +479,7 @@ int xta_java_xa_start(xta_xa_resource_t *context,
     } /* TRY-CATCH */
     LIXA_TRACE(("xta_java_xa_start/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -532,6 +539,7 @@ int xta_java_xa_end(xta_xa_resource_t *context, const XID *xid,
     } /* TRY-CATCH */
     LIXA_TRACE(("xta_java_xa_end/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -592,6 +600,7 @@ int xta_java_xa_rollback(xta_xa_resource_t *context, const XID *xid,
     } /* TRY-CATCH */
     LIXA_TRACE(("xta_java_xa_rollback/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -651,6 +660,7 @@ int xta_java_xa_prepare(xta_xa_resource_t *context, const XID *xid,
     } /* TRY-CATCH */
     LIXA_TRACE(("xta_java_xa_prepare/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -716,6 +726,7 @@ int xta_java_xa_commit(xta_xa_resource_t *context, const XID *xid,
     } /* TRY-CATCH */
     LIXA_TRACE(("xta_java_xa_commit/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -796,6 +807,7 @@ int xta_java_xa_forget(xta_xa_resource_t *context, const XID *xid,
     } /* TRY-CATCH */
     LIXA_TRACE(("xta_java_xa_forget/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 

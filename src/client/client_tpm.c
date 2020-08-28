@@ -16,17 +16,23 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with LIXA.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <config.h>
+#include "config.h"
 
-#include <lixa_errors.h>
-#include <lixa_xid.h>
-#include <lixa_xml_msg_deserialize.h>
-#include <lixa_xml_msg_serialize.h>
-#include <lixa_xml_msg_trace.h>
-#include <lixa_syslog.h>
-#include <src/common/lixa_xml_msg.h>
+
+
+#include "lixa_errors.h"
+#include "lixa_xid.h"
+#include "lixa_xml_msg_deserialize.h"
+#include "lixa_xml_msg_serialize.h"
+#include "lixa_xml_msg_trace.h"
+#include "lixa_syslog.h"
+#include "lixa_xml_msg.h"
+
+
 
 #include "client_tpm.h"
+
+
 
 /* set module trace flag */
 #ifdef LIXA_TRACE_MODULE
@@ -218,6 +224,7 @@ int client_tpm_trans(client_status_t *cs, GTree *xidt, int maint)
     } /* TRY-CATCH */
     LIXA_TRACE(("client_tpm_trans/excp=%d/ret_cod=%d/errno=%d\n",
                 excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -225,8 +232,7 @@ int client_tpm_trans(client_status_t *cs, GTree *xidt, int maint)
 
 int client_tpm_report(const client_status_t *cs, GTree *xidt)
 {
-    enum Exception
-    {
+    enum Exception {
         NONE
     } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
@@ -253,21 +259,22 @@ int client_tpm_report(const client_status_t *cs, GTree *xidt)
         printf("\n");
 
         THROW(NONE);
-    }
-    CATCH
-        {
-            switch (excp) {
-                case NONE:
-                    ret_cod = LIXA_RC_OK;
-                    break;
-                default:
-                    ret_cod = LIXA_RC_INTERNAL_ERROR;
-            } /* switch (excp) */
-        } /* TRY-CATCH */
+    } CATCH {
+        switch (excp) {
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
     LIXA_TRACE(("client_tpm_report/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
+
+
 
 int tpm_gtrid_compare(gconstpointer a, gconstpointer b, gpointer user_data)
 {
@@ -278,10 +285,14 @@ int tpm_gtrid_compare(gconstpointer a, gconstpointer b, gpointer user_data)
     return strcmp(gtrida, gtridb);
 }
 
+
+
 void tpm_gtrid_value_destroy(gpointer data)
 {
     g_array_free((GArray *) data, TRUE);
 }
+
+
 
 gboolean client_tpm_report_foreach(gpointer key, gpointer value, gpointer data)
 {
@@ -301,6 +312,8 @@ gboolean client_tpm_report_foreach(gpointer key, gpointer value, gpointer data)
     return FALSE;
 }
 
+
+
 gboolean client_tpm_value_foreach(gpointer key, gpointer value, gpointer data)
 {
     GArray *sxid = (GArray *) value;
@@ -316,6 +329,8 @@ gboolean client_tpm_value_foreach(gpointer key, gpointer value, gpointer data)
 
     return FALSE;
 }
+
+
 
 gboolean client_tpm_unique_value_foreach(gpointer key, gpointer value, gpointer data)
 {

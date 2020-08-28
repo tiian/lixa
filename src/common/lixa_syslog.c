@@ -137,5 +137,6 @@ void lixa_syslog(int priority, const char *format, ...)
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_syslog/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return;
 }

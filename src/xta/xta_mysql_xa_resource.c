@@ -104,6 +104,7 @@ xta_mysql_xa_resource_t *xta_mysql_xa_resource_new(MYSQL *connection,
     } /* TRY-CATCH */
     LIXA_TRACE(("xta_mysql_xa_resource_new/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return this;
 }
 
@@ -133,6 +134,7 @@ void xta_mysql_xa_resource_delete(xta_mysql_xa_resource_t *xa_resource)
     } /* TRY-CATCH */
     LIXA_TRACE(("xta_mysql_xa_resource_delete/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return;
 }
 
@@ -183,6 +185,7 @@ int xta_mysql_xa_resource_init(xta_mysql_xa_resource_t *xa_resource,
     } /* TRY-CATCH */
     LIXA_TRACE(("xta_mysql_xa_resource_init/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -213,6 +216,7 @@ void xta_mysql_xa_resource_clean(xta_mysql_xa_resource_t *xa_resource)
     } /* TRY-CATCH */
     LIXA_TRACE(("xta_mysql_xa_resource_clean/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return;
 }
 
@@ -257,6 +261,7 @@ int xta_mysql_xa_open(xta_xa_resource_t *context, char *xa_info,
     } /* TRY-CATCH */
     LIXA_TRACE(("xta_mysql_xa_open/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -295,6 +300,7 @@ int xta_mysql_xa_close(xta_xa_resource_t *context, char *xa_info,
     } /* TRY-CATCH */
     LIXA_TRACE(("xta_mysql_xa_close/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -330,6 +336,7 @@ int xta_mysql_xa_start(xta_xa_resource_t *context,
     } /* TRY-CATCH */
     LIXA_TRACE(("xta_mysql_xa_start/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -365,6 +372,7 @@ int xta_mysql_xa_end(xta_xa_resource_t *context, const XID *xid,
     } /* TRY-CATCH */
     LIXA_TRACE(("xta_mysql_xa_end/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
     
@@ -401,6 +409,7 @@ int xta_mysql_xa_rollback(xta_xa_resource_t *context, const XID *xid,
     } /* TRY-CATCH */
     LIXA_TRACE(("xta_mysql_xa_rollback/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
     
@@ -436,6 +445,7 @@ int xta_mysql_xa_prepare(xta_xa_resource_t *context, const XID *xid,
     } /* TRY-CATCH */
     LIXA_TRACE(("xta_mysql_xa_prepare/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
     
@@ -471,6 +481,7 @@ int xta_mysql_xa_commit(xta_xa_resource_t *context, const XID *xid,
     } /* TRY-CATCH */
     LIXA_TRACE(("xta_mysql_xa_commit/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
     
@@ -506,6 +517,7 @@ int xta_mysql_xa_recover(xta_xa_resource_t *context,
     } /* TRY-CATCH */
     LIXA_TRACE(("xta_mysql_xa_recover/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
     
@@ -541,5 +553,6 @@ int xta_mysql_xa_forget(xta_xa_resource_t *context, const XID *xid,
     } /* TRY-CATCH */
     LIXA_TRACE(("xta_mysql_xa_forget/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }

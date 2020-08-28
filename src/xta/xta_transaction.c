@@ -176,6 +176,7 @@ xta_transaction_t *xta_transaction_new(void)
     } /* TRY-CATCH */
     LIXA_TRACE(("xta_transaction_new/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return this;
 }
 
@@ -236,6 +237,7 @@ void xta_transaction_delete(xta_transaction_t *transact)
     } /* TRY-CATCH */
     LIXA_TRACE(("xta_transaction_delete/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return;
 }
 
@@ -299,6 +301,7 @@ int xta_transaction_safe_delete(const xta_transaction_t *transact)
     } /* TRY-CATCH */
     LIXA_TRACE(("xta_transaction_safe_delete/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return result;
 }
 
@@ -332,6 +335,7 @@ xta_config_t *xta_transaction_get_config(xta_transaction_t *transact)
     } /* TRY-CATCH */
     LIXA_TRACE(("xta_transaction_get_config/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ccc;
 }
 
@@ -443,6 +447,7 @@ int xta_transaction_enlist_resource(xta_transaction_t *transact,
     } /* TRY-CATCH */
     LIXA_TRACE(("xta_transaction_enlist_resource/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -545,6 +550,7 @@ int xta_transaction_redigest(xta_transaction_t *transact,
     } /* TRY-CATCH */
     LIXA_TRACE(("xta_transaction_redigest/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -618,6 +624,7 @@ int xta_transaction_open_internal(xta_transaction_t *transact)
     } /* TRY-CATCH */
     LIXA_TRACE(("xta_transaction_open_internal/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -701,6 +708,7 @@ int xta_transaction_close_internal(xta_transaction_t *transact)
     } /* TRY-CATCH */
     LIXA_TRACE(("xta_transaction_close_internal/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -744,6 +752,7 @@ int xta_transaction_recover(xta_transaction_t *transact)
     } /* TRY-CATCH */
     LIXA_TRACE(("xta_transaction_recover/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -830,6 +839,7 @@ int xta_transaction_start(xta_transaction_t *transact, int multiple_branches)
     } /* TRY-CATCH */
     LIXA_TRACE(("xta_transaction_start/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -1084,6 +1094,7 @@ int xta_transaction_commit(xta_transaction_t *transact, int non_blocking)
     }
     LIXA_TRACE(("xta_transaction_commit/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -1201,6 +1212,7 @@ int xta_transaction_rollback(xta_transaction_t *transact)
     } /* TRY-CATCH */
     LIXA_TRACE(("xta_transaction_rollback/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -1282,6 +1294,7 @@ int xta_transaction_suspend(xta_transaction_t *transact, long flags)
     } /* TRY-CATCH */
     LIXA_TRACE(("xta_transaction_suspend/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -1382,6 +1395,7 @@ int xta_transaction_resume(xta_transaction_t *transact,
     } /* TRY-CATCH */
     LIXA_TRACE(("xta_transaction_resume/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -1515,6 +1529,7 @@ int xta_transaction_branch(xta_transaction_t *transact, const char *xid_string)
     }
     LIXA_TRACE(("xta_transaction_branch/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -1548,6 +1563,7 @@ const xta_xid_t *xta_transaction_get_xid(const xta_transaction_t *transact)
     } /* TRY-CATCH */
     LIXA_TRACE(("xta_transaction_get_xid/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return xid;
 }
 
@@ -1582,6 +1598,7 @@ int xta_transaction_get_multiple_branches(
     } /* TRY-CATCH */
     LIXA_TRACE(("xta_transaction_get_multiple_branches/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return result;
 }
 

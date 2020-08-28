@@ -26,10 +26,10 @@
 
 
 
-#include <lixa_trace.h>
-#include <lixa_common_status.h>
-#include <lixa_xid.h>
-#include <xa.h>
+#include "lixa_trace.h"
+#include "lixa_common_status.h"
+#include "lixa_xid.h"
+#include "xa.h"
 
 
 

@@ -268,6 +268,7 @@ int client_recovery(client_config_coll_t *ccc, client_status_t *cs,
     } /* TRY-CATCH */
     LIXA_TRACE(("client_recovery/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -347,6 +348,7 @@ int client_recovery_analyze(client_config_coll_t *ccc,
     } /* TRY-CATCH */
     LIXA_TRACE(("client_recovery_analyze/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -443,6 +445,7 @@ int client_recovery_commit(client_config_coll_t *ccc,
     } /* TRY-CATCH */
     LIXA_TRACE(("client_recovery_commit/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -542,6 +545,7 @@ int client_recovery_rollback(client_config_coll_t *ccc,
     } /* TRY-CATCH */
     LIXA_TRACE(("client_recovery_rollback/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -681,6 +685,7 @@ int client_recovery_scan(const client_status_t *cs, GTree *crt,
     } /* TRY-CATCH */
     LIXA_TRACE(("client_recovery_scan/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -725,6 +730,7 @@ int client_recovery_report(const client_status_t *cs, GTree *crt)
     } /* TRY-CATCH */
     LIXA_TRACE(("client_recovery_report/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
     
@@ -830,6 +836,7 @@ int client_recovery_cold_commit(const client_status_t *cs,
     } /* TRY-CATCH */
     LIXA_TRACE(("client_recovery_cold_commit/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -896,6 +903,7 @@ int client_recovery_cold_rollback(const client_status_t *cs,
     } /* TRY-CATCH */
     LIXA_TRACE(("client_recovery_cold_rollback/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 

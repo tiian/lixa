@@ -99,7 +99,9 @@ void client_status_display(const client_status_t *cs) {
 
 int client_status_coll_add(client_status_coll_t *csc) {
     enum Exception {
-        YET_ADDED, MALLOC_ERROR, NONE
+        YET_ADDED,
+        MALLOC_ERROR,
+        NONE
     } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
 
@@ -132,37 +134,38 @@ int client_status_coll_add(client_status_coll_t *csc) {
 
         g_hash_table_insert(csc->status_data, (gpointer) key, (gpointer) cs);
         THROW(NONE);
-    }
-    CATCH
-        {
-            switch (excp) {
-                case YET_ADDED:
-                    ret_cod = LIXA_RC_OK;
-                    break;
-                case MALLOC_ERROR:
-                    ret_cod = LIXA_RC_MALLOC_ERROR;
-                    break;
-                case NONE:
-                    ret_cod = LIXA_RC_OK;
-                    break;
-                default:
-                    ret_cod = LIXA_RC_INTERNAL_ERROR;
-            } /* switch (excp) */
-
-            /* release exclusive lock */
-            LIXA_TRACE(("client_status_coll_add: releasing mutex\n"));
-            g_mutex_unlock(&(csc->mutex));
-
-        } /* TRY-CATCH */
+    } CATCH {
+        switch (excp) {
+            case YET_ADDED:
+                ret_cod = LIXA_RC_OK;
+                break;
+            case MALLOC_ERROR:
+                ret_cod = LIXA_RC_MALLOC_ERROR;
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+        
+        /* release exclusive lock */
+        LIXA_TRACE(("client_status_coll_add: releasing mutex\n"));
+        g_mutex_unlock(&(csc->mutex));
+        
+    } /* TRY-CATCH */
     LIXA_TRACE(("client_status_coll_add/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
 
 int client_status_coll_del(client_status_coll_t *csc) {
     enum Exception {
-        OBJ_NOT_FOUND, OBJ_CORRUPTED, NONE
+        OBJ_NOT_FOUND,
+        OBJ_CORRUPTED,
+        NONE
     } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
 
@@ -207,28 +210,27 @@ int client_status_coll_del(client_status_coll_t *csc) {
         }
 
         THROW(NONE);
-    }
-    CATCH
-        {
-            switch (excp) {
-                case OBJ_NOT_FOUND:
-                    break;
-                case OBJ_CORRUPTED:
-                    ret_cod = LIXA_RC_OBJ_CORRUPTED;
-                    break;
-                case NONE:
-                    ret_cod = LIXA_RC_OK;
-                    break;
-                default:
-                    ret_cod = LIXA_RC_INTERNAL_ERROR;
-            } /* switch (excp) */
-
-            /* release exclusive lock */
-            LIXA_TRACE(("client_status_coll_del: releasing mutex\n"));
-            g_mutex_unlock(&(csc->mutex));
-        } /* TRY-CATCH */
+    } CATCH {
+        switch (excp) {
+            case OBJ_NOT_FOUND:
+                break;
+            case OBJ_CORRUPTED:
+                ret_cod = LIXA_RC_OBJ_CORRUPTED;
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+        
+        /* release exclusive lock */
+        LIXA_TRACE(("client_status_coll_del: releasing mutex\n"));
+        g_mutex_unlock(&(csc->mutex));
+    } /* TRY-CATCH */
     LIXA_TRACE(("client_status_coll_del/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -272,7 +274,9 @@ gboolean client_status_coll_gequal(gconstpointer a, gconstpointer b) {
 int client_status_coll_get_cs(client_status_coll_t *csc,
                               client_status_t **cs) {
     enum Exception {
-        HASH_TABLE_NEW, OBJ_NOT_FOUND, NONE
+        HASH_TABLE_NEW,
+        OBJ_NOT_FOUND,
+        NONE
     } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
 
@@ -288,7 +292,8 @@ int client_status_coll_get_cs(client_status_coll_t *csc,
             LIXA_TRACE(("client_status_coll_get_cs: initializing hash "
                         "table for client status...\n"));
             if (NULL == (csc->status_data = g_hash_table_new(
-                             g_direct_hash, client_status_coll_gequal))) THROW(HASH_TABLE_NEW);
+                             g_direct_hash, client_status_coll_gequal)))
+                THROW(HASH_TABLE_NEW);
         }
 
         /* retrieve client status */
@@ -301,27 +306,26 @@ int client_status_coll_get_cs(client_status_coll_t *csc,
         }
 
         THROW(NONE);
-    }
-    CATCH
-        {
-            switch (excp) {
-                case HASH_TABLE_NEW:
-                    ret_cod = LIXA_RC_G_RETURNED_NULL;
-                    break;
-                case OBJ_NOT_FOUND:
-                    ret_cod = LIXA_RC_OBJ_NOT_FOUND;
-                    break;
-                case NONE:
-                    ret_cod = LIXA_RC_OK;
-                    break;
-                default:
-                    ret_cod = LIXA_RC_INTERNAL_ERROR;
-            } /* switch (excp) */
-            LIXA_TRACE(("client_status_coll_get_cs: releasing mutex\n"));
-            g_mutex_unlock(&(csc->mutex));
-        } /* TRY-CATCH */
+    } CATCH {
+        switch (excp) {
+            case HASH_TABLE_NEW:
+                ret_cod = LIXA_RC_G_RETURNED_NULL;
+                break;
+            case OBJ_NOT_FOUND:
+                ret_cod = LIXA_RC_OBJ_NOT_FOUND;
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+        LIXA_TRACE(("client_status_coll_get_cs: releasing mutex\n"));
+        g_mutex_unlock(&(csc->mutex));
+    } /* TRY-CATCH */
     LIXA_TRACE(("client_status_coll_get_cs/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 

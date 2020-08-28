@@ -517,6 +517,7 @@ int lixa_msg_serialize(const struct lixa_msg_s *msg,
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_msg_serialize/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -586,6 +587,7 @@ int lixa_msg_serialize_close_8(const struct lixa_msg_s *msg, char *buffer,
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_msg_serialize_close_8/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -676,6 +678,7 @@ int lixa_msg_serialize_commit_8(const struct lixa_msg_s *msg,
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_msg_serialize_commit_8/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -768,6 +771,7 @@ int lixa_msg_serialize_end_8(const struct lixa_msg_s *msg,
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_msg_serialize_end_8/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -810,6 +814,7 @@ int lixa_msg_serialize_end_16(const struct lixa_msg_s *msg,
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_msg_serialize_end_16/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -898,6 +903,7 @@ int lixa_msg_serialize_forget_8(const struct lixa_msg_s *msg,
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_msg_serialize_forget_8/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -1023,6 +1029,7 @@ int lixa_msg_serialize_open_8(const struct lixa_msg_s *msg, char *buffer,
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_msg_serialize_open_8/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -1066,6 +1073,7 @@ int lixa_msg_serialize_open_16(const struct lixa_msg_s *msg,
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_msg_serialize_open_16/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -1172,6 +1180,7 @@ int lixa_msg_serialize_open_24(const struct lixa_msg_s *msg, char *buffer,
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_msg_serialize_open_24/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -1264,6 +1273,7 @@ int lixa_msg_serialize_prepare_8(const struct lixa_msg_s *msg,
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_msg_serialize_prepare_8/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -1307,6 +1317,7 @@ int lixa_msg_serialize_prepare_16(const struct lixa_msg_s *msg,
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_msg_serialize_prepare_16/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -1343,6 +1354,7 @@ int lixa_msg_serialize_prepare_24(const struct lixa_msg_s *msg,
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_msg_serialize_prepare_24/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -1386,6 +1398,7 @@ int lixa_msg_serialize_prepare_32(const struct lixa_msg_s *msg,
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_msg_serialize_prepare_32/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -1431,6 +1444,7 @@ int lixa_msg_serialize_qrcvr_8(const struct lixa_msg_s *msg,
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_msg_serialize_qrcvr_8/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -1599,6 +1613,7 @@ int lixa_msg_serialize_qrcvr_16(const struct lixa_msg_s *msg,
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_msg_serialize_qrcvr_16/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -1684,6 +1699,7 @@ int lixa_msg_serialize_qrcvr_24(const struct lixa_msg_s *msg,
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_msg_serialize_qrcvr_24/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -1736,6 +1752,7 @@ int lixa_msg_serialize_reg_8(const struct lixa_msg_s *msg,
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_msg_serialize_reg_8/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -1827,6 +1844,7 @@ int lixa_msg_serialize_rollback_8(const struct lixa_msg_s *msg,
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_msg_serialize_rollback_8/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -1918,6 +1936,7 @@ int lixa_msg_serialize_start_8(const struct lixa_msg_s *msg,
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_msg_serialize_start_8/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -1961,6 +1980,7 @@ int lixa_msg_serialize_start_16(const struct lixa_msg_s *msg,
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_msg_serialize_start_16/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -2052,6 +2072,7 @@ int lixa_msg_serialize_start_24(const struct lixa_msg_s *msg,
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_msg_serialize_start_24/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -2102,6 +2123,7 @@ int lixa_msg_serialize_unreg_8(const struct lixa_msg_s *msg,
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_msg_serialize_unreg_8/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -2148,6 +2170,7 @@ int lixa_msg_serialize_trans_8(const struct lixa_msg_s *msg, char *buffer,
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_msg_serialize_trans_8/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -2279,5 +2302,6 @@ int lixa_msg_serialize_trans_16(const struct lixa_msg_s *msg, char *buffer,
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_msg_serialize_trans_16/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }

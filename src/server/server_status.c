@@ -176,6 +176,7 @@ int payload_header_init(struct status_record_data_s *srd, int fd)
     } /* TRY-CATCH */
     LIXA_TRACE(("payload_header_init/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -248,6 +249,7 @@ int payload_header_store_verb_step(struct thread_status_s *ts,
     } /* TRY-CATCH */
     LIXA_TRACE(("payload_header_store_verb_step/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -316,6 +318,7 @@ int payload_chain_release(struct thread_status_s *ts, uint32_t block_id)
     } /* TRY-CATCH */
     LIXA_TRACE(("payload_chain_release/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -403,6 +406,7 @@ int payload_chain_allocate(struct thread_status_s *ts, uint32_t block_id,
     } /* TRY-CATCH */
     LIXA_TRACE(("payload_chain_allocate/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -516,6 +520,7 @@ int status_record_load(status_record_t **sr,
     } /* TRY-CATCH */
     LIXA_TRACE(("status_record_load/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -599,6 +604,7 @@ int status_record_create_file(const char *status_file_name,
     } /* TRY-CATCH */
     LIXA_TRACE(("status_record_create_file/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -806,6 +812,7 @@ int status_record_check_integrity(status_record_t *sr)
     } /* TRY-CATCH */
     LIXA_TRACE(("status_record_check_integrity/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -926,6 +933,7 @@ int status_record_sync(status_record_t *sr)
     } /* TRY-CATCH */
     LIXA_TRACE(("status_record_sync/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -1037,6 +1045,7 @@ int status_record_copy(status_record_t *dest, const status_record_t *src,
     } /* TRY-CATCH */
     LIXA_TRACE(("status_record_copy/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 

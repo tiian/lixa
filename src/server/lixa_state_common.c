@@ -69,6 +69,7 @@ int lixa_state_slot_sync(lixa_state_slot_t *slot)
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_state_slot_sync/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
     

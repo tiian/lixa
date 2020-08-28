@@ -22,6 +22,9 @@
 export LIXA_TRACE_MASK=0xffff7fff
 #export LIXA_TRACE_MASK=0xffffffff
 
+# stack trace only warnings and errors
+export LIXA_STACK_TRACE=WARNINGS
+
 
 # This file contains utility functions for test purposes
 reset_server() {

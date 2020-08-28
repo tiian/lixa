@@ -474,7 +474,7 @@
 	<para>
 	  To switch from <emphasis>traditional</emphasis> to
 	  <emphasis>journal</emphasis> state engine use the
-	  <varname>LIXA_STATE_SERVER</varname> environment variable before
+	  <varname>LIXA_STATE_ENGINE</varname> environment variable before
 	  starting <command>lixad</command> state server. 
 	  To use the journal state engine:
 	  <screen>
@@ -926,6 +926,50 @@ export LIXA_CONFIG_FILE=/tmp/my_lixac
 	<filename>etc/lixac_conf.xml</filename>
 	will be applied.
 	See <xref linkend="Client_configuration_explanation"/> too.
+      </para>
+    </section>
+    <section>
+      <title>LIXA_STACK_TRACE</title>
+      <para>
+	This environment variable activate stack tracing for most of the
+	functions in LIXA codebase; it is intended as a problem determination
+	capability; the following values are allowed:
+	<itemizedlist mark='bullet'>
+	  <listitem><para>
+	    <varname>ALL</varname> to stack trace every function call;
+	    this value should not be used in a production environment to avoid
+	    a stack trace message congestion
+	  </para></listitem>
+	  <listitem><para>
+	    <varname>ERRORS</varname> to stack trace only the function
+	    calls that end with an error condition; this is the value suggested
+	    to detect anomalous conditions in production environments
+	  </para></listitem>
+	  <listitem><para>
+	    <varname>WARNINGS</varname> to stack trace only the function
+	    calls that end with either a warning or an error condition; this
+	    setting can produce trace messages that are not related to 
+	    anomalous conditions
+	  </para></listitem>
+	</itemizedlist>
+      </para>
+    </section>
+    <section>
+      <title>LIXA_STATE_ENGINE</title>
+      <para>
+	This environment variable allows to choose the type of state
+	engine that must be used by the LIXA state server; two values are
+	allowed:
+	<itemizedlist mark='bullet'>
+	  <listitem><para>
+	    <varname>TRADITIONAL</varname> for the traditional memory 
+	    mapped based state engine
+	  </para></listitem>
+	  <listitem><para>
+	    <varname>JOURNAL</varname> for the low latency, journal based
+	    state engine
+	  </para></listitem>
+	</itemizedlist>
       </para>
     </section>
     <section>

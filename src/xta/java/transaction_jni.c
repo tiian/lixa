@@ -150,6 +150,7 @@ JNIEXPORT void JNICALL Java_org_tiian_lixa_xta_Transaction_newJNI(
         g_ptr_array_free(array, TRUE);
     LIXA_TRACE(("Java_org_tiian_lixa_xta_Transaction_newJNI/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return;
 }
 
@@ -223,6 +224,7 @@ Java_org_tiian_lixa_xta_Transaction_getNativeObject(
         if (LIXA_RC_OK != ret_cod)
             Java_org_tiian_lixa_xta_XtaException_throw(env, ret_cod);
     } /* TRY-CATCH */
+    LIXA_TRACE_STACK();
     return tx;
 }
 
@@ -296,6 +298,7 @@ GPtrArray* Java_org_tiian_lixa_xta_Transaction_getNativeResources(
     } /* TRY-CATCH */
     LIXA_TRACE(("Java_org_tiian_lixa_xta_Transaction_getNativeResources/"
                 "excp=%d/ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return array;
 }
 
@@ -481,6 +484,7 @@ JNIEXPORT void JNICALL Java_org_tiian_lixa_xta_Transaction_enlistResource(
         (*env)->ReleaseStringUTFChars(env, identifier, resource_identifier);
     LIXA_TRACE(("Java_org_tiian_lixa_xta_Transaction_enlistResource"
                 "/excp=%d/ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return;
 }
 
@@ -567,6 +571,7 @@ Java_org_tiian_lixa_xta_Transaction_getXid
         
     LIXA_TRACE(("Java_org_tiian_lixa_xta_Transaction_getXid/"
                 "excp=%d/ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     /* return the Java object */
     return jxid;
 }
@@ -651,6 +656,7 @@ JNIEXPORT jobject JNICALL Java_org_tiian_lixa_xta_Transaction_getConfig
     } /* TRY-CATCH */
     LIXA_TRACE(("Java_org_tiian_lixa_xta_Transaction_getConfig/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return jconfig;
 }
 
@@ -701,6 +707,7 @@ JNIEXPORT void JNICALL Java_org_tiian_lixa_xta_Transaction_start
     } /* TRY-CATCH */
     LIXA_TRACE(("Java_org_tiian_lixa_xta_Transaction_start/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return;
 }
 
@@ -753,6 +760,7 @@ JNIEXPORT jint JNICALL Java_org_tiian_lixa_xta_Transaction_commit
     } /* TRY-CATCH */
     LIXA_TRACE(("Java_org_tiian_lixa_xta_Transaction_commit/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -802,6 +810,7 @@ JNIEXPORT void JNICALL Java_org_tiian_lixa_xta_Transaction_rollback
     } /* TRY-CATCH */
     LIXA_TRACE(("Java_org_tiian_lixa_xta_Transaction_rollback/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return;
 }
 
@@ -866,6 +875,7 @@ JNIEXPORT void JNICALL Java_org_tiian_lixa_xta_Transaction_resume
     } /* TRY-CATCH */
     LIXA_TRACE(("Java_org_tiian_lixa_xta_Transaction_resume/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return;
 }
 
@@ -915,6 +925,7 @@ JNIEXPORT void JNICALL Java_org_tiian_lixa_xta_Transaction_suspend
     } /* TRY-CATCH */
     LIXA_TRACE(("Java_org_tiian_lixa_xta_Transaction_suspend/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return;
 }
 
@@ -978,6 +989,7 @@ JNIEXPORT void JNICALL Java_org_tiian_lixa_xta_Transaction_branch
     } /* TRY-CATCH */
     LIXA_TRACE(("Java_org_tiian_lixa_xta_Transaction_branch/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return;
 }
 
@@ -1028,5 +1040,6 @@ JNIEXPORT void JNICALL Java_org_tiian_lixa_xta_Transaction_recover
     } /* TRY-CATCH */
     LIXA_TRACE(("Java_org_tiian_lixa_xta_Transaction_recover/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return;
 }

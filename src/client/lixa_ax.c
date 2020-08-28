@@ -221,6 +221,7 @@ int ax_reg(int rmid, XID *xid, long flags)
     }
     LIXA_TRACE(("ax_reg/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -363,5 +364,6 @@ int ax_unreg(int rmid, long flags)
     }
     LIXA_TRACE(("ax_unreg/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }

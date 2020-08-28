@@ -82,6 +82,7 @@ int xta_xa_resource_init(xta_xa_resource_t *xa_resource,
     } /* TRY-CATCH */
     LIXA_TRACE(("xta_xa_resource_init/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -119,6 +120,7 @@ const xta_xa_resource_config_t *xta_xa_resource_get_config(
     } /* TRY-CATCH */
     LIXA_TRACE(("xta_xa_resource_get_config/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return config;
 }
 
@@ -176,6 +178,7 @@ int xta_xa_resource_enlisted(xta_xa_resource_t *xa_resource,
     } /* TRY-CATCH */
     LIXA_TRACE(("xta_xa_resource_enlisted/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -208,6 +211,7 @@ void xta_xa_resource_clean(xta_xa_resource_t *xa_resource)
     } /* TRY-CATCH */
     LIXA_TRACE(("xta_xa_resource_clean/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return;
 }
 
@@ -235,6 +239,7 @@ int xta_xa_resource_start(xta_xa_resource_t *xa_resource,
     } /* TRY-CATCH */
     LIXA_TRACE(("xta_xa_resource_start/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -262,6 +267,7 @@ int xta_xa_resource_end(xta_xa_resource_t *xa_resource,
     } /* TRY-CATCH */
     LIXA_TRACE(("xta_xa_resource_end/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -288,6 +294,7 @@ int xta_xa_resource_prepare(xta_xa_resource_t *xa_resource,
     } /* TRY-CATCH */
     LIXA_TRACE(("xta_xa_resource_prepare/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -315,6 +322,7 @@ int xta_xa_resource_commit(xta_xa_resource_t *xa_resource,
     } /* TRY-CATCH */
     LIXA_TRACE(("xta_xa_resource_commit/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 

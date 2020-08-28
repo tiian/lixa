@@ -131,8 +131,8 @@ int server_ax_reg(struct thread_status_s *ts,
         } /* switch (excp) */
     } /* TRY-CATCH */
     LIXA_TRACE(("server_ax_reg/excp=%d/"
-                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
-    
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));    
+    LIXA_TRACE_STACK();
     LIXA_CRASH(LIXA_CRASH_POINT_SERVER_AX_REG,
                thread_status_get_crash_count(ts));
     return ret_cod;
@@ -217,7 +217,7 @@ int server_ax_unreg(struct thread_status_s *ts,
     } /* TRY-CATCH */
     LIXA_TRACE(("server_ax_unreg/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
-
+    LIXA_TRACE_STACK();
     LIXA_CRASH(LIXA_CRASH_POINT_SERVER_AX_UNREG,
                thread_status_get_crash_count(ts));
     return ret_cod;
@@ -256,6 +256,7 @@ int server_xa_close(struct thread_status_s *ts,
     } /* TRY-CATCH */
     LIXA_TRACE(("server_xa_close/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -296,6 +297,7 @@ int server_xa_commit(struct thread_status_s *ts,
     } /* TRY-CATCH */
     LIXA_TRACE(("server_xa_commit/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -411,7 +413,7 @@ int server_xa_commit_8(struct thread_status_s *ts,
     }
     LIXA_TRACE(("server_xa_commit_8/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
-
+    LIXA_TRACE_STACK();
     LIXA_CRASH(LIXA_CRASH_POINT_SERVER_XA_COMMIT_8,
                thread_status_get_crash_count(ts));
     return ret_cod;
@@ -460,6 +462,7 @@ int server_xa_end(struct thread_status_s *ts,
     } /* TRY-CATCH */
     LIXA_TRACE(("server_xa_end/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -602,7 +605,7 @@ int server_xa_end_8(struct thread_status_s *ts,
     } /* TRY-CATCH */
     LIXA_TRACE(("server_xa_end_8/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
-
+    LIXA_TRACE_STACK();
     LIXA_CRASH(LIXA_CRASH_POINT_SERVER_XA_END_8,
                thread_status_get_crash_count(ts));
     return ret_cod;
@@ -645,6 +648,7 @@ int server_xa_forget(struct thread_status_s *ts,
     } /* TRY-CATCH */
     LIXA_TRACE(("server_xa_forget/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -732,6 +736,7 @@ int server_xa_forget_8(struct thread_status_s *ts,
     } /* TRY-CATCH */
     LIXA_TRACE(("server_xa_forget_8/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     LIXA_CRASH(LIXA_CRASH_POINT_SERVER_XA_FORGET_8,
                thread_status_get_crash_count(ts));
     return ret_cod;
@@ -786,6 +791,7 @@ int server_xa_open(struct thread_status_s *ts,
     } /* TRY-CATCH */
     LIXA_TRACE(("server_xa_open/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -910,8 +916,8 @@ int server_xa_open_8(struct thread_status_s *ts,
         } /* switch (excp) */
     } /* TRY-CATCH */
     LIXA_TRACE(("server_xa_open_8/excp=%d/"
-                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
-    
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));    
+    LIXA_TRACE_STACK();
     LIXA_CRASH(LIXA_CRASH_POINT_SERVER_XA_OPEN_8,
                thread_status_get_crash_count(ts));
     return ret_cod;
@@ -1005,7 +1011,7 @@ int server_xa_open_24(struct thread_status_s *ts,
     } /* TRY-CATCH */
     LIXA_TRACE(("server_xa_open_24/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
-
+    LIXA_TRACE_STACK();
     LIXA_CRASH(LIXA_CRASH_POINT_SERVER_XA_OPEN_24,
                thread_status_get_crash_count(ts));
     return ret_cod;
@@ -1060,6 +1066,7 @@ int server_xa_prepare(struct thread_status_s *ts,
     } /* TRY-CATCH */
     LIXA_TRACE(("server_xa_prepare/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -1237,7 +1244,7 @@ int server_xa_prepare_8(struct thread_status_s *ts,
     }
     LIXA_TRACE(("server_xa_prepare_8/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
-    
+    LIXA_TRACE_STACK();    
     LIXA_CRASH(LIXA_CRASH_POINT_SERVER_XA_PREPARE_8,
                thread_status_get_crash_count(ts));
     return ret_cod;
@@ -1364,7 +1371,7 @@ int server_xa_prepare_24(struct thread_status_s *ts,
     }
     LIXA_TRACE(("server_xa_prepare_24/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
-
+    LIXA_TRACE_STACK();
     LIXA_CRASH(LIXA_CRASH_POINT_SERVER_XA_PREPARE_24,
                thread_status_get_crash_count(ts));
     return ret_cod;
@@ -1407,6 +1414,7 @@ int server_xa_rollback(struct thread_status_s *ts,
     } /* TRY-CATCH */
     LIXA_TRACE(("server_xa_rollback/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -1523,8 +1531,8 @@ int server_xa_rollback_8(struct thread_status_s *ts,
         sttq.gtrid = NULL;
     }
     LIXA_TRACE(("server_xa_rollback_8/excp=%d/"
-                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
-    
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));    
+    LIXA_TRACE_STACK();
     LIXA_CRASH(LIXA_CRASH_POINT_SERVER_XA_ROLLBACK_8,
                thread_status_get_crash_count(ts));
     return ret_cod;
@@ -1578,6 +1586,7 @@ int server_xa_start(struct thread_status_s *ts,
     } /* TRY-CATCH */
     LIXA_TRACE(("server_xa_start/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -1790,6 +1799,7 @@ int server_xa_start_8(struct thread_status_s *ts,
         server_trans_tbl_qry_arr_delete(query_result);
     LIXA_TRACE(("server_xa_start_8/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));    
+    LIXA_TRACE_STACK();
     LIXA_CRASH(LIXA_CRASH_POINT_SERVER_XA_START_8,
                thread_status_get_crash_count(ts));
     return ret_cod;
@@ -1879,7 +1889,7 @@ int server_xa_start_24(struct thread_status_s *ts,
     } /* TRY-CATCH */
     LIXA_TRACE(("server_xa_start_24/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
-
+    LIXA_TRACE_STACK();
     LIXA_CRASH(LIXA_CRASH_POINT_SERVER_XA_START_24,
                thread_status_get_crash_count(ts));
     return ret_cod;

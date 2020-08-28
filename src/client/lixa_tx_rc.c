@@ -26,10 +26,10 @@
 
 
 
-#include <lixa_errors.h>
-#include <lixa_trace.h>
-#include <lixa_tx_rc.h>
-#include <xa.h>
+#include "lixa_errors.h"
+#include "lixa_trace.h"
+#include "lixa_tx_rc.h"
+#include "xa.h"
 
 
 
@@ -153,6 +153,7 @@ int lixa_tx_rc_add(lixa_tx_rc_t *ltr, int xa_rc)
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_tx_rc_add/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 

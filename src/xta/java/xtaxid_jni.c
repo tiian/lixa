@@ -111,6 +111,7 @@ JNIEXPORT void JNICALL Java_org_tiian_lixa_xta_XtaXid_newJNI(
     } /* TRY-CATCH */
     LIXA_TRACE(("Java_org_tiian_lixa_xta_XtaXid_newJNI/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return;
 }
 
@@ -163,6 +164,7 @@ jobject JNICALL Java_org_tiian_lixa_xta_XtaXid_new(JNIEnv *env)
     } /* TRY-CATCH */
     LIXA_TRACE(("Java_org_tiian_lixa_xta_XtaXid_new/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return jxid;
 }
 
@@ -236,6 +238,7 @@ Java_org_tiian_lixa_xta_XtaXid_getNativeObject(JNIEnv *env, jobject this_obj)
     LIXA_TRACE(("Java_org_tiian_lixa_xta_XtaXid_"
                 "getNativeObject/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return xid;
 }
 
@@ -303,6 +306,7 @@ JNIEXPORT jbyteArray JNICALL Java_org_tiian_lixa_xta_XtaXid_getBranchQualifier
     } /* TRY-CATCH */
     LIXA_TRACE(("Java_org_tiian_lixa_xta_XtaXid_getBranchQualifier/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret;
 }
 
@@ -349,6 +353,7 @@ JNIEXPORT jint JNICALL Java_org_tiian_lixa_xta_XtaXid_getFormatId
     } /* TRY-CATCH */
     LIXA_TRACE(("Java_org_tiian_lixa_xta_XtaXid_getFormatId/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret;
 }
 
@@ -417,6 +422,7 @@ Java_org_tiian_lixa_xta_XtaXid_getGlobalTransactionId
     } /* TRY-CATCH */
     LIXA_TRACE(("Java_org_tiian_lixa_xta_XtaXid_getGlobalTransactionId/"
                 "excp=%d/ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret;
 }
 
@@ -482,6 +488,7 @@ JNIEXPORT jstring JNICALL Java_org_tiian_lixa_xta_XtaXid_toString
     } /* TRY-CATCH */
     LIXA_TRACE(("Java_org_tiian_lixa_xta_XtaXid_toString/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return xid_string;
 }
 

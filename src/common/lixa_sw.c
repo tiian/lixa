@@ -32,8 +32,8 @@
 
 
 
-#include <lixa_trace.h>
-#include <lixa_sw.h>
+#include "lixa_trace.h"
+#include "lixa_sw.h"
 
 
 

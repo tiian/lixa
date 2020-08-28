@@ -39,21 +39,21 @@
 
 
 /* XA standard header */
-#include <xa.h>
+#include "xa.h"
 /* MySQL front-end */
 #include <mysql.h>
 /* MySQL XA wrapper provided by LIXA (private header) */
-#include <liblixamy.h>
+#include "liblixamy.h"
 /* MySQL XA wrapper provided by LIXA (public header) */
-#include <lixamy.h>
+#include "lixamy.h"
 /* LIXA standard trace library: it could be removed if "TRACE" calls would
  * be removed from this source */
-#include <lixa_trace.h>
+#include "lixa_trace.h"
 /* LIXA convenience macros: it could be removed if "TRY/CATCH" statement
  * would be removed from this source */
-#include <lixa_defines.h>
+#include "lixa_defines.h"
 /* LIXA xid: it contains XID serialization/deserialization utilities */
-#include <lixa_xid.h>
+#include "lixa_xid.h"
 
 
 

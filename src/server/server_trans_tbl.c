@@ -71,6 +71,7 @@ int server_trans_tbl_init(server_trans_tbl_t *stt, guint tsid_array_size)
     } /* TRY-CATCH */
     LIXA_TRACE(("server_trans_tbl_init/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -170,6 +171,7 @@ int server_trans_tbl_insert(server_trans_tbl_t *stt,
     } /* TRY-CATCH */
     LIXA_TRACE(("server_trans_tbl_insert/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -225,6 +227,7 @@ int server_trans_tbl_clear(server_trans_tbl_t *stt)
     } /* TRY-CATCH */
     LIXA_TRACE(("server_trans_tbl_clear/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -351,6 +354,7 @@ int server_trans_tbl_query_xid(server_trans_tbl_t *stt,
     } /* TRY-CATCH */
     LIXA_TRACE(("server_trans_tbl_query_xid/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -408,6 +412,7 @@ int server_trans_tbl_remove(server_trans_tbl_t *stt,
     } /* TRY-CATCH */
     LIXA_TRACE(("server_trans_tbl_remove/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 

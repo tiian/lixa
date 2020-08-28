@@ -1,8 +1,18 @@
 LOG:
 	   1.9.1 Added a new environment variable LIXA_STACK_TRACE to activate
-		 stack tracing: use it in production environment that can not
+		 stack tracing: use it in production environments that can not
 		 tolerate standard tracing due to the too big number of
-		 produced messages.
+		 produced messages. Use
+		 export LIXA_STACK_TRACE=ERRORS
+		 to stack trace error conditions; use
+		 export LIXA_STACK_TRACE=WARNINGS
+		 to stack trace error and warning conditions; use
+		 export LIXA_STACK_TRACE=ALL
+		 to stack trace most of function calls (NOTE: not suggested, it
+		 can create a huge number of trace records).
+		 Use stack trace feature as an early tool in troubleshooting;
+		 it can even be used with an Elastic (ELK) stack to catch
+		 anomalous conditions in real time.
 
 2020-07-20 1.9.0 Added new state engine for the state server (lixad)
 		 Set a new environment variable to choose the state engine

@@ -97,6 +97,7 @@ int server_fsm_message_arrived(server_fsm_t *fsm, const char *sid)
     } /* TRY-CATCH */
     LIXA_TRACE(("server_fsm_message_arrived/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -144,6 +145,7 @@ int server_fsm_send_message_and_wait(server_fsm_t *fsm, const char *sid)
     } /* TRY-CATCH */
     LIXA_TRACE(("server_fsm_send_message_and_wait/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -190,6 +192,7 @@ int server_fsm_message_sent(server_fsm_t *fsm, const char *sid)
     } /* TRY-CATCH */
     LIXA_TRACE(("server_fsm_message_sent/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -236,6 +239,7 @@ int server_fsm_want_message(server_fsm_t *fsm, const char *sid)
     } /* TRY-CATCH */
     LIXA_TRACE(("server_fsm_want_message/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -283,6 +287,7 @@ int server_fsm_switch_thread(server_fsm_t *fsm, const char *sid)
     } /* TRY-CATCH */
     LIXA_TRACE(("server_fsm_switch_thread/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -329,6 +334,7 @@ int server_fsm_want_wake_up(server_fsm_t *fsm, const char *sid)
     } /* TRY-CATCH */
     LIXA_TRACE(("server_fsm_want_wake_up/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -375,6 +381,7 @@ int server_fsm_wake_up_arrived(server_fsm_t *fsm, const char *sid)
     } /* TRY-CATCH */
     LIXA_TRACE(("server_fsm_wake_up_arrived/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -421,6 +428,7 @@ int server_fsm_would_block(server_fsm_t *fsm, const char *sid)
     } /* TRY-CATCH */
     LIXA_TRACE(("server_fsm_would_block/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -467,6 +475,7 @@ int server_fsm_unblock(server_fsm_t *fsm, const char *sid)
     } /* TRY-CATCH */
     LIXA_TRACE(("server_fsm_unblock/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 

@@ -110,6 +110,7 @@ void Java_org_tiian_lixa_xta_XtaException_throw(JNIEnv *env,
     }
     LIXA_TRACE(("Java_org_tiian_lixa_xta_XtaException_throw/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return;
 }
 

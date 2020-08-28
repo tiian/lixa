@@ -148,6 +148,7 @@ int lixa_monkeyrm_get_rc(struct monkey_status_s *mss,
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_monkeyrm_get_rc/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -248,6 +249,7 @@ int lixa_monkeyrm_open(char *xa_info, int rmid, long flags)
     LIXA_TRACE(("lixa_monkeyrm_open/excp=%d/"
                 "ret_cod=%d/xa_rc=%d/errno=%d\n",
                 excp, ret_cod, xa_rc, errno));
+    LIXA_TRACE_STACK();
     assert(LIXA_RC_OK == ret_cod);
     return xa_rc;
 }
@@ -349,6 +351,7 @@ int lixa_monkeyrm_open_init(char *xa_info, int rmid, long flags,
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_monkeyrm_open_init/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -424,6 +427,7 @@ int lixa_monkeyrm_close(char *xa_info, int rmid, long flags)
     LIXA_TRACE(("lixa_monkeyrm_close/excp=%d/"
                 "ret_cod=%d/xa_rc=%d/errno=%d\n",
                 excp, ret_cod, xa_rc, errno));
+    LIXA_TRACE_STACK();
     assert(LIXA_RC_OK == ret_cod);
     return xa_rc;
 }
@@ -500,6 +504,7 @@ int lixa_monkeyrm_start(const XID *xid, int rmid, long flags)
     LIXA_TRACE(("lixa_monkeyrm_start/excp=%d/"
                 "ret_cod=%d/xa_rc=%d/errno=%d\n",
                 excp, ret_cod, xa_rc, errno));
+    LIXA_TRACE_STACK();
     assert(LIXA_RC_OK == ret_cod);
     return xa_rc;
 }
@@ -576,6 +581,7 @@ int lixa_monkeyrm_end(const XID *xid, int rmid, long flags)
     LIXA_TRACE(("lixa_monkeyrm_end/excp=%d/"
                 "ret_cod=%d/xa_rc=%d/errno=%d\n",
                 excp, ret_cod, xa_rc, errno));
+    LIXA_TRACE_STACK();
     assert(LIXA_RC_OK == ret_cod);
     return xa_rc;
 }
@@ -652,6 +658,7 @@ int lixa_monkeyrm_rollback(const XID *xid, int rmid, long flags)
     LIXA_TRACE(("lixa_monkeyrm_rollback/excp=%d/"
                 "ret_cod=%d/xa_rc=%d/errno=%d\n",
                 excp, ret_cod, xa_rc, errno));
+    LIXA_TRACE_STACK();
     assert(LIXA_RC_OK == ret_cod);
     return xa_rc;
 }
@@ -728,6 +735,7 @@ int lixa_monkeyrm_prepare(const XID *xid, int rmid, long flags)
     LIXA_TRACE(("lixa_monkeyrm_prepare/excp=%d/"
                 "ret_cod=%d/xa_rc=%d/errno=%d\n",
                 excp, ret_cod, xa_rc, errno));
+    LIXA_TRACE_STACK();
     assert(LIXA_RC_OK == ret_cod);
     return xa_rc;
 }
@@ -804,6 +812,7 @@ int lixa_monkeyrm_commit(const XID *xid, int rmid, long flags)
     LIXA_TRACE(("lixa_monkeyrm_commit/excp=%d/"
                 "ret_cod=%d/xa_rc=%d/errno=%d\n",
                 excp, ret_cod, xa_rc, errno));
+    LIXA_TRACE_STACK();
     assert(LIXA_RC_OK == ret_cod);
     return xa_rc;
 }
@@ -896,6 +905,7 @@ int lixa_monkeyrm_recover(XID *xids, long count, int rmid, long flags)
     LIXA_TRACE(("lixa_monkeyrm_recover/excp=%d/"
                 "ret_cod=%d/xa_rc=%d/errno=%d\n",
                 excp, ret_cod, xa_rc, errno));
+    LIXA_TRACE_STACK();
     assert(LIXA_RC_OK == ret_cod);
     return xa_rc;
 }
@@ -972,6 +982,7 @@ int lixa_monkeyrm_forget(const XID *xid, int rmid, long flags)
     LIXA_TRACE(("lixa_monkeyrm_forget/excp=%d/"
                 "ret_cod=%d/xa_rc=%d/errno=%d\n",
                 excp, ret_cod, xa_rc, errno));
+    LIXA_TRACE_STACK();
     assert(LIXA_RC_OK == ret_cod);
     return xa_rc;
 }
@@ -1044,6 +1055,7 @@ int lixa_monkeyrm_complete(int *handle, int *retval, int rmid, long flags)
     LIXA_TRACE(("lixa_monkeyrm_complete/excp=%d/"
                 "ret_cod=%d/xa_rc=%d/errno=%d\n",
                 excp, ret_cod, xa_rc, errno));
+    LIXA_TRACE_STACK();
     assert(LIXA_RC_OK == ret_cod);
     return xa_rc;
 }

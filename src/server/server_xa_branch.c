@@ -167,6 +167,7 @@ int server_xa_branch_chain(struct thread_status_s *ts,
     } /* TRY-CATCH */
     LIXA_TRACE(("server_xa_branch_chain/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -245,6 +246,7 @@ int server_xa_branch_unchain(struct thread_status_s *ts,
     } /* TRY-CATCH */
     LIXA_TRACE(("server_xa_branch_unchain/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -308,6 +310,7 @@ int server_xa_branch_want_replies(const struct thread_status_s *ts,
     } /* TRY-CATCH */
     LIXA_TRACE(("server_xa_branch_want_replies/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -378,6 +381,7 @@ int server_xa_branch_list(const struct thread_status_s *ts,
     } /* TRY-CATCH */
     LIXA_TRACE(("server_xa_branch_list/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -510,6 +514,7 @@ int server_xa_branch_prepare(struct thread_status_s *ts,
     } /* TRY-CATCH */
     LIXA_TRACE(("server_xa_branch_prepare/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -658,6 +663,7 @@ int server_xa_branch_check_recovery(const struct thread_status_s *ts,
     } /* TRY-CATCH */
     LIXA_TRACE(("server_xa_branch_check_recovery/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -753,6 +759,7 @@ int server_xa_branch_restart_fix(struct thread_status_s *ts,
     }
     LIXA_TRACE(("server_xa_branch_restart_fix/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -799,6 +806,7 @@ int server_client_branch_join_adjust(struct thread_status_s *ts,
     } /* TRY-CATCH */
     LIXA_TRACE(("server_client_branch_join_adjust/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -915,5 +923,6 @@ int server_client_branch_join_list(const struct thread_status_s *ts,
     } /* if (NULL != branch_array) */
     LIXA_TRACE(("server_client_branch_join_list/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }

@@ -261,7 +261,7 @@ extern unsigned long lixa_trace_mask;
          ret_cod < 0) || \
         (STACK_TRACE_WARNINGS_AND_ERRORS == lixa_trace_stack_value && \
          ret_cod != 0) ? \
-        lixa_trace_stack(__func__, excp, ret_cod, lixa_strerror(ret_cod), \
+        lixa_trace_stack(__func__, __FILE__, __LINE__, excp, ret_cod, lixa_strerror(ret_cod), \
                          errno) : 0)
 #else
 # define LIXA_TRACE_STACK()
@@ -340,8 +340,9 @@ extern "C" {
     /**
      * Send a trace message for stack tracing
      */
-    void lixa_trace_stack(const char *function_name, int exception,
-                          int ret_cod, const char *ret_cod_text,
+    void lixa_trace_stack(const char *function_name, const char *file_name,
+                          int file_line,
+                          int exception, int ret_cod, const char *ret_cod_text,
                           int error);
 
 

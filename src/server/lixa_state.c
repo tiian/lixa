@@ -353,6 +353,7 @@ int lixa_state_init(lixa_state_t *this, const char *path_prefix,
     LIXA_TRACE(("lixa_state_init/excp=%d/"
                 "ret_cod=%d/pthreaderror=%d/errno=%d\n", excp, ret_cod, pte,
                 errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -460,6 +461,7 @@ int lixa_state_analyze(lixa_state_t *this,
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_state_analyze/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -586,6 +588,7 @@ int lixa_state_cold_start(lixa_state_t *this)
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_state_cold_start/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -910,6 +913,7 @@ int lixa_state_warm_start(lixa_state_t *this,
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_state_warm_start/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -1153,6 +1157,7 @@ int lixa_state_shutdown(lixa_state_t *this)
     LIXA_TRACE(("lixa_state_shutdown/excp=%d/"
                 "ret_cod=%d/pthreaderror=%d/errno=%d\n", excp, ret_cod, pte,
                 errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -1211,6 +1216,7 @@ int lixa_state_clean(lixa_state_t *this)
     LIXA_TRACE(("lixa_state_clean/excp=%d/"
                 "ret_cod=%d/pthreaderror=%d/errno=%d\n", excp, ret_cod, pte,
                 errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -1426,6 +1432,7 @@ int lixa_state_check_log_actions(lixa_state_t *this, int *must_flush,
     LIXA_TRACE(("lixa_state_check_log_actions/excp=%d/"
                 "ret_cod=%d/pthreaderror=%d/errno=%d\n", excp, ret_cod, pte,
                 errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -1713,6 +1720,7 @@ int lixa_state_flush_log_records(lixa_state_t *this, int switch_after_write,
     LIXA_TRACE(("lixa_state_flush_log_records/excp=%d/"
                 "ret_cod=%d/pthreaderror=%d/errno=%d\n", excp, ret_cod, pte,
                 errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -1772,6 +1780,7 @@ int lixa_state_extend_log(lixa_state_t *this)
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_state_extend_log/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -1870,6 +1879,7 @@ int lixa_state_flush_table(lixa_state_t *this, int shutdown)
     LIXA_TRACE(("lixa_state_flush_table/excp=%d/"
                 "ret_cod=%d/pthreaderror=%d/errno=%d\n", excp, ret_cod, pte,
                 errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -2007,6 +2017,7 @@ int lixa_state_switch(lixa_state_t *this, lixa_word_t last_record_id)
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_state_switch/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -2094,6 +2105,7 @@ int lixa_state_sync(lixa_state_t *this, int must_flush, int must_switch,
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_state_sync/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -2214,6 +2226,7 @@ int lixa_state_mark_block(lixa_state_t *this, uint32_t block_id)
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_state_mark_block/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -2316,6 +2329,7 @@ int lixa_state_insert_block(lixa_state_t *this, uint32_t *block_id)
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_state_insert_block/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -2382,6 +2396,7 @@ int lixa_state_delete_block(lixa_state_t *this, uint32_t block_id)
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_state_delete_block/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -2426,6 +2441,7 @@ int lixa_state_dump(const lixa_state_t *this)
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_state_dump/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -2561,6 +2577,7 @@ void *lixa_state_async_table_flusher(void *data)
     LIXA_TRACE(("lixa_state_async_table_flusher/excp=%d/"
                 "ret_cod=%d/pthreaderror=%d/errno=%d\n", excp, ret_cod, pte,
                 errno));
+    LIXA_TRACE_STACK();
     /* Emergency exit? */
     if (NONE != excp) {
         int rc;
@@ -2708,6 +2725,7 @@ void *lixa_state_async_log_flusher(void *data)
     LIXA_TRACE(("lixa_state_async_log_flusher/excp=%d/"
                 "ret_cod=%d/pthreaderror=%d/errno=%d\n", excp, ret_cod, pte,
                 errno));
+    LIXA_TRACE_STACK();
     /* Emergency exit? */
     if (NONE != excp) {
         int rc;

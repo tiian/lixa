@@ -152,6 +152,7 @@ int lixa_utils_iso_timestamp(const struct timeval *tv, char *buf,
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_utils_iso_timestamp/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -208,6 +209,7 @@ int lixa_get_program_name(char *buf, size_t buf_size)
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_get_program_name/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -316,6 +318,7 @@ int lixa_session_init(lixa_session_t *session, int fd, int client)
     }
     LIXA_TRACE(("lixa_session_init/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -351,6 +354,7 @@ int lixa_session_set_sid(lixa_session_t *session, const char *sid)
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_session_set_sid/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 

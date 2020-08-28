@@ -226,6 +226,7 @@ int server_manager(struct server_config_s *sc,
     } /* TRY-CATCH */
     LIXA_TRACE(("server_manager/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -262,6 +263,7 @@ int server_pipes_init(struct thread_pipe_array_s *tpa)
     } /* TRY-CATCH */
     LIXA_TRACE(("server_pipes_init/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -518,6 +520,7 @@ void *server_manager_thread(void *void_ts)
     } /* TRY-CATCH */
     LIXA_TRACE(("server_manager_thread/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return NULL;
 }
 
@@ -676,6 +679,7 @@ int server_manager_pollin_ctrl(struct thread_status_s *ts, int fd)
     } /* TRY-CATCH */
     LIXA_TRACE(("server_manager_pollin_ctrl/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -780,6 +784,7 @@ int server_manager_pollin_data(struct thread_status_s *ts, size_t slot_id)
     } /* TRY-CATCH */
     LIXA_TRACE(("server_manager_pollin_data/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -923,6 +928,7 @@ int server_manager_drop_client(struct thread_status_s *ts, size_t slot_id)
     }
     LIXA_TRACE(("server_manager_drop_client/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -996,6 +1002,7 @@ int server_manager_switch_1(struct thread_status_s *ts,
     } /* TRY-CATCH */
     LIXA_TRACE(("server_manager_switch_1/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -1101,6 +1108,7 @@ int server_manager_switch_2(struct thread_status_s *ts,
     } /* TRY-CATCH */
     LIXA_TRACE(("server_manager_switch_2/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -1157,6 +1165,7 @@ int server_manager_switch_3(struct thread_status_s *ts,
     } /* TRY-CATCH */
     LIXA_TRACE(("server_manager_switch_3/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -1196,6 +1205,7 @@ int server_manager_shutdown(struct thread_status_s *ts,
     } /* TRY-CATCH */
     LIXA_TRACE(("server_manager_shutdown/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -1292,6 +1302,7 @@ int server_manager_pollout(struct thread_status_s *ts, size_t slot_id)
     } /* TRY-CATCH */
     LIXA_TRACE(("server_manager_pollout/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -1367,6 +1378,7 @@ int server_manager_free_slots(struct thread_status_s *ts, size_t slot_id)
     } /* TRY-CATCH */
     LIXA_TRACE(("server_manager_free_slots/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -1491,6 +1503,7 @@ int server_manager_msg_proc(struct thread_status_s *ts, size_t slot_id,
     } /* if (NULL != branch_list) */
     LIXA_TRACE(("server_manager_msg_proc/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -1689,6 +1702,7 @@ int server_manager_inmsg_proc(struct thread_status_s *ts,
     } /* TRY-CATCH */
     LIXA_TRACE(("server_manager_inmsg_proc/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -1838,6 +1852,7 @@ int server_manager_outmsg_prep(struct thread_status_s *ts, size_t slot_id,
     } /* TRY-CATCH */
     LIXA_TRACE(("server_manager_outmsg_prep/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -1907,6 +1922,7 @@ int server_manager_check_recovery(struct thread_status_s *ts,
     } /* TRY-CATCH */
     LIXA_TRACE(("server_manager_check_recovery/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -1976,6 +1992,7 @@ int server_manager_add_poll(struct thread_status_s *ts,
     } /* TRY-CATCH */
     LIXA_TRACE(("server_manager_add_poll/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -2020,6 +2037,7 @@ int server_manager_fix_poll(struct thread_status_s *ts)
     } /* TRY-CATCH */
     LIXA_TRACE(("server_manager_fix_poll/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -2079,6 +2097,7 @@ int server_manager_new_client(struct thread_status_s *ts, int fd, nfds_t place)
     } /* TRY-CATCH */
     LIXA_TRACE(("server_manager_new_client/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 

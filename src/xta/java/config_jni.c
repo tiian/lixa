@@ -112,6 +112,7 @@ JNIEXPORT void JNICALL Java_org_tiian_lixa_xta_Config_newJNI(
     } /* TRY-CATCH */
     LIXA_TRACE(("Java_org_tiian_lixa_xta_Config_newJNI/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return;
 }
 
@@ -184,6 +185,7 @@ Java_org_tiian_lixa_xta_Config_getNativePointer(JNIEnv *env, jobject this_obj)
     } /* TRY-CATCH */
     LIXA_TRACE(("Java_org_tiian_lixa_xta_Config_getNativePointer"
                 "/excp=%d/ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return config;
 }
 
@@ -230,6 +232,7 @@ JNIEXPORT jint JNICALL Java_org_tiian_lixa_xta_Config_getConnectionTimeout
     } /* TRY-CATCH */
     LIXA_TRACE(("Java_org_tiian_lixa_xta_Config_getConnectionTimeout/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret;
 }
 
@@ -280,5 +283,6 @@ JNIEXPORT void JNICALL Java_org_tiian_lixa_xta_Config_setConnectionTimeout
     } /* TRY-CATCH */
     LIXA_TRACE(("Java_org_tiian_lixa_xta_Config_setConnectionTimeout/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return;
 }

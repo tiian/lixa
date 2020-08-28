@@ -35,14 +35,14 @@
 
 
 
-#include <lixa_crash.h>
-#include <lixa_errors.h>
-#include <lixa_trace.h>
-#include <lixa_tx.h>
-#include <lixa_utils.h>
-#include <lixa_syslog.h>
-#include <client_config.h>
-#include <tx.h>
+#include "lixa_crash.h"
+#include "lixa_errors.h"
+#include "lixa_trace.h"
+#include "lixa_tx.h"
+#include "lixa_utils.h"
+#include "lixa_syslog.h"
+#include "client_config.h"
+#include "tx.h"
 
 
 

@@ -349,6 +349,7 @@ int client_config(client_config_coll_t *ccc, int global_config)
     } /* TRY-CATCH */
     LIXA_TRACE(("client_config/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -470,6 +471,7 @@ int client_config_dup(const client_config_coll_t *source,
     } /* TRY-CATCH */
     LIXA_TRACE(("client_config_dup/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -553,6 +555,7 @@ int client_config_job(client_config_coll_t *ccc, int fd)
     } /* TRY-CATCH */
     LIXA_TRACE(("client_config_job/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -692,6 +695,7 @@ int client_config_validate(client_config_coll_t *ccc)
     } /* TRY-CATCH */
     LIXA_TRACE(("client_config_validate/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -756,6 +760,7 @@ int client_config_load_all_switch_files(client_config_coll_t *ccc)
     } /* TRY-CATCH */
     LIXA_TRACE(("client_config_load_all_switch_files/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -839,6 +844,7 @@ int client_config_load_switch_file(struct act_rsrmgr_config_s *act_rsrmgr,
     } /* TRY-CATCH */
     LIXA_TRACE(("client_config_load_switch_file/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -987,6 +993,7 @@ int client_unconfig(client_config_coll_t *ccc, int global_config)
     } /* TRY-CATCH */
     LIXA_TRACE(("client_unconfig/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -1041,6 +1048,7 @@ int client_config_unload_all_switch_files(client_config_coll_t *ccc)
     } /* TRY-CATCH */
     LIXA_TRACE(("client_config_unload_all_switch_files/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -1080,6 +1088,7 @@ int client_config_unload_switch_file(struct act_rsrmgr_config_s *act_rsrmgr)
     } /* TRY-CATCH */
     LIXA_TRACE(("client_config_unload_switch_file/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -1156,6 +1165,7 @@ int client_config_display(client_config_coll_t *ccc)
     } /* TRY-CATCH */
     LIXA_TRACE(("client_config_display/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -1219,6 +1229,7 @@ gchar *client_config_tostring_rsrmgr(const struct act_rsrmgr_config_s *arc)
     } /* TRY-CATCH */
     LIXA_TRACE(("client_config_tostring_rsrmgr/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return tostring;
 }
 
@@ -1286,6 +1297,7 @@ int client_config_rsrmgr_dup(const struct act_rsrmgr_config_s *arc,
     } /* TRY-CATCH */
     LIXA_TRACE(("client_config_rsrmgr_dup/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -1322,6 +1334,7 @@ int client_config_set_connection_timeout(client_config_coll_t *ccc, int value)
     } /* TRY-CATCH */
     LIXA_TRACE(("client_config_set_connection_timeout/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -1417,6 +1430,7 @@ int client_parse(struct client_config_coll_s *ccc,
     } /* TRY-CATCH */
     LIXA_TRACE(("client_parse/%p/excp=%d/"
                 "ret_cod=%d/errno=%d\n", a_node, excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -1465,6 +1479,7 @@ int client_parse_sttsrvs(struct client_config_coll_s *ccc,
     } /* TRY-CATCH */
     LIXA_TRACE(("client_parse_sttsrvs/%p/excp=%d/"
                 "ret_cod=%d/errno=%d\n", a_node, excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -1554,6 +1569,7 @@ int client_parse_sttsrv(struct client_config_coll_s *ccc,
     } /* TRY-CATCH */
     LIXA_TRACE(("client_parse_sttsrv/%p/excp=%d/"
                 "ret_cod=%d/errno=%d\n", a_node, excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -1601,6 +1617,7 @@ int client_parse_rsrmgrs(struct client_config_coll_s *ccc,
     } /* TRY-CATCH */
     LIXA_TRACE(("client_parse_rsrmgrs/%p/excp=%d/"
                 "ret_cod=%d/errno=%d\n", a_node, excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -1715,6 +1732,7 @@ int client_parse_rsrmgr(struct client_config_coll_s *ccc,
     } /* TRY-CATCH */
     LIXA_TRACE(("client_parse_rsrmgr/%p/excp=%d/"
                 "ret_cod=%d/errno=%d\n", a_node, excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -1757,6 +1775,7 @@ int client_parse_profiles(struct client_config_coll_s *ccc,
     } /* TRY-CATCH */
     LIXA_TRACE(("client_parse_profiles/%p/excp=%d/"
                 "ret_cod=%d/errno=%d\n", a_node, excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -1841,6 +1860,7 @@ int client_parse_profile(struct client_config_coll_s *ccc,
     } /* TRY-CATCH */
     LIXA_TRACE(("client_parse_profile/%p/excp=%d/"
                 "ret_cod=%d/errno=%d\n", a_node, excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -1885,6 +1905,7 @@ int client_parse_profile_sttsrvs(struct client_config_coll_s *ccc,
     } /* TRY-CATCH */
     LIXA_TRACE(("client_parse_profile_sttsrvs/%p/excp=%d/"
                 "ret_cod=%d/errno=%d\n", a_node, excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -1929,6 +1950,7 @@ int client_parse_profile_rsrmgrs(struct client_config_coll_s *ccc,
     } /* TRY-CATCH */
     LIXA_TRACE(("client_parse_profile_rsrmgrs/%p/excp=%d/"
                 "ret_cod=%d/errno=%d\n", a_node, excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -2087,5 +2109,6 @@ int client_parse_sttsrvs_envvar(client_config_coll_t *ccc,
     LIXA_TRACE(("client_parse_sttsrvs_envvar/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
+    LIXA_TRACE_STACK();
 }
 

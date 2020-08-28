@@ -77,6 +77,7 @@ xta_transaction_manager_t *xta_transaction_manager_new(void)
     } /* TRY-CATCH */
     LIXA_TRACE(("xta_transaction_manager_new/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return this;
 }
 
@@ -119,6 +120,7 @@ void xta_transaction_manager_delete(xta_transaction_manager_t *tm)
     } /* TRY-CATCH */
     LIXA_TRACE(("xta_transaction_manager_delete/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return;
 }
 
@@ -246,6 +248,7 @@ xta_transaction_manager_create_transaction(xta_transaction_manager_t *tm)
     } /* TRY-CATCH */
     LIXA_TRACE(("xta_transaction_manager_create_transaction/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return tx;
 }
 #ifdef __GNUC__

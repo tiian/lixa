@@ -56,9 +56,9 @@
 
 
 
-#include <lixa_config.h>
-#include <lixa_errors.h>
-#include <lixa_trace.h>
+#include "lixa_config.h"
+#include "lixa_errors.h"
+#include "lixa_trace.h"
 
 
 
@@ -155,6 +155,7 @@ int lixa_config_retrieve_domain(xmlNode *cur_node, int *domain)
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_config_retrieve_domain/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -197,6 +198,7 @@ int lixa_config_retrieve_port(xmlNode *cur_node, in_port_t *port)
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_config_retrieve_port/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -240,6 +242,7 @@ int lixa_config_retrieve_generic_long(xmlNode *cur_node,
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_config_retrieve_generic_long/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -315,6 +318,7 @@ int lixa_config_digest(int fd, const char *profile, md5_digest_hex_t digest)
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_config_digest/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -352,6 +356,7 @@ int lixa_job_set_raw(lixa_job_t *job, const char *raw_job)
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_job_set_raw/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -402,6 +407,7 @@ int lixa_job_set_source_ip(lixa_job_t *job, int fd)
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_job_set_source_ip/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 

@@ -344,6 +344,7 @@ int lixa_msg_deserialize(char *buffer, size_t buffer_len,
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_msg_deserialize/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -405,6 +406,7 @@ int lixa_msg_deserialize_close_8(xmlNodePtr cur, struct lixa_msg_s *msg)
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_msg_deserialize_close_8/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -515,6 +517,7 @@ int lixa_msg_deserialize_commit_8(xmlNodePtr cur, struct lixa_msg_s *msg)
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_msg_deserialize_commit_8/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -562,6 +565,7 @@ int lixa_msg_deserialize_default_answer(xmlNodePtr cur,
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_msg_deserialize_default_answer/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -673,6 +677,7 @@ int lixa_msg_deserialize_end_8(xmlNodePtr cur, struct lixa_msg_s *msg)
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_msg_deserialize_end_8/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -788,6 +793,7 @@ int lixa_msg_deserialize_forget_8(xmlNodePtr cur, struct lixa_msg_s *msg)
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_msg_deserialize_forget_8/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -948,6 +954,7 @@ int lixa_msg_deserialize_open_8(xmlNodePtr cur, struct lixa_msg_s *msg)
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_msg_deserialize_open_8/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -1093,6 +1100,7 @@ int lixa_msg_deserialize_open_24(xmlNodePtr cur, struct lixa_msg_s *msg)
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_msg_deserialize_open_24/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -1218,6 +1226,7 @@ int lixa_msg_deserialize_prepare_8(xmlNodePtr cur, struct lixa_msg_s *msg)
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_msg_deserialize_prepare_8/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -1264,6 +1273,7 @@ int lixa_msg_deserialize_prepare_24(xmlNodePtr cur, struct lixa_msg_s *msg)
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_msg_deserialize_prepare_24/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -1331,6 +1341,7 @@ int lixa_msg_deserialize_qrcvr_8(xmlNodePtr cur, struct lixa_msg_s *msg)
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_msg_deserialize_qrcvr_8/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -1545,6 +1556,7 @@ int lixa_msg_deserialize_qrcvr_16(xmlNodePtr cur, struct lixa_msg_s *msg)
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_msg_deserialize_qrcvr_16/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -1632,6 +1644,7 @@ int lixa_msg_deserialize_qrcvr_24(xmlNodePtr cur, struct lixa_msg_s *msg)
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_msg_deserialize_qrcvr_24/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -1706,6 +1719,7 @@ int lixa_msg_deserialize_reg_8(xmlNodePtr cur, struct lixa_msg_s *msg)
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_msg_deserialize_reg_8/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -1819,6 +1833,7 @@ int lixa_msg_deserialize_rollback_8(xmlNodePtr cur, struct lixa_msg_s *msg)
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_msg_deserialize_rollback_8/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -1906,6 +1921,7 @@ int lixa_msg_deserialize_start_8(xmlNodePtr cur, struct lixa_msg_s *msg)
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_msg_deserialize_start_8/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -2032,6 +2048,7 @@ int lixa_msg_deserialize_start_24(xmlNodePtr cur, struct lixa_msg_s *msg)
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_msg_deserialize_start_24/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -2098,6 +2115,7 @@ int lixa_msg_deserialize_unreg_8(xmlNodePtr cur, struct lixa_msg_s *msg)
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_msg_deserialize_unreg_8/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -2160,6 +2178,7 @@ int lixa_msg_deserialize_trans_8(xmlNodePtr cur, struct lixa_msg_s *msg)
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_msg_deserialize_trans_8/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -2284,5 +2303,6 @@ int lixa_msg_deserialize_trans_16(xmlNodePtr cur, struct lixa_msg_s *msg)
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_msg_deserialize_trans_16/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }

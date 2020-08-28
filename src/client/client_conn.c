@@ -197,6 +197,7 @@ int client_disconnect_thread(client_status_coll_t *csc)
     } /* TRY-CATCH */
     LIXA_TRACE(("client_disconnect_thread/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -264,5 +265,6 @@ int client_disconnect(client_status_t *cs)
     } /* TRY-CATCH */
     LIXA_TRACE(("client_disconnect/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }

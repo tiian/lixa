@@ -216,6 +216,7 @@ int server_config(struct server_config_s *sc,
     } /* TRY-CATCH */
     LIXA_TRACE(("server_config/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -280,6 +281,7 @@ int server_cleanup(struct server_config_s *sc,
     } /* TRY-CATCH */
     LIXA_TRACE(("server_cleanup/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -532,6 +534,7 @@ int server_parse(struct server_config_s *sc,
     } /* TRY-CATCH */
     LIXA_TRACE(("server_parse/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -622,6 +625,7 @@ int server_parse_listener(struct server_config_s *sc,
         } /* TRY-CATCH */
     LIXA_TRACE(("server_parse_listener/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -687,6 +691,7 @@ int server_parse_manager(struct server_config_s *sc,
     } /* TRY-CATCH */
     LIXA_TRACE(("server_parse_manager/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 

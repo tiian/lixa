@@ -120,6 +120,7 @@ JNIEXPORT void JNICALL Java_org_tiian_lixa_xta_TransactionManager_newJNI(
     } /* TRY-CATCH */
     LIXA_TRACE(("Java_org_tiian_lixa_xta_TransactionManager_newJNI: "
                 "NativeObject set to %p\n", byte_buffer));
+    LIXA_TRACE_STACK();
     return;
 }
 
@@ -195,6 +196,7 @@ Java_org_tiian_lixa_xta_TransactionManager_getNativeObject(
     LIXA_TRACE(("Java_org_tiian_lixa_xta_TransactionManager_"
                 "getNativeObject/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return tm;
 }
 
@@ -291,6 +293,7 @@ Java_org_tiian_lixa_xta_TransactionManager_createTransaction
     LIXA_TRACE(("Java_org_tiian_lixa_xta_TransactionManager_"
                 "createTransaction/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     /* return the Java object */
     return jtx;
 }

@@ -212,6 +212,7 @@ int server_listener(const struct server_config_s *sc,
     } /* TRY-CATCH */
     LIXA_TRACE(("server_listener/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -408,6 +409,7 @@ int server_listener_loop(const struct server_config_s *sc,
     } /* TRY-CATCH */
     LIXA_TRACE(("server_listener_loop/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -467,6 +469,7 @@ int server_listener_find_manager(const struct thread_status_array_s *tsa,
     } /* TRY-CATCH */
     LIXA_TRACE(("server_listener_find_manager/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -547,6 +550,7 @@ int server_listener_signal(void)
     } /* TRY-CATCH */
     LIXA_TRACE(("server_listener_signal/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 

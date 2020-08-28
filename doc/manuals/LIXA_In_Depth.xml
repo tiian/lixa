@@ -104,15 +104,70 @@ Dec  4 18:22:49 ubuntu lixad[6697]: LXD006N server terminated activities
 	...
       </screen>
       <warning><para>
-	  Excluding tracing functions can reduce CPU and memory usage when
-	  the software is running, but you should disable tracing 
-	  <emphasis>only if you are really sure about it:
-	  </emphasis>without tracing you have no instruments
-	  to understand what's happening inside LIXA code when it's running.
+	Excluding tracing functions can reduce CPU and memory usage when
+	the software is running, but you should disable tracing 
+	<emphasis>only if you are really sure about it:
+	</emphasis>without tracing you have no instruments
+	to understand what's happening inside LIXA code when it's running.
       </para></warning>
       In the case you didn't disable the tracing feature at build time (see
       above), you could activate the message production when you need it.
+      <important><para>
+	LIXA provides two different tracing capabilities: one is based on the
+	concept of "stack tracing" and allows to catch the exiting condition
+	of every function call; the other one is based on the concept of
+	"modules" and allows selective module tracing. Stack tracing is more
+	usefulto catch anomalous conditions whenever they happen, while module
+	tracing is more useful to get fine grain messages of a subset of
+	functions to understand why things are not running as desired.
+      </para></important>
     </para>
+    <section xml:id="Stack_tracing">
+      <title>Stack Tracing</title>
+      <para>
+	Stack tracing can be activated using the environment variable 
+	<varname>LIXA_STACK_TRACE</varname>; three different values are
+	allowed:
+	<itemizedlist mark='bullet'>
+	  <listitem><para>
+	    <varname>ALL</varname> to stack trace every function call;
+	    this value should not be used in a production environment to avoid
+	    a stack trace message congestion
+	  </para></listitem>
+	  <listitem><para>
+	    <varname>ERRORS</varname> to stack trace only the function
+	    calls that end with an error condition; this is the value suggested
+	    to detect anomalous conditions in production environments
+	  </para></listitem>
+	  <listitem><para>
+	    <varname>WARNINGS</varname> to stack trace only the function
+	    calls that end with either a warning or an error condition; this
+	    setting can produce trace messages that are not related to 
+	    anomalous conditions
+	  </para></listitem>
+	</itemizedlist>
+	When activated, stack tracing produces JSON formatted records as in
+	the example below (messages produced by LIXA state server):
+	<screen>
+2020-08-28 18:41:01.699712 [6311/47460663904640] { "type": "StackTrace", "date": "2020-08-28", "time": "18:41:01.699712", "process_id": 6311, "thread_id": 47460663904640, "function_name": "status_record_check_integrity", "source_file_name": "server_status.c", "source_file_line": "815", "exception": 0, "return_code": -9, "return_code_text": "ERROR: object is corrupted", "errno": 9, "errno_text": "Bad file descriptor" }
+2020-08-28 18:41:02.722824 [6311/47460701607680] { "type": "StackTrace", "date": "2020-08-28", "time": "18:41:02.722824", "process_id": 6311, "thread_id": 47460701607680, "function_name": "srvr_rcvr_tbl_get_block", "source_file_name": "srvr_rcvr_tbl.c", "source_file_line": "358", "exception": 2, "return_code": 1, "return_code_text": "WARNING: object not found", "errno": 0, "errno_text": "Success" }
+2020-08-28 18:41:04.165927 [6311/47460701607680] { "type": "StackTrace", "date": "2020-08-28", "time": "18:41:04.165927", "process_id": 6311, "thread_id": 47460701607680, "function_name": "lixa_msg_retrieve", "source_file_name": "lixa_xml_msg.c", "source_file_line": "266", "exception": 5, "return_code": 4, "return_code_text": "WARNING: peer has closed TCP/IP connection", "errno": 0, "errno_text": "Success" }
+2020-08-28 18:41:04.166036 [6311/47460701607680] { "type": "StackTrace", "date": "2020-08-28", "time": "18:41:04.166036", "process_id": 6311, "thread_id": 47460701607680, "function_name": "server_manager_pollin_data", "source_file_name": "server_manager.c", "source_file_line": "787", "exception": 1, "return_code": 4, "return_code_text": "WARNING: peer has closed TCP/IP connection", "errno": 0, "errno_text": "Success" }
+2020-08-28 18:41:04.167795 [6311/47460699506432] { "type": "StackTrace", "date": "2020-08-28", "time": "18:41:04.167795", "process_id": 6311, "thread_id": 47460699506432, "function_name": "server_manager_pollin_ctrl", "source_file_name": "server_manager.c", "source_file_line": "682", "exception": 7, "return_code": 9, "return_code_text": "WARNING: shutdown must be performed", "errno": 0, "errno_text": "Success" }
+2020-08-28 18:41:04.167868 [6311/47460697405184] { "type": "StackTrace", "date": "2020-08-28", "time": "18:41:04.167868", "process_id": 6311, "thread_id": 47460697405184, "function_name": "server_manager_pollin_ctrl", "source_file_name": "server_manager.c", "source_file_line": "682", "exception": 7, "return_code": 9, "return_code_text": "WARNING: shutdown must be performed", "errno": 0, "errno_text": "Success" }
+2020-08-28 18:41:04.167918 [6311/47460701607680] { "type": "StackTrace", "date": "2020-08-28", "time": "18:41:04.167918", "process_id": 6311, "thread_id": 47460701607680, "function_name": "server_manager_pollin_ctrl", "source_file_name": "server_manager.c", "source_file_line": "682", "exception": 7, "return_code": 9, "return_code_text": "WARNING: shutdown must be performed", "errno": 0, "errno_text": "Success" }
+	</screen>
+	The JSON payload can be extracted by the whole message quite easily
+	and it can be ingested by a log analytic platform like for instance
+	the Elastic Stack (ELK).
+      </para>
+      <important><para>
+	Not necessarily an error condition is the result of a bug: LIXA
+	software try to manage as many as possible error conditions without
+	hurting the user. Nevertheless, stack tracing can be useful in
+	catching run time issues that are difficult to reproduce.
+      </para></important>
+    </section>
     <section xml:id="Tracing_modules">
       <title>Tracing modules</title>
       <para>

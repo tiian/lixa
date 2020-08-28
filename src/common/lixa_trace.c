@@ -223,8 +223,9 @@ void lixa_trace_text_data(const char *prefix, const byte_t *data,
 
 
 
-void lixa_trace_stack(const char *function_name, int exception,
-                      int ret_cod, const char *ret_cod_text,
+void lixa_trace_stack(const char *function_name, const char *file_name,
+                      int file_line,
+                      int exception, int ret_cod, const char *ret_cod_text,
                       int error)
 {
     struct tm broken_time;
@@ -235,22 +236,36 @@ void lixa_trace_stack(const char *function_name, int exception,
     g_mutex_lock(&lixa_trace_mutex);
     /* default header */
     fprintf(stderr,
+            /* standard LIXA trace header */
+            "%4.4d-%2.2d-%2.2d %2.2d:%2.2d:%2.2d.%6.6d [" PID_T_FORMAT "/"
+            PTHREAD_T_FORMAT "] "
+            /* JSON formatted trace body message */
             "{ "
+            "\"type\": \"StackTrace\", "
             "\"date\": \"%4.4d-%2.2d-%2.2d\", "
             "\"time\": \"%2.2d:%2.2d:%2.2d.%6.6d\", "
             "\"process_id\": " PID_T_FORMAT ", "
             "\"thread_id\": " PTHREAD_T_FORMAT ", "
             "\"function_name\": \"%s\", "
+            "\"source_file_name\": \"%s\", "
+            "\"source_file_line\": \"%d\", "
             "\"exception\": %d, "
             "\"return_code\": %d, "
             "\"return_code_text\": \"%s\", "
             "\"errno\": %d, "
             "\"errno_text\": \"%s\" "
             "}\n",
+            /* standard LIXA trace header */
             broken_time.tm_year + 1900, broken_time.tm_mon + 1,
             broken_time.tm_mday, broken_time.tm_hour,
             broken_time.tm_min, broken_time.tm_sec, (int)tv.tv_usec,
-            getpid(), pthread_self(), function_name, exception, ret_cod,
+            getpid(), pthread_self(),
+            /* JSON formatted trace body message */
+            broken_time.tm_year + 1900, broken_time.tm_mon + 1,
+            broken_time.tm_mday, broken_time.tm_hour,
+            broken_time.tm_min, broken_time.tm_sec, (int)tv.tv_usec,
+            getpid(), pthread_self(),
+            function_name, file_name, file_line, exception, ret_cod,
             ret_cod_text, error, strerror(error));
 # ifdef LIXA_DEBUG
     fflush(stderr);

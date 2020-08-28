@@ -102,6 +102,7 @@ xta_xid_t *xta_xid_new(const char *branch_qualifier,
     }   
     LIXA_TRACE(("xta_xid_new/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return this;
 }
 
@@ -329,6 +330,7 @@ xta_xid_t *xta_xid_new_from_string(const char *xid_string)
     }   
     LIXA_TRACE(("xta_xid_new_from_string/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return this;
 }
 
@@ -377,6 +379,7 @@ xta_xid_t *xta_xid_new_from_XID(const XID *xid)
     } /* TRY-CATCH */
     LIXA_TRACE(("xta_xid_new_from_XID/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return this;
 }
 
@@ -424,6 +427,7 @@ xta_xid_t *xta_xid_dup(const xta_xid_t *xid)
     } /* TRY-CATCH */
     LIXA_TRACE(("xta_xid_dup/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return this;
 }
 
@@ -450,6 +454,7 @@ void xta_xid_delete(xta_xid_t *xid)
     } /* TRY-CATCH */
     LIXA_TRACE(("xta_xid_delete/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return;
 }
 
@@ -483,6 +488,7 @@ const XID *xta_xid_get_xa_xid(const xta_xid_t *xid)
     } /* TRY-CATCH */
     LIXA_TRACE(("xta_xid_get_xa_xid/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return xa_xid;
 }
 
@@ -529,6 +535,7 @@ char *xta_xid_to_string(const xta_xid_t *xid)
     } /* TRY-CATCH */
     LIXA_TRACE(("xta_xid_to_string/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return string;
 }
 
@@ -555,6 +562,7 @@ void xta_xid_reset(xta_xid_t *xid)
     } /* TRY-CATCH */
     LIXA_TRACE(("xta_xid_reset/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return;
 }
 

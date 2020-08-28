@@ -16,11 +16,15 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with LIXA.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <config.h>
+#include "config.h"
 
-#include <tx.h>
-#include <lixa_tx.h>
-#include <lixa_xid.h>
+
+
+#include "tx.h"
+#include "lixa_tx.h"
+#include "lixa_xid.h"
+
+
 
 /* set module trace flag */
 #ifdef LIXA_TRACE_MODULE

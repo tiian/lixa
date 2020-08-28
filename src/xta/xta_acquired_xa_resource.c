@@ -132,6 +132,7 @@ int xta_acquired_xa_resource_init(xta_acquired_xa_resource_t *xa_resource,
     } /* TRY-CATCH */
     LIXA_TRACE(("xta_acquired_xa_resource_init/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -168,6 +169,7 @@ void xta_acquired_xa_resource_clean(xta_acquired_xa_resource_t *xa_resource)
     } /* TRY-CATCH */
     LIXA_TRACE(("xta_acquired_xa_resource_clean/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return;
 }
 

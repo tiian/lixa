@@ -76,24 +76,23 @@ int server_trans(struct thread_status_s *ts, size_t slot_id,
         }
 
         THROW(NONE);
-    }
-    CATCH
-        {
-            switch (excp) {
-                case SERVER_TRANS_8_ERROR:
-                    break;
-                case INVALID_STEP:
-                    ret_cod = LIXA_RC_INVALID_STATUS;
-                    break;
-                case NONE:
-                    ret_cod = LIXA_RC_OK;
-                    break;
-                default:
-                    ret_cod = LIXA_RC_INTERNAL_ERROR;
-            } /* switch (excp) */
-        } /* TRY-CATCH */
+    } CATCH {
+        switch (excp) {
+            case SERVER_TRANS_8_ERROR:
+                break;
+            case INVALID_STEP:
+                ret_cod = LIXA_RC_INVALID_STATUS;
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
     LIXA_TRACE(("server_trans/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -182,6 +181,7 @@ int server_trans_8(struct thread_status_s *ts, size_t slot_id,
         g_array_free(result, TRUE);
     LIXA_TRACE(("server_trans_8/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -263,6 +263,7 @@ int server_trans_result(struct thread_status_s *ts,
     } /* TRY-CATCH */
     LIXA_TRACE(("server_trans_result/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -284,18 +285,17 @@ int server_trans_empty_result(struct thread_status_s *ts,
         lmo->body.trans_16.answer.rc = LIXA_RC_OBJ_NOT_FOUND;
 
         THROW(NONE);
-    }
-    CATCH
-        {
-            switch (excp) {
-                case NONE:
-                    ret_cod = LIXA_RC_OK;
-                    break;
-                default:
-                    ret_cod = LIXA_RC_INTERNAL_ERROR;
-            } /* switch (excp) */
-        } /* TRY-CATCH */
+    } CATCH {
+        switch (excp) {
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
     LIXA_TRACE(("server_trans_empty_result/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }

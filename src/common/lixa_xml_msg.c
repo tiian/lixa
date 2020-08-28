@@ -263,6 +263,7 @@ int lixa_msg_retrieve(int fd, int timeout,
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_msg_retrieve/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -327,6 +328,7 @@ int lixa_msg_send(int fd, const char *buf, size_t buf_size)
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_msg_send/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -603,5 +605,6 @@ int lixa_msg_free(struct lixa_msg_s *msg)
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_msg_free/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }

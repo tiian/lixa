@@ -43,17 +43,17 @@
 /* PostgreSQL front-end */
 #include <libpq-fe.h>
 /* PostgreSQL XA wrapper provided by LIXA (private header) */
-#include <liblixapq.h>
+#include "liblixapq.h"
 /* PostgreSQL XA wrapper provided by LIXA (public header) */
-#include <lixapq.h>
+#include "lixapq.h"
 /* LIXA standard trace library: it could be removed if "TRACE" calls would
  * be removed from this source */
-#include <lixa_trace.h>
+#include "lixa_trace.h"
 /* LIXA convenience macros: it could be removed if "TRY/CATCH" statement
  * would be removed from this source */
-#include <lixa_defines.h>
+#include "lixa_defines.h"
 /* LIXA xid: it contains XID serialization/deserialization utilities */
-#include <lixa_xid.h>
+#include "lixa_xid.h"
 
 
 

@@ -207,8 +207,9 @@ void xa_context_reset(xa_context_t *xa_context)
 
 int lixavsr_parse_flag(const char *token, long *flag)
 {
-    enum Exception { INVALID_OPTION
-                     , NONE } excp;
+    enum Exception {
+        INVALID_OPTION,
+        NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     
     LIXA_TRACE(("lixavsr_parse_flag\n"));
@@ -242,6 +243,7 @@ int lixavsr_parse_flag(const char *token, long *flag)
     } /* TRY-CATCH */
     LIXA_TRACE(("lixavsr_parse_flag/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -262,9 +264,10 @@ int lixavsr_check_rmid(const int rmid)
 
 int lixavsr_parse_flags(const char *token, long *flags)
 {
-    enum Exception { PARSE_FLAG1
-                     , PARSE_FLAG2
-                     , NONE } excp;
+    enum Exception {
+        PARSE_FLAG1,
+        PARSE_FLAG2,
+        NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     
     LIXA_TRACE(("lixavsr_parse_flags\n"));
@@ -316,6 +319,7 @@ int lixavsr_parse_flags(const char *token, long *flags)
     } /* TRY-CATCH */
     LIXA_TRACE(("lixavsr_parse_flags/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -323,9 +327,10 @@ int lixavsr_parse_flags(const char *token, long *flags)
 
 int lixavsr_parse_info_rmid_flags(const char *token, parsed_function_t *pf)
 {
-    enum Exception { OUT_OF_RANGE
-                     , PARSE_FLAGS
-                     , NONE } excp;
+    enum Exception {
+        OUT_OF_RANGE,
+        PARSE_FLAGS,
+        NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     
     LIXA_TRACE(("lixavsr_parse_info_rmid_flags\n"));
@@ -376,6 +381,7 @@ int lixavsr_parse_info_rmid_flags(const char *token, parsed_function_t *pf)
     } /* TRY-CATCH */
     LIXA_TRACE(("lixavsr_parse_info_rmid_flags/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -383,8 +389,10 @@ int lixavsr_parse_info_rmid_flags(const char *token, parsed_function_t *pf)
 
 int lixavsr_parse_xid(lixa_ser_xid_t lsx, XID *xid)
 {
-    enum Exception { XID_DESERIALIZED
-                     , NONE } excp;
+    enum Exception {
+        XID_DESERIALIZED,
+        NONE
+    } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     
     LIXA_TRACE(("lixavsr_parse_xid\n"));
@@ -406,6 +414,7 @@ int lixavsr_parse_xid(lixa_ser_xid_t lsx, XID *xid)
     } /* TRY-CATCH */
     LIXA_TRACE(("lixavsr_parse_xid/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -413,10 +422,12 @@ int lixavsr_parse_xid(lixa_ser_xid_t lsx, XID *xid)
 
 int lixavsr_parse_xid_rmid_flags(const char *token, parsed_function_t *pf)
 {
-    enum Exception { PARSE_XID
-                     , OUT_OF_RANGE
-                     , PARSE_FLAGS
-                     , NONE } excp;
+    enum Exception {
+        PARSE_XID,
+        OUT_OF_RANGE,
+        PARSE_FLAGS,
+        NONE
+    } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     
     LIXA_TRACE(("lixavsr_parse_xid_rmid_flags\n"));
@@ -472,13 +483,16 @@ int lixavsr_parse_xid_rmid_flags(const char *token, parsed_function_t *pf)
     } /* TRY-CATCH */
     LIXA_TRACE(("lixavsr_parse_xid_rmid_flags/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
 
 int lixavsr_parse_rm_exec1_args(const char *token, parsed_function_t *pf)
 {
-    enum Exception { NONE } excp;
+    enum Exception {
+        NONE
+    } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     
     LIXA_TRACE(("lixavsr_parse_rm_exec1_args\n"));
@@ -508,6 +522,7 @@ int lixavsr_parse_rm_exec1_args(const char *token, parsed_function_t *pf)
     } /* TRY-CATCH */
     LIXA_TRACE(("lixavsr_parse_rm_exec1_args/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -515,12 +530,14 @@ int lixavsr_parse_rm_exec1_args(const char *token, parsed_function_t *pf)
 
 int lixavsr_parse_function(const char *token, parsed_function_t *pf)
 {
-    enum Exception { INVALID_OPTION
-                     , INTERNAL_ERROR
-                     , PARSE_TWO_ARGS
-                     , PARSE_THREE_ARGS
-                     , PARSE_RM_EXEC1_ARGS
-                     , NONE } excp;
+    enum Exception {
+        INVALID_OPTION,
+        INTERNAL_ERROR,
+        PARSE_TWO_ARGS,
+        PARSE_THREE_ARGS,
+        PARSE_RM_EXEC1_ARGS,
+        NONE
+    } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     
     LIXA_TRACE(("lixavsr_parse_function\n"));
@@ -591,6 +608,7 @@ int lixavsr_parse_function(const char *token, parsed_function_t *pf)
     } /* TRY-CATCH */
     LIXA_TRACE(("lixavsr_parse_function/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -599,12 +617,14 @@ int lixavsr_parse_function(const char *token, parsed_function_t *pf)
 int lixavsr_parse_record(const char *record,
                          parsed_statement_t *parsed_statement)
 {
-    enum Exception { NULL_OBJECT
-                     , NO_TOC
-                     , NO_FUNC
-                     , PARSE_FUNCTION
-                     , NO_RETCOD
-                     , NONE } excp;
+    enum Exception {
+        NULL_OBJECT,
+        NO_TOC,
+        NO_FUNC,
+        PARSE_FUNCTION,
+        NO_RETCOD,
+        NONE
+    } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     char buffer[RECORD_SIZE];
     
@@ -672,6 +692,7 @@ int lixavsr_parse_record(const char *record,
     } /* TRY-CATCH */
     LIXA_TRACE(("lixavsr_parse_record/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -680,9 +701,11 @@ int lixavsr_parse_record(const char *record,
 int rm_pql_exec1(const char *sql_statement)
 {
 #ifdef HAVE_POSTGRESQL
-    enum Exception { NULL_OBJECT
-                     , PQL_QUERY
-                     , NONE } excp;
+    enum Exception {
+        NULL_OBJECT,
+        PQL_QUERY,
+        NONE
+    } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
 
     /* MySQL connection */
@@ -725,9 +748,11 @@ int rm_pql_exec1(const char *sql_statement)
     } /* TRY-CATCH */
     LIXA_TRACE(("rm_pql_exec1/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 #else
     LIXA_TRACE(("rm_pql_exec1: not configured for PostgreSQL Database!\n"));
+    LIXA_TRACE_STACK();
     return LIXA_RC_BYPASSED_OPERATION;
 #endif
 }
@@ -737,9 +762,11 @@ int rm_pql_exec1(const char *sql_statement)
 int rm_mys_exec1(const char *sql_statement)
 {
 #ifdef HAVE_MYSQL
-    enum Exception { NULL_OBJECT
-                     , MYSQL_QUERY
-                     , NONE } excp;
+    enum Exception {
+        NULL_OBJECT,
+        MYSQL_QUERY,
+        NONE
+    } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
 
     /* MySQL connection */
@@ -778,9 +805,11 @@ int rm_mys_exec1(const char *sql_statement)
     } /* TRY-CATCH */
     LIXA_TRACE(("rm_mys_exec1/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 #else
     LIXA_TRACE(("rm_mys_exec1: not configured for MySQL Database!\n"));
+    LIXA_TRACE_STACK();
     return LIXA_RC_BYPASSED_OPERATION;
 #endif
 }
@@ -790,13 +819,15 @@ int rm_mys_exec1(const char *sql_statement)
 int rm_ora_exec1(const char *sql_statement)
 {
 #ifdef HAVE_ORACLE
-    enum Exception { XAO_ENV_ERROR
-                     , XAO_SVC_CTX_ERROR
-                     , OCI_HANDLE_ALLOC_ERROR1
-                     , OCI_HANDLE_ALLOC_ERROR2
-                     , OCI_STMT_PREPARE
-                     , OCI_STMT_EXECUTE
-                     , NONE } excp;
+    enum Exception {
+        XAO_ENV_ERROR,
+        XAO_SVC_CTX_ERROR,
+        OCI_HANDLE_ALLOC_ERROR1,
+        OCI_HANDLE_ALLOC_ERROR2,
+        OCI_STMT_PREPARE,
+        OCI_STMT_EXECUTE,
+        NONE
+    } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     
     LIXA_TRACE(("rm_ora_exec1\n"));
@@ -877,9 +908,11 @@ int rm_ora_exec1(const char *sql_statement)
     } /* TRY-CATCH */
     LIXA_TRACE(("rm_ora_exec1/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 #else
     LIXA_TRACE(("rm_ora_exec1: not configured for Oracle Database!\n"));
+    LIXA_TRACE_STACK();
     return LIXA_RC_BYPASSED_OPERATION;
 #endif
 }
@@ -889,9 +922,11 @@ int rm_ora_exec1(const char *sql_statement)
 int lixavsr_execute_function(parsed_function_t *parsed_function,
                              int *rc)
 {
-    enum Exception { OUT_OF_RANGE1
-                     , OUT_OF_RANGE2
-                     , NONE } excp;
+    enum Exception {
+        OUT_OF_RANGE1,
+        OUT_OF_RANGE2,
+        NONE
+    } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     
     LIXA_TRACE(("lixavsr_execute_function\n"));
@@ -1133,6 +1168,7 @@ int lixavsr_execute_function(parsed_function_t *parsed_function,
     } /* TRY-CATCH */
     LIXA_TRACE(("lixavsr_execute_function/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -1140,10 +1176,12 @@ int lixavsr_execute_function(parsed_function_t *parsed_function,
 
 void lixavsr_threadofcontrol(pipes_t *pipes)
 {
-    enum Exception { READ_ERROR
-                     , EXECUTE_XA_FUNCTION
-                     , WRITE_ERROR
-                     , NONE } excp;
+    enum Exception {
+        READ_ERROR,
+        EXECUTE_XA_FUNCTION,
+        WRITE_ERROR,
+        NONE
+    } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     pipes_t my_pipes = *pipes; /* make a local copy */
     
@@ -1206,6 +1244,7 @@ void lixavsr_threadofcontrol(pipes_t *pipes)
     /* closing pipes before exiting */
     close(my_pipes.read);
     close(my_pipes.write);
+    LIXA_TRACE_STACK();
     if (!threads)
         exit (LIXA_RC_OK == ret_cod ? 0 : 1);
 }
@@ -1216,12 +1255,14 @@ int lixavsr_activate_threadofcontrol(xa_context_t *xa_context,
                                      int thread_of_control,
                                      pipes_t *tmp_pipes)
 {
-    enum Exception { PIPE_ERROR1
-                     , PIPE_ERROR2
-                     , G_THREAD_CREATE_ERROR
-                     , FORK_ERROR
-                     , THREADOFCONTROL2
-                     , NONE } excp;
+    enum Exception {
+        PIPE_ERROR1,
+        PIPE_ERROR2,
+        G_THREAD_CREATE_ERROR,
+        FORK_ERROR,
+        THREADOFCONTROL2,
+        NONE
+    } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     
     LIXA_TRACE(("lixavsr_activate_threadofcontrol\n"));
@@ -1298,6 +1339,7 @@ int lixavsr_activate_threadofcontrol(xa_context_t *xa_context,
     } /* TRY-CATCH */
     LIXA_TRACE(("lixavsr_activate_threadofcontrol/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -1306,13 +1348,15 @@ int lixavsr_activate_threadofcontrol(xa_context_t *xa_context,
 int lixavsr_execute_record(xa_context_t *xa_context,
                            parsed_statement_t *parsed_statement)
 {
-    enum Exception { OUT_OF_RANGE
-                     , ACTIVATE_THREADOFCONTROL
-                     , WRITE_ERROR
-                     , READ_ERROR
-                     , XA_ERROR
-                     , WAITPID_ERROR
-                     , NONE } excp;
+    enum Exception {
+        OUT_OF_RANGE,
+        ACTIVATE_THREADOFCONTROL,
+        WRITE_ERROR,
+        READ_ERROR,
+        XA_ERROR,
+        WAITPID_ERROR,
+        NONE
+    } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     
     LIXA_TRACE(("lixavsr_execute_record\n"));
@@ -1432,6 +1476,7 @@ int lixavsr_execute_record(xa_context_t *xa_context,
     } /* TRY-CATCH */
     LIXA_TRACE(("lixavsr_execute_record/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -1546,6 +1591,7 @@ int lixavsr_parse_file(const char *filename)
         fclose(file);
     LIXA_TRACE(("lixavsr_parse_file/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 

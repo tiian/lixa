@@ -24,26 +24,24 @@
 
 #endif
 #ifdef HAVE_SYSLOG_H
-
 #include <syslog.h>
-
 #endif
 #ifdef HAVE_LIBXML_XMLVERSION_H
-
 #include <libxml/xmlversion.h>
-
 #endif
 #ifdef HAVE_LIBXML_PARSER_H
-
 #include <libxml/parser.h>
-
 #endif
 
-#include <lixa_trace.h>
-#include <lixa_crash.h>
-#include <lixa_errors.h>
-#include <lixa_tx.h>
-#include <lixa_xid.h>
+
+
+#include "lixa_trace.h"
+#include "lixa_crash.h"
+#include "lixa_errors.h"
+#include "lixa_tx.h"
+#include "lixa_xid.h"
+
+
 
 /* set module trace flag */
 #ifdef LIXA_TRACE_MODULE
@@ -58,6 +56,8 @@ static GOptionEntry entries[] =
     {"report", 'r', 0, G_OPTION_ARG_NONE, &report, "Report on all transactions linked to the current configuration and profile"},
     {NULL}
 };
+
+
 
 int main(int argc, char **argv)
 {

@@ -140,6 +140,7 @@ int lixa_state_table_init(lixa_state_table_t *this,
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_state_table_init/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -251,6 +252,7 @@ int lixa_state_table_create_new_file(lixa_state_table_t *this,
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_state_table_create_new_file/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -357,6 +359,7 @@ int lixa_state_table_open_file(lixa_state_table_t *this)
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_state_table_open_file/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -519,6 +522,7 @@ int lixa_state_table_check_integrity(lixa_state_table_t *this)
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_state_table_check_integrity/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -575,6 +579,7 @@ int lixa_state_table_close(lixa_state_table_t *this)
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_state_table_close/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -674,6 +679,7 @@ int lixa_state_table_shutdown(lixa_state_table_t *this)
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_state_table_shutdown/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -764,6 +770,7 @@ int lixa_state_table_map(lixa_state_table_t *this, int read_only)
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_state_table_map/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -808,6 +815,7 @@ int lixa_state_table_file_exist(lixa_state_table_t *this)
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_state_table_file_exist/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -852,6 +860,7 @@ int lixa_state_table_clean(lixa_state_table_t *this)
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_state_table_clean/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -1029,6 +1038,7 @@ int lixa_state_table_extend(lixa_state_table_t *this,
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_state_table_extend/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -1201,6 +1211,7 @@ int lixa_state_table_set_status(lixa_state_table_t *this,
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_state_table_set_status/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -1290,6 +1301,7 @@ int lixa_state_table_insert_block(lixa_state_table_t *this,
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_state_table_insert_block/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -1439,6 +1451,7 @@ int lixa_state_table_delete_block(lixa_state_table_t *this,
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_state_table_delete_block/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -1551,6 +1564,7 @@ int lixa_state_table_copy_from(lixa_state_table_t *this,
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_state_table_copy_from/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -1692,6 +1706,7 @@ int lixa_state_table_sync_map(lixa_state_table_t *this, int last_sync)
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_state_table_sync_map/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -1744,6 +1759,7 @@ int lixa_state_table_set_last_record_id(lixa_state_table_t *this,
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_state_table_set_last_record_id/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -1839,6 +1855,7 @@ int lixa_state_table_patch_slot(lixa_state_table_t *this,
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_state_table_patch_slot/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -1921,6 +1938,7 @@ int lixa_state_table_sync_slot(lixa_state_table_t *this,
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_state_table_sync_slot/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -1976,6 +1994,7 @@ int lixa_state_table_refresh_checksums(lixa_state_table_t *this,
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_state_table_refresh_checksums/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 

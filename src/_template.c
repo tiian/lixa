@@ -19,5 +19,6 @@
     } /* TRY-CATCH */
     LIXA_TRACE(("/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }

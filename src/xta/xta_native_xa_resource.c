@@ -87,6 +87,7 @@ xta_native_xa_resource_t *xta_native_xa_resource_new(
     } /* TRY-CATCH */
     LIXA_TRACE(("xta_native_xa_resource_new/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return this;
 }
 
@@ -134,6 +135,7 @@ xta_native_xa_resource_t *xta_native_xa_resource_new_by_rmid(
     }
     LIXA_TRACE(("xta_native_xa_resource_new_by_rmid/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return this;
 }
 
@@ -163,6 +165,7 @@ void xta_native_xa_resource_delete(xta_native_xa_resource_t *xa_resource)
     } /* TRY-CATCH */
     LIXA_TRACE(("xta_native_xa_resource_delete/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return;
 }
 
@@ -288,6 +291,7 @@ int xta_native_xa_resource_init(
     } /* TRY-CATCH */
     LIXA_TRACE(("xta_native_xa_resource_init/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }
 
@@ -343,6 +347,7 @@ void xta_native_xa_resource_clean(xta_native_xa_resource_t *xa_resource)
     } /* TRY-CATCH */
     LIXA_TRACE(("xta_native_xa_resource_clean/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return;
 }
 

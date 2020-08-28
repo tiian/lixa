@@ -157,5 +157,6 @@ int lixa_nonapi_parse_conn_string(const char *conn_string,
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_nonapi_parse_conn_string/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
     return ret_cod;
 }

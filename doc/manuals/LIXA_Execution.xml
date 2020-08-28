@@ -368,8 +368,7 @@ Application Options:
       rollback dummy distributed transaction
       <footnote><para>
 	  <command>lixat</command> can be used <quote>in benchmark mode</quote>
-	  as well, but that usage is explained in
-	  <xref linkend="Tuning_example"/>
+	  as well
       </para></footnote>.
       Below there's the output of a trivial execution: the program connects
       to the state server, performs tx_open() against all the configured 
