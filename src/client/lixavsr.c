@@ -700,7 +700,6 @@ int lixavsr_parse_record(const char *record,
 
 int rm_pql_exec1(const char *sql_statement)
 {
-#ifdef HAVE_POSTGRESQL
     enum Exception {
         NULL_OBJECT,
         PQL_QUERY,
@@ -708,6 +707,7 @@ int rm_pql_exec1(const char *sql_statement)
     } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
 
+#ifdef HAVE_POSTGRESQL
     /* MySQL connection */
     PGconn     *conn = NULL;
     PGresult   *res = NULL;
@@ -761,7 +761,6 @@ int rm_pql_exec1(const char *sql_statement)
 
 int rm_mys_exec1(const char *sql_statement)
 {
-#ifdef HAVE_MYSQL
     enum Exception {
         NULL_OBJECT,
         MYSQL_QUERY,
@@ -769,6 +768,7 @@ int rm_mys_exec1(const char *sql_statement)
     } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
 
+#ifdef HAVE_MYSQL
     /* MySQL connection */
     MYSQL *conn = NULL;
     LIXA_TRACE(("rm_mys_exec1\n"));
@@ -818,7 +818,6 @@ int rm_mys_exec1(const char *sql_statement)
 
 int rm_ora_exec1(const char *sql_statement)
 {
-#ifdef HAVE_ORACLE
     enum Exception {
         XAO_ENV_ERROR,
         XAO_SVC_CTX_ERROR,
@@ -830,6 +829,7 @@ int rm_ora_exec1(const char *sql_statement)
     } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     
+#ifdef HAVE_ORACLE
     LIXA_TRACE(("rm_ora_exec1\n"));
     TRY {
         int           ocirc;

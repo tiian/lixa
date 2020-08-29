@@ -1,5 +1,3 @@
-Put LIXA_TRACE_STACK() at the end of every function!
-
 Under very high workload the state server stops with a controlled shutdown;
 tracing is not viable because with active tracing the workload is lower and the
 issue does not happen.
@@ -32,8 +30,6 @@ exit with warnings/errors, exit with errors *** A new macro that call
 lixa_trace if necessary. This would be useful to catch the stacktrace when
 a more aggressive tracing is not possible in production. Add a new env var
 to specify it like LIXA_STACK_TRACE=ALL|WARNINGS|ERRORS
-
-Restart from LIXA_Tuning.xml @@@
 
 Document parameters for direct write...  o_direct_  o_dsync_  o_rsync_ o_sync_
 Document parameters log_size and max_buffer_log_size
