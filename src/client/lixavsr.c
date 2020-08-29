@@ -704,7 +704,7 @@ int rm_pql_exec1(const char *sql_statement)
         NULL_OBJECT,
         PQL_QUERY,
         NONE
-    } excp;
+    } excp = NONE;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
 
 #ifdef HAVE_POSTGRESQL
@@ -765,7 +765,7 @@ int rm_mys_exec1(const char *sql_statement)
         NULL_OBJECT,
         MYSQL_QUERY,
         NONE
-    } excp;
+    } excp = NONE;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
 
 #ifdef HAVE_MYSQL
@@ -826,7 +826,7 @@ int rm_ora_exec1(const char *sql_statement)
         OCI_STMT_PREPARE,
         OCI_STMT_EXECUTE,
         NONE
-    } excp;
+    } excp = NONE;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     
 #ifdef HAVE_ORACLE
