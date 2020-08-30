@@ -700,8 +700,8 @@ int lixa_state_log_open_file(lixa_state_log_t *this, void *single_page)
             THROW(INVALID_STATUS);
         
         LIXA_SYSLOG((LOG_DEBUG, LIXA_SYSLOG_LXD065D, this->pathname));
-        /* open the file descriptor */
-        if (-1 == (this->fd = open(this->pathname, this->flags))) {
+        /* open the file descriptor for read-only */
+        if (-1 == (this->fd = open(this->pathname, O_RDONLY))) {
             LIXA_TRACE(("lixa_state_log_open_file: open('%s')=%d "
                         "(%s)\n", this->pathname, errno, strerror(errno)));
             LIXA_SYSLOG((LOG_WARNING, LIXA_SYSLOG_LXD066W,
@@ -839,6 +839,72 @@ int lixa_state_log_open_file(lixa_state_log_t *this, void *single_page)
         } /* switch (excp) */
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_state_log_open_file/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
+    return ret_cod;
+}
+
+
+
+int lixa_state_log_reopen_file(lixa_state_log_t *this)
+{
+    enum Exception {
+        NULL_OBJECT,
+        INVALID_OPTION,
+        CLOSE_ERROR,
+        OPEN_ERROR,
+        NONE
+    } excp = NONE;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    
+    LIXA_TRACE(("lixa_state_log_reopen_file\n"));
+    TRY {
+        if (NULL == this)
+            THROW(NULL_OBJECT);
+
+        if (LIXA_NULL_FD == this->fd)
+            THROW(INVALID_OPTION);
+        
+        /* close the current file descriptor */
+        if (0 != close(this->fd))
+            THROW(CLOSE_ERROR);
+        this->fd = LIXA_NULL_FD;
+        /* reopen using flags optimized for writing */
+        /* open the file descriptor */
+        LIXA_TRACE(("lixa_state_log_reopen_file: reopen file descriptor for "
+                    "file '%s' using flags %d\n",
+                    this->pathname, this->flags));
+        if (-1 == (this->fd = open(this->pathname, this->flags))) {
+            LIXA_TRACE(("lixa_state_log_reopen_file: open('%s')=%d "
+                        "(%s)\n", this->pathname, errno, strerror(errno)));
+            LIXA_SYSLOG((LOG_ERR, LIXA_SYSLOG_LXD080E,
+                         this->pathname, errno, strerror(errno)));
+            THROW(OPEN_ERROR);
+        }        
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case NULL_OBJECT:
+                ret_cod = LIXA_RC_NULL_OBJECT;
+                break;
+            case INVALID_OPTION:
+                ret_cod = LIXA_RC_INVALID_OPTION;
+                break;
+            case CLOSE_ERROR:
+                ret_cod = LIXA_RC_CLOSE_ERROR;
+                break;
+            case OPEN_ERROR:
+                ret_cod = LIXA_RC_OPEN_ERROR;
+                break;
+            case NONE:
+                ret_cod = LIXA_RC_OK;
+                break;
+            default:
+                ret_cod = LIXA_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    LIXA_TRACE(("lixa_state_log_reopen_file/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     LIXA_TRACE_STACK();
     return ret_cod;

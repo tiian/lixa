@@ -611,6 +611,7 @@ int lixa_state_warm_start(lixa_state_t *this,
         TABLE_SET_STATUS2,
         TABLE_SET_STATUS3,
         STATE_LOG_CLOSE_ERROR,
+        STATE_LOG_REOPEN_FILE_ERROR,
         LOG_SET_STATUS,
         SWITCH_ERROR,
         NONE
@@ -864,6 +865,11 @@ int lixa_state_warm_start(lixa_state_t *this,
                 if (LIXA_RC_OK != (ret_cod = lixa_state_log_close(
                                        &this->logs[i])))
                     THROW(STATE_LOG_CLOSE_ERROR);
+                /* reopen the file descriptor for write optimization */
+                if (LIXA_RC_OK != (ret_cod = lixa_state_log_reopen_file(
+                                       &this->logs[i])))
+                    THROW(STATE_LOG_REOPEN_FILE_ERROR);
+                /* change the status */
                 if (LIXA_RC_OK != (
                         ret_cod = lixa_state_log_set_status(
                             &this->logs[i], STATE_LOG_DISPOSED, FALSE)))
@@ -896,6 +902,7 @@ int lixa_state_warm_start(lixa_state_t *this,
             case TABLE_CHECK_INTEGRITY:
             case SWITCH_ERROR:
             case STATE_LOG_CLOSE_ERROR:
+            case STATE_LOG_REOPEN_FILE_ERROR:
                 break;
             case TABLE_SET_STATUS1:
             case STATE_TABLE_CLOSE_ERROR:

@@ -308,7 +308,7 @@ extern "C" {
 
 
     /**
-     * Open an existing state log file
+     * Open an existing state log file for initial reading
      * @param[in,out] this state log object
      * @param[in,out] single_page of memory that's page aligned and that can
      *                be used for buffering
@@ -318,6 +318,16 @@ extern "C" {
 
     
 
+    /**
+     * Reopen an existing state log file for writing, applying write specific
+     * flags
+     * @param[in,out] this state log object
+     * @return a reason code
+     */     
+    int lixa_state_log_reopen_file(lixa_state_log_t *this);
+
+    
+    
     /**
      * Retrieve a record from the underlying file
      * @param[in,out] this state log object

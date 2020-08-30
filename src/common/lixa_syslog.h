@@ -307,6 +307,8 @@
     "actual storage performance"
 #define LIXA_SYSLOG_LXD079W "LXD079W table '%s' is corrupted and " \
     "it can not be a base state for warm restart"
+#define LIXA_SYSLOG_LXD080E "LXD080E state log file '%s' can not be " \
+    "opened: errno=%d (%s)"
 
 
 

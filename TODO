@@ -25,11 +25,6 @@ Some ideas:
 It seems to happen after many interactions: dump the content of the state to
 check how many "dirty" transactions are inside it.
 Check the log switch: it seems to switch too many times.
-*** Implement a new type of trace for exit function only to trace every exit,
-exit with warnings/errors, exit with errors *** A new macro that call
-lixa_trace if necessary. This would be useful to catch the stacktrace when
-a more aggressive tracing is not possible in production. Add a new env var
-to specify it like LIXA_STACK_TRACE=ALL|WARNINGS|ERRORS
 
 Document parameters for direct write...  o_direct_  o_dsync_  o_rsync_ o_sync_
 Document parameters log_size and max_buffer_log_size
@@ -42,6 +37,14 @@ Implement auto-migration from old state files to new state tables:
 - if cold start & state files exists => migrate and switch
 - if cold start & state files does not exist => cold start new state tables
 - if warm start => ignore old state files
+
+lixad restart is slow for journal state engine when logs are big:
+- 15-30% of "wait CPU time" from top
+- up to 2000 IOPS
+- CPU at 20% usage
+the first hint could be working on a larger buffer instead of single page as it
+is (or I think should be) now. Can be used the same buffer allocated for
+writing in this read-only phase?!
 
 Clean memory leaks by mean of valgrind
 
