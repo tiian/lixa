@@ -949,14 +949,16 @@ int lixa_state_log_reopen_file(lixa_state_log_t *this)
 
 
 int lixa_state_log_read_file(lixa_state_log_t *this, off_t pos, off_t prev_pos,
-                             struct lixa_state_log_record_s *buffer,
-                             void *single_page)
+                             const struct lixa_state_log_record_s **record,
+                             void *buffer, off_t pages_per_buffer)
 {
     enum Exception {
         NULL_OBJECT,
         INVALID_STATUS,
         PREAD_ERROR,
+        /*
         BUFFER_OVERFLOW,
+        */
         NONE
     } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
@@ -966,6 +968,7 @@ int lixa_state_log_read_file(lixa_state_log_t *this, off_t pos, off_t prev_pos,
     TRY {
         off_t page_number, pos_in_page, prev_page_number;
         ssize_t read_bytes;
+        size_t page_in_buffer;
         
         if (NULL == this)
             THROW(NULL_OBJECT);
@@ -978,27 +981,35 @@ int lixa_state_log_read_file(lixa_state_log_t *this, off_t pos, off_t prev_pos,
         page_number = pos / LIXA_STATE_LOG_RECORDS_PER_PAGE;
         prev_page_number = prev_pos / LIXA_STATE_LOG_RECORDS_PER_PAGE;
         pos_in_page = pos % LIXA_STATE_LOG_RECORDS_PER_PAGE;
+        page_in_buffer = page_number % pages_per_buffer;
         if (page_number != prev_page_number) {
-            /* read the whole page that contains the record */
-            read_bytes = pread(this->fd, single_page, LIXA_SYSTEM_PAGE_SIZE,
-                               page_number*LIXA_SYSTEM_PAGE_SIZE);
-            /* pread OK? */
-            if (0 >= read_bytes) {
-                LIXA_TRACE(("lixa_state_log_read_file: pread() returned error "
-                            "%d ('%s'); read_bytes=" SSIZE_T_FORMAT "\n",
-                            errno, strerror(errno)));
-                THROW(PREAD_ERROR);
-            }
-            /* the record has been read (the page could be broken if it's the
-               last one) */
-            if (read_bytes <
-                (pos_in_page+1)*sizeof(struct lixa_state_log_record_s))
-                THROW(BUFFER_OVERFLOW);
+            /* should a new buffer be read? */
+            if (0 == page_in_buffer) {
+                /* read the complete buffer that contains the page that
+                   contains the record */
+                read_bytes = pread(this->fd, buffer,
+                                   pages_per_buffer * LIXA_SYSTEM_PAGE_SIZE,
+                                   page_number * LIXA_SYSTEM_PAGE_SIZE);
+                /* pread OK? */
+                if (0 >= read_bytes) {
+                    LIXA_TRACE(("lixa_state_log_read_file: pread() returned "
+                                "error %d ('%s'); read_bytes=" SSIZE_T_FORMAT
+                                "\n", errno, strerror(errno)));
+                    THROW(PREAD_ERROR);
+                }
+                /* the record has been read (the page could be broken if it's
+                   the last one) */
+                /* @@@ remove me 2020-09-04 
+                if (read_bytes <
+                    (pos_in_page+1)*sizeof(struct lixa_state_log_record_s))
+                    THROW(BUFFER_OVERFLOW);
+                */
+            }            
         } /* if (page_number != prev_page_number) */
         /* copy data to buffer */
-        memcpy(buffer, single_page +
-               pos_in_page * sizeof(struct lixa_state_log_record_s),
-               sizeof(struct lixa_state_log_record_s));
+        *record = (struct lixa_state_log_record_s *)
+            (buffer + page_in_buffer * LIXA_SYSTEM_PAGE_SIZE +
+             pos_in_page * sizeof(struct lixa_state_log_record_s));
         
         THROW(NONE);
     } CATCH {
@@ -1012,9 +1023,11 @@ int lixa_state_log_read_file(lixa_state_log_t *this, off_t pos, off_t prev_pos,
             case PREAD_ERROR:
                 ret_cod = LIXA_RC_PREAD_ERROR;
                 break;
+                /*
             case BUFFER_OVERFLOW:
                 ret_cod = LIXA_RC_BUFFER_OVERFLOW;
                 break;
+                */
             case NONE:
                 ret_cod = LIXA_RC_OK;
                 break;

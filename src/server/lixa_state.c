@@ -602,6 +602,7 @@ int lixa_state_warm_start(lixa_state_t *this,
         NULL_OBJECT,
         TABLE_OPEN_ERROR,
         CORRUPTED_STATUS_FILE,
+        POSIX_MEMALIGN_ERROR,
         LOG_READ_FILE,
         TABLE_PATCH_SLOT,
         TABLE_SET_LAST_RECORD_ID,
@@ -617,11 +618,15 @@ int lixa_state_warm_start(lixa_state_t *this,
         NONE
     } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    void *buffer = NULL; /* buffer for reading log file */
     
     LIXA_TRACE(("lixa_state_warm_start\n"));
     TRY {
         int i, last_table = -1;
         lixa_word_t last_record_id;
+        size_t buffer_size;
+        off_t pages_per_buffer;
+        int pm_error;
 
         if (NULL == this)
             THROW(NULL_OBJECT);
@@ -735,11 +740,26 @@ int lixa_state_warm_start(lixa_state_t *this,
                 &this->tables[last_table]);
         }
         
+        /* adjust buffer_size to a multiple of system page size */
+        buffer_size = (this->max_buffer_log_size / LIXA_SYSTEM_PAGE_SIZE + 1) *
+            LIXA_SYSTEM_PAGE_SIZE;
+        pages_per_buffer = buffer_size / LIXA_SYSTEM_PAGE_SIZE;
+        /* allocate a buffer to read the file */
+        LIXA_TRACE(("lixa_state_warm_start: allocating a buffer of "
+                    SIZE_T_FORMAT " bytes (" OFF_T_FORMAT " pages per buffer"
+                    ") to read log files\n", buffer_size, pages_per_buffer));
+        if (0 != (pm_error = posix_memalign(
+                      &buffer, LIXA_SYSTEM_PAGE_SIZE, buffer_size))) {
+            LIXA_TRACE(("lixa_state_warm_start/posix_memalign: error=%d\n",
+                        pm_error));
+            THROW(POSIX_MEMALIGN_ERROR);
+        }
+        
         /* looping on all logs */
         i = last_table;
         do { /* looping on all logs using variable i */
             off_t j=0, prev_j=-1, count=0, num_rec=0;
-            struct lixa_state_log_record_s buffer;
+            const struct lixa_state_log_record_s *record;
             int order;
 
             LIXA_TRACE(("lixa_state_warm_start: analyzing " OFF_T_FORMAT
@@ -752,8 +772,8 @@ int lixa_state_warm_start(lixa_state_t *this,
             while (num_rec<lixa_state_log_get_ri_number_of_records(
                        &this->logs[i])) {
                 if (LIXA_RC_OK != (ret_cod = lixa_state_log_read_file(
-                                       &this->logs[i], j, prev_j++, &buffer,
-                                       this->single_page)))
+                                       &this->logs[i], j, prev_j++, &record,
+                                       buffer, pages_per_buffer)))
                     THROW(LOG_READ_FILE);
                 /* check if the log record must be applied to the state
                    table */
@@ -762,23 +782,23 @@ int lixa_state_warm_start(lixa_state_t *this,
                         &this->tables[last_table]),
                     lixa_state_table_get_last_sync(
                         &this->tables[last_table]),
-                    lixa_state_log_record_get_id(&buffer),
-                    lixa_state_log_record_get_timestamp(&buffer));
+                    lixa_state_log_record_get_id(record),
+                    lixa_state_log_record_get_timestamp(record));
                 /* analyze the log record and applies it if necessary */
-                if (!lixa_state_log_record_is_valid(&buffer)) {
+                if (!lixa_state_log_record_is_valid(record)) {
                     LIXA_TRACE(("lixa_state_warm_start: log record # "
                                 OFF_T_FORMAT ", id=" UINT32_T_FORMAT
                                 ", can NOT be applied because it's "
                                 "corrupted\n", j,
-                                lixa_state_log_record_get_id(&buffer)));
-                } else if (lixa_state_log_record_get_id(&buffer) !=
+                                lixa_state_log_record_get_id(record)));
+                } else if (lixa_state_log_record_get_id(record) !=
                            last_record_id+1) {
                     LIXA_TRACE(("lixa_state_warm_start: log record # "
                                 OFF_T_FORMAT ", id=" UINT32_T_FORMAT
                                 ", can NOT be applied because it's "
                                 "out of sequence (expected id="
                                 UINT32_T_FORMAT ")\n", j,
-                                lixa_state_log_record_get_id(&buffer),
+                                lixa_state_log_record_get_id(record),
                                 last_record_id+1));
                     num_rec++;
                 } else if (order >= 0) {
@@ -787,7 +807,7 @@ int lixa_state_warm_start(lixa_state_t *this,
                                 ", can NOT be applied because it's not "
                                 "younger that state table last_record_id"
                                 "=" UINT32_T_FORMAT "\n", j,
-                                lixa_state_log_record_get_id(&buffer),
+                                lixa_state_log_record_get_id(record),
                                 lixa_state_table_get_last_record_id(
                                     &this->tables[last_table])));
                     num_rec++;
@@ -795,15 +815,15 @@ int lixa_state_warm_start(lixa_state_t *this,
                     LIXA_TRACE(("lixa_state_warm_start: log record # "
                                 OFF_T_FORMAT ", id=" UINT32_T_FORMAT
                                 " MUST be applied\n", j,
-                                lixa_state_log_record_get_id(&buffer)));
+                                lixa_state_log_record_get_id(record)));
                     if (LIXA_RC_OK != (
                             ret_cod = lixa_state_table_patch_slot(
                                 &this->tables[last_table],
                                 lixa_state_log_record_get_original_slot(
-                                    &buffer),
-                                lixa_state_log_record_get_record(&buffer))))
+                                    record),
+                                lixa_state_log_record_get_record(record))))
                         THROW(TABLE_PATCH_SLOT);
-                    last_record_id = lixa_state_log_record_get_id(&buffer);
+                    last_record_id = lixa_state_log_record_get_id(record);
                     num_rec++;
                     count++;
                 }
@@ -897,6 +917,9 @@ int lixa_state_warm_start(lixa_state_t *this,
             case CORRUPTED_STATUS_FILE:
                 ret_cod = LIXA_RC_CORRUPTED_STATUS_FILE;
                 break;
+            case POSIX_MEMALIGN_ERROR:
+                ret_cod = LIXA_RC_POSIX_MEMALIGN_ERROR;
+                break;
             case LOG_READ_FILE:
             case TABLE_PATCH_SLOT:
             case TABLE_SET_LAST_RECORD_ID:
@@ -918,6 +941,11 @@ int lixa_state_warm_start(lixa_state_t *this,
             default:
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
         } /* switch (excp) */
+        /* recovery memory */
+        if (NULL != buffer) {
+            free(buffer);
+            buffer = NULL;
+        }
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_state_warm_start/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));

@@ -332,15 +332,16 @@ extern "C" {
      * @param[in,out] this state log object
      * @param[in] pos of the record in the file
      * @param[in] prev_pos was the position of the previous read record
-     * @param[out] buffer used to store the retrieved record
-     * @param[in,out] single_page of memory that's page aligned and that can
-     *                be used for buffering
+     * @param[out] record pointer to the position of the record in the buffer
+     * @param[in,out] buffer of memory that's page aligned and that can
+     *                be used for log buffering
+     * @param[in] pages_per_buffer number of pages in a single IO buffer
      * @return a reason code
      */
     int lixa_state_log_read_file(lixa_state_log_t *this, off_t pos,
                                  off_t prev_pos,
-                                 struct lixa_state_log_record_s *buffer,
-                                 void *single_page);
+                                 const struct lixa_state_log_record_s **record,
+                                 void *buffer, off_t pages_per_buffer);
                                
 
     

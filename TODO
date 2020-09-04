@@ -1,3 +1,5 @@
+Avoid buffer copy in lixa_state_log_read_file, return a pointer and that's all
+
 Under very high workload the state server stops with a controlled shutdown;
 tracing is not viable because with active tracing the workload is lower and the
 issue does not happen.
@@ -45,6 +47,12 @@ lixad restart is slow for journal state engine when logs are big:
 the first hint could be working on a larger buffer instead of single page as it
 is (or I think should be) now. Can be used the same buffer allocated for
 writing in this read-only phase?!
+
+lixad restart is slow for journal state engine when logs are big:
+- even with a large buffer, lixad can ask up to 133 IOPS and 1.94 GB/s; with
+large log files it can require several seconds to restart
+- "server_manager" function activates the server threads sequentially: going parallel could be an option only for very high speed storage, but very high speed storage should not show a slow restart...
+It's not clear how much performance benefit can be obtained following this path.
 
 Clean memory leaks by mean of valgrind
 
