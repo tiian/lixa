@@ -8,8 +8,8 @@ AT_CLEANUP
 
 m4_include([lixa-config.at])
 m4_include([env_var.at])
-m4_include([xta.at])
 m4_include([nonapi.at])
+m4_include([xta.at])
 m4_include([xid.at])
 m4_include([xa.at])
 m4_include([tx.at])

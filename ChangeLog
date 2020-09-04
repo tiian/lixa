@@ -13,6 +13,8 @@ LOG:
 		 Use stack trace feature as an early tool in troubleshooting;
 		 it can even be used with an Elastic (ELK) stack to catch
 		 anomalous conditions in real time.
+		 Reduced restart time for LIXA state server restart when using
+		 journal state engine.
 
 2020-07-20 1.9.0 Added new state engine for the state server (lixad)
 		 Set a new environment variable to choose the state engine
