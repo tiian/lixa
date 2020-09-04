@@ -310,11 +310,10 @@ extern "C" {
     /**
      * Open an existing state log file for initial reading
      * @param[in,out] this state log object
-     * @param[in,out] single_page of memory that's page aligned and that can
-     *                be used for buffering
+     * @param[in] buffer_size for log reading
      * @return a reason code
      */
-    int lixa_state_log_open_file(lixa_state_log_t *this, void *single_page);
+    int lixa_state_log_open_file(lixa_state_log_t *this, size_t buffer_size);
 
     
 

@@ -673,23 +673,27 @@ int lixa_state_log_create_new_file(lixa_state_log_t *this, void *single_page,
 
 
 
-int lixa_state_log_open_file(lixa_state_log_t *this, void *single_page)
+int lixa_state_log_open_file(lixa_state_log_t *this, size_t buffer_size)
 {
     enum Exception {
         NULL_OBJECT,
         INVALID_STATUS,
         OPEN_ERROR,
+        POSIX_MEMALIGN_ERROR,
         FSTAT_ERROR,
         SET_STATUS,
         NONE
     } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    void *buffer = NULL;
     
     LIXA_TRACE(("lixa_state_log_open_file\n"));
     TRY {
         struct stat fd_stat;
         off_t number_of_pages, i, j;
+        off_t pages_per_buffer;
         int error = FALSE;
+        int pm_error;
         
         if (NULL == this)
             THROW(NULL_OBJECT);
@@ -727,41 +731,65 @@ int lixa_state_log_open_file(lixa_state_log_t *this, void *single_page)
         }
         /* reset the area that will be used to store the data */
         memset(&this->read_info, 0, sizeof(this->read_info));
+        /* adjust buffer_size to a multiple of system page size */
+        buffer_size = (buffer_size / LIXA_SYSTEM_PAGE_SIZE + 1) *
+            LIXA_SYSTEM_PAGE_SIZE;
+        pages_per_buffer = buffer_size / LIXA_SYSTEM_PAGE_SIZE;
+        /* allocate a buffer to read the file */
+        LIXA_TRACE(("lixa_state_log_open_file: allocating a buffer of "
+                    SIZE_T_FORMAT " bytes (" OFF_T_FORMAT " pages per buffer"
+                    ") to read log file\n", buffer_size, pages_per_buffer));
+        if (0 != (pm_error = posix_memalign(
+                      &buffer, LIXA_SYSTEM_PAGE_SIZE, buffer_size))) {
+            LIXA_TRACE(("lixa_state_log_open_file/posix_memalign: error=%d\n",
+                        pm_error));
+            THROW(POSIX_MEMALIGN_ERROR);
+        }
         /* analyze the content; this loop will try to read as much as
            possible from the underlying file
            Note: using a larger buffer would be faster, but this function is
            called only at warm start-up time: could be a future improvement!
         */
         for (i=0; i<number_of_pages; ++i) {
-            ssize_t read_bytes;
-            
-            LIXA_TRACE(("lixa_state_log_open_file: reading page "
-                        OFF_T_FORMAT "/" OFF_T_FORMAT " from file '%s'\n", i,
-                        number_of_pages, this->pathname));
-            read_bytes = pread(this->fd, single_page, LIXA_SYSTEM_PAGE_SIZE,
-                               i*LIXA_SYSTEM_PAGE_SIZE);
-            if (0 >= read_bytes) {
-                LIXA_TRACE(("lixa_state_log_open_file: pread() returned error "
-                            "%d ('%s'); read_bytes=" SSIZE_T_FORMAT "\n",
-                            errno, strerror(errno)));
-                LIXA_SYSLOG((LOG_WARNING, LIXA_SYSLOG_LXD069W,
-                             i, this->pathname, errno, strerror(errno),
-                             read_bytes));
-                error = TRUE;
-                break; /* leave the loop prematurely */
-            }
-            LIXA_TRACE(("lixa_state_log_open_file: pread() returned "
-                        SSIZE_T_FORMAT " bytes\n", read_bytes));
-            /* reset the tail if a partial page has been read */
-            if (read_bytes < LIXA_SYSTEM_PAGE_SIZE)
-                memset(single_page + read_bytes, 0,
-                       LIXA_SYSTEM_PAGE_SIZE - read_bytes);
+            size_t page_in_buffer = i % pages_per_buffer;
+            /* should a new buffer be read? */
+            if (0 == page_in_buffer) {
+                ssize_t read_bytes;
+                /* compute the number of pages to be read */
+                size_t to_be_read = (number_of_pages - i) *
+                    LIXA_SYSTEM_PAGE_SIZE;
+                if (to_be_read > buffer_size)
+                    to_be_read = buffer_size;
+                LIXA_TRACE(("lixa_state_log_open_file: reading " SIZE_T_FORMAT
+                            " bytes starting at page "
+                            OFF_T_FORMAT "/" OFF_T_FORMAT
+                            " from file '%s'\n", to_be_read, i,
+                            number_of_pages, this->pathname));
+                read_bytes = pread(this->fd, buffer, to_be_read,
+                                   i*LIXA_SYSTEM_PAGE_SIZE);
+                if (0 >= read_bytes) {
+                    LIXA_TRACE(("lixa_state_log_open_file: pread() returned "
+                                "error %d ('%s'); read_bytes=" SSIZE_T_FORMAT
+                                "\n", errno, strerror(errno)));
+                    LIXA_SYSLOG((LOG_WARNING, LIXA_SYSLOG_LXD069W,
+                                 i, this->pathname, errno, strerror(errno),
+                                 read_bytes));
+                    error = TRUE;
+                    break; /* leave the loop prematurely */
+                }
+                LIXA_TRACE(("lixa_state_log_open_file: pread() returned "
+                            SSIZE_T_FORMAT " bytes\n", read_bytes));
+                /* reset the tail if a partial page has been read */
+                if (read_bytes < to_be_read)
+                memset(buffer + read_bytes, 0, to_be_read - read_bytes);
+            }                
             /* loop on the records that can be available in the page */
             for (j=0; j<LIXA_STATE_LOG_RECORDS_PER_PAGE; ++j) {
                 uint32_t crc32;
                 struct lixa_state_log_record_s *log_record =
                     (struct lixa_state_log_record_s *)
-                    (single_page + j * sizeof(struct lixa_state_log_record_s));
+                    (buffer + page_in_buffer * LIXA_SYSTEM_PAGE_SIZE +
+                     j * sizeof(struct lixa_state_log_record_s));
                 char iso_timestamp[ISO_TIMESTAMP_BUFFER_SIZE];
                 /* compute crc32 of the record and check with the stored one */
                 crc32 = lixa_crc32(
@@ -828,6 +856,9 @@ int lixa_state_log_open_file(lixa_state_log_t *this, void *single_page)
             case OPEN_ERROR:
                 ret_cod = LIXA_RC_OPEN_ERROR;
                 break;
+            case POSIX_MEMALIGN_ERROR:
+                ret_cod = LIXA_RC_POSIX_MEMALIGN_ERROR;
+                break;
             case FSTAT_ERROR:
                 ret_cod = LIXA_RC_FSTAT_ERROR;
                 break;
@@ -837,6 +868,11 @@ int lixa_state_log_open_file(lixa_state_log_t *this, void *single_page)
             default:
                 ret_cod = LIXA_RC_INTERNAL_ERROR;
         } /* switch (excp) */
+        /* recover memory */
+        if (NULL != buffer) {
+            free(buffer);
+            buffer = NULL;
+        }
     } /* TRY-CATCH */
     LIXA_TRACE(("lixa_state_log_open_file/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));

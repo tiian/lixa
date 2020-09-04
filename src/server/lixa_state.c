@@ -659,7 +659,8 @@ int lixa_state_warm_start(lixa_state_t *this,
             } /* if (table_exists[i]) */
             if (log_exists[i]) {
                 if (LIXA_RC_OK != (ret_cod = lixa_state_log_open_file(
-                                       &this->logs[i], this->single_page)))
+                                       &this->logs[i],
+                                       this->max_buffer_log_size)))
                     THROW(TABLE_OPEN_ERROR);
                 lixa_utils_iso_timestamp(
                     lixa_state_log_get_ri_first_record_timestamp(
