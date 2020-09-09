@@ -1,5 +1,6 @@
 LOG:
-	   1.9.1 Added a new environment variable LIXA_STACK_TRACE to activate
+
+2020-09-09 1.9.1 Added a new environment variable LIXA_STACK_TRACE to activate
 		 stack tracing: use it in production environments that can not
 		 tolerate standard tracing due to the too big number of
 		 produced messages. Use

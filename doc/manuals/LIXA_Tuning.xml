@@ -157,7 +157,7 @@
       The good news is that the LIXA state engines, both journal and
       traditional, provide parameters to tune the behavior.
     </para>
-    <section>
+    <section xml:id="Tuning_the_journal_state_engine">
       <title>Tuning the journal state engine</title>
       <para>
 	The journal state engine provides two levels of resilience with two
@@ -265,9 +265,29 @@
 	  The parameter specifies the desired amount of disk space that must
 	  be used of every state log file. A state log file can be switched
 	  only when the previous state table synchronization has been
-	  completed. In presence of slow disks, a larger value can be helpful
-	  to obtain better performances.
+	  completed. In presence of disks with high latency and high 
+	  throughput, a larger value can be helpful to obtain better
+	  performances.
 	</para>
+	<important>
+	  <para>
+	    Too large logs can produce adverse performances during state server
+	    restart in a couple of situations:
+	    <itemizedlist mark='bullet'>
+	      <listitem><para>
+		option <parameter>log_o_direct="1"</parameter> (O_DIRECT) is
+		used
+	      </para></listitem>
+	      <listitem><para>
+		the state server restart follows a system reboot
+	      </para></listitem>
+	    </itemizedlist>
+	    In both cases, Linux operating system has not cached the log file
+	    page and all the reading must be done by the storage devices. As a
+	    rule of thumb, don't allocate a large log if there's no a valid
+	    performance benefit, during normal activity, in doing it.
+	  </para>
+	</important>
 	<para>
 	  The parameter has no direct impact on RPO.
 	</para>
@@ -287,25 +307,28 @@
 	<title>Impact of parameters <parameter>log_o_*</parameter></title>
 	<para>
 	  The parameters specify the corresponding flags that must be used for
-	  state log files; as a general rule, 
+	  writing the state log files; as a general rule, 
 	  <parameter>log_o_direct="1"</parameter> (O_DIRECT) is faster than
 	  <parameter>log_o_dsync="1"</parameter> (O_DSYNC) and
 	  <parameter>log_o_dsync="1"</parameter> (O_DSYNC) is faster than
 	  <parameter>log_o_sync="1"</parameter> (O_SYNC).
 	</para>
 	<important><para>
-	  As a general rule, only <parameter>log_o_sync=1</parameter> in
+	  To be precise, only <parameter>log_o_sync=1</parameter> in
 	  association with 
 	  <parameter>min_elapsed_sync_time="0"</parameter> and
 	  <parameter>max_elapsed_sync_time="0"</parameter> guarantees RPO=0
-	  in the event of <emphasis>hard crash</emphasis>.
-	</para></important>
+	  in the event of <emphasis>hard crash</emphasis> for every hardware
+	  configuration, but such configuration limitates the performance of
+	  the LIXA state server and introduce additional latency.
+	</para>
 	<para>
 	  In real life scenarios, depending on the characteristics of the
-	  storage subsystem, less restrictive options can be used.
-	  The best configuration requires further investigation about the
-	  specific hardware configuration.
-	</para>
+	  storage subsystem, less restrictive options can be reasonably used.
+	  The best configuration requires investigation on the specific
+	  hardware configuration. The configuration provided by default can be
+	  considered a starting point to adjust according to the user's needs.
+	</para></important>
 	<note><para>
 	  Parameters <parameter>log_o_*</parameter> can be uses together, for
 	  example you can specify both <parameter>log_o_direct="1"</parameter> 
@@ -314,7 +337,7 @@
 	</para></note>
       </section>
     </section>
-    <section>
+    <section xml:id="Tuning_the_traditional_state_engine">
       <title>Tuning the traditional state engine</title>
       <para>
 	The traditional state engine provides a single level of resilience

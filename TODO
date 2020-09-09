@@ -1,5 +1,3 @@
-Avoid buffer copy in lixa_state_log_read_file, return a pointer and that's all
-
 Under very high workload the state server stops with a controlled shutdown;
 tracing is not viable because with active tracing the workload is lower and the
 issue does not happen.
@@ -28,27 +26,12 @@ It seems to happen after many interactions: dump the content of the state to
 check how many "dirty" transactions are inside it.
 Check the log switch: it seems to switch too many times.
 
-Document parameters for direct write...  o_direct_  o_dsync_  o_rsync_ o_sync_
-Document parameters log_size and max_buffer_log_size
-Document new meaning of max_elapsed_sync_time: if 0, synchronous log; just
-1 ms can decrease the latency by 33%; higher values can decrease latency even
-more
-Document environment variable LIXA_STATE_ENGINE, see server_config.h
-
 Implement auto-migration from old state files to new state tables:
 - if cold start & state files exists => migrate and switch
 - if cold start & state files does not exist => cold start new state tables
 - if warm start => ignore old state files
 
-lixad restart is slow for journal state engine when logs are big:
-- 15-30% of "wait CPU time" from top
-- up to 2000 IOPS
-- CPU at 20% usage
-the first hint could be working on a larger buffer instead of single page as it
-is (or I think should be) now. Can be used the same buffer allocated for
-writing in this read-only phase?!
-
-lixad restart is slow for journal state engine when logs are big:
+lixad restart is slow for journal state engine when logs are too large:
 - even with a large buffer, lixad can ask up to 133 IOPS and 1.94 GB/s; with
 large log files it can require several seconds to restart
 - "server_manager" function activates the server threads sequentially: going parallel could be an option only for very high speed storage, but very high speed storage should not show a slow restart...

@@ -446,8 +446,9 @@
 	  plays a fundamental role in reliability and performance of the LIXA
 	  state server.
 	  The provided default values are valid for general
-	  purpose scenarios, for advanced use cases, refer to the dedicated
-	  <xref linkend="Tuning"/> section.
+	  purpose scenarios, for advanced use cases, refer to:
+	  <xref linkend="Tuning_the_journal_state_engine"/> and
+	  <xref linkend="Tuning_the_traditional_state_engine"/>.
 	</para>
       </section>
       <section xml:id="Journal_based_state_engine">
