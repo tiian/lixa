@@ -19,7 +19,7 @@
 %exception {
         try {
                 $action
-        } catch (xta::Exception e) {
+        } catch (xta::Exception &e) {
                 string text = "XTA exception in function " +
                     e.where() + " [" + e.getReturnCodeText() + "]";
                 SWIG_exception(SWIG_RuntimeError, text.c_str());

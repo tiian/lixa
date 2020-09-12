@@ -1,4 +1,4 @@
-AC_INIT([lixa], [1.9.1], [tiian at users dot sourceforge dot net], [], [http://www.tiian.org/lixa/])
+AC_INIT([lixa], [1.9.2-dev], [tiian at users dot sourceforge dot net], [], [http://www.tiian.org/lixa/])
 AM_INIT_AUTOMAKE([-Wall -Werror])
 m4_ifdef([AM_PROG_AR], [AM_PROG_AR])
 
@@ -237,6 +237,9 @@ then
 fi
 
 AM_PROG_CC_C_O
+
+# Disable a couple of questionable warnings: it's C language beatifulness, baby
+CFLAGS="$CFLAGS -Wno-stringop-truncation -Wno-stringop-overflow"
 
 # Checking if C++ compiler is available
 AC_MSG_CHECKING([if C++ compiler is available])
