@@ -1,3 +1,5 @@
+36: XTA/1.0/2.0 Crash after connect                 FAILED (xta_1.at:84)
+
 Under very high workload the state server stops with a controlled shutdown;
 tracing is not viable because with active tracing the workload is lower and the
 issue does not happen.

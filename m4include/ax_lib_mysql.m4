@@ -64,7 +64,7 @@ AC_DEFUN([AX_LIB_MYSQL],
 	    # Does not work with Debian 10.3 because mysql_config --include
 	    # returns "-I/usr/include/mariadb -I/usr/include/mariadb/mysql"
             #MYSQL_INCLUDE_DIR=${MYSQL_CPPFLAGS##-I}
-	    # This hack workaround the issue:
+	    # This hack workarounds the issue:
 	    MYSQL_INCLUDE_DIR=$(echo ${MYSQL_CPPFLAGS##-I} | cut -d " " -f1)
             HAVE_MYSQL="yes"
         fi

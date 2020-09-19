@@ -1,5 +1,9 @@
 LOG:
 
+2020-09-19 1.9.2 Fixed a build issue related to Debian 10.3 and MariaDB client
+		 instead of MySQL client. The issue didn't allow the build of
+		 some Docker images https://hub.docker.com/u/lixa
+
 2020-09-09 1.9.1 Added a new environment variable LIXA_STACK_TRACE to activate
 		 stack tracing: use it in production environments that can not
 		 tolerate standard tracing due to the too big number of
