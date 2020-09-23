@@ -1,4 +1,4 @@
-AC_INIT([lixa], [1.9.2], [tiian at users dot sourceforge dot net], [], [http://www.tiian.org/lixa/])
+AC_INIT([lixa], [1.9.3-dev], [tiian at users dot sourceforge dot net], [], [http://www.tiian.org/lixa/])
 AM_INIT_AUTOMAKE([-Wall -Werror])
 m4_ifdef([AM_PROG_AR], [AM_PROG_AR])
 
