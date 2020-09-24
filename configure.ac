@@ -188,6 +188,12 @@ if test "$LIXA_XTA_CXX" = "yes" -a "$LIXA_XTA" = "no"
 then
 	LIXA_XTA_CXX="no"
 	AC_MSG_NOTICE([XTA for C++ can not be compiled because XTA is disabled])
+else
+	# checking MySQL/MariaDB and PostgreSQL are available
+	if test "$HAVE_MYSQL" != "yes" -o "$HAVE_POSTGRESQL" != "yes"
+	then
+		AC_MSG_ERROR([XTA for C++ requires --with-mysql and --with-postgresql])
+	fi
 fi
 
 AC_ARG_ENABLE([xta-java],

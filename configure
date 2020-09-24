@@ -18012,6 +18012,12 @@ then
 	LIXA_XTA_CXX="no"
 	{ $as_echo "$as_me:${as_lineno-$LINENO}: XTA for C++ can not be compiled because XTA is disabled" >&5
 $as_echo "$as_me: XTA for C++ can not be compiled because XTA is disabled" >&6;}
+else
+	# checking MySQL/MariaDB and PostgreSQL are available
+	if test "$HAVE_MYSQL" != "yes" -o "$HAVE_POSTGRESQL" != "yes"
+	then
+		as_fn_error $? "XTA for C++ requires --with-mysql and --with-postgresql" "$LINENO" 5
+	fi
 fi
 
 # Check whether --enable-xta-java was given.
@@ -18676,7 +18682,7 @@ else
 JAVA_TEST=Test.java
 CLASS_TEST=Test.class
 cat << \EOF > $JAVA_TEST
-/* #line 18679 "configure" */
+/* #line 18685 "configure" */
 public class Test {
 }
 EOF
@@ -19089,7 +19095,7 @@ else
 JAVA_TEST=Test.java
 CLASS_TEST=Test.class
 cat << \EOF > $JAVA_TEST
-/* #line 19092 "configure" */
+/* #line 19098 "configure" */
 public class Test {
 }
 EOF
@@ -19123,7 +19129,7 @@ JAVA_TEST=Test.java
 CLASS_TEST=Test.class
 TEST=Test
 cat << \EOF > $JAVA_TEST
-/* [#]line 19126 "configure" */
+/* [#]line 19132 "configure" */
 public class Test {
 public static void main (String args[]) {
         System.exit (0);
