@@ -1,5 +1,5 @@
 LOG:
-	   1.9.3
+	   1.9.3 Fixed https://github.com/tiian/lixa/issues/7
 
 2020-09-19 1.9.2 Fixed a build issue related to Debian 10.3 and MariaDB client
 		 instead of MySQL client. The issue didn't allow the build of
