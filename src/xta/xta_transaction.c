@@ -716,10 +716,10 @@ int xta_transaction_close_internal(xta_transaction_t *transact)
 
 int xta_transaction_recover(xta_transaction_t *transact)
 {
-    enum Exception { NULL_OBJECT
-                     , OPEN_INTERNAL
-                     , CLOSE_INTERNAL
-                     , NONE } excp;
+    enum Exception {
+        NULL_OBJECT,
+        OPEN_INTERNAL,
+        NONE } excp = NONE;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     
     LIXA_TRACE(("xta_transaction_recover\n"));
@@ -730,9 +730,6 @@ int xta_transaction_recover(xta_transaction_t *transact)
         /* open enlisted resources */
         if (LIXA_RC_OK != (ret_cod = xta_transaction_open_internal(transact)))
             THROW(OPEN_INTERNAL);
-        /* close enlisted resources */
-        if (LIXA_RC_OK != (ret_cod = xta_transaction_close_internal(transact)))
-            THROW(CLOSE_INTERNAL);
         
         THROW(NONE);
     } CATCH {
@@ -741,7 +738,6 @@ int xta_transaction_recover(xta_transaction_t *transact)
                 ret_cod = LIXA_RC_NULL_OBJECT;
                 break;
             case OPEN_INTERNAL:
-            case CLOSE_INTERNAL:
                 break;
             case NONE:
                 ret_cod = LIXA_RC_OK;
