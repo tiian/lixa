@@ -226,7 +226,7 @@ void lixa_trace_text_data(const char *prefix, const byte_t *data,
 void lixa_trace_stack(const char *function_name, const char *file_name,
                       int file_line,
                       int exception, int ret_cod, const char *ret_cod_text,
-                      int error)
+                      int error, long trace_module)
 {
     struct tm broken_time;
     struct timeval tv;
@@ -253,7 +253,8 @@ void lixa_trace_stack(const char *function_name, const char *file_name,
             "\"return_code\": %d, "
             "\"return_code_text\": \"%s\", "
             "\"errno\": %d, "
-            "\"errno_text\": \"%s\" "
+            "\"errno_text\": \"%s\", "
+            "\"trace_module\": 0x%x "
             "}\n",
             /* standard LIXA trace header */
             broken_time.tm_year + 1900, broken_time.tm_mon + 1,
@@ -266,7 +267,7 @@ void lixa_trace_stack(const char *function_name, const char *file_name,
             broken_time.tm_min, broken_time.tm_sec, (int)tv.tv_usec,
             getpid(), pthread_self(),
             function_name, file_name, file_line, exception, ret_cod,
-            ret_cod_text, error, strerror(error));
+            ret_cod_text, error, strerror(error), trace_module);
 # ifdef LIXA_DEBUG
     fflush(stderr);
 #endif

@@ -114,8 +114,8 @@ extern "C" {
     /**
      * Check if the transaction object can be safely deleted: if there's a
      * transaction in progress, this method returns FALSE
-     * @deprecated only @ref xta_transaction_manager_* should call this
-     *             function.
+     * @deprecated only @ref xta_transaction_manager_create_transaction should
+     *             call this function.
      * @param[in] transact : transaction object to delete
      * @return a boolean value
      */

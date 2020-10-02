@@ -563,12 +563,13 @@ int client_config_job(client_config_coll_t *ccc, int fd)
 
 int client_config_validate(client_config_coll_t *ccc)
 {
-    enum Exception { G_STRDUP_ERROR
-                     , STTSRV_NOT_DEFINED
-                     , STTSRV_NOT_FOUND
-                     , RSRMGR_NOT_FOUND
-                     , PROFILE_NOT_FOUND
-                     , NONE } excp;
+    enum Exception {
+        G_STRDUP_ERROR,
+        STTSRV_NOT_DEFINED,
+        STTSRV_NOT_FOUND,
+        RSRMGR_NOT_FOUND,
+        PROFILE_NOT_FOUND,
+        NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
 
     LIXA_TRACE(("client_config_validate\n"));

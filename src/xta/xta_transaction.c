@@ -565,11 +565,12 @@ int xta_transaction_open(xta_transaction_t *transact)
 
 int xta_transaction_open_internal(xta_transaction_t *transact)
 {
-    enum Exception { NULL_OBJECT
-                     , INVALID_STATUS
-                     , LIXA_XA_OPEN_ERROR
-                     , INTERNAL_ERROR
-                     , NONE } excp;
+    enum Exception {
+        NULL_OBJECT,
+        INVALID_STATUS,
+        LIXA_XA_OPEN_ERROR,
+        INTERNAL_ERROR,
+        NONE } excp;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     
     LIXA_TRACE(("xta_transaction_open_internal\n"));

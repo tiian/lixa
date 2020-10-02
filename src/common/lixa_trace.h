@@ -262,7 +262,7 @@ extern unsigned long lixa_trace_mask;
         (STACK_TRACE_WARNINGS_AND_ERRORS == lixa_trace_stack_value && \
          ret_cod != 0) ? \
         lixa_trace_stack(__func__, __FILE__, __LINE__, excp, ret_cod, lixa_strerror(ret_cod), \
-                         errno) : 0)
+                         errno, LIXA_TRACE_MODULE) : 0)
 #else
 # define LIXA_TRACE_STACK()
 #endif
@@ -343,7 +343,7 @@ extern "C" {
     void lixa_trace_stack(const char *function_name, const char *file_name,
                           int file_line,
                           int exception, int ret_cod, const char *ret_cod_text,
-                          int error);
+                          int error, long trace_module);
 
 
     

@@ -411,5 +411,14 @@
         <rsrmgr>LIXAmonkey1staRM</rsrmgr>
       </rsrmgrs>
     </profile>
+    <profile name="CASE_PROF_0039">
+      <sttsrvs>
+        <sttsrv>TestTM</sttsrv>
+      </sttsrvs>
+      <rsrmgrs>
+        <rsrmgr>LIXAdummy1RM</rsrmgr>
+        <rsrmgr>LIXAdummy2RM</rsrmgr>
+      </rsrmgrs>
+    </profile>
   </profiles>
 </client>
