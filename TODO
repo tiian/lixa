@@ -1,5 +1,3 @@
-Go on with case0111.c and implement the same with enlisting.
-
 
 Under very high workload the state server stops with a controlled shutdown;
 tracing is not viable because with active tracing the workload is lower and the

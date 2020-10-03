@@ -719,6 +719,7 @@ int xta_transaction_recover(xta_transaction_t *transact)
 {
     enum Exception {
         NULL_OBJECT,
+        BYPASSED_OPERATION,
         OPEN_INTERNAL,
         NONE } excp = NONE;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
@@ -728,6 +729,16 @@ int xta_transaction_recover(xta_transaction_t *transact)
         /* check object */
         if (NULL == transact)
             THROW(NULL_OBJECT);
+        /* check automatic recovery make sense */
+        if (TX_STATE_S0 != client_status_get_txstate(
+                transact->client_status)) {
+            LIXA_TRACE(("xta_transaction_recover: to start automatic "
+                        "recovery, client status should be %d, but the "
+                        "current value is %d, bypassing...\n", TX_STATE_S0,
+                        client_status_get_txstate(transact->client_status)));
+            THROW(BYPASSED_OPERATION);
+        }
+
         /* open enlisted resources */
         if (LIXA_RC_OK != (ret_cod = xta_transaction_open_internal(transact)))
             THROW(OPEN_INTERNAL);
@@ -737,6 +748,9 @@ int xta_transaction_recover(xta_transaction_t *transact)
         switch (excp) {
             case NULL_OBJECT:
                 ret_cod = LIXA_RC_NULL_OBJECT;
+                break;
+            case BYPASSED_OPERATION:
+                ret_cod = LIXA_RC_BYPASSED_OPERATION;
                 break;
             case OPEN_INTERNAL:
                 break;

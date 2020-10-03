@@ -291,11 +291,12 @@ void xta_java_xa_resource_clean(xta_java_xa_resource_t *xa_resource)
 
 int xta_java_xa_resource_rc(JNIEnv *env)
 {
-    enum Exception { EXCEPTION_OCCURRED_ERROR
-                     , FIND_CLASS_ERROR
-                     , GET_FIELD_ID_ERROR
-                     , GET_INT_FIELD_ERROR
-                     , NONE } excp;
+    enum Exception {
+        EXCEPTION_OCCURRED_ERROR,
+        FIND_CLASS_ERROR,
+        GET_FIELD_ID_ERROR,
+        GET_INT_FIELD_ERROR,
+        NONE } excp = NONE;
     int ret_cod = XAER_RMFAIL;
     
     LIXA_TRACE(("xta_java_xa_resource_rc\n"));
@@ -318,9 +319,8 @@ int xta_java_xa_resource_rc(JNIEnv *env)
             error_code = (*env)->GetIntField(env, exception, fieldID);
             LIXA_TRACE(("xta_java_xa_resource_rc: XAException.errorCode=%d\n",
                         error_code));
-            /* this row is to have Java stacktrace on stderr
+            /* this row is to have Java stacktrace on stderr */
             (*env)->ExceptionDescribe(env);
-            */
             /* reset exception, it must not be propagated */
             (*env)->ExceptionClear(env);
             ret_cod = error_code;
@@ -548,9 +548,10 @@ int xta_java_xa_end(xta_xa_resource_t *context, const XID *xid,
 int xta_java_xa_rollback(xta_xa_resource_t *context, const XID *xid,
                          int rmid, long flags)
 {
-    enum Exception { GET_ENV_ERROR
-                     , SET_XID_ERROR
-                     , NONE } excp;
+    enum Exception {
+        GET_ENV_ERROR,
+        SET_XID_ERROR,
+        NONE } excp = NONE;
     int ret_cod = XAER_RMERR;
 
     LIXA_TRACE(("xta_java_xa_rollback: rmid=%d, flags=%0x\n", rmid, flags));
@@ -573,7 +574,7 @@ int xta_java_xa_rollback(xta_xa_resource_t *context, const XID *xid,
             if (LIXA_RC_OK != xta_java_resource_set_xid(res, xid, env))
                 THROW(SET_XID_ERROR);
         }
-        /* call Java start method */
+        /* call Java rollback method */
         (*env)->CallVoidMethod(env, res->java_object,
                                res->java_method_rollback,
                                res->java_xid);

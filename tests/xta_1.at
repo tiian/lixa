@@ -535,7 +535,20 @@ AT_CLEANUP
 # Force recovery, multiple tx, rollback
 AT_SETUP([XTA/1.0/8.2 Force recovery, multiple tx, rollback])
 AT_CHECK([if test "$LIXA_XTA" = "no"; then exit 77; fi])
-AT_CHECK([export LIXA_PROFILE=CASE_PROF_0039 ; lixa_test_exec.sh noreset stop case0111 1 0 2 2>&1], [0], [ignore], [ignore])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0039 ; lixa_test_exec.sh noreset none case0111 1 0 2 2>&1], [0], [ignore], [ignore])
 AT_CLEANUP
 
+# Force recovery, multiple tx, two phase commit (with enlistment)
+AT_SETUP([XTA/1.0/8.3 Force recovery, multiple tx, two phase commit])
+AT_CHECK([if test "$LIXA_XTA" = "no"; then exit 77; fi])
+AT_CHECK([if test "$HAVE_POSTGRESQL" = "no" -a "$HAVE_MYSQL" = "no" -a "$HAVE_ORACLE" = "no" ; then exit 77; fi])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0008 ; lixa_test_exec.sh noreset none case0112 1 0 2>&1], [0], [ignore], [ignore])
+AT_CLEANUP
+
+# Force recovery, multiple tx, rollback (with enlistment)
+AT_SETUP([XTA/1.0/8.4 Force recovery, multiple tx, rollback])
+AT_CHECK([if test "$LIXA_XTA" = "no"; then exit 77; fi])
+AT_CHECK([if test "$HAVE_POSTGRESQL" = "no" -a "$HAVE_MYSQL" = "no" -a "$HAVE_ORACLE" = "no" ; then exit 77; fi])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0008 ; lixa_test_exec.sh noreset stop case0112 0 0 2>&1], [0], [ignore], [ignore])
+AT_CLEANUP
 

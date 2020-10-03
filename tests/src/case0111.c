@@ -38,6 +38,7 @@
 
 /*
  * Forced xta_transaction_recover in a loop of multiple transactions
+ * Related issue: https://github.com/tiian/lixa/issues/6
  */
 
 
@@ -115,7 +116,8 @@ int main(int argc, char *argv[])
         printf("%s| executing transaction number %i\n", pgm, i);
     
         /* force a recovery of previous transactions, if any */
-        if (LIXA_RC_OK != (rc = xta_transaction_recover(tx))) {
+        rc = xta_transaction_recover(tx);
+        if (LIXA_RC_OK != rc && LIXA_RC_BYPASSED_OPERATION != rc) {
             printf("%s| xta_transaction_recover: returned %d\n", pgm, rc);
             return 1;
         }
