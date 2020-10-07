@@ -116,9 +116,11 @@ RHEL 7.5	Python		swig python-devel
 
 Ubuntu <= 18.04	Java		default-jdk rng-tools libmysql-java
 Ubuntu 20.04	Java		default-jdk rng-tools libmariadb-java
-CentOS 7.x	Java		API java-1.8.0-openjdk* rng-tools
+CentOS 7.x	Java		java-1.8.0-openjdk* rng-tools
 				mysql-connector-java
-
+CentOS 8.x	Java		java-1.8.0-openjdk* rng-tools
+				mariadb-java-client postgresql-jdbc
+-
 Optional packages:
 O.S.		Feature		Packages
 Ubuntu		doxygen		doxygen graphviz

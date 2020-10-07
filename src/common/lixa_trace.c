@@ -267,7 +267,7 @@ void lixa_trace_stack(const char *function_name, const char *file_name,
             broken_time.tm_min, broken_time.tm_sec, (int)tv.tv_usec,
             getpid(), pthread_self(),
             function_name, file_name, file_line, exception, ret_cod,
-            ret_cod_text, error, strerror(error), trace_module);
+            ret_cod_text, error, strerror(error), (unsigned int)trace_module);
 # ifdef LIXA_DEBUG
     fflush(stderr);
 #endif

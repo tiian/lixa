@@ -992,6 +992,14 @@ ORA_DYN
       <section>
 	<title>Program execution (dynamic registration)</title>
 	<para>
+	  Before executing the client program, Oracle Instant Client must be
+	  configured as described in
+	  <xref linkend="App_RM_install_Oracle_Instant_Client"/>.
+	  If the Oracle Database server has never been used before with LIXA,
+	  even it requires some configurations as described in
+	  <xref linkend="App_RM_Config_Oracle_Local"/>.
+	</para>
+	<para>
 	  Execute the client program and check how the content table changes:
 	  <screen>
 tiian@ubuntu1404-64:/tmp$ ./example2_ora

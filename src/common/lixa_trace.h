@@ -268,6 +268,18 @@ extern unsigned long lixa_trace_mask;
 #endif
 
 
+/**
+ * Call something that make sense for tracing, like for example a Java stack
+ * trace if the module has active tracing
+ */
+#ifdef _TRACE
+# define LIXA_TRACE_SOMETHING(a)   (LIXA_TRACE_MODULE & lixa_trace_mask ? \
+                                     a : 0)
+#else
+# define LIXA_TRACE_SOMETHING(a)
+#endif /* _TRACE */
+
+
 
 /**
  * Which functions will be stack traced (enum, type)
