@@ -30,8 +30,14 @@ import java.io.*;
 // import SQL
 import java.sql.Connection;
 import java.sql.Statement;
-// import MySQL package for XA Data Source
-import com.mysql.jdbc.jdbc2.optional.MysqlXADataSource;
+// import MySQL/MariaDB package for XA Data Source
+import @MYSQL_JDBC_DATASOURCE_CLASS@;
+// import Oracle package for XA Data Source
+import oracle.jdbc.xa.OracleXid;
+import oracle.jdbc.xa.OracleXAException;
+//import oracle.jdbc.*;
+import oracle.jdbc.pool.*;
+import oracle.jdbc.xa.client.*;
 // import PostgreSQL package for XA Data Source
 import org.postgresql.xa.PGXADataSource;
 
@@ -72,7 +78,7 @@ import org.postgresql.xa.PGXADataSource;
 
 
 
-public class case4107 {
+public class case4106 {
     // parsed command line arguments
     private static int branchType;
     private static boolean insert;
@@ -85,6 +91,8 @@ public class case4107 {
     // strings for SQL statements
     private static String mysqlStmtInsert;
     private static String mysqlStmtDelete;
+    private static String oracleStmtInsert;
+    private static String oracleStmtDelete;
     private static String postgresStmtInsert;
     private static String postgresStmtDelete;
     // XTA Transaction Manager
@@ -94,11 +102,17 @@ public class case4107 {
     // XA Resource for LIXA Monkey
     private static LixaMonkeyXAResource xar0 = null;
     // XA Resource for MySQL
-    private static MysqlXADataSource xads1 = null;
+    private static @MYSQL_JDBC_DATASOURCE_CLASS@ xads1 = null;
     private static XAConnection xac1 = null;
     private static XAResource xar1 = null;
     private static Connection conn1 = null;
     private static Statement stmt1 = null;
+    // XA Resource for Oracle
+    private static OracleXADataSource xads2 = null;
+    private static XAConnection xac2 = null;
+    private static XAResource xar2 = null;
+    private static Connection conn2 = null;
+    private static Statement stmt2 = null;
     // XA Resource for PostgreSQL
     private static PGXADataSource xads3 = null;
     private static XAConnection xac3 = null;
@@ -159,6 +173,64 @@ public class case4107 {
                 postgresStmtDelete = "DELETE FROM authors WHERE id=1929;";
                 break;
         } // switch (statement % 2)
+        switch (statement) {
+            case 1:
+                oracleStmtInsert   = "INSERT INTO authors VALUES (1830, 'Mistral', 'Frederic')";
+                oracleStmtDelete   = "DELETE FROM authors WHERE ID = 1830";
+                break;
+            case 2:
+                oracleStmtInsert   = "INSERT INTO authors VALUES (1832, 'Echegaray', 'Jose')";
+                oracleStmtDelete   = "DELETE FROM authors WHERE ID = 1832";
+                break;
+            case 3:
+                oracleStmtInsert   = "INSERT INTO authors VALUES (1846, 'Sienkiewicz', 'Henryk')";
+                oracleStmtDelete   = "DELETE FROM authors WHERE ID = 1846";
+                break;
+            case 4:
+                oracleStmtInsert = "INSERT INTO authors VALUES (1835, 'Carducci', 'Giosue')";
+                oracleStmtDelete = "DELETE FROM authors WHERE ID=1835";
+                break;
+            case 5:
+                oracleStmtInsert = "INSERT INTO authors VALUES (1865, 'Kipling', 'Rudyard')";
+                oracleStmtDelete = "DELETE FROM authors WHERE ID=1865";
+                break;
+            case 6:
+                oracleStmtInsert = "INSERT INTO authors VALUES (1858, 'Lagerlof', 'Selma')";
+                oracleStmtDelete = "DELETE FROM authors WHERE ID=1858";
+                break;
+            case 7:
+                oracleStmtInsert = "INSERT INTO authors VALUES (1862, 'Maeterlinck', 'Maurice')";
+                oracleStmtDelete = "DELETE FROM authors WHERE ID=1862";
+                break;
+            case 8:
+                oracleStmtInsert = "INSERT INTO authors VALUES (1861, 'Tagore', 'Rabindranath')";
+                oracleStmtDelete = "DELETE FROM authors WHERE ID=1861";
+                break;
+            case 9:
+                oracleStmtInsert = "INSERT INTO authors VALUES (1866, 'Rolland', 'Romain')";
+                oracleStmtDelete = "DELETE FROM authors WHERE ID=1866";
+                break;
+            case 10:
+                oracleStmtInsert = "INSERT INTO authors VALUES (1859, 'Verner v Heidenstam', 'Carl Gustav')";
+                oracleStmtDelete = "DELETE FROM authors WHERE ID=1859";
+                break;
+            case 11:
+                oracleStmtInsert = "INSERT INTO authors VALUES (1857, 'Gjellerup', 'Karl Adolph')";
+                oracleStmtDelete = "DELETE FROM authors WHERE ID=1857";
+                break;
+            case 12:
+                oracleStmtInsert = "INSERT INTO authors VALUES (1845, 'Spitteler', 'Carl')";
+                oracleStmtDelete = "DELETE FROM authors WHERE ID=1845";
+                break;
+            case 13:
+                oracleStmtInsert = "INSERT INTO authors VALUES (1844, 'France', 'Anatole')";
+                oracleStmtDelete = "DELETE FROM authors WHERE ID=1844";
+                break;
+            default:
+                System.err.println("Statement=" + statement +
+                                   " is not valid!");
+                System.exit(1);
+        } // switch (statement)
     }
     private static void recovery() {
         System.err.println("branchType=" + branchType + " (RECOVERY");
@@ -190,7 +262,7 @@ public class case4107 {
             //
             if (branchType == 0) { // SUPERIOR
                 // 1. create an XA Data Source
-                xads1 = new MysqlXADataSource();
+                xads1 = new @MYSQL_JDBC_DATASOURCE_CLASS@();
                 // 2. set connection parameters using a connection URL
                 xads1.setUrl("jdbc:mysql://localhost/lixa?user=lixa&password=");
                 // 3. get an XA Connection from the XA Data Source
@@ -200,6 +272,26 @@ public class case4107 {
                 // 5. get an SQL Connection from the XA Connection
                 conn1 = xac1.getConnection();
             }
+            //
+            // A bit of boilerplate for Oracle JDBC & XA
+            //
+            // 1. create an XA Data Source
+            xads2 = new OracleXADataSource();
+            // 2. set connection URL (JDBC thin driver), user and password
+            xads2.setURL("jdbc:oracle:thin:@" +
+                         "(DESCRIPTION=" +
+                         "(ADDRESS=(PROTOCOL=tcp)" +
+                         "(HOST=centos7-oracle12.brenta.org)(PORT=1521))" +
+                         "(CONNECT_DATA=" +
+                         "(SERVICE_NAME=orcl.brenta.org)))");
+            xads2.setUser("hr");
+            xads2.setPassword("hr");
+            // 3. get an XA Connection from the XA Data Source
+            xac2 = xads2.getXAConnection();
+            // 4. get an XA Resource from the XA Connection
+            xar2 = xac2.getXAResource();
+            // 5. get an SQL Connection from the XA Connection
+            conn2 = xac2.getConnection();
             //
             // A bit of scaffolding for PostgreSQL:
             //
@@ -255,12 +347,14 @@ public class case4107 {
                 // enlist MySQL resource to Transaction
                 tx.enlistResource(
                     xar1, "MySQL",
-                    "jdbc:mysql://localhost/lixa?user=lixa/password=");
+                    "jdbc:mysql://localhost/lixa?user=lixa");
+                // enlist Oracle resource to transaction
+                tx.enlistResource(xar2, "Oracle DB", "orcl.brenta.org/hr");
             }
             if (branchType == 1) { // SUBORDINATE
                 // enlist PostgreSQL resource to transaction
                 tx.enlistResource(xar3, "PostgreSQL",
-                                  "localhost/testdb/tiian/passw0rd");
+                                  "localhost/testdb/tiian");
             }
         } catch  (XtaException e) {
             System.err.println("XtaException: LIXA ReturnCode=" +
@@ -289,6 +383,24 @@ public class case4107 {
                 System.exit(1);
             }
             System.out.println("MySQL statement >" + mysqlStmt +
+                               "< completed");
+            String oracleStmt = null;
+            if (insert)
+                oracleStmt = oracleStmtInsert;
+            else
+                oracleStmt = oracleStmtDelete;
+            try {
+                // create a Statement object for Oracle
+                stmt2 = conn2.createStatement();
+                // Execute Oracle statement
+                stmt2.executeUpdate(oracleStmt);
+                // close statement
+                stmt2.close();
+            } catch (Exception e) {
+                e.printStackTrace();
+                System.exit(1);
+            }
+            System.out.println("Oracle statement >" + oracleStmt +
                                "< completed");
         } // if (branchType == 0) { // SUPERIOR
         if (branchType == 1) { // SUBORDINATE
@@ -332,6 +444,8 @@ public class case4107 {
                 e.printStackTrace();
                 System.exit(2);
             }
+            // update XA resources under the control of XTA
+            useXaResources();
             // retrieve the XID associated to the started transaction
             xidString = tx.getXid().toString();
             System.err.println("calling subordinate task and passing XID '" +
@@ -342,8 +456,6 @@ public class case4107 {
                message passing */
             String reply = msgReceive(fifoReply);
             System.err.println("subordinate task replied '" + reply + "'");
-            // update XA resources under the control of XTA
-            useXaResources();
             // the application can decide to commit or rollback the transaction
             if (commit) {
                 try {
@@ -353,7 +465,7 @@ public class case4107 {
                     tx.commit(false);
                 } catch (XtaException e) {
                     System.err.println("Tx.commit() returned " +
-                                       reply + e.getReturnCode() + "(" +
+                                       reply + e.getReturnCode() + " (" +
                                        e.getMessage() + ")");
                     e.printStackTrace();
                     switch (e.getReturnCode()) {
@@ -375,7 +487,7 @@ public class case4107 {
                     tx.rollback();
                 } catch (XtaException e) {
                     System.err.println("Tx.rollback() returned " +
-                                       reply + e.getReturnCode() + "(" +
+                                       reply + e.getReturnCode() + " (" +
                                        e.getMessage() + ")");
                     e.printStackTrace();
                     System.exit(11);
@@ -412,7 +524,7 @@ public class case4107 {
                 tx.branch(xidString);
             } catch (XtaException e1) {
                 System.err.println(
-                    "Tx.branch() returned " + e1.getReturnCode() + "(" +
+                    "Tx.branch() returned " + e1.getReturnCode() + " (" +
                     e1.getMessage() + ")");
                 e1.printStackTrace();
                 System.exit(3);
@@ -431,7 +543,7 @@ public class case4107 {
                 } catch (XtaException e1) {
                     System.err.println(
                             "Tx.commit() (first phase) returned " +
-                            e1.getReturnCode() + "(" +
+                            e1.getReturnCode() + " (" +
                             e1.getMessage() + ")");
                     e1.printStackTrace();
                     if (e1.getReturnCode() == ErrorCodes.LIXA_RC_TX_ROLLBACK)
@@ -448,7 +560,7 @@ public class case4107 {
                 } catch (XtaException e1) {
                     System.err.println(
                         "Tx.commit() (second phase) returned " +
-                        e1.getReturnCode() + "(" +
+                        e1.getReturnCode() + " (" +
                         e1.getMessage() + ")");
                     e1.printStackTrace();
                     switch (e1.getReturnCode()) {
@@ -470,7 +582,7 @@ public class case4107 {
                     tx.rollback();
                 } catch (XtaException e1) {
                     System.err.println("Tx.rollback() returned " +
-                                       e1.getReturnCode() + "(" +
+                                       e1.getReturnCode() + " (" +
                                        e1.getMessage() + ")");
                     e1.printStackTrace();
                     System.exit(12);

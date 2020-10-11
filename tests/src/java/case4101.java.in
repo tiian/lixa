@@ -30,8 +30,8 @@ import javax.transaction.xa.XAResource;
 import javax.sql.XAConnection;
 // import PostgreSQL package for XA Data Source
 import org.postgresql.xa.PGXADataSource;
-// import MySQL package for XA Data Source
-import com.mysql.jdbc.jdbc2.optional.MysqlXADataSource;
+// import MySQL or MariaDB package for XA Data Source
+import @MYSQL_JDBC_DATASOURCE_CLASS@;
 
 
 
@@ -60,7 +60,7 @@ public class case4101 {
         Connection conn1 = null;
         Statement stmt1 = null;
         // XA Resource for MySQL
-        MysqlXADataSource xads2 = null;
+        @MYSQL_JDBC_DATASOURCE_CLASS@ xads2 = null;
         XAConnection xac2 = null;
         XAResource xar2 = null;
         Connection conn2 = null;
@@ -102,7 +102,7 @@ public class case4101 {
             // A bit of scaffolding for MySQL/MariaDB
             //
             // 1. create an XA Data Source
-            xads2 = new MysqlXADataSource();
+            xads2 = new @MYSQL_JDBC_DATASOURCE_CLASS@();
             // 2. set connection parameters using a connection URL
             xads2.setUrl("jdbc:mysql://localhost/lixa?user=lixa&password=");
             // 3. get an XA Connection from the XA Data Source

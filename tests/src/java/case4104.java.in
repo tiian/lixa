@@ -31,8 +31,8 @@ import java.util.concurrent.TimeUnit;
 // import SQL
 import java.sql.Connection;
 import java.sql.Statement;
-// import MySQL package for XA Data Source
-import com.mysql.jdbc.jdbc2.optional.MysqlXADataSource;
+// import MySQL/MariaDB package for XA Data Source
+import @MYSQL_JDBC_DATASOURCE_CLASS@;
 // import Oracle package for XA Data Source
 import oracle.jdbc.xa.OracleXid;
 import oracle.jdbc.xa.OracleXAException;
@@ -92,7 +92,7 @@ public class case4104 {
     // XA LIXA dummy resource
     private static LixaDummyXAResource xar0 = null;
     // XA Resource for MySQL
-    private static MysqlXADataSource xads1 = null;
+    private static @MYSQL_JDBC_DATASOURCE_CLASS@ xads1 = null;
     private static XAConnection xac1 = null;
     private static XAResource xar1 = null;
     private static Connection conn1 = null;
@@ -220,7 +220,7 @@ public class case4104 {
                 // A bit of scaffolding for MySQL/MariaDB
                 //
                 // 1. create an XA Data Source
-                xads1 = new MysqlXADataSource();
+                xads1 = new @MYSQL_JDBC_DATASOURCE_CLASS@();
                 // 2. set connection parameters using a connection URL
                 xads1.setUrl("jdbc:mysql://localhost/lixa?user=lixa&password=");
                 // 3. get an XA Connection from the XA Data Source

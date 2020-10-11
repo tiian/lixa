@@ -4,6 +4,7 @@ AT_COPYRIGHT([Copyright (c) 2009-2020, Christian Ferrari <tiian@users.sourceforg
 AT_BANNER([LIXA test cases start-up])
 AT_SETUP([check lixad process is NOT active...])
 AT_CHECK([ps -ef | grep lixad | grep -v grep], [1], [ignore], [ignore])
+#AT_CHECK([true], [4], [ignore], [ignore])
 AT_CLEANUP
 
 m4_include([lixa-config.at])

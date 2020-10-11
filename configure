@@ -730,6 +730,7 @@ COMPILE_MYSQL_POSTGRESQL_STUFF_FALSE
 COMPILE_MYSQL_POSTGRESQL_STUFF_TRUE
 COMPILE_MYSQL_STUFF_FALSE
 COMPILE_MYSQL_STUFF_TRUE
+MYSQL_JDBC_DATASOURCE_CLASS
 MYSQL_JDBC_JAR
 HAVE_MYSQL
 MYSQL_INCLUDE_DIR
@@ -17426,7 +17427,7 @@ else
   COMPILE_POSTGRESQL_STUFF_FALSE=
 fi
 
-# Include MySQL test
+# Include MySQL/MariaDB test
 
 
 
@@ -17544,6 +17545,22 @@ fi
         fi
     fi
 
+    # guess the right class to use for MySQL/MariaDB
+    TMPFILE=$(mktemp)
+    jar -tf $MYSQL_JDBC_JAR | grep DataSource | sed 's/\//./g' | sed 's/\.class$//g' > $TMPFILE
+    # check for MysqlXADataSource
+    MYSQL_JDBC_DATASOURCE_CLASS=$(grep MysqlXADataSource $TMPFILE)
+    if test $? -ne 0
+    then
+        # check for MariaDbDataSource
+        MYSQL_JDBC_DATASOURCE_CLASS=$(grep MariaDbDataSource $TMPFILE)
+        if test $? -ne 0
+        then
+            as_fn_error $? "cannot find a suitable XA Data Source class for MySQL/MariaDB" "$LINENO" 5
+        fi
+    fi
+
+    rm $TMPFILE
 
  if test "$HAVE_MYSQL" = "yes"; then
   COMPILE_MYSQL_STUFF_TRUE=
@@ -18682,7 +18699,7 @@ else
 JAVA_TEST=Test.java
 CLASS_TEST=Test.class
 cat << \EOF > $JAVA_TEST
-/* #line 18685 "configure" */
+/* #line 18702 "configure" */
 public class Test {
 }
 EOF
@@ -19095,7 +19112,7 @@ else
 JAVA_TEST=Test.java
 CLASS_TEST=Test.class
 cat << \EOF > $JAVA_TEST
-/* #line 19098 "configure" */
+/* #line 19115 "configure" */
 public class Test {
 }
 EOF
@@ -19129,7 +19146,7 @@ JAVA_TEST=Test.java
 CLASS_TEST=Test.class
 TEST=Test
 cat << \EOF > $JAVA_TEST
-/* [#]line 19132 "configure" */
+/* [#]line 19149 "configure" */
 public class Test {
 public static void main (String args[]) {
         System.exit (0);

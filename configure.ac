@@ -94,7 +94,7 @@ AX_LIB_POSTGRESQL
 m4_include(m4include/ax_lib_postgresql_jdbc.m4)
 AX_LIB_POSTGRESQL_JDBC
 AM_CONDITIONAL([COMPILE_POSTGRESQL_STUFF], [test "$HAVE_POSTGRESQL" = "yes"])
-# Include MySQL test
+# Include MySQL/MariaDB test
 m4_include(m4include/ax_lib_mysql.m4)
 AX_LIB_MYSQL
 m4_include(m4include/ax_lib_mysql_jdbc.m4)

@@ -13,14 +13,27 @@ if COMPILE_ORACLE_STUFF
 endif
 endif
 
-dist_noinst_DATA = case4100.java case4101.java case4102.java case4103.java \
+dist_noinst_DATA = case4100.java case4101.java.in case4102.java case4103.java \
 	case4104.java case4105.java case4106.java case4107.java \
 	case4108.java case4110.java
 
 check_DATA = $(MAYBE_XTA) $(MAYBE_XTA_MYPOST_SQL) $(MAYBE_XTA_ORACLE) \
 	$(MAYBE_XTA_MYPOSTORACLE)
 
+CLEANFILES = case4101.java case4104.java case4106.java case4107.java
+
 SUFFIXES: .java .class
+
+case4101.java:	case4101.java.in
+	sed -e 's|@MYSQL_JDBC_DATASOURCE_CLASS[@]|$(MYSQL_JDBC_DATASOURCE_CLASS)|g' $< >$@
+case4104.java:	case4104.java.in
+	sed -e 's|@MYSQL_JDBC_DATASOURCE_CLASS[@]|$(MYSQL_JDBC_DATASOURCE_CLASS)|g' $< >$@
+case4106.java:	case4106.java.in
+	sed -e 's|@MYSQL_JDBC_DATASOURCE_CLASS[@]|$(MYSQL_JDBC_DATASOURCE_CLASS)|g' $< >$@
+case4107.java:	case4107.java.in
+	sed -e 's|@MYSQL_JDBC_DATASOURCE_CLASS[@]|$(MYSQL_JDBC_DATASOURCE_CLASS)|g' $< >$@
+case4108.java:	case4108.java.in
+	sed -e 's|@MYSQL_JDBC_DATASOURCE_CLASS[@]|$(MYSQL_JDBC_DATASOURCE_CLASS)|g' $< >$@
 
 .java.class:
 	$(JAVAC) -cp $(top_srcdir)/src/xta/java/xta.jar:@MYSQL_JDBC_JAR@:@POSTGRESQL_JDBC_JAR@:@ORACLE_JDBC_JAR@ $<

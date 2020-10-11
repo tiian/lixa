@@ -1,6 +1,10 @@
 Test Ubuntu 20.04
 Test CentOS 8
 
+Fix examples for MySQL JTA as it has been done for case4101.java and others in dir test/src/java
+
+
+
 Under very high workload the state server stops with a controlled shutdown;
 tracing is not viable because with active tracing the workload is lower and the
 issue does not happen.
