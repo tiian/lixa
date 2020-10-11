@@ -1,7 +1,3 @@
-Before  (*env)->ExceptionDescribe(env);
-in xta_java_xa_resource_rc
-put a condition of activated tracing to avoid undesired messages on stderr.
-
 Test Ubuntu 20.04
 Test CentOS 8
 

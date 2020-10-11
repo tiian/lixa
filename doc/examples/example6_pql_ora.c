@@ -59,7 +59,6 @@ int main(int argc, char *argv[])
     /* generic variables */
     int         txrc, delete;
     /* PostgreSQL variables */
-    const char *conninfo;
     PGconn     *conn;
     PGresult   *res;
     /* Oracle variables */
@@ -73,8 +72,6 @@ int main(int argc, char *argv[])
         "VALUES ('RS', 'Repubblica San Marino', 1)";
     text       *stmt_d = (text *) "DELETE FROM COUNTRIES WHERE "
         "COUNTRY_ID = 'RS'";
-
-    conninfo = "dbname = testdb";
 
     if (argc > 1 && (!strcmp(argv[1], "delete") || !strcmp(argv[1], "DELETE")))
         delete = 1;

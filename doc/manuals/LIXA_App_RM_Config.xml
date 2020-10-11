@@ -19,7 +19,7 @@
     explained.
   </para></note>
   <section xml:id="App_RM_Config_MySQL">
-    <title>MySQL Configuration</title>
+    <title>MySQL/MariaDB Configuration</title>
     <para>
       The following diagram represents a simplified vision of the components
       necessary to run an example program (<filename>example8_mys</filename>
@@ -37,7 +37,8 @@
       This section has been developed using MySQL 5.5.54 (or upper) and
       MariaDB 5.5.52 for Linux. 
       Here is a brief list of the tested versions for Ubuntu 12.04,
-      14.04, 16.04, 18.04 and CentOS/RHEL 7.3 and the installed packages:
+      14.04, 16.04, 18.04 and CentOS/RHEL 7.3, CentOS 8 and the installed
+      packages:
       <screen>
 tiian@ubuntu1204-64:~$ dpkg -l | grep -i mysql
 ii  libdbd-mysql-perl                4.020-1ubuntu0.1                    Perl5 database interface to the MySQL database
@@ -93,6 +94,20 @@ mariadb-devel-5.5.52-1.el7.x86_64
 mariadb-5.5.52-1.el7.x86_64
 mariadb-server-5.5.52-1.el7.x86_64
 mariadb-libs-5.5.52-1.el7.x86_64
+
+[tiian@centos8 tmp]$ rpm -qa | grep -i maria
+mariadb-gssapi-server-10.3.17-1.module_el8.1.0+257+48736ea6.x86_64
+mariadb-connector-c-3.0.7-1.el8.x86_64
+mariadb-10.3.17-1.module_el8.1.0+257+48736ea6.x86_64
+mariadb-common-10.3.17-1.module_el8.1.0+257+48736ea6.x86_64
+mariadb-errmsg-10.3.17-1.module_el8.1.0+257+48736ea6.x86_64
+mariadb-server-10.3.17-1.module_el8.1.0+257+48736ea6.x86_64
+mariadb-connector-c-config-3.0.7-1.el8.noarch
+mariadb-server-utils-10.3.17-1.module_el8.1.0+257+48736ea6.x86_64
+mariadb-devel-10.3.17-1.module_el8.1.0+257+48736ea6.x86_64
+mariadb-connector-c-devel-3.0.7-1.el8.x86_64
+mariadb-backup-10.3.17-1.module_el8.1.0+257+48736ea6.x86_64
+mariadb-java-client-2.2.5-2.el8.noarch
       </screen>
       If you were using a different version you would need to adapt some
       commands to your environment.
@@ -124,7 +139,7 @@ mariadb-libs-5.5.52-1.el7.x86_64
 	<title>Start-up the MySQL server</title>
 	<para>
 	  If your server didn't start-up automatically at boot time, you
-	  could start it with the following commands:
+	  could start it with the following commands for Ubuntu:
 	  <table frame="box">
 	    <thead><tr><td>[Shell terminal session]</td></tr></thead>
 	    <tbody><tr><td><screen>
@@ -134,6 +149,36 @@ tiian@ubuntu1204-64:/tmp$ sudo service mysql status
 mysql start/running, process 1607
 tiian@ubuntu1204-64:/tmp$ ps -ef|grep mysql|grep -v grep
 mysql     1607     1  0 22:43 ?        00:00:00 /usr/sbin/mysqld
+	    </screen></td></tr></tbody>
+	  </table>
+	  or the following commands for CentOS:
+	  <table frame="box">
+	    <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	    <tbody><tr><td><screen>
+[tiian@centos8 tmp]$ sudo systemctl start mariadb
+[tiian@centos8 tmp]$ sudo systemctl status mariadb
+● mariadb.service - MariaDB 10.3 database server
+   Loaded: loaded (/usr/lib/systemd/system/mariadb.service; enabled; vendor preset: disabled)
+   Active: active (running) since Sun 2020-10-11 15:08:59 CEST; 57s ago
+     Docs: man:mysqld(8)
+           https://mariadb.com/kb/en/library/systemd/
+  Process: 2013 ExecStartPost=/usr/libexec/mysql-check-upgrade (code=exited, status=0/SUCCESS)
+  Process: 1944 ExecStartPre=/usr/libexec/mysql-prepare-db-dir mariadb.service (code=exited, status=0/SUCCESS)
+  Process: 1919 ExecStartPre=/usr/libexec/mysql-check-socket (code=exited, status=0/SUCCESS)
+ Main PID: 1982 (mysqld)
+   Status: "Taking your SQL requests now..."
+    Tasks: 30 (limit: 11477)
+   Memory: 73.1M
+   CGroup: /system.slice/mariadb.service
+           └─1982 /usr/libexec/mysqld --basedir=/usr
+
+Oct 11 15:08:58 centos8 systemd[1]: Starting MariaDB 10.3 database server...
+Oct 11 15:08:59 centos8 mysql-prepare-db-dir[1944]: Database MariaDB is probably initialized in /var/lib/mysql already, nothing is done.
+Oct 11 15:08:59 centos8 mysql-prepare-db-dir[1944]: If this is not the case, make sure the /var/lib/mysql is empty before running mysql-prepare-db-dir.
+Oct 11 15:08:59 centos8 mysqld[1982]: 2020-10-11 15:08:59 0 [Note] /usr/libexec/mysqld (mysqld 10.3.17-MariaDB) starting as process 1982 ...
+Oct 11 15:08:59 centos8 systemd[1]: Started MariaDB 10.3 database server.
+[tiian@centos8 tmp]$ ps -ef | grep mysql|grep -v grep
+mysql       1982       1  1 15:08 ?        00:00:00 /usr/libexec/mysqld --basedir=/usr
 	    </screen></td></tr></tbody>
 	  </table>
 	  Create a new user authorization and a new database
@@ -168,8 +213,9 @@ mysql> quit
 Bye
 	    </screen></td></tr></tbody>
 	  </table>
-	  On recent systems like Ubuntu 18.04, the following commands can be
-	  used instead of the previous ones that don't work anymore:
+	  On newest systems like for example Ubuntu 18.04 and CentOS 8, the
+	  following commands can be used instead of the previous ones that
+	  don't work anymore:
 	  <table frame="box">
 	    <thead><tr><td>[Shell terminal session]</td></tr></thead>
 	    <tbody><tr><td><screen>
@@ -961,8 +1007,8 @@ Disconnected from Oracle Database 12c Standard Edition Release 12.1.0.2.0 - 64bi
     <para>
       This section has been developed using PostgreSQL 9.1.24 (and upper)
       for Linux. Here is a brief list of the tested versions for Ubuntu
-      12.04, 14.04, 16.04, 18.04 and CentOS/RHEL 7.3 and the installed
-      packages:
+      12.04, 14.04, 16.04, 18.04 and CentOS/RHEL 7.3, CentOS 8 and the
+      installed packages:
       <screen>
 tiian@ubuntu1204-64:/tmp$ dpkg -l | grep -i -e pq -e postgresql
 ii  libpq-dev                        9.1.24-0ubuntu0.12.04               header files for libpq5 (PostgreSQL library)
@@ -1012,6 +1058,13 @@ postgresql-devel-9.2.18-1.el7.x86_64
 postgresql-9.2.18-1.el7.x86_64
 postgresql-server-9.2.18-1.el7.x86_64
 postgresql-libs-9.2.18-1.el7.x86_64
+
+[tiian@centos8 tmp]$ rpm -qa | grep -i -e pq -e postgresql
+postgresql-server-10.14-1.module_el8.2.0+487+53cc39ce.x86_64
+libpq-12.4-1.el8_2.x86_64
+postgresql-jdbc-42.2.3-3.el8_2.noarch
+libpq-devel-12.4-1.el8_2.x86_64
+postgresql-10.14-1.module_el8.2.0+487+53cc39ce.x86_64
       </screen>
       If you were using a different version you would need to adapt some
       commands to your environment.
@@ -1043,7 +1096,7 @@ postgresql-libs-9.2.18-1.el7.x86_64
 	<title>Start-up the PostgreSQL server</title>
 	<para>
 	  If your server didn't start-up automatically at boot time, you
-	  could start it with the following commands:
+	  could start it with the following commands for Ubuntu:
 	  <table frame="box">
 	    <thead><tr><td>[Shell terminal session]</td></tr></thead>
 	    <tbody><tr><td><screen>
@@ -1060,6 +1113,52 @@ postgres  1831  1829  0 23:00 ?        00:00:00 postgres: writer process
 postgres  1832  1829  0 23:00 ?        00:00:00 postgres: wal writer process
 postgres  1833  1829  0 23:00 ?        00:00:00 postgres: autovacuum launcher process
 postgres  1834  1829  0 23:00 ?        00:00:00 postgres: stats collector process
+	    </screen></td></tr></tbody>
+	  </table>
+	  or with the following ones for CentOS:
+	  <table frame="box">
+	    <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	    <tbody><tr><td><screen>
+[tiian@centos8 tmp]$ sudo /usr/bin/postgresql-setup --initdb
+ * Initializing database in '/var/lib/pgsql/data'
+ * Initialized, logs are in /var/lib/pgsql/initdb_postgresql.log
+[tiian@centos8 tmp]$ sudo systemctl start postgresql.service
+[tiian@centos8 tmp]$ sudo systemctl enable postgresql.service
+Created symlink /etc/systemd/system/multi-user.target.wants/postgresql.service → /usr/lib/systemd/system/postgresql.service.
+[tiian@centos8 tmp]$ ps -ef|grep postgres|grep -v grep
+postgres    2254       1  0 15:23 ?        00:00:00 /usr/bin/postmaster -D /var/lib/pgsql/data
+postgres    2256    2254  0 15:23 ?        00:00:00 postgres: logger process   
+postgres    2258    2254  0 15:23 ?        00:00:00 postgres: checkpointer process   
+postgres    2259    2254  0 15:23 ?        00:00:00 postgres: writer process   
+postgres    2260    2254  0 15:23 ?        00:00:00 postgres: wal writer process   
+postgres    2261    2254  0 15:23 ?        00:00:00 postgres: autovacuum launcher process   
+postgres    2262    2254  0 15:23 ?        00:00:00 postgres: stats collector process   
+postgres    2263    2254  0 15:23 ?        00:00:00 postgres: bgworker: logical replication launcher   
+[tiian@centos8 tmp]$ sudo systemctl status postgresql.service
+● postgresql.service - PostgreSQL database server
+   Loaded: loaded (/usr/lib/systemd/system/postgresql.service; enabled; vendor preset: disabled)
+   Active: active (running) since Sun 2020-10-11 15:23:45 CEST; 3min 7s ago
+ Main PID: 2254 (postmaster)
+    Tasks: 8 (limit: 11477)
+   Memory: 16.3M
+   CGroup: /system.slice/postgresql.service
+           ├─2254 /usr/bin/postmaster -D /var/lib/pgsql/data
+           ├─2256 postgres: logger process   
+           ├─2258 postgres: checkpointer process   
+           ├─2259 postgres: writer process   
+           ├─2260 postgres: wal writer process   
+           ├─2261 postgres: autovacuum launcher process   
+           ├─2262 postgres: stats collector process   
+           └─2263 postgres: bgworker: logical replication launcher   
+
+Oct 11 15:23:44 centos8 systemd[1]: Starting PostgreSQL database server...
+Oct 11 15:23:44 centos8 postmaster[2254]: 2020-10-11 15:23:44.877 CEST [2254] LOG:  listening on IPv6 address "::1", port 5432
+Oct 11 15:23:44 centos8 postmaster[2254]: 2020-10-11 15:23:44.877 CEST [2254] LOG:  listening on IPv4 address "127.0.0.1", port 5432
+Oct 11 15:23:44 centos8 postmaster[2254]: 2020-10-11 15:23:44.893 CEST [2254] LOG:  listening on Unix socket "/var/run/postgresql/.s.PGSQL.5432"
+Oct 11 15:23:44 centos8 postmaster[2254]: 2020-10-11 15:23:44.935 CEST [2254] LOG:  listening on Unix socket "/tmp/.s.PGSQL.5432"
+Oct 11 15:23:44 centos8 postmaster[2254]: 2020-10-11 15:23:44.957 CEST [2254] LOG:  redirecting log output to logging collector process
+Oct 11 15:23:44 centos8 postmaster[2254]: 2020-10-11 15:23:44.957 CEST [2254] HINT:  Future log output will appear in directory "log".
+Oct 11 15:23:45 centos8 systemd[1]: Started PostgreSQL database server.
 	    </screen></td></tr></tbody>
 	  </table>
 	  Switch to user <systemitem class="username">postgres</systemitem>,
@@ -1114,24 +1213,19 @@ postgres=# \q
 	  <table frame="box">
 	    <thead><tr><td>[PostgreSQL terminal session]</td></tr></thead>
 	    <tbody><tr><td><screen>
-tiian@ubuntu1204-64:~$ createdb testdb
-tiian@ubuntu1204-64:~$ psql testdb
-psql (9.1.24)
+[tiian@centos8 tmp]$ createdb testdb
+[tiian@centos8 tmp]$ psql testdb
+psql (10.14)
 Type "help" for help.
 
-testdb=>
-testdb=> CREATE TABLE "authors" (
-testdb(> "id" integer NOT NULL,
-testdb(> "last_name" text,
-testdb(> "first_name" text,
-testdb(> Constraint "authors_pkey" Primary Key ("id"));
-NOTICE:  CREATE TABLE / PRIMARY KEY will create implicit index "authors_pkey" for table "authors"
+testdb=> CREATE TABLE "authors" ("id" integer NOT NULL,"last_name" text,"first_name" text,Constraint "authors_pkey" Primary Key ("id"));
 CREATE TABLE
-
 testdb=> select * from authors;
- id | last_name | first_name
+ id | last_name | first_name 
 ----+-----------+------------
 (0 rows)
+
+testdb=> \q
 	    </screen></td></tr></tbody>
 	  </table>
 	  OK, the <quote>authors</quote> table was created. 
@@ -1162,7 +1256,9 @@ max_prepared_transactions = 10          # zero disables the feature
 #max_stack_depth = 2MB                  # min 100kB
 	  </screen>
 	  and restart the PostgreSQL server with something like
-	  <screen>service postgresql restart</screen> (Ubuntu, CentOS and RHEL) using
+	  <screen>service postgresql restart</screen> (Ubuntu) or
+	  <screen>systemctl restart postgresql.service</screen> (CentOS)
+	  using
 	  <systemitem class="username">root</systemitem> user.
 	</para>
       </section>
