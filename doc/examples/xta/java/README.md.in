@@ -15,7 +15,7 @@ work.
 After proper installation of LIXA, you can compile the program with the
 following command (jar classpath must be changed as necessary):
 
-`javac -cp /opt/lixa/share/lixa/java/xta.jar:/usr/share/java/mysql.jar:/opt/postgresql/postgresql.jar ExampleXtaSA31.java`
+`javac -cp /opt/lixa/share/lixa/java/xta.jar:@MYSQL_JDBC_JAR@:/opt/postgresql/postgresql.jar ExampleXtaSA31.java`
 
 and execute it with this command:
 

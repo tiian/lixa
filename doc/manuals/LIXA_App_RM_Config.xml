@@ -1187,11 +1187,12 @@ logout
 	  </table>
 	  Even if most of the examples use local connection, for JDBC it's
 	  necessary even a host connection; verify that config file
-	  <filename>pg_hba.conf</filename> contains a row like the following
-	  one:
+	  <filename>pg_hba.conf</filename> contains a couple of rows like the
+	  following ones:
 	  <table frame="box">
 	    <thead><tr><td>[Shell terminal session]</td></tr></thead>
 	    <tbody><tr><td><screen>
+host    all             all             127.0.0.1/32            md5
 host    all             all             ::1/128                 md5
 	    </screen></td></tr></tbody>
 	  </table>

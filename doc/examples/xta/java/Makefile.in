@@ -79,7 +79,8 @@ POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
 subdir = doc/examples/xta/java
-DIST_COMMON = $(srcdir)/Makefile.in $(srcdir)/Makefile.am
+DIST_COMMON = $(srcdir)/Makefile.in $(srcdir)/Makefile.am \
+	$(dist_noinst_DATA)
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/acinclude.m4 \
 	$(top_srcdir)/m4include/ax_lib_oracle_oci.m4 \
@@ -160,7 +161,7 @@ am__uninstall_files_from_dir = { \
          $(am__cd) "$$dir" && rm -f $$files; }; \
   }
 am__installdirs = "$(DESTDIR)$(docdir)"
-DATA = $(doc_DATA)
+DATA = $(dist_noinst_DATA) $(doc_DATA)
 am__tagged_files = $(HEADERS) $(SOURCES) $(TAGS_FILES) $(LISP)
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 ACLOCAL = @ACLOCAL@
@@ -388,6 +389,7 @@ doc_DATA = README.md ExampleXtaSA31.java ExampleXtaMACC31.java \
 	ExampleXtaMACBPA31.java ExampleXtaMACBPA32.java \
 	ExampleXtaMACBPS31.java ExampleXtaMACBPS32.java
 
+dist_noinst_DATA = README.md.in ExampleXtaSA31.java.in
 EXTRA_DIST = $(doc_DATA)
 all: all-am
 
@@ -605,6 +607,11 @@ uninstall-am: uninstall-docDATA
 	mostlyclean-libtool pdf pdf-am ps ps-am tags-am uninstall \
 	uninstall-am uninstall-docDATA uninstall-hook
 
+
+README.md:	README.md.in
+	sed -e 's|@MYSQL_JDBC_JAR[@]|$(MYSQL_JDBC_JAR)|g' $< >$@
+ExampleXtaSA31.java:	ExampleXtaSA31.java.in
+	sed -e 's|@MYSQL_JDBC_DATASOURCE_CLASS[@]|$(MYSQL_JDBC_DATASOURCE_CLASS)|g' $< >$@
 
 uninstall-hook:
 	if test -d ${docdir}; then rmdir ${docdir}; fi

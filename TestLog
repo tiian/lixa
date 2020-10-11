@@ -1,3 +1,9 @@
+Release: 1.9.3
+CentOS 8
+PYTHON_VERSION=3 ./configure --enable-crash --with-mysql --with-mysql-jdbc=/usr/lib/java/mariadb-java-client.jar --with-postgresql --with-postgresql-jdbc=/usr/share/java/postgresql.jar --with-oracle-include=/opt/oracle/instantclient_19_8/sdk/include/ --with-oracle-lib=/opt/oracle/instantclient_19_8/ --with-oracle-jdbc=/opt/oracle/instantclient_19_8/ojdbc8.jar
+
+
+
 Release: 1.9.1 (Tester: Tiian; Test purpose: non regression test of the 
 improvements for the journal based state engine)
 Date: 2019-09-09

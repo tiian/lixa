@@ -1,7 +1,7 @@
-Test Ubuntu 20.04
 Test CentOS 8
+Test Ubuntu 20.04
 
-Fix examples for MySQL JTA as it has been done for case4101.java and others in dir test/src/java
+Fix examples for MySQL XTA as it has been done for case4101.java and others in dir test/src/java; test them again in CentOS 8, after MariaDB jar/class adaptation
 
 
 
