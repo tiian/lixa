@@ -1,4 +1,6 @@
-Test CentOS 8
+906: CT/1.4/3.0 server pollout end (rollback)        FAILED (ct_1_4.at:285)
+
+Test CentOS 8 with JOURNAL state engine
 Test Ubuntu 20.04
 
 Fix examples for MySQL XTA as it has been done for case4101.java and others in dir test/src/java; test them again in CentOS 8, after MariaDB jar/class adaptation
