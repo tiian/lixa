@@ -133,7 +133,7 @@ void lixa_trace(const char *fmt, ...)
     fputs(buffer, stderr);
 # ifdef LIXA_DEBUG
     fflush(stderr);
-#endif
+# endif
     /* remove the lock from mutex */
     g_mutex_unlock(&lixa_trace_mutex);
 #else
@@ -268,7 +268,7 @@ void lixa_trace_stack(const char *function_name, const char *file_name,
             getpid(), pthread_self(),
             function_name, file_name, file_line, exception, ret_cod,
             ret_cod_text, error, strerror(error), (unsigned int)trace_module);
-# ifdef LIXA_DEBUG
+#ifdef LIXA_DEBUG
     fflush(stderr);
 #endif
     /* remove the lock from mutex */

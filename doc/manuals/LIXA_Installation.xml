@@ -589,17 +589,18 @@ make
 	  </para>
 	</section>
 	<section>
-	  <title>Extra debug code</title>
+	  <title>Extra debug code and messages</title>
 	  <para>
-	    To enable extra debug code, that's basically some redundant check
-	    code use <option>--enable-debug</option> on
+	    To enable extra debug code and messages, that's basically some
+	    additional code and trace messages, use
+	    <option>--enable-debug</option> on
 	    <command>./configure</command> command line:
 	    <screen>
 ./configure --enable-debug
 	    </screen>
-	    This feature could be interesting when porting the LIXA project
-	    software to a different platform; for normal use, the extra
-	    debugging code is useless.
+	    This feature is typically used for debugging some hard issues
+	    during development and porting activities; for normal use of the
+	    LIXA project software, it should not be used.
 	  </para>
 	</section>
 	<section>
@@ -613,6 +614,9 @@ make
 	    <screen>
 ./configure --enable-crash
 	    </screen>
+	    This feature is typically used for testing some features during
+	    development and porting activities; for normal use of the
+	    LIXA project software, it should not be used.
 	  </para>
 	</section>
       </section>
