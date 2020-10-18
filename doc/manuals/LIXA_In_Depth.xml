@@ -147,15 +147,10 @@ Dec  4 18:22:49 ubuntu lixad[6697]: LXD006N server terminated activities
 	  </para></listitem>
 	</itemizedlist>
 	When activated, stack tracing produces JSON formatted records as in
-	the example below (messages produced by LIXA state server):
+	the example below (messages produced by a LIXA application):
 	<screen>
-2020-08-28 18:41:01.699712 [6311/47460663904640] { "type": "StackTrace", "date": "2020-08-28", "time": "18:41:01.699712", "process_id": 6311, "thread_id": 47460663904640, "function_name": "status_record_check_integrity", "source_file_name": "server_status.c", "source_file_line": "815", "exception": 0, "return_code": -9, "return_code_text": "ERROR: object is corrupted", "errno": 9, "errno_text": "Bad file descriptor" }
-2020-08-28 18:41:02.722824 [6311/47460701607680] { "type": "StackTrace", "date": "2020-08-28", "time": "18:41:02.722824", "process_id": 6311, "thread_id": 47460701607680, "function_name": "srvr_rcvr_tbl_get_block", "source_file_name": "srvr_rcvr_tbl.c", "source_file_line": "358", "exception": 2, "return_code": 1, "return_code_text": "WARNING: object not found", "errno": 0, "errno_text": "Success" }
-2020-08-28 18:41:04.165927 [6311/47460701607680] { "type": "StackTrace", "date": "2020-08-28", "time": "18:41:04.165927", "process_id": 6311, "thread_id": 47460701607680, "function_name": "lixa_msg_retrieve", "source_file_name": "lixa_xml_msg.c", "source_file_line": "266", "exception": 5, "return_code": 4, "return_code_text": "WARNING: peer has closed TCP/IP connection", "errno": 0, "errno_text": "Success" }
-2020-08-28 18:41:04.166036 [6311/47460701607680] { "type": "StackTrace", "date": "2020-08-28", "time": "18:41:04.166036", "process_id": 6311, "thread_id": 47460701607680, "function_name": "server_manager_pollin_data", "source_file_name": "server_manager.c", "source_file_line": "787", "exception": 1, "return_code": 4, "return_code_text": "WARNING: peer has closed TCP/IP connection", "errno": 0, "errno_text": "Success" }
-2020-08-28 18:41:04.167795 [6311/47460699506432] { "type": "StackTrace", "date": "2020-08-28", "time": "18:41:04.167795", "process_id": 6311, "thread_id": 47460699506432, "function_name": "server_manager_pollin_ctrl", "source_file_name": "server_manager.c", "source_file_line": "682", "exception": 7, "return_code": 9, "return_code_text": "WARNING: shutdown must be performed", "errno": 0, "errno_text": "Success" }
-2020-08-28 18:41:04.167868 [6311/47460697405184] { "type": "StackTrace", "date": "2020-08-28", "time": "18:41:04.167868", "process_id": 6311, "thread_id": 47460697405184, "function_name": "server_manager_pollin_ctrl", "source_file_name": "server_manager.c", "source_file_line": "682", "exception": 7, "return_code": 9, "return_code_text": "WARNING: shutdown must be performed", "errno": 0, "errno_text": "Success" }
-2020-08-28 18:41:04.167918 [6311/47460701607680] { "type": "StackTrace", "date": "2020-08-28", "time": "18:41:04.167918", "process_id": 6311, "thread_id": 47460701607680, "function_name": "server_manager_pollin_ctrl", "source_file_name": "server_manager.c", "source_file_line": "682", "exception": 7, "return_code": 9, "return_code_text": "WARNING: shutdown must be performed", "errno": 0, "errno_text": "Success" }
+2020-10-18 19:06:06.871362 [32034/47612092549696] { "type": "StackTrace", "date": "2020-10-18", "time": "19:06:06.871362", "process_id": 32034, "thread_id": 47612092549696, "function_name": "client_status_coll_get_cs", "source_file_name": "client_status.c", "source_file_line": "328", "exception": 1, "return_code": 1, "return_code_text": "WARNING: object not found", "errno": 0, "errno_text": "Success", "trace_module": 0x20000 }
+2020-10-18 19:06:06.874283 [32034/47612092549696] { "type": "StackTrace", "date": "2020-10-18", "time": "19:06:06.874283", "process_id": 32034, "thread_id": 47612092549696, "function_name": "lixa_xa_open", "source_file_name": "lixa_xa.c", "source_file_line": "1446", "exception": 10, "return_code": -99, "return_code_text": "ERROR: an XA function returned an unexpected return code", "errno": 0, "errno_text": "Success", "trace_module": 0x2000 }
 	</screen>
 	The JSON payload can be extracted by the whole message quite easily
 	and it can be ingested by a log analytic platform like for instance
@@ -167,6 +162,12 @@ Dec  4 18:22:49 ubuntu lixad[6697]: LXD006N server terminated activities
 	hurting the user. Nevertheless, stack tracing can be useful in
 	catching run time issues that are difficult to reproduce.
       </para></important>
+      <note><para>
+	Stack trace displays the bit that must be put in trace mask to get all
+	the messages produced by the module that generated the exception.
+	In the example above, look at "trace_module" field inside the JSON
+	records.
+      </para></note>
     </section>
     <section xml:id="Tracing_modules">
       <title>Tracing modules</title>
@@ -390,6 +391,11 @@ Dec  4 18:22:49 ubuntu lixad[6697]: LXD006N server terminated activities
 	  </listitem>
 	</itemizedlist>
       </para>
+      <important><para>
+	The suggested way to guess the modules require tracing is looking at
+	the stack trace record produced activating stack tracing as 
+	described in <xref linkend="Stack_tracing"/>.
+      </para></important>
     </section>
     <section>
       <title>Improve troubleshooting with trace</title>
@@ -566,6 +572,20 @@ tiian@ubuntu:~$ ls -la /tmp/lixat.trace
 2011-12-04 17:43:36.083890 [5544/3074013872] client_connect: connecting socket 4 to server '127.0.0.1' port 2345
 2011-12-04 17:43:36.084862 [5544/3074013872] client_connect/excp=2/ret_cod=-138/errno=111
 2011-12-04 17:43:36.084906 [5544/3074013872] lixa_tx_open/TX_*=-7/excp=5/ret_cod=-138/errno=111
+	</screen>
+      </para>
+    </section>
+    <section>
+      <title>Catching the last trace messages</title>
+      <para>
+	Under some conditions, the last trace messages produced by the daemon
+	<command>lixad</command> are not captured in the event of a crash.
+	This can increase the difficulty of problem determination.
+	To avoid the buffering of trace messages for <command>lixad</command>,
+	use <option>--enable-debug</option> on
+	<command>./configure</command> command line:
+	<screen>
+./configure --enable-debug
 	</screen>
       </para>
     </section>

@@ -1,4 +1,22 @@
-906: CT/1.4/3.0 server pollout end (rollback)        FAILED (ct_1_4.at:285)
+77: CT/1.4/3.0 server pollout end (rollback)        FAILED (ct_1_4.at:285)
+Ubuntu 14.04: OK
+CentOS 8: the lixad state server crashes (?) disappear with no apparent reason.
+GDB tells it exits normally... 
+CentOS 8 does not produce last trace messages when lixad aborts due to crash
+test.
+This little change can solve the issue in lixad.c, but it must be understood
+a little bit deeply
+
+    if (NULL != trace_file) {
+        FILE *dummy;
+        dummy = freopen(trace_file, "w", stderr);
+#ifdef LIXA_DEBUG
+        setbuf(dummy, NULL);
+#endif
+    }
+
+Test the change with --enable-debug to be sure it's safe!
+
 
 Test CentOS 8 with JOURNAL state engine
 Test Ubuntu 20.04

@@ -142,6 +142,11 @@ int main(int argc, char *argv[])
     if (NULL != trace_file) {
         FILE *dummy;
         dummy = freopen(trace_file, "w", stderr);
+#ifdef LIXA_DEBUG
+        /* remove buffering: it's the default behavior before freopen, but it
+           changes calling it */
+        setbuf(dummy, NULL);
+#endif /* LIXA_DEBUG */
     }
 
     if (print_version) {

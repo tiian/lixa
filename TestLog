@@ -2,7 +2,7 @@ Release: 1.9.3 (Tested: Tiian; Test purpose: support of CentOS 8 and Ubuntu 20.0
 
 CentOS 8.2      |x86_64 |virtual (KVM)  |2 vCPU *
 
-Configuration for CentOS 8:	PYTHON_VERSION=3 ./configure --enable-crash --with-mysql --with-mysql-jdbc=/usr/lib/java/mariadb-java-client.jar --with-postgresql --with-postgresql-jdbc=/usr/share/java/postgresql.jar --with-oracle-include=/opt/oracle/instantclient_19_8/sdk/include/ --with-oracle-lib=/opt/oracle/instantclient_19_8/ --with-oracle-jdbc=/opt/oracle/instantclient_19_8/ojdbc8.jar
+Configuration for CentOS 8:	PYTHON_VERSION=3 ./configure --enable-debug --enable-crash --with-mysql --with-mysql-jdbc=/usr/lib/java/mariadb-java-client.jar --with-postgresql --with-postgresql-jdbc=/usr/share/java/postgresql.jar --with-oracle-include=/opt/oracle/instantclient_19_8/sdk/include/ --with-oracle-lib=/opt/oracle/instantclient_19_8/ --with-oracle-jdbc=/opt/oracle/instantclient_19_8/ojdbc8.jar
 - LIXA_STATE_ENGINE=JOURNAL
 - LIXA_STATE_ENGINE=TRADITIONAL
 
