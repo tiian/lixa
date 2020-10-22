@@ -2345,17 +2345,18 @@ int lixa_xa_start(client_config_coll_t *ccc, client_status_t *cs,
                   int *txrc, const XID *xid, int txstate,
                   int next_txstate, int *dupid_or_proto, int xa_start_flags)
 {
-    enum Exception { MSG_SERIALIZE_ERROR1
-                     , MSG_SEND_ERROR
-                     , MSG_RETRIEVE_ERROR
-                     , MSG_DESERIALIZE_ERROR
-                     , ERROR_FROM_SERVER
-                     , MSG_SERIALIZE_ERROR2
-                     , ASYNC_NOT_IMPLEMENTED
-                     , UNEXPECTED_XA_RC
-                     , MSG_SEND_ERROR2
-                     , XA_ERROR
-                     , NONE } excp;
+    enum Exception {
+        MSG_SERIALIZE_ERROR1,
+        MSG_SEND_ERROR,
+        MSG_RETRIEVE_ERROR,
+        MSG_DESERIALIZE_ERROR,
+        ERROR_FROM_SERVER,
+        MSG_SERIALIZE_ERROR2,
+        ASYNC_NOT_IMPLEMENTED,
+        UNEXPECTED_XA_RC,
+        MSG_SEND_ERROR2,
+        XA_ERROR,
+        NONE } excp = NONE;
     int ret_cod = LIXA_RC_INTERNAL_ERROR;
     int warning = LIXA_RC_OK;
 
