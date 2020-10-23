@@ -17545,18 +17545,21 @@ fi
         fi
     fi
 
-    # guess the right class to use for MySQL/MariaDB
-    TMPFILE=$(mktemp)
-    jar -tf $MYSQL_JDBC_JAR | grep DataSource | sed 's/\//./g' | sed 's/\.class$//g' > $TMPFILE
-    # check for MysqlXADataSource
-    MYSQL_JDBC_DATASOURCE_CLASS=$(grep MysqlXADataSource $TMPFILE)
-    if test $? -ne 0
+    if test "z$MYSQL_JDBC_JAR" != "z"
     then
-        # check for MariaDbDataSource
-        MYSQL_JDBC_DATASOURCE_CLASS=$(grep MariaDbDataSource $TMPFILE)
+        # guess the right class to use for MySQL/MariaDB
+        TMPFILE=$(mktemp)
+        jar -tf $MYSQL_JDBC_JAR | grep DataSource | sed 's/\//./g' | sed 's/\.class$//g' > $TMPFILE
+        # check for MysqlXADataSource
+        MYSQL_JDBC_DATASOURCE_CLASS=$(grep MysqlXADataSource $TMPFILE)
         if test $? -ne 0
         then
-            as_fn_error $? "cannot find a suitable XA Data Source class for MySQL/MariaDB" "$LINENO" 5
+            # check for MariaDbDataSource
+            MYSQL_JDBC_DATASOURCE_CLASS=$(grep MariaDbDataSource $TMPFILE)
+            if test $? -ne 0
+            then
+                as_fn_error $? "cannot find a suitable XA Data Source class for MySQL/MariaDB" "$LINENO" 5
+            fi
         fi
     fi
 
@@ -18699,7 +18702,7 @@ else
 JAVA_TEST=Test.java
 CLASS_TEST=Test.class
 cat << \EOF > $JAVA_TEST
-/* #line 18702 "configure" */
+/* #line 18705 "configure" */
 public class Test {
 }
 EOF
@@ -19112,7 +19115,7 @@ else
 JAVA_TEST=Test.java
 CLASS_TEST=Test.class
 cat << \EOF > $JAVA_TEST
-/* #line 19115 "configure" */
+/* #line 19118 "configure" */
 public class Test {
 }
 EOF
@@ -19146,7 +19149,7 @@ JAVA_TEST=Test.java
 CLASS_TEST=Test.class
 TEST=Test
 cat << \EOF > $JAVA_TEST
-/* [#]line 19149 "configure" */
+/* [#]line 19152 "configure" */
 public class Test {
 public static void main (String args[]) {
         System.exit (0);

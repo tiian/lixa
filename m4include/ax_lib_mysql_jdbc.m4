@@ -49,18 +49,21 @@ AC_DEFUN([AX_LIB_MYSQL_JDBC],
         fi
     fi
     AC_SUBST(MYSQL_JDBC_JAR)
-    # guess the right class to use for MySQL/MariaDB
-    TMPFILE=$(mktemp)
-    jar -tf $MYSQL_JDBC_JAR | grep DataSource | sed 's/\//./g' | sed 's/\.class$//g' > $TMPFILE
-    # check for MysqlXADataSource
-    MYSQL_JDBC_DATASOURCE_CLASS=$(grep MysqlXADataSource $TMPFILE)
-    if test $? -ne 0
+    if test "z$MYSQL_JDBC_JAR" != "z"
     then
-        # check for MariaDbDataSource
-        MYSQL_JDBC_DATASOURCE_CLASS=$(grep MariaDbDataSource $TMPFILE)
+        # guess the right class to use for MySQL/MariaDB
+        TMPFILE=$(mktemp)
+        jar -tf $MYSQL_JDBC_JAR | grep DataSource | sed 's/\//./g' | sed 's/\.class$//g' > $TMPFILE
+        # check for MysqlXADataSource
+        MYSQL_JDBC_DATASOURCE_CLASS=$(grep MysqlXADataSource $TMPFILE)
         if test $? -ne 0
         then
-            AC_MSG_ERROR([cannot find a suitable XA Data Source class for MySQL/MariaDB])
+            # check for MariaDbDataSource
+            MYSQL_JDBC_DATASOURCE_CLASS=$(grep MariaDbDataSource $TMPFILE)
+            if test $? -ne 0
+            then
+                AC_MSG_ERROR([cannot find a suitable XA Data Source class for MySQL/MariaDB])
+            fi
         fi
     fi
     AC_SUBST(MYSQL_JDBC_DATASOURCE_CLASS)
