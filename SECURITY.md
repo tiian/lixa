@@ -2,7 +2,7 @@
 
 ## Supported Versions
 
-Security patches will be produced on the master tree, and for the last release (last git tag).
+Security patches will be produced on the master tree and for the last release (last git tag).
 
 | Version | Supported          |
 | ------- | ------------------ |
