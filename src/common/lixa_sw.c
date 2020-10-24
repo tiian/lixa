@@ -76,7 +76,7 @@ struct lixa_sw_status_rm_s *lixa_sw_status_rm_get(int rmid)
     if (NULL == (lps = (lixa_sw_status_t *)g_hash_table_lookup(
                      lixa_sw_status, (gconstpointer)key))) {
         LIXA_TRACE(("lixa_sw_status_rm_get: thread " PTHREAD_T_FORMAT
-                    "not registered\n"));
+                    "not registered\n", key));
         return NULL;
     }
     /* look for rmid */

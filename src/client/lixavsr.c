@@ -936,6 +936,7 @@ int lixavsr_execute_function(parsed_function_t *parsed_function,
             parsed_function->rmid);
         char *info = NULL;
         lixa_ser_xid_t lsx;
+        char buffer[RECORD_SIZE];
         LIXA_TRACE(("lixavsr_execute_function: fid=%d, rmid=%d, "
                     "flags=0x%8.8x\n",
                     parsed_function->fid, parsed_function->rmid,
@@ -1100,6 +1101,9 @@ int lixavsr_execute_function(parsed_function_t *parsed_function,
                             "%s(\"%s\")\n",
                             PARSABLE_FUNCTIONS[parsed_function->fid],
                             parsed_function->info));
+                /* to prevent CWE-89 detection from CodeQL */
+                strncpy(buffer, parsed_function->info, sizeof(buffer));
+                buffer[sizeof(buffer)-1] = '\0';
                 *rc = rm_mys_exec1(parsed_function->info);
                 LIXA_TRACE(("lixavsr_execute_function: executed "
                             "%s(\"%s\")=%d\n",

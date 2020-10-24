@@ -265,7 +265,8 @@ int exec_benchmark(void)
     srandom((unsigned int)time(NULL));
 
     /* allocate arrays */
-    if (NULL == (open_array = calloc(clients*bench_cycles, sizeof(double))) ||
+    if (NULL == (open_array = calloc((size_t)clients*(size_t)bench_cycles,
+                                     sizeof(double))) ||
         NULL == (begin_array = calloc(clients*bench_cycles, sizeof(double))) ||
         NULL == (comrol_array = calloc(clients*bench_cycles, sizeof(double))) ||
         NULL == (close_array = calloc(clients*bench_cycles, sizeof(double))) ||
@@ -468,7 +469,8 @@ void compute_statistics(thread_parameters_t *tp, long total_time)
     double stddev;
 
     /* sort the arrays with metrics */
-    qsort(open_array, clients*bench_cycles, sizeof(double), compare);
+    qsort(open_array, (size_t)clients*(size_t)bench_cycles,
+          sizeof(double), compare);
     qsort(begin_array, clients*bench_cycles, sizeof(double), compare);
     qsort(comrol_array, clients*bench_cycles, sizeof(double), compare);
     qsort(close_array, clients*bench_cycles, sizeof(double), compare);
