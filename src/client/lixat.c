@@ -267,10 +267,14 @@ int exec_benchmark(void)
     /* allocate arrays */
     if (NULL == (open_array = calloc((size_t)clients*(size_t)bench_cycles,
                                      sizeof(double))) ||
-        NULL == (begin_array = calloc(clients*bench_cycles, sizeof(double))) ||
-        NULL == (comrol_array = calloc(clients*bench_cycles, sizeof(double))) ||
-        NULL == (close_array = calloc(clients*bench_cycles, sizeof(double))) ||
-        NULL == (total_array = calloc(clients*bench_cycles, sizeof(double)))) {
+        NULL == (begin_array = calloc((size_t)clients*(size_t)bench_cycles,
+                                      sizeof(double))) ||
+        NULL == (comrol_array = calloc((size_t)clients*(size_t)bench_cycles,
+                                       sizeof(double))) ||
+        NULL == (close_array = calloc((size_t)clients*(size_t)bench_cycles,
+                                      sizeof(double))) ||
+        NULL == (total_array = calloc((size_t)clients*(size_t)bench_cycles,
+                                      sizeof(double)))) {
         fprintf(stderr, "Error while allocating arrays\n");
         exit(1);
     }    
@@ -471,10 +475,14 @@ void compute_statistics(thread_parameters_t *tp, long total_time)
     /* sort the arrays with metrics */
     qsort(open_array, (size_t)clients*(size_t)bench_cycles,
           sizeof(double), compare);
-    qsort(begin_array, clients*bench_cycles, sizeof(double), compare);
-    qsort(comrol_array, clients*bench_cycles, sizeof(double), compare);
-    qsort(close_array, clients*bench_cycles, sizeof(double), compare);
-    qsort(total_array, clients*bench_cycles, sizeof(double), compare);
+    qsort(begin_array, (size_t)clients*(size_t)bench_cycles,
+          sizeof(double), compare);
+    qsort(comrol_array, (size_t)clients*(size_t)bench_cycles,
+          sizeof(double), compare);
+    qsort(close_array, (size_t)clients*(size_t)bench_cycles,
+          sizeof(double), compare);
+    qsort(total_array, (size_t)clients*(size_t)bench_cycles,
+          sizeof(double), compare);
     
     tps = (double)clients * (double)tp[0].cycles * (double)1000000 /
         (double)total_time;

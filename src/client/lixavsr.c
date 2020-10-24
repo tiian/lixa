@@ -1104,7 +1104,7 @@ int lixavsr_execute_function(parsed_function_t *parsed_function,
                 /* to prevent CWE-89 detection from CodeQL */
                 strncpy(buffer, parsed_function->info, sizeof(buffer));
                 buffer[sizeof(buffer)-1] = '\0';
-                *rc = rm_mys_exec1(parsed_function->info);
+                *rc = rm_mys_exec1(buffer);
                 LIXA_TRACE(("lixavsr_execute_function: executed "
                             "%s(\"%s\")=%d\n",
                             PARSABLE_FUNCTIONS[parsed_function->fid],
