@@ -1102,7 +1102,10 @@ int lixavsr_execute_function(parsed_function_t *parsed_function,
                             "%s(\"%s\")\n",
                             PARSABLE_FUNCTIONS[parsed_function->fid],
                             parsed_function->info));
-                /* to prevent CWE-89 detection from CodeQL */
+                /* to prevent CWE-89 detection from CodeQL:
+                   lixavsr is intended to load SQL statements from the
+                   configuration file; it's user responsability to avoid
+                   malicious SQL statements */
                 for (i=0; i<sizeof(buffer); ++i)
                     buffer[i] = parsed_function->info[i];
                 buffer[sizeof(buffer)-1] = '\0';

@@ -456,6 +456,13 @@ public class case4106 {
                message passing */
             String reply = msgReceive(fifoReply);
             System.err.println("subordinate task replied '" + reply + "'");
+            // this pause is necessary to avoid the commit starts before
+            // lixad receives the packet from subordinate task
+            try {
+                Thread.sleep(1000);
+            } catch (Exception e) {
+                ;
+            }
             // the application can decide to commit or rollback the transaction
             if (commit) {
                 try {

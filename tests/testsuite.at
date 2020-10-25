@@ -7,11 +7,12 @@ AT_CHECK([ps -ef | grep lixad | grep -v grep], [1], [ignore], [ignore])
 #AT_CHECK([true], [4], [ignore], [ignore])
 AT_CLEANUP
 
+m4_include([xta.at])
 m4_include([ct.at])
 m4_include([lixa-config.at])
 m4_include([env_var.at])
 m4_include([nonapi.at])
-m4_include([xta.at])
+#m4_include([xta.at])
 m4_include([xid.at])
 m4_include([xa.at])
 m4_include([tx.at])

@@ -1,11 +1,5 @@
-Test case
-XTA Java/8.2/2.3 automatic recovery
-must be reworked because sometimes the recovery pending arrives at the superior,
-while the case tests expect it at the subordinate...
-MonkeyRM throw an exception of type XAER_PROTO...
-For some reason, the recovery pending can arrive at one (subordinate most of the
-times) or at the other (superior some time)
-
+7: XTA Java/8.2/2.2 server_xa_prepare_24,count=1   FAILED (xta_java_8_2.at:214)
+after fixing of 8.2/2.3, this breaks 50% of the times
 
 77: CT/1.4/3.0 server pollout end (rollback)        FAILED (ct_1_4.at:285)
 Ubuntu 14.04: OK

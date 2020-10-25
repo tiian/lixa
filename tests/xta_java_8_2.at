@@ -413,6 +413,7 @@ AT_CHECK([export LIXA_PROFILE=CASE_PROF_0027 ; lixa_test_group.sh insert], [0], 
 AT_CHECK([rm fifo_request], [0], [ignore], [ignore])
 AT_CHECK([rm fifo_reply], [0], [ignore], [ignore])
 # stop the LIXA state server
-AT_CHECK([lixa_test_exec.sh noreset stop true], [0], [ignore], [ignore])
+# stop execution with a false error!
+AT_CHECK([lixa_test_exec.sh noreset stop true], [1], [ignore], [ignore])
 AT_CLEANUP
 
