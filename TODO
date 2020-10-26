@@ -1,5 +1,14 @@
-7: XTA Java/8.2/2.2 server_xa_prepare_24,count=1   FAILED (xta_java_8_2.at:214)
-after fixing of 8.2/2.3, this breaks 50% of the times
+Reproduced even with Ubunu 14.04:
+
+ 71: CT/1.4/0.0 server pollout open                  ok
+ 72: CT/1.4/0.1 server pollout open                  ok
+ 73: CT/1.4/1.0 server pollout start                 ok
+ 74: CT/1.4/1.1 server pollout start                 ok
+ 75: CT/1.4/2.0 server pollout end (commit)          ok
+ 76: CT/1.4/2.1 server pollout end (commit)          ok
+ 77: CT/1.4/3.0 server pollout end (rollback)        FAILED (ct_1_4.at:285)
+
+
 
 77: CT/1.4/3.0 server pollout end (rollback)        FAILED (ct_1_4.at:285)
 Ubuntu 14.04: OK
