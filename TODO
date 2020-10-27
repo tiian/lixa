@@ -1,39 +1,5 @@
-Reproduced even with Ubunu 14.04:
-
- 71: CT/1.4/0.0 server pollout open                  ok
- 72: CT/1.4/0.1 server pollout open                  ok
- 73: CT/1.4/1.0 server pollout start                 ok
- 74: CT/1.4/1.1 server pollout start                 ok
- 75: CT/1.4/2.0 server pollout end (commit)          ok
- 76: CT/1.4/2.1 server pollout end (commit)          ok
- 77: CT/1.4/3.0 server pollout end (rollback)        FAILED (ct_1_4.at:285)
-
-
-
-77: CT/1.4/3.0 server pollout end (rollback)        FAILED (ct_1_4.at:285)
-Ubuntu 14.04: OK
-CentOS 8: the lixad state server crashes (?) disappear with no apparent reason.
-GDB tells it exits normally... 
-CentOS 8 does not produce last trace messages when lixad aborts due to crash
-test.
-This little change can solve the issue in lixad.c, but it must be understood
-a little bit deeply
-
-    if (NULL != trace_file) {
-        FILE *dummy;
-        dummy = freopen(trace_file, "w", stderr);
-#ifdef LIXA_DEBUG
-        setbuf(dummy, NULL);
-#endif
-    }
-
-Test the change with --enable-debug to be sure it's safe!
-
-
-Test CentOS 8 with JOURNAL state engine
 Test Ubuntu 20.04
 
-Fix examples for MySQL XTA as it has been done for case4101.java and others in dir test/src/java; test them again in CentOS 8, after MariaDB jar/class adaptation
 
 
 
