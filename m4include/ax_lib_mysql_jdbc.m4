@@ -53,7 +53,7 @@ AC_DEFUN([AX_LIB_MYSQL_JDBC],
     then
         # guess the right class to use for MySQL/MariaDB
         TMPFILE=$(mktemp)
-        jar -tf $MYSQL_JDBC_JAR | grep DataSource | sed 's/\//./g' | sed 's/\.class$//g' > $TMPFILE
+        jar -tf $MYSQL_JDBC_JAR | grep 'DataSource\.class' | sed 's/\//./g' | sed 's/\.class$//g' > $TMPFILE
         # check for MysqlXADataSource
         MYSQL_JDBC_DATASOURCE_CLASS=$(grep MysqlXADataSource $TMPFILE)
         if test $? -ne 0

@@ -213,9 +213,9 @@ mysql> quit
 Bye
 	    </screen></td></tr></tbody>
 	  </table>
-	  On newest systems like for example Ubuntu 18.04 and CentOS 8, the
-	  following commands can be used instead of the previous ones that
-	  don't work anymore:
+	  On newest systems like for example Ubuntu 18.04, Ubuntu 20.04 and
+	  CentOS 8, the following commands can be used instead of the
+	  previous ones that don't work anymore:
 	  <table frame="box">
 	    <thead><tr><td>[Shell terminal session]</td></tr></thead>
 	    <tbody><tr><td><screen>

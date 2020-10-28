@@ -114,8 +114,8 @@ Ubuntu		Python		swig python-dev python-setuptools
 Ubuntu		Python3		swig python3-dev python3-setuptools
 RHEL 7.5	Python		swig python-devel 
 
-Ubuntu <= 18.04	Java		default-jdk rng-tools libmysql-java
-Ubuntu 20.04	Java		default-jdk rng-tools libmariadb-java
+Ubuntu <= 18.04	Java		default-jdk rng-tools libmysql-java https://jdbc.postgresql.org/download/postgresql-42.2.5.jar
+Ubuntu 20.04	Java		default-jdk rng-tools libmariadb-java libpostgresql-jdbc-java
 CentOS 7.x	Java		java-1.8.0-openjdk* rng-tools
 				mysql-connector-java
 CentOS 8.x	Java		java-1.8.0-openjdk* rng-tools
