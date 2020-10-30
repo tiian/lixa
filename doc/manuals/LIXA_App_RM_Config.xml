@@ -246,6 +246,39 @@ mysql> quit
 Bye
 	    </screen></td></tr></tbody>
 	  </table>
+	  <note><para>
+	  MySQL 8.0 requires an additional privilege to perform 
+	  <command>XA RECOVER</command> (SQL) statement as described
+	  <link xlink:href="https://stackoverflow.com/questions/56831529/configuring-a-xa-datasource-to-mysql-8-db-with-spring-boot-and-bitronix-jta-mana">
+	    here</link>:
+	    <table frame="box">
+	      <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	      <tbody><tr><td><screen>
+tiian@ubuntu2004:~$ sudo mysql -u root
+[sudo] password for tiian: 
+Welcome to the MySQL monitor.  Commands end with ; or \g.
+Your MySQL connection id is 14
+Server version: 8.0.21-0ubuntu0.20.04.4 (Ubuntu)
+
+Copyright (c) 2000, 2020, Oracle and/or its affiliates. All rights reserved.
+
+Oracle is a registered trademark of Oracle Corporation and/or its
+affiliates. Other names may be trademarks of their respective
+owners.
+
+Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
+
+mysql> GRANT XA_RECOVER_ADMIN ON *.* TO 'lixa'@'localhost';
+Query OK, 0 rows affected (0.07 sec)
+
+mysql> FLUSH PRIVILEGES;
+Query OK, 0 rows affected (0.04 sec)
+
+mysql> quit
+Bye
+	      </screen></td></tr></tbody>
+	    </table>
+	  </para></note>
 	  The <systemitem class="username">lixa@localhost</systemitem> user
 	  has been created with all privileges on the <quote>lixa</quote>
 	  database. Now a sample table must be created using this new user:

@@ -110,10 +110,7 @@
       applications.
     </para>
     <para>
-      <link xlink:href="http://jotm.ow2.org/xwiki/bin/view/Main/WebHome">
-	<citetitle>JOTM (Java Open Transaction Manager)</citetitle>
-      </link>
-      and
+      JOTM (Java Open Transaction Manager) and
       <link xlink:href="https://github.com/bitronix/btm">
 	<citetitle>BTM (Bitronix JTA Transaction Manager)</citetitle>
       </link> 

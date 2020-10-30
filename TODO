@@ -1,4 +1,8 @@
-Test Ubuntu 20.04
+Test Ubuntu 20.04:
+327: XTA Java/5.3/0.0 SUP xa_commit XAER_RMERR       FAILED (xta_java_5_0.at:467)
+
+Configuration:
+PYTHON_VERSION=3 ./configure --enable-debug --enable-crash --with-mysql --with-mysql-jdbc=/usr/share/java/mariadb-java-client.jar --with-postgresql --with-postgresql-jdbc=/usr/share/java/postgresql.jar --with-oracle-include=/opt/oracle/instantclient_19_8/sdk/include/ --with-oracle-lib=/opt/oracle/instantclient_19_8/ --with-oracle-jdbc=/opt/oracle/instantclient_19_8/ojdbc8.jar
 
 
 
