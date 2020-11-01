@@ -1,5 +1,5 @@
 LOG:
-	   1.9.3 Fixed https://github.com/tiian/lixa/issues/7
+2020-11-01 1.9.3 Fixed https://github.com/tiian/lixa/issues/7
 		 Fixed https://github.com/tiian/lixa/issues/6
 		 Activated GitHub CodeQL to sanitize the code from common
 		 security issues.
