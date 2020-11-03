@@ -1,4 +1,8 @@
 LOG:
+
+2020-11-03 1.9.4 Fixed a bug in configure.ac related to --disable-xta-cpp flag
+		 (it prevented the build of some Docker images)
+
 2020-11-01 1.9.3 Fixed https://github.com/tiian/lixa/issues/7
 		 Fixed https://github.com/tiian/lixa/issues/6
 		 Activated GitHub CodeQL to sanitize the code from common
