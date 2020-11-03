@@ -1,4 +1,4 @@
-AC_INIT([lixa], [1.9.3], [tiian at users dot sourceforge dot net], [], [http://www.tiian.org/lixa/])
+AC_INIT([lixa], [1.9.4-dev], [tiian at users dot sourceforge dot net], [], [http://www.tiian.org/lixa/])
 AM_INIT_AUTOMAKE([-Wall -Werror])
 m4_ifdef([AM_PROG_AR], [AM_PROG_AR])
 
@@ -188,7 +188,9 @@ if test "$LIXA_XTA_CXX" = "yes" -a "$LIXA_XTA" = "no"
 then
 	LIXA_XTA_CXX="no"
 	AC_MSG_NOTICE([XTA for C++ can not be compiled because XTA is disabled])
-else
+fi
+if test "$LIXA_XTA_CXX" = "yes"
+then
 	# checking MySQL/MariaDB and PostgreSQL are available
 	if test "$HAVE_MYSQL" != "yes" -o "$HAVE_POSTGRESQL" != "yes"
 	then
