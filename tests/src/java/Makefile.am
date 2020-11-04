@@ -14,8 +14,8 @@ endif
 endif
 
 dist_noinst_DATA = case4100.java case4101.java.in case4102.java case4103.java \
-	case4104.java case4105.java case4106.java case4107.java \
-	case4108.java case4110.java
+	case4104.java.in case4105.java case4106.java.in case4107.java.in \
+	case4108.java.in case4110.java
 
 check_DATA = $(MAYBE_XTA) $(MAYBE_XTA_MYPOST_SQL) $(MAYBE_XTA_ORACLE) \
 	$(MAYBE_XTA_MYPOSTORACLE)
