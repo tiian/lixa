@@ -282,9 +282,11 @@ extern "C" {
      *                            global static config shared by all the
      *                            threads, XTA API uses a local dynamic
      *                            object for every thread.
+     * @param[in] profile : If non-NULL, this name is used in place of the
+     *                            LIXA_PROFILE environment variable.
      * @return a reason code
      */
-    int client_config(client_config_coll_t *ccc, int global_config);
+    int client_config(client_config_coll_t *ccc, int global_config, const char *profile);
 
 
 

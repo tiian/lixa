@@ -53,6 +53,13 @@
 #endif /* LIXA_TRACE_MODULE */
 #define LIXA_TRACE_MODULE   LIXA_TRACE_MOD_CLIENT_TX
 
+static const char *tx_open_profile = NULL;
+
+int lixa_tx_set_profile(const char *profile) {
+    tx_open_profile = profile;
+    return 0;
+}
+
 
 
 int lixa_tx_begin(int *txrc, XID *xid, int flags)
@@ -1004,7 +1011,7 @@ int lixa_tx_open(int *txrc, int mmode)
         /* check TX state (see Table 7-1) */
         txstate = client_status_get_txstate(cs);
         if (txstate == TX_STATE_S0) {
-            if (LIXA_RC_OK != (ret_cod = client_config(&global_ccc, TRUE)))
+            if (LIXA_RC_OK != (ret_cod = client_config(&global_ccc, TRUE, tx_open_profile)))
                 THROW(CLIENT_CONFIG_ERROR);
             if (LIXA_RC_OK != (ret_cod = client_connect(cs, &global_ccc)))
                 THROW(CLIENT_CONNECT_ERROR);

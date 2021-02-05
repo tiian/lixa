@@ -1630,7 +1630,7 @@ int main(int argc, char *argv[])
     }
 
     /* configure a client standard environment */
-    if (LIXA_RC_OK != (ret_cod = client_config(&global_ccc, TRUE))) {
+    if (LIXA_RC_OK != (ret_cod = client_config(&global_ccc, TRUE, NULL))) {
         LIXA_TRACE(("%s/client_config: ret_cod=%d ('%s')\n", argv[0],
                     ret_cod, lixa_strerror(ret_cod)));
         exit(1);

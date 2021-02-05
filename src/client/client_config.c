@@ -70,10 +70,11 @@
 
 
 
-int client_config(client_config_coll_t *ccc, int global_config)
+int client_config(client_config_coll_t *ccc, int global_config, const char *profile)
 {
     enum Exception { G_HASH_TABLE_NEW_ERROR
                      , G_STRDUP_ERROR
+                     , G_STRDUP_ERROR2
                      , OPEN_CONFIG_ERROR
                      , STTSRVS_ENVVAR
                      , XML_READ_FILE_ERROR
@@ -162,7 +163,12 @@ int client_config(client_config_coll_t *ccc, int global_config)
             ccc->profiles = g_array_new(FALSE, FALSE, sizeof(
                                             struct profile_config_s));
         
-        if (NULL == (tmp_str = getenv(LIXA_PROFILE_ENV_VAR))) {
+        if (profile) {
+            LIXA_TRACE(("client_config: using transactional profile '%s' for "
+                        "subsequent operations\n", profile));
+            if (NULL == (ccc->profile = g_strdup(profile)))
+                THROW(G_STRDUP_ERROR);
+        } else if (NULL == (tmp_str = getenv(LIXA_PROFILE_ENV_VAR))) {
             /* use empty string instead of NULL to avoid allocation issues */
             ccc->profile = tmp_str;
             LIXA_TRACE(("client_config: '%s' environment variable not found, "
@@ -172,7 +178,7 @@ int client_config(client_config_coll_t *ccc, int global_config)
             LIXA_TRACE(("client_config: using transactional profile '%s' for "
                         "subsequent operations\n", tmp_str));
             if (NULL == (ccc->profile = g_strdup(tmp_str)))
-                THROW(G_STRDUP_ERROR);
+                THROW(G_STRDUP_ERROR2);
         }
 
         /* checking if available the custom config file */
@@ -294,6 +300,7 @@ int client_config(client_config_coll_t *ccc, int global_config)
                 ret_cod = LIXA_RC_G_RETURNED_NULL;
                 break;
             case G_STRDUP_ERROR:
+            case G_STRDUP_ERROR2:
                 ret_cod = LIXA_RC_G_STRDUP_ERROR;
                 break;
             case OPEN_CONFIG_ERROR:

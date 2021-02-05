@@ -58,7 +58,7 @@ xta_transaction_manager_t *xta_transaction_manager_new(void)
         /* initialize the mutex */
         g_mutex_init(&this->mutex);
         /* configure the global config for LIXA client (if necessary) */
-        if (LIXA_RC_OK != (ret_cod = client_config(&global_ccc, TRUE)))
+        if (LIXA_RC_OK != (ret_cod = client_config(&global_ccc, TRUE, NULL)))
             THROW(CLIENT_CONFIG_ERROR);
         THROW(NONE);
     } CATCH {

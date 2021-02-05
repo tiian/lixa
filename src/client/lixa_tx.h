@@ -214,6 +214,15 @@ extern "C" {
     void lixa_tx_cleanup(void);
 
 
+
+    /**
+     * Set the profile name, overrides the LIXA_PROFILE environment variable
+     * @param[in] profile, NULL will remove the override, otherwise the profile must exist in the conf file
+     * @return 0 = OK, non-zero = error
+     */
+    extern int lixa_tx_set_profile(const char *profile);
+
+
     
 #ifdef __cplusplus
 }
