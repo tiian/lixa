@@ -56,8 +56,18 @@
 static const char *tx_open_profile = NULL;
 
 int lixa_tx_set_profile(const char *profile) {
-    tx_open_profile = profile;
-    return 0;
+    if (tx_open_profile) {
+        free((char*)tx_open_profile);
+    }
+    if (profile) {
+	tx_open_profile = strdup(profile);
+        if (tx_open_profile == NULL) {
+	    return TX_FAIL;
+        }
+    } else {
+        tx_open_profile = NULL;
+    }
+    return TX_OK;
 }
 
 
@@ -339,6 +349,9 @@ int lixa_tx_close(int *txrc)
             default:
                 THROW(INVALID_STATUS);
         }
+
+        /* Clear profile override */
+        lixa_tx_set_profile(NULL);
 
         /* update the TX state, now TX_STATE_S0; the result of XA calls
            must not be waited; see bug 3006369 */

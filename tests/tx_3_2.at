@@ -21,6 +21,27 @@ xa_close/0
 AT_CHECK([export LIXA_PROFILE=CASE_PROF_0000 ; lixa_test_exec.sh reset recycle case0000 2>&1 | tee $TESTS_TMP_FILE1 ; grep 'lixa_monkeyrm_close' $TESTS_TMP_FILE1 | grep 'ret_cod' | wc -l | grep 3], [0], [ignore], [ignore])
 AT_CLEANUP
 
+AT_SETUP([TX/3.2/0.1])
+# As for TX/3.2/0.0 but profile CASE_PROF_0000 is specified by the test program
+# and overrides the CASE_PROF_0001 specified by LIXA_PROFILE
+AT_DATA([monkey1s.conf],
+[[# first monkey R.M. config
+xa_open/0
+xa_close/0
+]])
+AT_DATA([monkey2s.conf],
+[[# second monkey R.M. config
+xa_open/-3
+xa_close/0
+]])
+AT_DATA([monkey3s.conf],
+[[# third monkey R.M. config
+xa_open/0
+xa_close/0
+]])
+AT_CHECK([export LIXA_PROFILE=CASE_PROF_0001 ; lixa_test_exec.sh reset recycle case0054 CASE_PROF_0000 2>&1 | tee $TESTS_TMP_FILE1 ; grep 'lixa_monkeyrm_close' $TESTS_TMP_FILE1 | grep 'ret_cod' | wc -l | grep 3], [0], [ignore], [ignore])
+AT_CLEANUP
+
 AT_SETUP([TX/3.2/1.0])
 # "The AP calls tx_close( ) to close all RMs linked with the AP. 
 # For tx_close( ) to return success, the AP cannot be part of an active global
