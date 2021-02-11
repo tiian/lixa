@@ -32,10 +32,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-#ifdef HAVE_ORACLE
 /* Oracle C Interface API header */
 #include <oci.h>
-#endif
 
 /* TX (Transaction Demarcation) header */
 #include <tx.h>

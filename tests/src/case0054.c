@@ -33,6 +33,7 @@
 
 
 #include <tx.h>
+#include <lixa_tx.h>
 #include <liblixamonkey.h>
 
 

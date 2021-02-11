@@ -163,22 +163,24 @@ int client_config(client_config_coll_t *ccc, int global_config, const char *prof
             ccc->profiles = g_array_new(FALSE, FALSE, sizeof(
                                             struct profile_config_s));
         
-        if (profile) {
-            LIXA_TRACE(("client_config: using transactional profile '%s' for "
-                        "subsequent operations\n", profile));
-            if (NULL == (ccc->profile = g_strdup(profile)))
-                THROW(G_STRDUP_ERROR);
-        } else if (NULL == (tmp_str = getenv(LIXA_PROFILE_ENV_VAR))) {
-            /* use empty string instead of NULL to avoid allocation issues */
-            ccc->profile = tmp_str;
-            LIXA_TRACE(("client_config: '%s' environment variable not found, "
-                        "using default profile for this client\n",
-                        LIXA_PROFILE_ENV_VAR));
-        } else {
-            LIXA_TRACE(("client_config: using transactional profile '%s' for "
+        if (NULL != (tmp_str = getenv(LIXA_PROFILE_ENV_VAR))) {
+            LIXA_TRACE(("client_config: using environment transactional profile '%s' for "
                         "subsequent operations\n", tmp_str));
             if (NULL == (ccc->profile = g_strdup(tmp_str)))
                 THROW(G_STRDUP_ERROR2);
+        } else {
+            if (profile) {
+                LIXA_TRACE(("client_config: using application transactional profile '%s' for "
+                            "subsequent operations\n", profile));
+                if (NULL == (ccc->profile = g_strdup(profile)))
+                    THROW(G_STRDUP_ERROR);
+            } else {
+                /* use empty string instead of NULL to avoid allocation issues */
+                ccc->profile = tmp_str;
+                LIXA_TRACE(("client_config: '%s' environment variable not found, "
+                            "using default profile for this client\n",
+                            LIXA_PROFILE_ENV_VAR));
+            }
         }
 
         /* checking if available the custom config file */
