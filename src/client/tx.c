@@ -202,3 +202,10 @@ int tx_xid_deserialize(TXINFO *info, char *sxid) {
     txrc = TX_OK;
     return txrc;
 }
+
+int tx_set_profile(const char *profile) {
+    int txrc = TX_FAIL;
+    lixa_tx_set_profile( &txrc, profile );
+    return txrc;
+}
+

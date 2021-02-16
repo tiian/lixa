@@ -33,7 +33,6 @@
 
 
 #include <tx.h>
-#include <lixa_tx.h>
 #include <liblixamonkey.h>
 
 
@@ -47,6 +46,7 @@ int main(int argc, char *argv[])
 {
     char *pgm = argv[0];
     char *profile = NULL;
+    char *missing_profile = "MISSING_PROFILE";
     int rc;
     TXINFO info;
 
@@ -55,13 +55,22 @@ int main(int argc, char *argv[])
     }
     
     printf("%s| starting...\n", pgm);
-    printf("%s| lixa_tx_set_profile(%s): %d\n", pgm, profile ? profile : "NULL", rc = lixa_tx_set_profile(profile));
+    printf("%s| tx_set_profile(%s): %d\n", pgm, missing_profile, rc = tx_set_profile(missing_profile));
+    assert(TX_OK == rc);
+    printf("%s| tx_set_profile(%s): %d\n", pgm, profile ? profile : "NULL", rc = tx_set_profile(profile));
     assert(TX_OK == rc);
     printf("%s| tx_open(): %d\n", pgm, rc = tx_open());
     if (TX_ERROR == rc) {
         /* memory leak prevention */
         printf("%s| tx_close(): %d\n", pgm, rc = tx_close());
         lixa_monkeyrm_call_cleanup();
+    }
+    if (TX_FAIL == rc) {
+        /* memory leak prevention */
+        printf("%s| tx_close(): %d\n", pgm, rc = tx_close());
+        lixa_monkeyrm_call_cleanup();
+        printf("%s| ...finished\n", pgm);
+        return 1;
     }
     assert(TX_OK == rc);
     printf("%s| tx_begin(): %d\n", pgm, rc = tx_begin());

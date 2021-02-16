@@ -216,11 +216,14 @@ extern "C" {
 
 
     /**
-     * Set the profile name, overrides the LIXA_PROFILE environment variable
+     * Set the profile name to use
+     * <b>Note:</b> This is a non standard function.
+     * The LIXA_PROFILE environment variable, if present, will override this value
+     * @param[out] txrc tx_* return code
      * @param[in] profile, NULL will remove the override, otherwise the profile must exist in the conf file
-     * @return 0 = OK, non-zero = error
+     * @return a standardised return code
      */
-    extern int lixa_tx_set_profile(const char *profile);
+    extern int lixa_tx_set_profile(int *txrc, const char *profile);
 
 
     
