@@ -72,7 +72,8 @@ int lixa_tx_set_profile(int *txrc, const char *profile)
     g_mutex_lock( &profile_mutex );
     TRY {
         if (tx_open_profile) {
-            free(g_steal_pointer(&tx_open_profile));
+            free(tx_open_profile);
+            tx_open_profile = NULL;
         }
         if (profile) {
 	    tx_open_profile = g_strdup(profile);
@@ -86,14 +87,14 @@ int lixa_tx_set_profile(int *txrc, const char *profile)
         }
     } CATCH {
         switch (excp) {
-        default:
-        case G_STRDUP_ERROR:
-            ret_cod = LIXA_RC_G_STRDUP_ERROR;
-            *txrc = TX_FAIL;
-            break;
         case NONE:
             ret_cod = LIXA_RC_OK;
             *txrc = TX_OK;
+            break;
+        case G_STRDUP_ERROR:
+        default:
+            ret_cod = LIXA_RC_G_STRDUP_ERROR;
+            *txrc = TX_FAIL;
             break;
         }
     }
