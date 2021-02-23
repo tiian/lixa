@@ -233,6 +233,16 @@ extern "C" {
  */
     extern int tx_xid_deserialize(TXINFO *info, char *sxid);
 
+/**
+ * Set a Resource Manager profile
+ * This should be called prior to calling @ref tx_open
+ * This profile name can be overridden by the LIXA_PROFILE environment variable
+ * This is NOT a standard Transaction Demarcation function
+ * @param profile IN the profile name, or NULL for none
+ * @return a standardized TX return code (TX_*)
+ */
+    extern int tx_set_profile(const char *profile);
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
