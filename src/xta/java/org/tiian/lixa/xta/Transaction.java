@@ -68,7 +68,8 @@ public class Transaction {
     }
     /**
      * Enlist the resource specified with the transaction associated with the
-     * target Transaction object.
+     * target Transaction object. Note: XTA guarantees that all the XA
+     * functions are called in the same exact order of enlistment.
      * @param xaRes The XAResource object associated with the Resource Manager
      * @param name The name of the Resource Manager associated to the
      *        XAResource, for example "PostgreSQL"

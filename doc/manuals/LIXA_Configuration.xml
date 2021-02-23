@@ -714,6 +714,28 @@ $ export LIXA_STATE_ENGINE=TRADITIONAL
 	    </para></listitem>
 	  </itemizedlist>
 	</para>
+	<important><para>
+	  Every profile lists some Resource Managers: LIXA guarantees that all
+	  the XA functions are called in the same exact order
+	  <footnote><para>XA functions can be skipped for dynamically
+	  registered Resource Managers 
+	  if they are not part of the transaction.</para></footnote>
+	  of the Resource Managers as enlisted in the profile.</para>
+	  <para>In the above example, profile "VZ67" enlists Resource Managers
+	  "OracleXE_dynreg" in first position and "IBMDB2_dynreg" in second
+	  position; every XA function, like for example
+	  <function>xa_prepare</function> and <function>xa_commit</function>
+	  are called by LIXA in the same exact order:
+	  <screen>
+	    ...
+	    xa_prepare("OracleXE_dynreg")
+	    xa_prepare("IBMDB2_dynreg")
+	    ...
+	    xa_commit("OracleXE_dynreg")
+	    xa_commit("IBMDB2_dynreg")
+	    ...
+	  </screen>
+	</para></important>
 	<para>
 	  The picture below models an environment that's using the sample
 	  <filename>etc/lixac_conf.xml</filename>

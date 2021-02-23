@@ -135,7 +135,8 @@ extern "C" {
 
     /**
      * Enlist the resource specified with the Transaction associated with the
-     * Transaction object
+     * Transaction object. Note: XTA guarantees that all the XA functions are
+     * called in the same exact order of enlistment.
      * @param[in,out] transact : transaction object
      * @param[in] xa_res : resource to associate
      * @return a reason code

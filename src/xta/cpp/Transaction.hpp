@@ -56,13 +56,14 @@ namespace xta {
         ~Transaction();
         /**
          * Enlist the resource specified with the Transaction associated with
-         * the Transaction object
+         * the Transaction object. Note: XTA guarantees that all the XA
+         * functions are called in the same exact order of enlistment.
          * @param[in] xaRes : resource to associate
          */
         void enlistResource(XaResource *xaRes);
         /**
          * Start a new XA Transaction. From the XA specification point of
-         * view, it calls xa_start (for the Native XA Resource Managers)
+         * view, it calls xa_start (for the Native XA Resource Managers).
          * @param[in] MultipleBranches : boolean value: <br>
          *            true = the created transaction will span more
          *                   applications,
