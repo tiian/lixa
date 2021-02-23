@@ -92,11 +92,14 @@ int lixa_tx_set_profile(int *txrc, const char *profile)
             *txrc = TX_OK;
             break;
         case G_STRDUP_ERROR:
-        default:
             ret_cod = LIXA_RC_G_STRDUP_ERROR;
             *txrc = TX_FAIL;
             break;
-        }
+        default:
+            ret_cod = LIXA_RC_INTERNAL_ERROR;
+            *txrc = TX_FAIL;
+            break;
+         }
     }
     g_mutex_unlock( &profile_mutex );
     LIXA_TRACE(("lixa_tx_set_profile/TX_*=%d/excp=%d/"

@@ -93,7 +93,7 @@ xa_close/0
 AT_CHECK([export LIXA_PROFILE=CASE_PROF_0000; lixa_test_exec.sh reset recycle case0054 MISSING_PROF 2>&1 | tee $TESTS_TMP_FILE1 ; grep 'lixa_monkeyrm_close' $TESTS_TMP_FILE1 | grep 'ret_cod' | wc -l | grep 3], [0], [ignore], [ignore])
 AT_CLEANUP
 
-AT_SETUP([TX/3.2/0.2])
+AT_SETUP([TX/3.2/0.5])
 # As for TX/3.2/0.0 but no profile is specified by LIXA_PROFILE
 # or by the program, so should default to CASE_PROF_0000
 AT_DATA([monkey1s.conf],
