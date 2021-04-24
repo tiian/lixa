@@ -1,5 +1,5 @@
 AT_INIT
-AT_COPYRIGHT([Copyright (c) 2009-2020, Christian Ferrari <tiian@users.sourceforge.net>])
+AT_COPYRIGHT([Copyright (c) 2009-2021, Christian Ferrari <tiian@users.sourceforge.net>])
 
 AT_BANNER([LIXA test cases start-up])
 AT_SETUP([check lixad process is NOT active...])
