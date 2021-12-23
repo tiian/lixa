@@ -76,7 +76,7 @@
                STOP RUN RETURNING 1
             END-IF.
       *
-      * Put yout code INSIDE the transaction boundary here
+      * Put your code INSIDE the transaction boundary here
       *
       * Calling TXCOMMIT (tx_commit): the transaction ends here with a
       * commit
