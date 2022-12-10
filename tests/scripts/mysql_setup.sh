@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# Copyright (c) 2009-2021, Christian Ferrari <tiian@users.sourceforge.net>
+# Copyright (c) 2009-2023, Christian Ferrari <tiian@users.sourceforge.net>
 # All rights reserved.
 #
 # This file is part of LIXA.

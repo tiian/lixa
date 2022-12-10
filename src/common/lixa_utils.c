@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2021, Christian Ferrari <tiian@users.sourceforge.net>
+ * Copyright (c) 2009-2023, Christian Ferrari <tiian@users.sourceforge.net>
  * All rights reserved.
  *
  * This file is part of LIXA.
@@ -74,7 +74,7 @@ size_t LIXA_SYSTEM_PAGE_SIZE;
 void lixa_print_version(FILE *stream)
 {
     fprintf(stream, "LIXA: a LIbre XA implementation\n"
-            "Copyright (c) 2009-2021, Christian Ferrari; "
+            "Copyright (c) 2009-2023, Christian Ferrari; "
             "all rights reserved.\n"
             "License: GPL (GNU Public License) version 2\n"
             "Package name: %s; package version: %s\n"

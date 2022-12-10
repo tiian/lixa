@@ -986,7 +986,7 @@ export LIXA_CONFIG_FILE=/tmp/my_lixac
 	<itemizedlist mark='bullet'>
 	  <listitem><para>
 	    <varname>TRADITIONAL</varname> for the traditional memory 
-	    mapped based state engine
+	    mapped based state engine (default value)
 	  </para></listitem>
 	  <listitem><para>
 	    <varname>JOURNAL</varname> for the low latency, journal based

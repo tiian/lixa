@@ -1,6 +1,6 @@
 LOG:
 
-	   1.9.5 
+2022-12-10 1.9.5 Documentation only minor improvements (COBOL example, README)
 
 2020-11-03 1.9.4 Fixed a bug in configure.ac related to --disable-xta-cpp flag
 		 (it prevented the build of some Docker images)

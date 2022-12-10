@@ -126,6 +126,10 @@ O.S.		Feature		Packages
 Ubuntu		doxygen		doxygen graphviz
 Ubuntu		docbook		xsltproc docbook-xml docbook-xsl
 
+Additional libraries are necessary for commercial third party Resource Managers
+like Oracle DB, IBM DB2 and IBM MQ: additional details are available in the
+"LIXA Reference Guide" manual.
+
 Enjoy LIXA!
 Ch.F.
 
