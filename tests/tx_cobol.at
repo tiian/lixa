@@ -63,3 +63,8 @@ AT_CHECK([if test "$HAVE_COBOLAPI" = "no"; then exit 77; fi])
 AT_CHECK([lixa_test_exec.sh noreset stop CASE1000], [ignore], [ignore], [ignore])
 AT_CLEANUP
 
+AT_SETUP([Stopping lixad process])
+AT_CHECK([if test "$HAVE_COBOLAPI" = "yes"; then exit 77; fi])
+AT_CHECK([lixa_test_exec.sh noreset stop true], [ignore], [ignore], [ignore])
+AT_CLEANUP
+

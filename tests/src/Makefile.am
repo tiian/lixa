@@ -52,7 +52,7 @@ check_PROGRAMS = case0000 case0001 case0002 case0003 case0004 case0005 \
 	case0020 case0021 case0022 case0023 case0024 case0025 case0026 \
 	case0027 case0028 case0029 case0030 case0031 case0032 case0033 \
 	case0034 case0035 case0036 case0043 case0046 case0048 case0049 \
-	case0050 case0051 case0052 case0053 \
+	case0050 case0051 case0052 case0053 case0054 \
 	$(MAYBE_POSTGRESQL) $(MAYBE_ORACLE) \
 	$(MAYBE_IBMDB2) $(MAYBE_MYSQL) $(MAYBE_MYSQL_POSTGRESQL) \
 	$(MAYBE_WEBSPHEREMQ) $(MAYBE_XTA)
@@ -162,6 +162,7 @@ case0050_SOURCES = case0050.c
 case0051_SOURCES = case0051.c
 case0052_SOURCES = case0052.c
 case0053_SOURCES = case0053.c
+case0054_SOURCES = case0054.c
 case0100_CPPFLAGS = -I../../src/client -I../../src/common -I../../src \
 	@ORACLE_OCI_CFLAGS@ @MYSQL_CPPFLAGS@ @POSTGRESQL_CPPFLAGS@
 case0100_LDADD = ../../src/common/liblixab.la ../../src/client/liblixac.la \
