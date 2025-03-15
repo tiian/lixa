@@ -1548,6 +1548,161 @@ logout
       </para></warning>
     </section>
     <section>
+      <title>Cleaning up difficult XA transactions from Oracle DB</title>
+      <para>
+	In rare occasions, command <command>lixar</command> does not succeed in
+	recoverying an XA transaction in Oracle DB. Here below a real example:
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+tiian@ubuntu1404-64:~/lixa/src/common$ /opt/lixa/bin/lixar -b -p -x 1279875137.6aa8b6332e2c49ad8e1a6a6c37072898.82d2d7f3984faf491e5c7f19f2354870 -c
+Execution options:
+- print report = yes
+- transaction to commit/rollback = 1279875137.6aa8b6332e2c49ad8e1a6a6c37072898.82d2d7f3984faf491e5c7f19f2354870
+- transaction(s) will be committed = yes
+- transaction(s) will be rolled back = no
+- bypass xid branch qualifier check = yes
+- bypass xid format id check = no
+- use TMENDRSCAN flag for last xa_recover call = no
+
+Recovery environment:
+LIXA_CONFIG_FILE_ENV_VAR = '(null)'
+LIXA_PROFILE_ENV_VAR = 'PQL_STA_ORA_STA'
+LIXA_JOB_ENV_VAR = '(null)'
+
+Resource manager list:
+rmid=0, lixa_name='PostgreSQL_stareg', xa_name='PostgreSQL[LIXA]'
+rmid=1, lixa_name='OracleIC_stareg', xa_name='Oracle_XA'
+
+Prepared and in-doubt transaction list:
+xid='1279875137.6aa8b6332e2c49ad8e1a6a6c37072898.82d2d7f3984faf491e5c7f19f2354870': rmid=1 
+
+Analizing transaction '1279875137.6aa8b6332e2c49ad8e1a6a6c37072898.82d2d7f3984faf491e5c7f19f2354870':
+xa_commit --> rmid=1, lixa_name='OracleIC_stareg', xa_name='Oracle_XA', rc=-4
+
+
+tiian@ubuntu1404-64:~/lixa/src/common$ /opt/lixa/bin/lixar -b -p -x 1279875137.6aa8b6332e2c49ad8e1a6a6c37072898.82d2d7f3984faf491e5c7f19f2354870 -r
+Execution options:
+- print report = yes
+- transaction to commit/rollback = 1279875137.6aa8b6332e2c49ad8e1a6a6c37072898.82d2d7f3984faf491e5c7f19f2354870
+- transaction(s) will be committed = no
+- transaction(s) will be rolled back = yes
+- bypass xid branch qualifier check = yes
+- bypass xid format id check = no
+- use TMENDRSCAN flag for last xa_recover call = no
+
+Recovery environment:
+LIXA_CONFIG_FILE_ENV_VAR = '(null)'
+LIXA_PROFILE_ENV_VAR = 'PQL_STA_ORA_STA'
+LIXA_JOB_ENV_VAR = '(null)'
+
+Resource manager list:
+rmid=0, lixa_name='PostgreSQL_stareg', xa_name='PostgreSQL[LIXA]'
+rmid=1, lixa_name='OracleIC_stareg', xa_name='Oracle_XA'
+
+Prepared and in-doubt transaction list:
+xid='1279875137.6aa8b6332e2c49ad8e1a6a6c37072898.82d2d7f3984faf491e5c7f19f2354870': rmid=1 
+
+Analizing transaction '1279875137.6aa8b6332e2c49ad8e1a6a6c37072898.82d2d7f3984faf491e5c7f19f2354870':
+xa_rollback --> rmid=1, lixa_name='OracleIC_stareg', xa_name='Oracle_XA', rc=0
+
+
+tiian@ubuntu1404-64:~/lixa/src/common$ /opt/lixa/bin/lixar -b -p
+Execution options:
+- print report = yes
+- transaction(s) will be committed = no
+- transaction(s) will be rolled back = no
+- bypass xid branch qualifier check = yes
+- bypass xid format id check = no
+- use TMENDRSCAN flag for last xa_recover call = no
+
+Recovery environment:
+LIXA_CONFIG_FILE_ENV_VAR = '(null)'
+LIXA_PROFILE_ENV_VAR = 'PQL_STA_ORA_STA'
+LIXA_JOB_ENV_VAR = '(null)'
+
+Resource manager list:
+rmid=0, lixa_name='PostgreSQL_stareg', xa_name='PostgreSQL[LIXA]'
+rmid=1, lixa_name='OracleIC_stareg', xa_name='Oracle_XA'
+
+Prepared and in-doubt transaction list:
+xid='1279875137.6aa8b6332e2c49ad8e1a6a6c37072898.82d2d7f3984faf491e5c7f19f2354870': rmid=1 
+	  </screen></td></tr></tbody>
+	</table>
+	If you try to commit the transaction, you get rc=-4 that's the value
+	of XAER_NOTA (the XID is not valid); if you try to rollback the
+	transaction, you get rc=0, but the transaction is still inside the
+	system.
+	Even you try and re-try, you may not be able to clean-up the
+	transaction from Oracle DB.
+      </para>
+      <warning><para>
+	The following instructions worked for me, but refer to Oracle
+	documentation and Oracle support before using them. They are here
+	provided, collected from a public post, but if you use them, you use
+	at your own risk.
+      </para></warning>
+      <para>
+	Login to Oracle using <command>sqlplus</command> with sysdba user,
+	check the global transaction and use the PL/SQL procedure
+	<command>PURGE_LOST_DB_ENTRY</command>
+	<table frame="box">
+	  <thead><tr><td>[Shell terminal session]</td></tr></thead>
+	  <tbody><tr><td><screen>
+[oracle@centos7-oracle12 ~]$ sqlplus "sys/oracle as sysdba"
+
+SQL*Plus: Release 12.1.0.2.0 Production on Fri Feb 21 19:05:03 2025
+
+Copyright (c) 1982, 2014, Oracle.  All rights reserved.
+
+
+Connected to:
+Oracle Database 12c Standard Edition Release 12.1.0.2.0 - 64bit Production
+
+SQL> select * from v$pending_xatrans$;
+
+GLOBAL_TRAN_FMT
+---------------
+GLOBAL_FOREIGN_ID
+--------------------------------------------------------------------------------
+BRANCH_ID
+--------------------------------------------------------------------------------
+     1279875137
+6AA8B6332E2C49AD8E1A6A6C37072898
+82D2D7F3984FAF491E5C7F19F2354870
+
+SQL> select LOCAL_TRAN_ID from dba_2pc_pending;
+
+LOCAL_TRAN_ID
+----------------------
+2.24.4871
+
+SQL> exec DBMS_TRANSACTION.PURGE_LOST_DB_ENTRY('2.24.4871');
+
+PL/SQL procedure successfully completed.
+
+SQL> select LOCAL_TRAN_ID from dba_2pc_pending;
+
+no rows selected
+	  </screen></td></tr></tbody>
+	</table>
+	<note>
+	  <para>
+	    In case of high traffic database, in case more than one rows are
+	    selected, use additional fields (LOCAL_TRAN_ID, GLOBAL_TRAN_ID) to
+	    match the transaction you want to clean.
+	  </para>
+	</note>
+	<important>
+	  <para>
+	    Don't forget to check the data in your table(s) because with the
+	    above cleaning operations you implicitly performed either a
+	    COMMIT or a ROLLBACK.
+	  </para>
+	</important>
+      </para>
+    </section>
+    <section>
       <title>Picking up the LIXA format id and branch qualifier</title>
       <para>
 	In the previous sections we have dealt with 

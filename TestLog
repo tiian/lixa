@@ -1,3 +1,12 @@
+... test in progress ...
+
+Release: 1.9.6 (Tester: Tiian; Test purpose: generic testing)
+Date: 2025-02-
+Configuration for Ubuntu: PYTHON_VERSION=3 ./configure --enable-debug --enable-crash --with-mysql --with-mysql-jdbc=/usr/share/java/mariadb-java-client.jar --with-postgresql --with-postgresql-jdbc=/usr/share/java/postgresql.jar --with-oracle-include=/opt/oracle/instantclient_19_8/sdk/include/ --with-oracle-lib=/opt/oracle/instantclient_19_8/ --with-oracle-jdbc=/opt/oracle/instantclient_19_8/ojdbc8.jar
+
+Ubuntu 22.04	|x86_64	|virtual (KVM)	|2 vCPU
+
+------------------------------------------------------------------------------
 Release: 1.9.5 (Tester: Tiian; Test purpose: generic testing)
 Date: 2022-12-10
 Configuration for Ubuntu: ./configure --enable-crash --with-docbook --with-mysql --with-mysql-jdbc=/usr/share/java/mysql.jar --with-postgresql --with-postgresql-jdbc=/opt/postgresql/postgresql.jar --with-oracle-include=/opt/oracle/instantclient_12_1/sdk/include/ --with-oracle-lib=/opt/oracle/instantclient_12_1/ --with-oracle-jdbc=/opt/oracle/OJDBC-Full/ojdbc7.jar

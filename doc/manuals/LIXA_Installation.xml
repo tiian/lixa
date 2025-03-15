@@ -985,11 +985,41 @@ sudo make install
     </section>
   </section>
   <section>
-    <title>Checking</title>
-    <para>
-      Before using LIXA to manage your transactions you might be interested
-      in checking the compiled software quality.
-    </para>
+    <title>Checking (LIXA developers only)</title>
+    <important>
+      <para>
+	The check procedure of LIXA is not intended for general purpose, but 
+	only during the development process to guarantee a change does not 
+	introduce regressions.
+	The procedure requires a lot of configuration to run properly because
+	several specific behaviors of some resource managers are tested.
+	In case you want to execute it, start with a configuration
+	documented in Testlog file, and only after you can complete it
+	successfully try something different.
+      </para>
+      <para>
+	The most common issues in performing the check are:
+	<itemizedlist mark='bullet'>
+	  <listitem>
+	    <para>
+	      one ore more resource manager(s) is not configure or is not
+	      reachable: test scripts skip some tests that cannot be performed
+	      without a specific resource manager, but the most sophisticated
+	      tests for XTA cannot be parametrized
+	    </para>
+	  </listitem>
+	  <listitem>
+	    <para>
+	      some tests are based on timing to wait for an event, like for
+	      example waiting that a resource manager put a transaction in its
+	      internal recovery list: sometimes timing doesn't work and the
+	      same test, if repeated is passed
+	    </para>
+	  </listitem>
+	</itemizedlist>
+	
+      </para>
+    </important>
     <para>
       LIXA has its own test suite implemented with 
       <application>Autotest</application>. A specific build configuration is
