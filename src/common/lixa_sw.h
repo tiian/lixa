@@ -137,7 +137,7 @@ extern "C" {
     static inline void lixa_sw_status_rm_init(struct lixa_sw_status_rm_s *lpsr)
     {
         lpsr->rmid = 0;
-        lpsr->rmid = LIXA_SW_STATUS_RM_TYPE_NULL;
+        lpsr->rm_type = LIXA_SW_STATUS_RM_TYPE_NULL;
         lpsr->state.R = lpsr->state.T = lpsr->state.S = 0;
         memset(&(lpsr->xid), 0, sizeof(XID));
         lpsr->conn = NULL;
