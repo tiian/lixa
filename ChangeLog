@@ -1,4 +1,6 @@
 LOG:
+	1.9.6-dev	Fixed bug documented in issue #19
+	      		Fixed bud documented in issue #16
 
 2022-12-10 1.9.5 Documentation only minor improvements (COBOL example, README)
 

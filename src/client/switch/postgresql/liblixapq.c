@@ -338,7 +338,7 @@ int lixa_pq_open(char *xa_info, int rmid, long flags)
         /* look for this thread status */
         if (NULL == (lps = (lixa_sw_status_t *)g_hash_table_lookup(
                          lixa_sw_status, (gconstpointer)key))) {
-            LIXA_TRACE(("lixa_sw_open: status for thread " PTHREAD_T_FORMAT
+            LIXA_TRACE(("lixa_pq_open: status for thread " PTHREAD_T_FORMAT
                         " not found, allocating it...\n", key));
             if (NULL == (lps = (lixa_sw_status_t *)malloc(
                              sizeof(lixa_sw_status_t)))) {
@@ -443,7 +443,7 @@ int lixa_pq_close(char *xa_info, int rmid, long flags)
         g_mutex_lock(&lixa_sw_status_mutex);
 
         if ((flags|valid_flags) != valid_flags) {
-            LIXA_TRACE(("lixa_pq_open: invalid flag in 0x%x\n", flags));
+            LIXA_TRACE(("lixa_pq_close: invalid flag in 0x%x\n", flags));
             THROW(INVALID_FLAGS);
         }
 
@@ -579,7 +579,7 @@ int lixa_pq_start_core(struct lixa_sw_status_rm_s *lpsr,
         lixa_ser_xid_t lsx;
 
         if ((flags|valid_flags) != valid_flags) {
-            LIXA_TRACE(("lixa_pq_end: invalid flag in 0x%x\n", flags));
+            LIXA_TRACE(("lixa_pq_start_core: invalid flag in 0x%x\n", flags));
             THROW(INVALID_FLAGS1);
         }
         

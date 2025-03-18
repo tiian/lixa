@@ -146,7 +146,8 @@ am__uninstall_files_from_dir = { \
 am__installdirs = "$(DESTDIR)$(libdir)" "$(DESTDIR)$(docdir)" \
 	"$(DESTDIR)$(includedir)"
 LTLIBRARIES = $(lib_LTLIBRARIES)
-liblixtapp_la_DEPENDENCIES = $(top_srcdir)/src/xta/liblixta.la
+liblixtapp_la_DEPENDENCIES = $(top_srcdir)/src/xta/liblixta.la \
+	$(MAYBE_MYSQL_LIBADD) $(MAYBE_POSTGRESQL_LIBADD)
 am__liblixtapp_la_SOURCES_DIST = Config.cpp Transaction.cpp \
 	TransactionManager.cpp Xta.cpp NativeXaResource.cpp Xid.cpp \
 	MysqlXaResource.cpp PostgresqlXaResource.cpp
@@ -455,10 +456,12 @@ top_srcdir = @top_srcdir@
 @COMPILE_MYSQL_STUFF_TRUE@MAYBE_MYSQL_CPPFLAGS = @MYSQL_CPPFLAGS@ \
 @COMPILE_MYSQL_STUFF_TRUE@	-I$(top_srcdir)/src/client/switch/mysql
 
+@COMPILE_MYSQL_STUFF_TRUE@MAYBE_MYSQL_LIBADD = $(top_srcdir)/src/client/switch/mysql/liblixamy.la
 @COMPILE_POSTGRESQL_STUFF_TRUE@MAYBE_POSTGRESQL_SOURCES = PostgresqlXaResource.cpp
 @COMPILE_POSTGRESQL_STUFF_TRUE@MAYBE_POSTGRESQL_CPPFLAGS = @POSTGRESQL_CPPFLAGS@ \
 @COMPILE_POSTGRESQL_STUFF_TRUE@	-I$(top_srcdir)/src/client/switch/postgresql
 
+@COMPILE_POSTGRESQL_STUFF_TRUE@MAYBE_POSTGRESQL_LIBADD = $(top_srcdir)/src/client/switch/postgresql/liblixapq.la
 dist_doc_DATA = README.md
 include_HEADERS = Xta.hpp AcquiredXaResource.hpp Config.hpp Exception.hpp \
 	MysqlXaResource.hpp NativeXaResource.hpp \

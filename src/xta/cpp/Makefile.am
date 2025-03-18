@@ -2,11 +2,13 @@ if COMPILE_MYSQL_STUFF
   MAYBE_MYSQL_SOURCES = MysqlXaResource.cpp
   MAYBE_MYSQL_CPPFLAGS = @MYSQL_CPPFLAGS@ \
 	-I$(top_srcdir)/src/client/switch/mysql
+  MAYBE_MYSQL_LIBADD = $(top_srcdir)/src/client/switch/mysql/liblixamy.la
 endif
 if COMPILE_POSTGRESQL_STUFF
   MAYBE_POSTGRESQL_SOURCES = PostgresqlXaResource.cpp
   MAYBE_POSTGRESQL_CPPFLAGS = @POSTGRESQL_CPPFLAGS@ \
 	-I$(top_srcdir)/src/client/switch/postgresql
+  MAYBE_POSTGRESQL_LIBADD = $(top_srcdir)/src/client/switch/postgresql/liblixapq.la
 endif
 
 dist_doc_DATA = README.md
