@@ -123,7 +123,10 @@ fi
 
 if test "$HAVE_IBMDB2" = "yes"
 then
-. /home/db2inst1/sqllib/db2profile
+	if test -f /home/db2inst1/sqllib/db2profile
+	then
+	. /home/db2inst1/sqllib/db2profile
+	fi
 fi
 
 if test "$HAVE_WEBSPHEREMQ" = "yes"

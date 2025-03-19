@@ -17166,12 +17166,9 @@ fi
     fi
 
     if test "$want_ibmdb2_but_no_path" = "yes"; then
-        { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: IBMDB2 support is requested but no IBMDB2 paths have been provided. \
+        as_fn_error $? "IBMDB2 support is requested but no IBMDB2 paths have been provided. \
 Please, locate IBMDB2 directories using --with-ibmdb2 or \
---with-ibmdb2-include and --with-ibmdb2-lib options." >&5
-$as_echo "$as_me: WARNING: IBMDB2 support is requested but no IBMDB2 paths have been provided. \
-Please, locate IBMDB2 directories using --with-ibmdb2 or \
---with-ibmdb2-include and --with-ibmdb2-lib options." >&2;}
+--with-ibmdb2-include and --with-ibmdb2-lib options." "$LINENO" 5
     fi
 
                 if test -n "$ibmdb2_include_dir" -a -n "$ibmdb2_lib_dir"; then
@@ -18704,7 +18701,7 @@ else
 JAVA_TEST=Test.java
 CLASS_TEST=Test.class
 cat << \EOF > $JAVA_TEST
-/* #line 18707 "configure" */
+/* #line 18704 "configure" */
 public class Test {
 }
 EOF
@@ -19117,7 +19114,7 @@ else
 JAVA_TEST=Test.java
 CLASS_TEST=Test.class
 cat << \EOF > $JAVA_TEST
-/* #line 19120 "configure" */
+/* #line 19117 "configure" */
 public class Test {
 }
 EOF
@@ -19151,7 +19148,7 @@ JAVA_TEST=Test.java
 CLASS_TEST=Test.class
 TEST=Test
 cat << \EOF > $JAVA_TEST
-/* [#]line 19154 "configure" */
+/* [#]line 19151 "configure" */
 public class Test {
 public static void main (String args[]) {
         System.exit (0);

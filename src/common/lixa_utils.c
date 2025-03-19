@@ -337,7 +337,7 @@ int lixa_session_set_sid(lixa_session_t *session, const char *sid)
         /* reset the destination, copy the value in a safe way */
         memset(&(session->sid), 0, LIXA_SESSION_ID_LENGTH);
         strncpy(session->sid, sid, LIXA_SESSION_ID_LENGTH);
-        session->sid[LIXA_SESSION_ID_LENGTH] = '\0';
+        session->sid[LIXA_SESSION_ID_LENGTH-1] = '\0';
         
         THROW(NONE);
     } CATCH {

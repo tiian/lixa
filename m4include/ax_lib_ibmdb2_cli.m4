@@ -120,7 +120,7 @@ AC_DEFUN([AX_LIB_IBMDB2_CLI],
     fi
 
     if test "$want_ibmdb2_but_no_path" = "yes"; then
-        AC_MSG_WARN([IBMDB2 support is requested but no IBMDB2 paths have been provided. \
+        AC_MSG_ERROR([IBMDB2 support is requested but no IBMDB2 paths have been provided. \
 Please, locate IBMDB2 directories using --with-ibmdb2 or \
 --with-ibmdb2-include and --with-ibmdb2-lib options.])
     fi
