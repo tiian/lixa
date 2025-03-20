@@ -1,3 +1,16 @@
+Update year copyright
+
+regular expression for parsing the MySQL/MariaDB dialect:
+/^([[:digit:]]+)\.([[:digit:]]+)\.([[:digit:]]+)\-([[:alnum:][:punct:]]+)/gm
+example strings:
+5.5.60-MariaDB
+10.3.28-MariaDB
+10.5.27-MariaDB
+5.7.33-0ubuntu0.16.04.1
+5.5.62-0ubuntu0.14.04.1
+
+
+
 Under very high workload the state server stops with a controlled shutdown;
 tracing is not viable because with active tracing the workload is lower and the
 issue does not happen.
