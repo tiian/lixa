@@ -198,6 +198,7 @@ xa_close/0
 AT_CHECK([export LIXA_PROFILE=CASE_PROF_0038; lixa_test_exec.sh noreset none case0100 0 1 0 2>&1], [0], [ignore], [ignore])
 AT_CLEANUP
 AT_SETUP([XTA/8.0/5.1 automatic recovery])
+AT_CHECK([if test "$LIXA_XTA" = "no"; then exit 77; fi])
 # recover previous prepared transaction and delete rows from tables
 # TRADITIONAL state engine misses the
 # rollback state and requires a further rollback; JOURNAL state engine saves

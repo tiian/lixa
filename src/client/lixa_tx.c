@@ -53,6 +53,73 @@
 #endif /* LIXA_TRACE_MODULE */
 #define LIXA_TRACE_MODULE   LIXA_TRACE_MOD_CLIENT_TX
 
+static char *tx_open_profile = NULL;
+static GMutex profile_mutex = G_STATIC_MUTEX_INIT;
+
+int lixa_tx_set_profile(int *txrc, const char *profile)
+{
+    enum Exception {
+        G_STRDUP_ERROR,
+        NONE
+    } excp;
+    int ret_cod = LIXA_RC_INTERNAL_ERROR;
+    *txrc = TX_FAIL;
+
+    LIXA_TRACE_INIT;
+    LIXA_CRASH_INIT;
+    LIXA_TRACE(("lixa_tx_set_profile\n"));
+
+    g_mutex_lock( &profile_mutex );
+    TRY {
+        if (tx_open_profile) {
+            free(tx_open_profile);
+            tx_open_profile = NULL;
+        }
+        if (profile) {
+	    tx_open_profile = g_strdup(profile);
+            if (tx_open_profile == NULL) {
+                THROW( G_STRDUP_ERROR );
+            } else {
+                THROW( NONE );
+            }
+        } else {
+            THROW( NONE );
+        }
+    } CATCH {
+        switch (excp) {
+        case NONE:
+            ret_cod = LIXA_RC_OK;
+            *txrc = TX_OK;
+            break;
+        case G_STRDUP_ERROR:
+            ret_cod = LIXA_RC_G_STRDUP_ERROR;
+            *txrc = TX_FAIL;
+            break;
+        default:
+            ret_cod = LIXA_RC_INTERNAL_ERROR;
+            *txrc = TX_FAIL;
+            break;
+         }
+    }
+    g_mutex_unlock( &profile_mutex );
+    LIXA_TRACE(("lixa_tx_set_profile/TX_*=%d/excp=%d/"
+                "ret_cod=%d/errno=%d\n", *txrc, excp, ret_cod, errno));
+    LIXA_TRACE_STACK();
+    return ret_cod;
+}
+
+/*
+ * Return a char* for the profile set, or NULL if none
+ * If non-NULL, this must be free'd after use
+ */
+static char* lixa_tx_get_profile()
+{
+    g_mutex_lock( &profile_mutex );
+    char* result = tx_open_profile ? g_strdup( tx_open_profile ) : NULL;
+    g_mutex_unlock( &profile_mutex );
+    return result;
+}
+
 
 
 int lixa_tx_begin(int *txrc, XID *xid, int flags)
@@ -1004,7 +1071,11 @@ int lixa_tx_open(int *txrc, int mmode)
         /* check TX state (see Table 7-1) */
         txstate = client_status_get_txstate(cs);
         if (txstate == TX_STATE_S0) {
-            if (LIXA_RC_OK != (ret_cod = client_config(&global_ccc, TRUE)))
+            char *profile = lixa_tx_get_profile();
+            ret_cod = client_config(&global_ccc, TRUE, profile);
+            if (profile)
+                free(profile);
+            if (LIXA_RC_OK != ret_cod)
                 THROW(CLIENT_CONFIG_ERROR);
             if (LIXA_RC_OK != (ret_cod = client_connect(cs, &global_ccc)))
                 THROW(CLIENT_CONNECT_ERROR);

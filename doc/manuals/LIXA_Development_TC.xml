@@ -316,4 +316,63 @@ tx_close(): 0
       </section>
     </section>
   </section>
+  <section>
+    <title>Non-standard TX (Transaction Demarcation) Specification Extensions</title>
+    <para>
+      The LIXA project provides an extension to the <citation>TXspec</citation>,
+      to set the Resource Manager profile programatically
+      <footnote>
+	<para>
+	  This extension to the TX specification was designed and has been
+	  provided to the LIXA project by 
+	  <ulink url="http://www.lzlabs.com/">LzLabs GmbH</ulink>
+	</para>
+      </footnote>, which can be used in addition to the 
+      standard API when developing Application Programs.
+    </para>
+    <para>
+      The following C example briefly explains it:
+      <programlisting>
+#include &lt;tx.h&gt;
+        
+/* your includes */
+
+static bool mysql_exists() {
+    return true;
+}
+        
+int main(int argc, char *argv[])
+{
+    int rc;
+    const char *basic_profile = "PROF_SP";
+
+    char program_profile[50];
+    if ( mysql_exists() ) {
+        snprintf( program_profile, sizeof(program_profile), "%s_WITH_MYSQL", basic_profile );
+    } else {
+        snprintf( program_profile, sizeof(program_profile), "%s", basic_profile );
+    }
+
+    if (TX_OK != (rc = tx_set_profile( program_profile )))
+        /* handle error */
+        
+    if (TX_OK != (rc = tx_open()))
+        /* handle error - specified profile name is checked */
+        /* during tx_open */
+        
+    if (TX_OK != (rc = tx_begin()))
+        /* handle error */
+        
+    /* do local work against Resource Managers here */
+        
+    /* commit or roll back transaction */
+    if (TX_OK != (rc = tx_commit()))
+        /* handle errror */
+        
+    /* shut down */
+    tx_close();
+}
+      </programlisting>
+    </para>
+  </section>
 </chapter>
