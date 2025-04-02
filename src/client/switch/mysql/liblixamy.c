@@ -35,6 +35,9 @@
 #ifdef HAVE_PTHREAD_H
 # include <pthread.h>
 #endif
+#ifdef HAVE_REGEX_H
+# include <regex.h>
+#endif
 
 
 
@@ -54,6 +57,7 @@
 #include "lixa_defines.h"
 /* LIXA xid: it contains XID serialization/deserialization utilities */
 #include "lixa_xid.h"
+#include "lixa_syslog.h"
 
 
 
@@ -462,6 +466,160 @@ int lixa_my_xid_deserialize(XID *xid, const char *formatID,
 }
 
 
+int lixa_my_retrieve_subtype(MYSQL *conn, int *rm_subtype, long *version,
+                             long *release, long *minor)
+{
+    enum Exception {
+        MYSQL_SELECT_VERSION_ERROR
+        , REGCOMP_ERROR
+        , REGEX_ERROR
+        , UNSUPPORTED_VERSION
+        , NONE
+    } excp = NONE;
+    int ret_cod = TRUE;
+    
+    MYSQL_RES *result = NULL;
+    MYSQL_ROW  row;
+    const char reg_str[] = "^([[:digit:]]+)\\.([[:digit:]]+)\\.([[:digit:]]+)\\-([[:alnum:][:punct:]]+)$";
+    char       reg_errbuf[500];
+    regex_t    reg_expression;
+    regmatch_t reg_matches[5];
+    
+    LIXA_TRACE(("lixa_my_retrieve_subtype\n"));
+    TRY {
+        int reg_error;
+        int i;
+        char *text;
+//            "5.5.60-MariaDB"
+//            "10.3.28-MariaDB"
+//            "10.5.27-MariaDB"
+//            "5.7.33-0ubuntu0.16.04.1"
+//            "5.5.62-0ubuntu0.14.04.1"
+        
+        /* retrieve MySQL dialect (subtype) */
+        if (mysql_query(conn, "SELECT VERSION();")) {
+            LIXA_TRACE(("lixa_my_retrieve_subtype: mysql_query returned "
+                        "error: %u: %s\n", mysql_errno(conn),
+                        mysql_error(conn)));
+            mysql_close(conn);
+            THROW(MYSQL_SELECT_VERSION_ERROR);
+        }
+        result = mysql_store_result(conn);
+        row = mysql_fetch_row(result);
+        text = row[0];
+        LIXA_TRACE(("lixa_my_retrieve_subtype: SELECT VERSION() "
+                    "returned '%s'\n", text));
+        
+        /* initialize the regular expression */
+        reg_error = regcomp(&reg_expression, reg_str,
+                            REG_EXTENDED|REG_NEWLINE);
+        if (0 != reg_error) {
+            regerror(reg_error, &reg_expression, reg_errbuf,
+                     sizeof(reg_errbuf));
+            LIXA_TRACE(("lixa_my_retrieve_subtype: regcomp returned %d "
+                        "('%s') instead of 0\n", reg_error, reg_errbuf));
+            THROW(REGCOMP_ERROR);
+        }
+            
+        /* check the regular expression matches and extract the matches */
+        for (i=0; i<sizeof(reg_matches)/sizeof(regmatch_t); ++i)
+            reg_matches[i].rm_so = reg_matches[i].rm_eo = -1;
+        reg_error = regexec(&reg_expression, text,
+                            sizeof(reg_matches)/sizeof(regmatch_t),
+                            reg_matches, 0);
+        if (0 != reg_error) {
+            regerror(reg_error, &reg_expression, reg_errbuf,
+                     sizeof(reg_errbuf));
+            LIXA_TRACE(("lixa_my_retrieve_subtype: regex returned %d "
+                        "('%s') instead of 0\n", reg_error, reg_errbuf));
+            LIXA_SYSLOG((LOG_ERR, LIXA_SYSLOG_LXC040E, text));
+            THROW(REGEX_ERROR);
+        }
+
+        /* trace the results */
+        for (i=0; i<sizeof(reg_matches)/sizeof(regmatch_t); ++i) {
+            char buffer[1000];
+            long number;
+            size_t delta = reg_matches[i].rm_eo - reg_matches[i].rm_so;
+            if (delta >= sizeof(buffer))
+                delta = sizeof(buffer)-1;
+            memcpy(buffer, text+reg_matches[i].rm_so, delta);
+            buffer[delta] = '\0';
+            /* value is always interpreted using decimal base */
+            number = strtol(buffer, NULL, 10);
+            /*
+            LIXA_TRACE(("lixa_my_retrieve_subtype: regmatch[%ld]='%s', "
+                        "number=%d\n", i, buffer, number));
+            */
+            switch (i) {
+                case 0: // full string
+                    break;
+                case 1: // version
+                    *version = number;
+                    break;
+                case 2: // release
+                    *release = number;
+                    break;
+                case 3: // minor
+                    *minor = number;
+                    break;
+                case 4: // type
+                    if (NULL == strstr(buffer, "MariaDB")) {
+                        *rm_subtype = LIXA_SW_STATUS_RM_SUBTYPE_MYSQL;
+                        LIXA_TRACE(("lixa_my_retrieve_subtype: this is an "
+                                    "original MySQL database, version=%ld, "
+                                    "release=%ld, minor=%ld\n", *version,
+                                    *release, *minor));
+                    } else {
+                        *rm_subtype = LIXA_SW_STATUS_RM_SUBTYPE_MARIADB;
+                        LIXA_TRACE(("lixa_my_retrieve_subtype: this is a "
+                                    "MariaDB database, version=%ld, "
+                                    "release=%ld, minor=%ld\n", *version,
+                                    *release, *minor));
+                    }
+                default: // nothing to do
+                    break;
+            } // switch (i)
+        }
+        
+        /* check the version to guarantee appropriate XA support */
+        if ((*version < 5) ||
+            (*version == 5 && *release < 7)) {
+            LIXA_TRACE(("lixa_my_retrieve_subtype: this is an unsupported "
+                        "version of MySQL/MariaDB database %ld.%ld.%ld\n",
+                        *version, *release, *minor));
+            LIXA_SYSLOG((LOG_ERR, LIXA_SYSLOG_LXC041E, *version, *release,
+                         *minor));
+            THROW(UNSUPPORTED_VERSION);
+        }
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case MYSQL_SELECT_VERSION_ERROR:
+            case REGCOMP_ERROR:
+            case REGEX_ERROR:
+            case UNSUPPORTED_VERSION:
+                ret_cod = FALSE;
+                break;
+            case NONE:
+                ret_cod = TRUE;
+                break;
+            default:
+                ret_cod = FALSE;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    /* free memory */
+    if (NULL != result)
+        mysql_free_result(result);
+    if (REGCOMP_ERROR < excp)
+        regfree(&reg_expression);
+    LIXA_TRACE(("lixa_my_retrieve_subtype/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
 
 int lixa_my_open(char *xa_info, int rmid, long flags)
 {
@@ -473,6 +631,7 @@ int lixa_my_open(char *xa_info, int rmid, long flags)
                      , PARSE_ERROR
                      , MYSQL_INIT_ERROR
                      , MYSQL_REAL_CONNECT_ERROR
+                     , MYSQL_RETRIEVE_SUBTYPE_ERROR
                      , NONE } excp;
     int xa_rc = XAER_RMERR;
 
@@ -548,6 +707,8 @@ int lixa_my_open(char *xa_info, int rmid, long flags)
         if (NULL == conn) {
             /* create a new connection */
             struct lixa_sw_status_rm_s lpsr;
+            int rm_subtype = LIXA_SW_STATUS_RM_SUBTYPE_NULL;
+            long version=0, release=0, minor=0;
             lixa_sw_status_rm_init(&lpsr);
 
             if (XA_OK != (xa_rc = lixa_my_parse_xa_info(xa_info, &lmrc)))
@@ -566,10 +727,18 @@ int lixa_my_open(char *xa_info, int rmid, long flags)
                 mysql_close(conn);
                 THROW(MYSQL_REAL_CONNECT_ERROR);
             }
+
+            if (!lixa_my_retrieve_subtype(conn, &rm_subtype, &version,
+                                          &release, &minor)) {
+                LIXA_TRACE(("lixa_my_open: lixa_my_retrieve_sybtype returned "
+                            "FALSE\n"));
+                THROW(MYSQL_RETRIEVE_SUBTYPE_ERROR);
+            }
             
             /* save the connection for this thread/rmid */
             lpsr.rmid = rmid;
             lpsr.rm_type = LIXA_SW_STATUS_RM_TYPE_MYSQL;
+            lpsr.rm_subtype = rm_subtype;
             lpsr.state.R = 1;
             lpsr.conn = (gpointer)conn;
             g_array_append_val(lps->rm, lpsr);
@@ -596,6 +765,7 @@ int lixa_my_open(char *xa_info, int rmid, long flags)
                 break;
             case MYSQL_INIT_ERROR:
             case MYSQL_REAL_CONNECT_ERROR:
+            case MYSQL_RETRIEVE_SUBTYPE_ERROR:
                 xa_rc = XAER_RMERR;
                 break;
             case NONE:

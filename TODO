@@ -1,4 +1,13 @@
+Go on with liblixamy.c, implement the new XA RECOVER option using the MySQL 
+subtype.
+
+lixa_my_open generates several memory leaks (LIXA_PROFILE=MYS_STA) but they 
+have not been introduced by the new lixa_my_retrieve_subtype...
+Are they related to the lixa_sw_status hash table???
+
 Update year copyright
+Update manual: remove versions older than Ubuntu 16.04 & MySQL 5.7
+Remove VM ubuntu1604b, no more useful, remove its disk
 
 regular expression for parsing the MySQL/MariaDB dialect:
 /^([[:digit:]]+)\.([[:digit:]]+)\.([[:digit:]]+)\-([[:alnum:][:punct:]]+)/gm

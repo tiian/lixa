@@ -160,6 +160,22 @@ int lixa_my_xid_deserialize(XID *xid, const char *formatID,
 
 
 /**
+ * Understand what sort of MySQL is connected: original MySQL o MariaDB
+ * @param[in] conn open connection to the database
+ * @param[out] rm_subtype will contain the subtype of MySQL as
+ *             @ref LIXA_SW_STATUS_RM_SUBTYPE_MYSQL or
+ *             @ref LIXA_SW_STATUS_RM_SUBTYPE_MARIADB
+ * @param[out] version will contain the version of MySQL/MariaDB
+ * @param[out] release will contain the release of MySQL/MariaDB
+ * @apram[out] minor will contain the minor number of MySQL/MariaDB
+ * @return TRUE if the subtype was retrieved, FALSE in case of error
+ */
+int lixa_my_retrieve_subtype(MYSQL *conn, int *rm_subtype, long *version,
+                             long *release, long *minor);
+    
+
+
+/**
  * Implementation of "xa_open" for MySQL;
  * refer to "Distributed Transaction Processing: The XA Specification" for
  * a complete description

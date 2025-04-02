@@ -1134,7 +1134,7 @@ int xta_transaction_rollback(xta_transaction_t *transact)
         /* check TX state */
         txstate = client_status_get_txstate(transact->client_status);
         if (TX_STATE_S3 != txstate) {
-            LIXA_TRACE(("xta_transaction_commit: expected client status %d, "
+            LIXA_TRACE(("xta_transaction_rollback: expected client status %d, "
                         "current client status %d\n", TX_STATE_S3, txstate));
             THROW(INVALID_STATUS);
         }

@@ -1,5 +1,5 @@
 LOG:
-1.10.0-dev	 Changes related to issue #16, #18, #19, #22, #23, #24, #25, #26
+1.10.0-dev	 Changes related to issue #16, #18, #19, #22, #23, #24, #25, #26		 Dropped support for Ubuntu 14.04 and MySQL before 5.7.7
 
 2022-12-10 1.9.5 Documentation only minor improvements (COBOL example, README)
 

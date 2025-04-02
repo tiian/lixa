@@ -63,6 +63,24 @@ extern GHashTable  *lixa_sw_status;
 
 
 /**
+ * Default, null resource manager subtype
+ */
+#define LIXA_SW_STATUS_RM_SUBTYPE_NULL        0
+/**
+ * Resource manager subtype associated to original MySQL
+ */
+#define LIXA_SW_STATUS_RM_SUBTYPE_MYSQL       1
+/**
+ * Resource manager subtype associated to MariaDB
+ */
+#define LIXA_SW_STATUS_RM_SUBTYPE_MARIADB     2
+
+
+
+
+
+
+/**
  * Used to build an array of connections; useful when there are two or more
  * identical resource managers in the same transaction
  */
@@ -72,6 +90,11 @@ struct lixa_sw_status_rm_s {
     /** Resource Manager type: it's used to distinguish the records in the
      * list */
     int      rm_type;
+    /** Resource Manager subtype: it's used to distinguish some derivatives
+     *  because sometimes derivatives speak a little different dialect in
+     *  respect of the original type, like for example MariaDB as derivative
+     *  of MySQL */
+    int      rm_subtype;
     /** Resource Manager state */
     struct {
         /** Resource Manager State:
@@ -138,6 +161,7 @@ extern "C" {
     {
         lpsr->rmid = 0;
         lpsr->rm_type = LIXA_SW_STATUS_RM_TYPE_NULL;
+        lpsr->rm_subtype = LIXA_SW_STATUS_RM_SUBTYPE_NULL;
         lpsr->state.R = lpsr->state.T = lpsr->state.S = 0;
         memset(&(lpsr->xid), 0, sizeof(XID));
         lpsr->conn = NULL;

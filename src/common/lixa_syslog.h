@@ -154,6 +154,10 @@
 #define LIXA_SYSLOG_LXC038N "LXC038N transaction with xid='%s' must be %s"
 #define LIXA_SYSLOG_LXC039I "LXC039I transaction with xid='%s' has been " \
     "recovered (%s)"
+#define LIXA_SYSLOG_LXC040E "LXC040E SQL statement SELECT VERSION() " \
+    "returned '%s' and it is not recognized as a valid MySQL like database"
+#define LIXA_SYSLOG_LXC041E "LXC041E release %ld.%ld.%ld is not a " \
+    "supported version of MySQL/MariaDB"
 
 
 

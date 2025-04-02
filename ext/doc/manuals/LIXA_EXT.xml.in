@@ -1,11 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V5.0/EN" 
-	  "http://docbook.org/xml/5.0/dtd/docbook.dtd" [
-<!ENTITY intro SYSTEM "LIXA_EXT_Introduction.xml">
-<!ENTITY php SYSTEM "LIXA_EXT_PHP.xml">
-<!ENTITY biblio SYSTEM "LIXA_EXT_Bibliography.xml">
-]>
-<book xmlns="http://docbook.org/ns/docbook">
+<book version="5.0"
+      xmlns="http://docbook.org/ns/docbook" 
+      xmlns:xi="http://www.w3.org/2001/XInclude"
+      xmlns:xlink="http://www.w3.org/1999/xlink"
+>
   <title>LIXA Extensions reference guide (version @PACKAGE_VERSION@)</title>
   <subtitle>
     A libre, free, open source implementation of the XA and the TX 
@@ -19,11 +17,11 @@
       </personname>
     </author>
     <copyright>
-      <year>2012</year>
+      <year>2025</year>
       <holder>Christian Ferrari</holder>
     </copyright>
   </info>
-  &intro;
-  &php;
-  &biblio;
+  <xi:include href="LIXA_EXT_Introduction.xml"/>
+  <xi:include href="LIXA_EXT_PHP.xml"/>
+  <xi:include href="LIXA_EXT_Bibliography.xml"/>
 </book>
