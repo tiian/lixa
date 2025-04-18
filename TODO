@@ -1,6 +1,5 @@
-Go on debugging this issue that's consequence of the new serialization functions for MySQL:
- 23: MY/0.1/3.0 Crash in the middle of prepare       ok
- 24: MY/0.1/3.1 Automatic recovery                   FAILED (mysql.at:289)
+Test the behavior for MariaDB 10.5 using Rocky9 distro
+
 
 
 lixa_my_open generates several memory leaks (LIXA_PROFILE=MYS_STA) but they 
@@ -9,16 +8,7 @@ Are they related to the lixa_sw_status hash table???
 
 Update year copyright
 Update manual: remove versions older than Ubuntu 16.04 & MySQL 5.7
-Remove VM ubuntu1604b, no more useful, remove its disk
 
-regular expression for parsing the MySQL/MariaDB dialect:
-/^([[:digit:]]+)\.([[:digit:]]+)\.([[:digit:]]+)\-([[:alnum:][:punct:]]+)/gm
-example strings:
-5.5.60-MariaDB
-10.3.28-MariaDB
-10.5.27-MariaDB
-5.7.33-0ubuntu0.16.04.1
-5.5.62-0ubuntu0.14.04.1
 
 
 

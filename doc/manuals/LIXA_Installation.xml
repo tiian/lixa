@@ -724,11 +724,11 @@ sudo pip3 install mysqlclient
 	    - like dynamic registration - can not be implemented.
 	</para></note>
 	<warning><para>
-	  Some old versions of the software are affected by a
+	  Some very old versions of the software were affected by a
 	    <link xlink:href="http://bugs.mysql.com/bug.php?id=12161">
 	      serious documented bug (# 12161)</link>
 	    related to the XA implementation of MySQL. The symptoms perceived
-	    while developing LIXA are described below:
+	    while developing with LIXA are described below:
 	    <orderedlist enumeration='arabic'>
 	      <listitem><para>
 		  a MySQL client application invokes XA START
@@ -760,9 +760,9 @@ sudo pip3 install mysqlclient
 	    </quote>.
 	  </para>
 	  <para>
-	    The impact of this bug is quite severe and seriously compromises
-	    the ACID properties of the resulting system (application program
-	    + MySQL resource manager + LIXA transaction manager).
+	    Starting from LIXA version 1.10.0, the support for the versions of
+	    MySQL older than 5.7.7 has been removed; as a consequence, if you
+	    are using LIXA 1.10.0 or newer, the bug cannot affect you.
 	  </para>
 	</warning>
       </section>
@@ -770,11 +770,144 @@ sudo pip3 install mysqlclient
 	<title>MariaDB</title>
 	<para>
 	  Even if MariaDB is different from MySQL, it can be used with LIXA in
-	  the same way of MySQL: most of the times it's just a matter of
+	  quite the same way of MySQL: most of the times it's just a matter of
 	  changing some file or directory name.
 	  LIXA does not provide specific options for MariaDB, just use the
 	  options provided for MySQL.
+	  Most of the considerations that apply to MySQL apply even to MariaDB,
+	  but the two projects started to diverge in the last few years, for
+	  example the SQL statement for <command>XA RECOVER</command> is no
+	  more fully compatible in the last versions. LIXA uses
+	  <code>XA RECOVER CONVERT XID</code> for MySQL and
+	  <code>XA RECOVER FORMAT='SQL'</code> for MariaDB, but you
+	  don't need to specify anything, LIXA recognizes the "MySQL"
+	  dialect automatically.
 	</para>
+	<note><para>
+	  As for MySQL, even MariaDB does not supply an XA standard switch
+	  structure, but only some SQL non standard statements (
+	    <code>XA START, XA END, XA PREPARE, XA COMMIT, XA ROLLBACK, 
+	      XA RECOVER</code>
+	    ) that can be used to implement some XA features.
+	    This is good enough to build a loadable module that can be
+	    used by the LIXA transaction manager, but some XA standard features
+	    - like dynamic registration - can not be implemented.
+	</para></note>
+	<warning><para>
+	  Versions of MariaDB older than 10.5 are a affected by a serious bug
+	  that was solved in version 10.5 as explained 
+	    <link xlink:href="https://mariadb.com/kb/en/xa-transactions/#incompatibility-with-xa-behaviour">
+	    here.</link>
+	    The symptoms perceived while developing with LIXA are described
+	    below:
+	    <orderedlist enumeration='arabic'>
+	      <listitem><para>
+		  a MariaDB client application invokes XA START
+	      </para></listitem>
+	      <listitem><para>
+		  it updates some data in the database
+	      </para></listitem>
+	      <listitem><para>
+		  it invokes XA END and XA PREPARE
+	      </para></listitem>
+	      <listitem><para>
+		  it crashes and disconnects from the MariaDB server 
+	      </para></listitem>
+	      <listitem><para>
+		MariaDB server rollbacks the transaction and there's no way
+		to see it again using XA RECOVER
+	      </para></listitem>
+	    </orderedlist>
+	    This behavior violates the XA specification: below there is an 
+	    excerpt for <function>xa_prepare</function> from man page (
+	    <citation>XAspec</citation>, page 44)
+	    <quote>Once this function successfully returns, 
+	      the resource manager 
+	      must guarantee that the transaction branch may be either 
+	      committed or rolled back regardless of failures. A resource 
+	      manager cannot erase its knowledge of a branch until the 
+	      transaction manager calls either xa_commit() or xa_rollback () 
+	      to complete the branch
+	    </quote>.
+	  </para>
+	  <para>
+	    The impact of this bug is quite severe and seriously it compromises
+	    the ACID properties of the resulting system (application program
+	    + MariaDB resource manager + LIXA transaction manager).
+	  </para>
+	  <para>
+	    Here is an example of the behavior that can be verified using the
+	    standard command line utility:
+	    <table frame="box">
+	      <tbody><tr><td><screen>
+		[tiian@centos8 ~]$ mysql -h localhost -u lixa lixa
+		Reading table information for completion of table and column names
+		You can turn off this feature to get a quicker startup with -A
+
+		Welcome to the MariaDB monitor.  Commands end with ; or \g.
+		Your MariaDB connection id is 184
+		Server version: 10.3.28-MariaDB MariaDB Server
+
+		Copyright (c) 2000, 2018, Oracle, MariaDB Corporation Ab and others.
+
+		Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
+
+		MariaDB [lixa]> XA START X'3b86b218cf234eb7827536da8979f1e4',X'9a3c699a6eb346cd92bba720568f542a',1279875137;
+		Query OK, 0 rows affected (0.001 sec)
+
+		MariaDB [lixa]> INSERT INTO authors VALUES (11, 'Richard', 'Stevens');
+		Query OK, 1 row affected (0.001 sec)
+
+		MariaDB [lixa]> XA END X'3b86b218cf234eb7827536da8979f1e4',X'9a3c699a6eb346cd92bba720568f542a',1279875137;
+		Query OK, 0 rows affected (0.000 sec)
+
+		MariaDB [lixa]> XA PREPARE X'3b86b218cf234eb7827536da8979f1e4',X'9a3c699a6eb346cd92bba720568f542a',1279875137;
+		Query OK, 0 rows affected (0.025 sec)
+
+		MariaDB [lixa]> XA RECOVER FORMAT='SQL';
+		+------------+--------------+--------------+------------------------------------------------------------------------------------+
+		| formatID   | gtrid_length | bqual_length | data                                                                               |
+		+------------+--------------+--------------+------------------------------------------------------------------------------------+
+		| 1279875137 |           16 |           16 | X'3b86b218cf234eb7827536da8979f1e4',X'9a3c699a6eb346cd92bba720568f542a',1279875137 |
+		+------------+--------------+--------------+------------------------------------------------------------------------------------+
+		1 row in set (0.000 sec)
+
+		MariaDB [lixa]> exit
+		Bye
+
+
+
+		[tiian@centos8 ~]$ mysql -h localhost -u lixa lixa
+		Reading table information for completion of table and column names
+		You can turn off this feature to get a quicker startup with -A
+
+		Welcome to the MariaDB monitor.  Commands end with ; or \g.
+		Your MariaDB connection id is 185
+		Server version: 10.3.28-MariaDB MariaDB Server
+
+		Copyright (c) 2000, 2018, Oracle, MariaDB Corporation Ab and others.
+
+		Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
+
+		MariaDB [lixa]> XA RECOVER FORMAT='SQL';
+		Empty set (0.001 sec)
+
+		MariaDB [lixa]> SELECT * FROM authors;
+		Empty set (0.000 sec)
+
+		
+	      </screen></td></tr></tbody>
+	    </table>
+	    After client disconnection, the prepared transaction is
+	    automatically rolled-back by MariaDB server and this is not a
+	    legitimate behavior in the scenario of a distributed two phase
+	    commit transaction. If users ask it, the support for MariaDB will
+	    be removed from a future version of LIXA; even if the bug is
+	    severe, LIXA accepts to work with MariaDB 10.3.x because it's the
+	    default version provided by CentOS 8 and RHEL 8 that's still a
+	    supported version.
+	  </para>
+	</warning>
       </section>
       <section>
 	<title>Oracle XE 10.2/11.2 (server)<footnote><para>
