@@ -425,16 +425,17 @@ int lixa_my_xid_serialize(const XID *xid, lixa_my_ser_xid_t lmsx)
 
 int lixa_my_xid_deserialize(XID *xid, const char *formatID,
                             const char *gtrid_length, const char *bqual_length,
-                            const char *data)
+                            const char *data, int rm_subtype)
 {
     long i, s;
     const char *p, *q;
     char tmp[3];
     unsigned int b = 0;
+    char stripped_data[XIDDATASIZE*8];
     
     LIXA_TRACE(("lixa_my_xid_deserialize: formatID='%s', gtrid_length='%s', "
-                "bqual_length='%s', data='%s'\n",
-                formatID, gtrid_length, bqual_length, data));
+                "bqual_length='%s', data='%s', rm_subtype=%d\n",
+                formatID, gtrid_length, bqual_length, data, rm_subtype));
     memset(xid, 0, sizeof(XID));
     xid->formatID = strtol(formatID, NULL, 0);
     xid->gtrid_length = strtol(gtrid_length, NULL, 0);
@@ -447,23 +448,118 @@ int lixa_my_xid_deserialize(XID *xid, const char *formatID,
                     xid->bqual_length, XIDDATASIZE));
         return FALSE;
     }
-    if (strlen(data) > s*2+2) { // take in consideration initial 0x and that
+    // check data is manageable
+    if (strlen(data) > sizeof(stripped_data) - 1) {
+        LIXA_TRACE(("lixa_my_xid_deserialize: data is too long and "
+		"unmanageable, something string is happening: >%s<, buffer "
+		"size is " SIZE_T_FORMAT ")\n", data, sizeof(stripped_data)));
+	return FALSE;
+    }
+    // in case of MariaDB the format is like this:
+    // X'3b86b218ef234eb7827536da8979f1e4',X'9a3c699a6eb346cd92bba720568f542c',1279875137
+    // in case of genuine MySQL the format is like this:
+    // 0x04389AC1D8E24F0BB551004C72A8A00A5120360E06828F8ABDC431C5919E09CB
+    // MariaDB will be converted to MySQL...
+    if (rm_subtype == LIXA_SW_STATUS_RM_SUBTYPE_MARIADB) {
+        int state = 0;
+	char *q;
+        p = data;
+	q = stripped_data;
+	for (i=0; i<strlen(data); ++i) {
+	    switch (state) {
+                case 0: // search for first X
+		    if (*p == 'X') {
+			// move to next state
+			state = 1;
+			// put '0'
+			*q = '0';
+			q++;
+		    }
+		    break;
+		case 1: // search for first \'
+		    if (*p == '\'') {
+		        // move to next state
+			state = 2;
+			// put 'x'
+			*q = 'x';
+			q++;
+		     }
+		     break;
+		 case 2: // search for HEX char or \'
+                     if (((*p >= '0' && *p <= '9') || (*p >= 'a' && *p <= 'f')
+                       || (*p >= 'A' && *p <= 'F'))) {
+		         // put it
+			 *q = toupper(*p);
+			 q++;
+		     } else if (*p == '\'') {
+		         // found \', move to next state and ignore it
+			 state = 3;
+		     }
+		     break;
+		 case 3: // search for comma ','
+		     if (*p == ',') {
+		         // move to next state, but without putting
+			 state = 4;
+		     }
+		     break;
+		 case 4: // search for second X
+		     if (*p == 'X') {
+		        // move to next state, but without putting
+			state = 5;
+		     }
+		     break;
+		 case 5: // search for third \'
+		     if (*p == '\'') {
+		         // move to next state, but without putting
+			 state = 6;
+		     }
+		     break;
+		 case 6: // search for HEX char or \'
+                     if (((*p >= '0' && *p <= '9') || (*p >= 'a' && *p <= 'f')
+                       || (*p >= 'A' && *p <= 'F'))) {
+		         // put it
+			 *q = toupper(*p);
+			 q++;
+		     } else if (*p == '\'') {
+		         // found \', move to next state and ignore it
+			 state = 7;
+		     }
+		     break;
+		 case 7: // ignore, parsing completed
+		     break;
+		 default:
+                     LIXA_TRACE(("lixa_my_xid_deserialize: char '%c' skipped "
+		                 "IT SHOULD NOT HAPPEN!\n", *p));
+	    } // switch (state)
+            // move forward
+	    p++;
+	} // for i
+	// put a terminator at the end
+	*q = '\0';
+    } else {
+        // just copy
+	strncpy(stripped_data, data, sizeof(stripped_data)-1);
+	stripped_data[sizeof(stripped_data)-1] = '\0';
+    }
+    LIXA_TRACE(("lixa_my_xid_deserialize: stripped_data is '%s'\n",
+			    stripped_data));
+    if (strlen(stripped_data) > s*2+2) { // take in consideration initial 0x and that
         // hex requires 2 chars for a single byte
         LIXA_TRACE(("lixa_my_xid_deserialize: data length ("
                     SIZE_T_FORMAT ") exceeds "
-                    "gtrid and bqual length (%ld)\n", strlen(data), s*2+2));
+                    "gtrid and bqual length (%ld)\n", strlen(stripped_data), s*2+2));
         return FALSE;
     }
     tmp[2] = '\0';
 
     // check the data starts with '0x'
-    if (data[0] != '0' || data[1] != 'x') {
+    if (stripped_data[0] != '0' || stripped_data[1] != 'x') {
         LIXA_TRACE(("lixa_my_xid_deserialize: data returned does not start "
                     "with prefix '0x' (data='%s')\n", data));
         return FALSE;
     }
     // skip the prefix
-    p = data+2;
+    p = stripped_data+2;
     for (i=0; i<s; ++i) {
         q = p+1;
         if (((*p >= '0' && *p <= '9') || (*p >= 'a' && *p <= 'f')
@@ -1022,6 +1118,7 @@ int lixa_my_start_core(struct lixa_sw_status_rm_s *lpsr,
         if (TMRESUME & flags)
             strncat(stmt, stmt_resume, stmt_size);
         /* starting transaction */
+        LIXA_TRACE(("lixa_my_start_core: executing statement >%s<\n", stmt));
         if (mysql_query(lpsr->conn, stmt)) {
             LIXA_TRACE(("lixa_my_start_core: MySQL error while executing "
                         "'%s': %u/%s\n", stmt,
@@ -1198,6 +1295,7 @@ int lixa_my_end_core(struct lixa_sw_status_rm_s *lpsr,
         if (TMMIGRATE&flags)
             strncat(stmt, stmt_migrate, stmt_size);
         /* starting transaction */
+        LIXA_TRACE(("lixa_my_end_core: executing statement >%s<\n", stmt));
         if (mysql_query(lpsr->conn, stmt)) {
             LIXA_TRACE(("lixa_my_end_core: MySQL error while executing "
                         "'%s': %u/%s\n", stmt,
@@ -1402,9 +1500,11 @@ int lixa_my_rollback_core(struct lixa_sw_status_rm_s *lpsr,
                             "gtrid_length=%s, bqual_length=%s, data=%s\n",
                             formatID, gtrid_length, bqual_length, data));
                 if (!lixa_my_xid_deserialize(&xid_r, formatID, gtrid_length,
-                                            bqual_length, data)) {
+                                            bqual_length, data, 
+					    lpsr->rm_subtype)) {
                     LIXA_TRACE(("lixa_my_rollback_core: unable to deserialize "
                                 "the XID retrieved with XA RECOVER\n"));
+                    LIXA_SYSLOG((LOG_WARNING, LIXA_SYSLOG_LXC042W, data));
                 }
                 if (!lixa_xid_compare(xid, &xid_r)) {
                     LIXA_TRACE(("lixa_my_rollback_core: the transaction %s is "
@@ -1785,7 +1885,8 @@ int lixa_my_commit_core(struct lixa_sw_status_rm_s *lpsr,
                             "gtrid_length=%s, bqual_length=%s, data=%s\n",
                             formatID, gtrid_length, bqual_length, data));
                 if (!lixa_my_xid_deserialize(&xid_r, formatID, gtrid_length,
-                                            bqual_length, data)) {
+                                            bqual_length, data,
+					    lpsr->rm_subtype)) {
                     LIXA_TRACE(("lixa_my_commit_core: unable to deserialize "
                                 "the XID retrieved with XA RECOVER\n"));
                     LIXA_SYSLOG((LOG_WARNING, LIXA_SYSLOG_LXC042W, data));
@@ -2006,11 +2107,13 @@ int lixa_my_recover_core(struct lixa_sw_status_rm_s *lpsr,
                             "gtrid_length=%s, bqual_length=%s, data=%s\n",
                             formatID, gtrid_length, bqual_length, data));
                 if (lixa_my_xid_deserialize(&xid, formatID, gtrid_length,
-                                            bqual_length, data)) {
+                                            bqual_length, data,
+					    lpsr->rm_subtype)) {
                     xids[out_count++] = xid;
                 } else {
                     LIXA_TRACE(("lixa_my_recover_core: unable to deserialize "
                                 "the XID retrieved with XA RECOVER\n"));
+                    LIXA_SYSLOG((LOG_WARNING, LIXA_SYSLOG_LXC042W, data));
                 }
             }
             mysql_free_result(res);

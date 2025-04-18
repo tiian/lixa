@@ -55,7 +55,7 @@ int main(int argc, char *argv[])
                 "bqual_length='%s', data='%s'\n",
                 formatID, gtrid_length, bqual_length, data));
     if (!lixa_my_xid_deserialize(&xid, formatID, gtrid_length, bqual_length,
-                                 data)) {
+                                 data, LIXA_SW_STATUS_RM_SUBTYPE_MYSQL)) {
         LIXA_TRACE(("lixa_my_xid_deserialized returned FALSE\n"));
         return 1;
     }

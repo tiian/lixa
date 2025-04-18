@@ -151,11 +151,12 @@ int lixa_my_xid_serialize(const XID *xid, lixa_my_ser_xid_t lmsx);
  * @param[in] gtrid_length a string containing the length of gtrid part
  * @param[in] bqual_length a string containing the length of bqual part
  * @param[in] data a string containing the concatenation of gtrid and bqual
+ * @param[in] rm_subtype to distinguish between genuine MySQL and MariaDB
  * @return TRUE if deserialization was completed, FALSE if there was an error
  */
 int lixa_my_xid_deserialize(XID *xid, const char *formatID,
                             const char *gtrid_length, const char *bqual_length,
-                            const char *data);
+                            const char *data, int rm_subtype);
 
 
 
