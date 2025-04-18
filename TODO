@@ -1,5 +1,7 @@
-Go on with liblixamy.c, implement the new XA RECOVER option using the MySQL 
-subtype.
+Go on debugging this issue that's consequence of the new serialization functions for MySQL:
+ 23: MY/0.1/3.0 Crash in the middle of prepare       ok
+ 24: MY/0.1/3.1 Automatic recovery                   FAILED (mysql.at:289)
+
 
 lixa_my_open generates several memory leaks (LIXA_PROFILE=MYS_STA) but they 
 have not been introduced by the new lixa_my_retrieve_subtype...

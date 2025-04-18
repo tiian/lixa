@@ -87,6 +87,11 @@ struct xa_switch_t xamyls = {
 
 
 
+const char *MYSQL_XA_RECOVER_STMT = "XA RECOVER CONVERT XID";
+const char *MARIADB_XA_RECOVER_STMT= "XA RECOVER FORMAT='SQL'";
+
+
+
 const gchar *g_module_check_init(GModule *module)
 {
     LIXA_TRACE(("lixa_my/g_module_check_init: initializing module\n"));
@@ -365,9 +370,9 @@ int lixa_my_xid_serialize(const XID *xid, lixa_my_ser_xid_t lmsx)
 {
     int i = 0, j = 0;
     byte_t *p;
-    long len = 1 /* first ' */ +
+    long len = 2 /* first X' */ +
         xid->gtrid_length*2 /* gtrid */ +
-        3 /* ',' */ +
+        4 /* ',X' */ +
         xid->bqual_length*2 /* bqual */ +
         2 /* ', */ +
         LIXA_SERIALIZED_LONG_INT /* formatID */ +
@@ -379,11 +384,12 @@ int lixa_my_xid_serialize(const XID *xid, lixa_my_ser_xid_t lmsx)
                     SIZE_T_FORMAT "\n", len, sizeof(lixa_ser_xid_t)));
         return FALSE;
     }
-    /* put the first apostrophe */
-    lmsx[0] = '\'';
-    lmsx[1] = '\0';
+    /* put the first X-apostrophe */
+    lmsx[0] = 'X';
+    lmsx[1] = '\'';
+    lmsx[2] = '\0';
     /* serialize gtrid */
-    j = 1;
+    j = 2;
     p = (byte_t *)&(xid->data[0]);
     for (i=0; i<xid->gtrid_length; ++i) {
         sprintf(lmsx+j, "%2.2x", p[i]);
@@ -394,6 +400,9 @@ int lixa_my_xid_serialize(const XID *xid, lixa_my_ser_xid_t lmsx)
     j += 1;
     /* put a comma */
     *(lmsx+j) = ',';
+    j += 1;
+    /* put the second X */
+    *(lmsx+j) = 'X';
     j += 1;
     /* put the third apostrophe */
     *(lmsx+j) = '\'';
@@ -428,8 +437,8 @@ int lixa_my_xid_deserialize(XID *xid, const char *formatID,
                 formatID, gtrid_length, bqual_length, data));
     memset(xid, 0, sizeof(XID));
     xid->formatID = strtol(formatID, NULL, 0);
-    xid->gtrid_length = strtol(gtrid_length, NULL, 0) / 2;
-    xid->bqual_length = strtol(bqual_length, NULL, 0) / 2;
+    xid->gtrid_length = strtol(gtrid_length, NULL, 0);
+    xid->bqual_length = strtol(bqual_length, NULL, 0);
     s = xid->gtrid_length + xid->bqual_length;
     if (XIDDATASIZE < s) {
         LIXA_TRACE(("lixa_my_xid_deserialize: gtrid_length (%ld) + "
@@ -438,19 +447,29 @@ int lixa_my_xid_deserialize(XID *xid, const char *formatID,
                     xid->bqual_length, XIDDATASIZE));
         return FALSE;
     }
-    if (strlen(data) > s*2) {
+    if (strlen(data) > s*2+2) { // take in consideration initial 0x and that
+        // hex requires 2 chars for a single byte
         LIXA_TRACE(("lixa_my_xid_deserialize: data length ("
                     SIZE_T_FORMAT ") exceeds "
-                    "gtrid and bqual length (%ld)\n", strlen(data), s));
+                    "gtrid and bqual length (%ld)\n", strlen(data), s*2+2));
         return FALSE;
     }
     tmp[2] = '\0';
 
-    p = data;
+    // check the data starts with '0x'
+    if (data[0] != '0' || data[1] != 'x') {
+        LIXA_TRACE(("lixa_my_xid_deserialize: data returned does not start "
+                    "with prefix '0x' (data='%s')\n", data));
+        return FALSE;
+    }
+    // skip the prefix
+    p = data+2;
     for (i=0; i<s; ++i) {
         q = p+1;
-        if (((*p >= '0' && *p <= '9') || (*p >= 'a' && *p <= 'f')) &&
-            ((*q >= '0' && *q <= '9') || (*q >= 'a' && *q <= 'f'))) {
+        if (((*p >= '0' && *p <= '9') || (*p >= 'a' && *p <= 'f')
+             || (*p >= 'A' && *p <= 'F')) &&
+            ((*q >= '0' && *q <= '9') || (*q >= 'a' && *q <= 'f')
+             || (*q >= 'A' && *q <= 'F'))) {
             tmp[0] = *p;
             tmp[1] = *q;
             sscanf(tmp, "%x", &b);
@@ -1343,11 +1362,19 @@ int lixa_my_rollback_core(struct lixa_sw_status_rm_s *lpsr,
             XID xid_r;
             int num_fields;
             const char *autocommit_stmt = "SET autocommit=1";
-            const char *xa_recover_stmt = "XA RECOVER";
+            const char *xa_recover_stmt = "";
 
+            if (LIXA_SW_STATUS_RM_SUBTYPE_MARIADB == lpsr->rm_subtype) {
+                // MariaDB
+                xa_recover_stmt = MARIADB_XA_RECOVER_STMT;
+            } else {
+                // MySQL
+                xa_recover_stmt = MYSQL_XA_RECOVER_STMT;
+            }
+            
             /* due to bug #87836 in MySQL 5.7.x
                https://bugs.mysql.com/bug.php?id=87836
-               we need to forse AUTOCOMMIT */            
+               we need to force AUTOCOMMIT */            
             LIXA_TRACE(("lixa_my_rollback_core: executing statement >%s<\n",
                         autocommit_stmt));
             if (mysql_query(lpsr->conn, autocommit_stmt)) {
@@ -1718,8 +1745,16 @@ int lixa_my_commit_core(struct lixa_sw_status_rm_s *lpsr,
             XID xid_r;
             int num_fields;
             const char *autocommit_stmt = "SET autocommit=1";
-            const char *xa_recover_stmt = "XA RECOVER";
+            const char *xa_recover_stmt = "";
 
+            if (LIXA_SW_STATUS_RM_SUBTYPE_MARIADB == lpsr->rm_subtype) {
+                // MariaDB
+                xa_recover_stmt = MARIADB_XA_RECOVER_STMT;
+            } else {
+                // MySQL
+                xa_recover_stmt = MYSQL_XA_RECOVER_STMT;
+            }
+            
             /* due to bug #87836 in MySQL 5.7.x
                https://bugs.mysql.com/bug.php?id=87836
                we need to forse AUTOCOMMIT */            
@@ -1753,6 +1788,7 @@ int lixa_my_commit_core(struct lixa_sw_status_rm_s *lpsr,
                                             bqual_length, data)) {
                     LIXA_TRACE(("lixa_my_commit_core: unable to deserialize "
                                 "the XID retrieved with XA RECOVER\n"));
+                    LIXA_SYSLOG((LOG_WARNING, LIXA_SYSLOG_LXC042W, data));
                 }
                 if (!lixa_xid_compare(xid, &xid_r)) {
                     LIXA_TRACE(("lixa_my_commit_core: the transaction %s is "
@@ -1902,6 +1938,16 @@ int lixa_my_recover_core(struct lixa_sw_status_rm_s *lpsr,
     TRY {
         const long valid_flags = TMSTARTRSCAN|TMENDRSCAN|TMNOFLAGS;
 
+        const char *xa_recover_stmt = "";
+
+        if (LIXA_SW_STATUS_RM_SUBTYPE_MARIADB == lpsr->rm_subtype) {
+            // MariaDB
+            xa_recover_stmt = MARIADB_XA_RECOVER_STMT;
+        } else {
+            // MySQL
+            xa_recover_stmt = MYSQL_XA_RECOVER_STMT;
+        }
+            
         if ((flags|valid_flags) != valid_flags) {
             LIXA_TRACE(("lixa_my_recover_core: invalid flag in 0x%x\n",
                         flags));
@@ -1940,10 +1986,11 @@ int lixa_my_recover_core(struct lixa_sw_status_rm_s *lpsr,
             MYSQL_ROW row;
             XID xid;
             int num_fields;
-            LIXA_TRACE(("lixa_my_recover_core: executing XA RECOVER\n"));
-            if (mysql_query(lpsr->conn, "XA RECOVER")) {
+            LIXA_TRACE(("lixa_my_recover_core: executing statement >%s<\n",
+                        xa_recover_stmt));
+            if (mysql_query(lpsr->conn, xa_recover_stmt)) {
                 LIXA_TRACE(("lixa_my_recover_core: error while executing "
-                            "'XA RECOVER' command: %u/%s\n",
+                            "'%s' command: %u/%s\n", xa_recover_stmt,
                             mysql_errno(lpsr->conn), mysql_error(lpsr->conn)));
                 THROW(XA_RECOVER_ERROR);
             }

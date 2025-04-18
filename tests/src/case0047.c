@@ -41,12 +41,13 @@
 
 int main(int argc, char *argv[])
 {
-    lixa_my_ser_xid_t lmsx = "'db92e9410ef84504b174da57ec216e3e','1d3fe851993cd58d220e64772e6c21e2',1279875137";
+    // must be reviewed for MariaDB, in the meantime, fix it for MySQL
+    lixa_my_ser_xid_t lmsx = "X'db92e9410ef84504b174da57ec216e3e',X'1d3fe851993cd58d220e64772e6c21e2',1279875137";
     lixa_my_ser_xid_t lmsx2;
     const char *formatID = "1279875137";
-    const char *gtrid_length = "32";
-    const char *bqual_length = "32";
-    const char *data = "db92e9410ef84504b174da57ec216e3e1d3fe851993cd58d220e64772e6c21e2";
+    const char *gtrid_length = "16";
+    const char *bqual_length = "16";
+    const char *data = "0xdb92e9410ef84504b174da57ec216e3e1d3fe851993cd58d220e64772e6c21e2";
     XID xid;
 
     LIXA_TRACE_INIT ;
